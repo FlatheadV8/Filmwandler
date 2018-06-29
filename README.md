@@ -82,7 +82,7 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     * Audio-Kodierung:  AAC                                                        *
     * Beschreibung:                                                                *
     *   - abspielbar auf vielen kleineren Konsumergeräten                          *
-    *           * die meisten dieser Abspielgeräte können nur 15 FPS               *
+    *       * die meisten dieser Abspielgeräte können nur 15 FPS                   *
     *   - Advanced Simple Profile (ASP)                                            *
     *   - H.263 kann aber leider nur diese Formate beherbergen:                    *
     *       * 128x96                                                               *
