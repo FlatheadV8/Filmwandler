@@ -47,6 +47,8 @@ ORIGINAL_PIXEL="Nein"
 #==============================================================================#
 ### Funktionen
 
+# einbinden der Funktion "bildaufloesungen_namen()"
+. $(dirname ${0})/grafik.txt
 
 ausgabe_hilfe()
 {
