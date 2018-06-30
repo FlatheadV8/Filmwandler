@@ -1,10 +1,13 @@
+VERSION="v2018063000"
+
 bildaufloesungen_namen()
 {
+### 117 Namen von Bildauflösungen, sortiert nach Qualität (aufsteigend):
 echo "
-        -soll_xmaly SQCIF               # 128x96  - es ist ein h263/3GPP-Format
+        -soll_xmaly SQCIF               # 128x96  - es ist ein h263-Format
         -soll_xmaly QQVGA               # 160x120
         -soll_xmaly GB                  # 160x144
-        -soll_xmaly QCIF                # 176x144 - es ist ein h263/3GPP-Format
+        -soll_xmaly QCIF                # 176x144 - es ist ein h263-Format
         -soll_xmaly Palm_LoRes          # 160x160
         -soll_xmaly GBA                 # 240x160
         -soll_xmaly VGA8                # 240x180
@@ -14,7 +17,7 @@ echo "
         -soll_xmaly CGA                 # 320x200
         -soll_xmaly QVGA                # 320x240
         -soll_xmaly VHS                 # 320x240
-        -soll_xmaly VCD                 # 352x288 - es ist ein h263/3GPP-Format
+        -soll_xmaly VCD                 # 352x288 - es ist ein h263-Format
         -soll_xmaly Palm_HiRes          # 320x320
         -soll_xmaly WQVGA               # 432x240
         -soll_xmaly QSVGA               # 400x300
@@ -37,7 +40,7 @@ echo "
         -soll_xmaly NTSC                # 720x480
         -soll_xmaly WVGA3               # 800x480
         -soll_xmaly WVGA2               # 720x540
-        -soll_xmaly 4CIF                # 704x576 - es ist ein h263/3GPP-Format
+        -soll_xmaly 4CIF                # 704x576 - es ist ein h263-Format
         -soll_xmaly WVGA4               # 848x480
         -soll_xmaly WVGA5               # 852x480
         -soll_xmaly WVGA7               # 864x480
@@ -75,7 +78,7 @@ echo "
         -soll_xmaly WXGA+Apple          # 1440x960
         -soll_xmaly WSXGA               # 1600x900
         -soll_xmaly SXGA+               # 1400x1050
-        -soll_xmaly 16CIF               # 1408x1152 - es ist ein h263/3GPP-Format
+        -soll_xmaly 16CIF               # 1408x1152 - es ist ein h263-Format
         -soll_xmaly WSXGA2              # 1600x1024
         -soll_xmaly WSXGA+              # 1680x1050
         -soll_xmaly UXGA                # 1600x1200
