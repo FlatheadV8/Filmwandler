@@ -97,3 +97,14 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     *       * 704x576                                                              *
     *       * 1408x1152                                                            *
     ********************************************************************************
+
+---
+
+Dieses Skript ist optimiert für FreeBSD, funktioniert aber auch auf Linux.
+
+Da es Probleme zwischen der GPL und den Lizenzen vieler Codec-Bibliotheken gibt, ist es häufig problematisch diese Codec-Bibliotheken auf vielen Linux-Distributionen zu betreiben.
+
+Aus diesem Grund werden nur auf FreeBSD die externen Codec-Bibliotheken (per Voreinstellung) verwendet.
+Alle anderen Betriebssysteme, auf denen dieses Skript läuft, werden die nativen (internen) Codecs von FFmpeg verwenden.
+
+Leider sind einige von den nativen (internen) Codecs noch im Stadium "experimentell" (aber alle im Skript konfigurierten Codecs funktionieren). In den meisten Fällen erbringen die externen Codec-Bibliotheken bessere Ergebnisse.
