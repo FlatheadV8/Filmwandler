@@ -7,6 +7,7 @@ Das Skript besitzt viele weitere nützliche Optionen, siehe:
 
 mit den beiden folgenden Kommandos können Filme erzeugt werden, die auch auf dem "iPad", "iPad2" und "iPad mini"
 abspielbar sind:
+
     ~/bin/Filmwandler.sh -q Aufnahme.mpeg -z meinFilm.mp4 -soll_xmaly 1024x576
     ~/bin/Filmwandler.sh -q Aufnahme.mpeg -z meinFilm.mp4 -soll_xmaly iPad
 
