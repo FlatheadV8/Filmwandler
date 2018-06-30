@@ -51,7 +51,7 @@ echo "
         -soll_xmaly QHD                 # 960x540
         -soll_xmaly HXGA                # 832x624
         -soll_xmaly PS_Vita             # 964x544
-        -soll_xmaly iPad                # 1024x576
+        -soll_xmaly iPad                # 1024x576 - abspielbar auch auf "iPad", "iPad2" und "iPad mini"
         -soll_xmaly WSVGA               # 1024x600
         -soll_xmaly DVGA                # 960x640
         -soll_xmaly WSVGA2              # 1072x600
