@@ -1205,7 +1205,7 @@ else
 fi
 
 #------------------------------------------------------------------------------#
-### AVI kann nur bestimmte Formate
+### H.263 kann nur bestimmte Formate
 ### 128x96 176x144 352x288 704x576 1408x1152
 #   128x96   =   12288 Bildpunkte (Pixel)
 #   176x144  =   25344 Bildpunkte (Pixel)
@@ -1214,15 +1214,15 @@ fi
 #  1408x1152 = 1622016 Bildpunkte (Pixel)
 
 if [ "${ENDUNG}" = 3gp ] ; then
-	AVI_FORMAT="$(echo "12288 25344 101376 405504 1622016 ${IN_BREIT} ${IN_HOCH}" | awk '{f=$6*$7 ; gpp="128x96" ; if ($1 <= f) gpp="176x144"; if ($2 <= f) gpp="352x288"; if ($3 <= f) gpp="704x576"; if ($4 <= f) gpp="1408x1152"; if ($5 <= f) gpp="1408x1152"; print gpp}')"
+	AVI_FORMAT="$(echo "12288 25344 101376 405504 1622016 ${IN_BREIT} ${IN_HOCH}" | awk '{bild=$6*$7 ; h263="sonstige" ; if (bild <= $5) h263="1408x1152" ; if (bild <= $4) h263="704x576" ; if (bild <= $3) h263="352x288" ; if (bild <= $2) h263="176x144" ; if (bild <= $1) h263="128x96" ; print h263}')"
 	FORMAT_ANPASSUNG="scale=${AVI_FORMAT}"
 else
 	FORMAT_ANPASSUNG="setsar='1/1'"
 fi
 
 
-### funktioniert bei AVI
-### AVI-Formate: 128x96 176x144 352x288 704x576 1408x1152
+### funktioniert bei H.263
+### H.263-Formate: 128x96 176x144 352x288 704x576 1408x1152
 VIDEOOPTION="${VIDEO_OPTION} -vf ${ZEILENSPRUNG}${CROP}${QUADR_SCALE}${PAD}${SOLL_SCALE}${FORMAT_ANPASSUNG}"
 
 ### funktioniert bei allen Container-Formaten, die jedes normale Bildformat beherschen
