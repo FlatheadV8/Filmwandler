@@ -47,7 +47,7 @@ ORIGINAL_PIXEL="Nein"
 #==============================================================================#
 ### Funktionen
 
-# einbinden der Funktion "bildaufloesungen_namen()"
+# einbinden der Namen von vielen Bildauflösungen
 BILDAUFLOESUNGEN_NAMEN="$(dirname ${0})/Filmwandler_grafik.txt"
 if [ -r "${BILDAUFLOESUNGEN_NAMEN}" ] ; then
 . ${BILDAUFLOESUNGEN_NAMEN}
@@ -288,12 +288,6 @@ while [ "${#}" -ne "0" ]; do
         # dann wird so die 3. Tonspur angegeben (die Zaehlweise beginnt mit 0)
         -ton 2
 
-        # die gewünschte Bildauflösung des neuen Filmes
-        -soll_xmaly 720x576		# deutscher Parametername
-        -out_xmaly 720x480		# englischer Parametername
-        -soll_xmaly 965x543		# frei wählbares Bildformat kann angegeben werden
-	echo "${BILD_FORMATNAMEN_AUFLOESUNGEN}"
-
         # wenn die Bildaufloesung des Originalfilmes nicht automatisch ermittelt
         # werden kann, dann muss sie manuell als Parameter uebergeben werden
         -ist_xmaly 480x270
@@ -334,6 +328,12 @@ while [ "${#}" -ne "0" ]; do
         # mit schwarzen Balken an den Seiten, diese schwarzen Balken entfernen,
         # dann könnte das zum Beispiel so gemacht werden:
         -crop '540:576:90:0'
+
+        # die gewünschte Bildauflösung des neuen Filmes
+        -soll_xmaly 720x576		# deutscher Parametername
+        -out_xmaly 720x480		# englischer Parametername
+        -soll_xmaly 965x543		# frei wählbares Bildformat kann angegeben werden
+	${BILD_FORMATNAMEN_AUFLOESUNGEN}
                         "
                         exit 12
                         ;;
