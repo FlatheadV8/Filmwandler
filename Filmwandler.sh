@@ -48,7 +48,10 @@ ORIGINAL_PIXEL="Nein"
 ### Funktionen
 
 # einbinden der Funktion "bildaufloesungen_namen()"
-. $(dirname ${0})/grafik.txt
+BILDAUFLOESUNGEN_NAMEN="$(dirname ${0})/grafik.txt"
+if [ -r "${BILDAUFLOESUNGEN_NAMEN}" ] ; then
+. ${BILDAUFLOESUNGEN_NAMEN}
+fi
 
 ausgabe_hilfe()
 {
