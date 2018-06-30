@@ -212,8 +212,8 @@ while [ "${#}" -ne "0" ]; do
                         ZIELPFAD="${2}"		# Name für die Zieldatei
                         shift
                         ;;
-                -c)
-                        CROP="${2}"		# -vf crop=width:height:x:y
+                -c|-crop)
+                        CROP="${2}"		# zum entfernen der schwarzen Balken: -vf crop=width:height:x:y
                         shift
                         ;;
                 -dar|-ist_dar)
@@ -247,10 +247,6 @@ while [ "${#}" -ne "0" ]; do
                         ;;
                 -schnitt)
                         SCHNITTZEITEN="${2}"	# zum Beispiel zum Werbung entfernen (in Sekunden, Dezimaltrennzeichen ist der Punkt): -schnitt "10-432 520-833 1050-1280"
-                        shift
-                        ;;
-                -crop)
-                        CROP="${2}"		# zum Beispiel zum entfernen der schwarzen Balken
                         shift
                         ;;
                 -test|-t)
