@@ -51,6 +51,7 @@ ORIGINAL_PIXEL="Nein"
 BILDAUFLOESUNGEN_NAMEN="$(dirname ${0})/Filmwandler_grafik.txt"
 if [ -r "${BILDAUFLOESUNGEN_NAMEN}" ] ; then
 . ${BILDAUFLOESUNGEN_NAMEN}
+BILD_FORMATNAMEN_AUFLOESUNGEN="$(bildaufloesungen_namen)"
 fi
 
 ausgabe_hilfe()
@@ -295,6 +296,7 @@ while [ "${#}" -ne "0" ]; do
         -soll_xmaly 720x576		# deutscher Parametername
         -out_xmaly 720x480		# englischer Parametername
         -soll_xmaly 965x543		# frei wählbares Bildformat kann angegeben werden
+	echo "${BILD_FORMATNAMEN_AUFLOESUNGEN}"
 
         # wenn die Bildaufloesung des Originalfilmes nicht automatisch ermittelt
         # werden kann, dann muss sie manuell als Parameter uebergeben werden
@@ -1205,38 +1207,69 @@ else
 fi
 
 #------------------------------------------------------------------------------#
-### H.263 kann nur bestimmte Formate
-### 128x96 176x144 352x288 704x576 1408x1152
-#   128x96   =   12288 Bildpunkte (Pixel)
-#   176x144  =   25344 Bildpunkte (Pixel)
-#   352x288  =  101376 Bildpunkte (Pixel)
-#   704x576  =  405504 Bildpunkte (Pixel)
-#  1408x1152 = 1622016 Bildpunkte (Pixel)
+### Übersetzung von Bildauflösungsnamen zu Bildauflösungen
+### tritt nur bei manueller Auswahl der Bildauflösung in Kraft
 
-if [ "${ENDUNG}" = 3gp ] ; then
-	AVI_FORMAT="$(echo "12288 25344 101376 405504 1622016 ${IN_BREIT} ${IN_HOCH}" | awk '{bild=$6*$7 ; h263="sonstige" ; if (bild <= $5) h263="1408x1152" ; if (bild <= $4) h263="704x576" ; if (bild <= $3) h263="352x288" ; if (bild <= $2) h263="176x144" ; if (bild <= $1) h263="128x96" ; print h263}')"
-	FORMAT_ANPASSUNG="scale=${AVI_FORMAT}"
+AUFLOESUNG_ODER_NAME="$(echo "${SOLL_XY}" | egrep '[0-9][0-9][0-9][x][0-9][0-9]')"
+if [ "x${AUFLOESUNG_ODER_NAME}" = "x" ] ; then
+	### manuelle Auswahl der Bildauflösung per Namen
+	if [ "x${BILD_FORMATNAMEN_AUFLOESUNGEN}" != "x" ] ; then
+		SOLL_XY="$(bildaufloesungen_namen | egrep '[-]soll_xmaly ' | awk '{print $2,$4}' | egrep "^${SOLL_XY} " | awk '{print $2}')"
+		SOLL_SCALE="scale=${SOLL_XY},"
+	else
+		echo "Die gewünschte Bildauflösung wurde als 'Name' angegeben: '${SOLL_XY}'"
+		echo "Für die Übersetzung wird die Datei 'Filmwandler_grafik.txt' benötigt."
+		echo "Leider konnte die Datei '$(dirname ${0})/Filmwandler_grafik.txt' nicht gelesen werden."
+		exit 22
+	fi
+fi
+
+#------------------------------------------------------------------------------#
+### AVI und 3GPP können nicht zwingend quadratische Bildpunkte haben
+
+unset FORMAT_ANPASSUNG
+if [ "${ENDUNG}" = "avi" ] ; then
+	unset FORMAT_ANPASSUNG
+	SOLL_SCALE="scale=${SOLL_XY}"		# damit das "," am Ende verschwindet
+elif [ "${ENDUNG}" = "3gp" ] ; then
+	unset FORMAT_ANPASSUNG
+	SOLL_SCALE="scale=${SOLL_XY}"		# damit das "," am Ende verschwindet
 else
 	FORMAT_ANPASSUNG="setsar='1/1'"
 fi
 
+#------------------------------------------------------------------------------#
+### H.263 kann nur diese 5 Formate
+# SQCIF -  128x96   =   12288 Bildpunkte (Pixel)
+# QCIF  -  176x144  =   25344 Bildpunkte (Pixel)
+# VCD   -  352x288  =  101376 Bildpunkte (Pixel)
+# 4CIF  -  704x576  =  405504 Bildpunkte (Pixel)
+# 16CIF - 1408x1152 = 1622016 Bildpunkte (Pixel)
 
-### funktioniert bei H.263
-### H.263-Formate: 128x96 176x144 352x288 704x576 1408x1152
+if [ "${VIDEOCODEC}" = "h263" ] ; then
+	if [ "x${SOLL_XY}" = "x" ] ; then
+		### automatische auswahl der richtigen Bildauflösung
+		SOLL_SCALE="scale=$(echo "12288 25344 101376 405504 1622016 ${IN_BREIT} ${IN_HOCH}" | awk '{bild=$6*$7 ; h263="sonstige" ; if (bild <= $5) h263="1408x1152" ; if (bild <= $4) h263="704x576" ; if (bild <= $3) h263="352x288" ; if (bild <= $2) h263="176x144" ; if (bild <= $1) h263="128x96" ; print h263}')"
+	else
+		### manuelle Auswahl mit Bildauflösung
+		SOLL_SCALE="scale=${SOLL_XY}"
+	fi
+else
+	FORMAT_ANPASSUNG="setsar='1/1'"
+fi
+
+#------------------------------------------------------------------------------#
+
 VIDEOOPTION="${VIDEO_OPTION} -vf ${ZEILENSPRUNG}${CROP}${QUADR_SCALE}${PAD}${SOLL_SCALE}${FORMAT_ANPASSUNG}"
-
-### funktioniert bei allen Container-Formaten, die jedes normale Bildformat beherschen
-#VIDEOOPTION="${VIDEO_OPTION} -vf ${ZEILENSPRUNG}${CROP}${QUADR_SCALE}${PAD}${SOLL_SCALE}setsar='1/1'"
 
 START_ZIEL_FORMAT="-f ${FORMAT}"
 
 #------------------------------------------------------------------------------#
 
-
 echo "
 ${VIDEOOPTION}
 "
-
+#exit
 
 #==============================================================================#
 
@@ -1251,7 +1284,6 @@ else
 	AUDIO_VERARBEITUNG_02="-an"
 fi
 
-
 #==============================================================================#
 
 #rm -f ${ZIELVERZ}/${ZIELNAME}.txt
@@ -1264,9 +1296,6 @@ if [ -z "${SCHNITTZEITEN}" ] ; then
 	echo
 	${PROGRAMM} -i "${FILMDATEI}" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} 2>&1
 else
-	#echo "SCHNITTZEITEN=${SCHNITTZEITEN}"
-	#exit 22
-
 	ZUFALL="$(head -c 100 /dev/urandom | base64 | tr -d '\n' | tr -cd '[:alnum:]' | cut -b-12)"
 	NUMMER="0"
 	for _SCHNITT in ${SCHNITTZEITEN}
