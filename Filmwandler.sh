@@ -5,12 +5,17 @@
 # Dieses Skript verändert NICHT die Bildwiederholrate!
 #
 # Das Ergebnis besteht aus folgenden Formaten:
-#  - AVCHD:  mp4  + H.264/AVC  + AAC
 #  - DivX10: mkv  + H.265/HEVC + AAC
-#  - OGG:    ogv  + Theora     + Vorbis
 #  - WebM:   webm + VP9        + Opus
+#  - AVCHD:  mp4  + H.264/AVC  + AAC
 #  - AVI:    avi  + DivX5      + MP3
+#  - FLV:    flv  + FLV        + MP3  (Sorenson Spark: H.263)
 #  - 3GPP:   3gp  + H.263      + AAC  (128x96 176x144 352x288 704x576 1408x1152)
+#  - OGG:    ogv  + Theora     + Vorbis
+#  - MPEG:   mpeg + MPEG-2     + AC3
+#  - MPG:    mpg  + MPEG-1     + MP2
+#
+# https://de.wikipedia.org/wiki/Containerformat
 #
 # Es werden folgende Programme von diesem Skript verwendet:
 #  - ffmpeg
@@ -20,13 +25,20 @@
 #
 #------------------------------------------------------------------------------#
 
+# Hinweis
+#*******************************************************************************
+# Video-Kodierung:	H.265/HEVC                                             *
+# Audio-Kodierung:	FLAC       (menötigt das Container-Format MP4)         *
+#	- unterstützt seit macOS High Sierra 10.13 (25. September 2017)        *
+#*******************************************************************************
+
 
 BILDQUALIT="5"
 TONQUALIT="5"
 
 
 #VERSION="v2017102900"
-VERSION="v2018063000"
+VERSION="v2018070200"
 
 #set -x
 PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -66,32 +78,18 @@ echo "
 #                                                                              #
 # Es werden nur die folgenden Formate unterstützt:                             #
 "
-meldung_avchd
 meldung_divx10
-meldung_ogg
 meldung_webm
+meldung_avchd
 meldung_divx5
+meldung_flv
 meldung_3gpp
+meldung_ogg
+meldung_mpeg2
+meldung_mpeg1
 echo "
 #                                                                              #
 #==============================================================================#
-"
-}
-
-
-meldung_avchd()
-{
-echo "
-********************************************************************************
-* Name:			AVCHD                                                  *
-* ENDUNG:		.mp4                                                   *
-* Video-Kodierung:	H.264 (MPEG-4 Part 10 / AVC / Blu Ray)                 *
-* Audio-Kodierung:	AAC       (mehrkanalfähiger Nachfolger von MP3)        *
-* Beschreibung:                                                                *
-*	- höchste Kompatibilität mit Konsumerelektronik                        *
-*	- HTML5-Unterstützung                                                  *
-*	- abspielbar auf Android                                               *
-********************************************************************************
 "
 }
 
@@ -107,26 +105,6 @@ echo "
 * Beschreibung:                                                                *
 *	- (noch) keine HTML5-Unterstützung                                     *
 *	- abspielbar auf Android                                               *
-********************************************************************************
-"
-}
-
-
-meldung_ogg()
-{
-echo "
-********************************************************************************
-* Name:			OGG                                                    *
-* ENDUNG:		.ogv                                                   *
-* Video-Kodierung:	Theora (freie Alternative zu DivX5)                    *
-* Audio-Kodierung:	Vorbis (freie Alternative zu MP3)                      *
-* Beschreibung:                                                                *
-*	- 'Royalty free' (komplett frei von patentierten Technologien)         *
-*	- mit HTML5-Unterstützung                                              *
-*	- der ogv-Container ist uneingeschränkt streaming-fähig                *
-*	- abspielbar auf Android                                               *
-*	- kodiert sehr schnell                                                 *
-*	- nicht so gut wie 'AVCHD'                                             *
 ********************************************************************************
 "
 }
@@ -152,21 +130,55 @@ echo "
 }
 
 
+meldung_avchd()
+{
+echo "
+********************************************************************************
+* Name:			AVCHD                                                  *
+* ENDUNG:		.mp4                                                   *
+* Video-Kodierung:	H.264 (MPEG-4 Part 10 / AVC / Blu Ray)                 *
+* Audio-Kodierung:	AAC       (mehrkanalfähiger Nachfolger von MP3)        *
+* Beschreibung:                                                                *
+*	- höchste Kompatibilität mit Konsumerelektronik                        *
+*	- HTML5-Unterstützung                                                  *
+*	- abspielbar auf Android                                               *
+********************************************************************************
+"
+}
+
+
 meldung_divx5()
 {
 echo "
 ********************************************************************************
 * Name:			DivX5                                                  *
 * ENDUNG:		.avi                                                   *
-* Video-Kodierung:	H.263+                                                 *
+* Video-Kodierung:	DivX Version 5 (H.263+)                                *
 * Audio-Kodierung:	MP3                                                    *
 * Beschreibung:                                                                *
 *	- abspielbar auf vielen größeren Konsumergeräten                       *
 *	- Advanced Simple Profile (ASP)                                        *
 *	- ASP-Codec mit der größten Verbreitung, bevor AVC ihn verdrengt hat   *
 *	- FourCC DIVX (Hack of AVI)                                            *
-*	- FourCC DX50 (DivX Version 5 / MPEG-4 Visual)                         *
+*	- FourCC DX50 (MPEG-4 Visual)                                          *
 *	- MP3 -> MPEG-1 Layer 3                                                *
+********************************************************************************
+"
+}
+
+
+meldung_flv()
+{
+echo "
+********************************************************************************
+* Name:			FlashV                                                 *
+* ENDUNG:		.flv                                                   *
+* Video-Kodierung:	Sorenson Spark (H.263)                                 *
+* Audio-Kodierung:	MP3                                                    *
+* Beschreibung:                                                                *
+*	- ab Adobe Flash Player Version 6 abspielbar                           *
+*	- Flash Video Version 1                                                *
+*	- FourCC: FLV1                                                         *
 ********************************************************************************
 "
 }
@@ -190,6 +202,58 @@ echo "
 *           * 352x288                                                          *
 *           * 704x576                                                          *
 *           * 1408x1152                                                        *
+********************************************************************************
+"
+}
+
+
+meldung_ogg()
+{
+echo "
+********************************************************************************
+* Name:			OGG                                                    *
+* ENDUNG:		.ogv                                                   *
+* Video-Kodierung:	Theora (freie Alternative zu DivX5)                    *
+* Audio-Kodierung:	Vorbis (freie Alternative zu MP3)                      *
+* Beschreibung:                                                                *
+*	- 'Royalty free' (komplett frei von patentierten Technologien)         *
+*	- mit HTML5-Unterstützung                                              *
+*	- der ogv-Container ist uneingeschränkt streaming-fähig                *
+*	- abspielbar auf Android                                               *
+*	- kodiert sehr schnell                                                 *
+*	- nicht so gut wie 'AVCHD'                                             *
+********************************************************************************
+"
+}
+
+
+meldung_mpeg2()
+{
+echo "
+********************************************************************************
+* Name:			MPEG-2                                                 *
+* ENDUNG:		.mpeg                                                  *
+* Video-Kodierung:	MPEG-2                                                 *
+* Audio-Kodierung:	AC3                                                    *
+* Beschreibung:                                                                *
+*	- abspielbar auf vielen größeren Konsumergeräten                       *
+*	- übliches DVD-Format                                                  *
+********************************************************************************
+"
+}
+
+
+meldung_mpeg1()
+{
+echo "
+********************************************************************************
+* Name:			MPEG-1                                                 *
+* ENDUNG:		.mpg                                                   *
+* Video-Kodierung:	MPEG-1                                                 *
+* Audio-Kodierung:	MP2                                                    *
+* Beschreibung:                                                                *
+*	- abspielbar auf vielen größeren Konsumergeräten                       *
+*	- übliches VCD-Format                                                  *
 ********************************************************************************
 "
 }
@@ -406,54 +470,69 @@ fi
 #==============================================================================#
 # Das Video-Format wird nach der Dateiendung ermittelt
 #
-#  - AVCHD:  mp4  + H.264/AVC  + AAC
-#  - DivX10: mkv  + H.265/HEVC + AAC
-#  - OGG:    ogv  + Theora     + Vorbis
-#  - WebM:   webm + VP9        + Opus
-#  - AVI:    avi  + DivX5      + MP3
-#  - 3GPP:   3gp  + H.263      + MP3  (128x96 176x144 352x288 704x576 1408x1152)
 
 case "${ZIELDATEI}" in
-	[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.][Mm][Pp][4])
-		ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
-		ENDUNG="mp4"
-		FORMAT="mp4"
-		meldung_avchd
-		shift
-		;;
 	[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.][Mm][Kk][Vv])
 		ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
 		ENDUNG="mkv"
-		FORMAT="matroska"
+		FORMAT="matroska"	# HEVC
 		meldung_divx10
-		shift
-		;;
-	[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.][Oo][Gg][Vv])
-		ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
-		ENDUNG="ogv"
-		FORMAT="ogg"
-		meldung_ogg
 		shift
 		;;
 	[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.][Ww][Ee][Bb][Mm])
 		ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
 		ENDUNG="webm"
-		FORMAT="webm"
+		FORMAT="webm"		# HEVC
 		meldung_webm
+		shift
+		;;
+	[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.][Mm][Pp][4])
+		ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
+		ENDUNG="mp4"
+		FORMAT="mp4"		# AVC
+		meldung_avchd
 		shift
 		;;
 	[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.][Aa][Vv][Ii])
 		ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
 		ENDUNG="avi"
-		FORMAT="avi"
+		FORMAT="avi"		# mpeg4
 		meldung_divx5
+		shift
+		;;
+	[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.][Ff][Ll][Vv])
+		ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
+		ENDUNG="flv"
+		FORMAT="flv"		# Sorenson Spark
+		meldung_flv
 		shift
 		;;
 	[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.][3][Gg][Pp])
 		ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
 		ENDUNG="3gp"
-		FORMAT="3gp"
+		FORMAT="3gp"		# H.263
 		meldung_3gpp
+		shift
+		;;
+	[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.][Oo][Gg][Vv])
+		ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
+		ENDUNG="ogv"
+		FORMAT="ogg"		# Theora
+		meldung_ogg
+		shift
+		;;
+	[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.][Mm][Pp][Ee][Gg])
+		ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
+		ENDUNG="mpg"
+		FORMAT="dvd"		# mpeg2video
+		meldung_mpeg2
+		shift
+		;;
+	[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.][Mm][Pp][Gg])
+		ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
+		ENDUNG="mpeg"
+		FORMAT="vcd"		# mpeg1video
+		meldung_mpeg1
 		shift
 		;;
 	*)
@@ -501,63 +580,83 @@ esac
 case "${TONQUALIT}" in
 	0)
 		AAC_Q="-b:a 64k"		# 32k
-		VORBIS_Q="-q:a 1"		# 0-10, 10 liefert die beste Qualität
 		OPUS_Q="-b:a 64k"		# mind. 500 / empf. mind. 32k je Kanal
 		MP3_Q="-b:a 64k -ac 2"		# 96k / MPEG-1 Layer 3
+		VORBIS_Q="-q:a 1"		# 0-10, 10 liefert die beste Qualität
+		AC3_Q="-b:a 128k"		#
+		MP2_Q="-b:a 64k -ac 2"		# 96k / MPEG-1 Layer 2
 		;;
 	1)
 		AAC_Q="-b:a 80k"		# 48k
-		VORBIS_Q="-q:a 2"		# 0-10, 10 liefert die beste Qualität
 		OPUS_Q="-b:a 80k"		# 
-		MP3_Q="-b:a 80k -ac 2" 	# 112k / MPEG-1 Layer 3
+		MP3_Q="-b:a 80k -ac 2" 		# 112k / MPEG-1 Layer 3
+		VORBIS_Q="-q:a 2"		# 0-10, 10 liefert die beste Qualität
+		AC3_Q="-b:a 144k"		#
+		MP2_Q="-b:a 80k -ac 2" 		# 112k / MPEG-1 Layer 2
 		;;
 	2)
 		AAC_Q="-b:a 104k"		# 64k
-		VORBIS_Q="-q:a 3"		# 0-10, 10 liefert die beste Qualität
 		OPUS_Q="-b:a 104k"		# 
-		MP3_Q="-b:a 88k -ac 2" 	# 128k / MPEG-1 Layer 3
+		MP3_Q="-b:a 88k -ac 2" 		# 128k / MPEG-1 Layer 3
+		VORBIS_Q="-q:a 3"		# 0-10, 10 liefert die beste Qualität
+		AC3_Q="-b:a 168k"		#
+		MP2_Q="-b:a 88k -ac 2" 		# 128k / MPEG-1 Layer 2
 		;;
 	3)
 		AAC_Q="-b:a 128k"		# 96k
-		VORBIS_Q="-q:a 4"		# 0-10, 10 liefert die beste Qualität
 		OPUS_Q="-b:a 128k"		# 
-		MP3_Q="-b:a 112k -ac 2"	# 144k / MPEG-1 Layer 3
+		MP3_Q="-b:a 112k -ac 2"		# 144k / MPEG-1 Layer 3
+		VORBIS_Q="-q:a 4"		# 0-10, 10 liefert die beste Qualität
+		AC3_Q="-b:a 192k"		#
+		MP2_Q="-b:a 112k -ac 2"		# 144k / MPEG-1 Layer 2
 		;;
 	4)
 		AAC_Q="-b:a 160k"		# 128k
-		VORBIS_Q="-q:a 5"		# 0-10, 10 liefert die beste Qualität
 		OPUS_Q="-b:a 160k"		# 
-		MP3_Q="-b:a 128k -ac 2"	# 160k / MPEG-1 Layer 3
+		MP3_Q="-b:a 128k -ac 2"		# 160k / MPEG-1 Layer 3
+		VORBIS_Q="-q:a 5"		# 0-10, 10 liefert die beste Qualität
+		AC3_Q="-b:a 224k"		#
+		MP2_Q="-b:a 128k -ac 2"		# 160k / MPEG-1 Layer 2
 		;;
 	5)
 		AAC_Q="-b:a 200k"		# 192k
-		VORBIS_Q="-q:a 6"		# 0-10, 10 liefert die beste Qualität
 		OPUS_Q="-b:a 208k"		# 
-		MP3_Q="-b:a 160k -ac 2"	# 192k / MPEG-1 Layer 3
+		MP3_Q="-b:a 160k -ac 2"		# 192k / MPEG-1 Layer 3
+		VORBIS_Q="-q:a 6"		# 0-10, 10 liefert die beste Qualität
+		AC3_Q="-b:a 256k"		#
+		MP2_Q="-b:a 160k -ac 2"		# 192k / MPEG-1 Layer 2
 		;;
 	6)
 		AAC_Q="-b:a 256k"		# 272k
-		VORBIS_Q="-q:a 7"		# 0-10, 10 liefert die beste Qualität
 		OPUS_Q="-b:a 256k"		# 
-		MP3_Q="-b:a 184k -ac 2"	# 224k / MPEG-1 Layer 3
+		MP3_Q="-b:a 184k -ac 2"		# 224k / MPEG-1 Layer 3
+		VORBIS_Q="-q:a 7"		# 0-10, 10 liefert die beste Qualität
+		AC3_Q="-b:a 296k"		#
+		MP2_Q="-b:a 184k -ac 2"		# 224k / MPEG-1 Layer 2
 		;;
 	7)
 		AAC_Q="-b:a 320k"		# 400k
-		VORBIS_Q="-q:a 8"		# 0-10, 10 liefert die beste Qualität
 		OPUS_Q="-b:a 320k"		# 
-		MP3_Q="-b:a 224k -ac 2"	# 248k / MPEG-1 Layer 3
+		MP3_Q="-b:a 224k -ac 2"		# 248k / MPEG-1 Layer 3
+		VORBIS_Q="-q:a 8"		# 0-10, 10 liefert die beste Qualität
+		AC3_Q="-b:a 336k"		#
+		MP2_Q="-b:a 224k -ac 2"		# 248k / MPEG-1 Layer 2
 		;;
 	8)
 		AAC_Q="-b:a 408k"		# 560k
-		VORBIS_Q="-q:a 9"		# 0-10, 10 liefert die beste Qualität
 		OPUS_Q="-b:a 408k"		# 
-		MP3_Q="-b:a 264k -ac 2"	# 280k / MPEG-1 Layer 3
+		MP3_Q="-b:a 264k -ac 2"		# 280k / MPEG-1 Layer 3
+		VORBIS_Q="-q:a 9"		# 0-10, 10 liefert die beste Qualität
+		AC3_Q="-b:a 392k"		#
+		MP2_Q="-b:a 264k -ac 2"		# 280k / MPEG-1 Layer 2
 		;;
 	9)
 		AAC_Q="-b:a 512k"		# max. 800k
-		VORBIS_Q="-q:a 10"		# 0-10, 10 liefert die beste Qualität
 		OPUS_Q="-b:a 512k"		# max. 256k je Kanal
-		MP3_Q="-b:a 320k -ac 2"	# 320k / MPEG-1 Layer 3
+		MP3_Q="-b:a 320k -ac 2"		# 320k / MPEG-1 Layer 3
+		VORBIS_Q="-q:a 10"		# 0-10, 10 liefert die beste Qualität
+		AC3_Q="-b:a 448k"		#
+		MP2_Q="-b:a 320k -ac 2"		# 320k / MPEG-1 Layer 2
 		;;
 esac
 
@@ -625,10 +724,16 @@ AVC_PRESET="-preset slow"
 #------------------------------------------------------------------------------#
 
 # zur Sicherheit, sauber machen
-unset AVC_Q
 unset HEVC_Q
-unset THEORA_Q
 unset VP9_Q
+unset AVC_Q
+unset DIVX5_Q
+unset FLV_Q
+unset OGG_Q
+unset THEORA_Q
+unset MPEG2_Q
+unset MPEG1_Q
+
 unset VIDEOCODEC
 unset VIDEO_OPTION
 unset AUDIOCODEC
@@ -636,84 +741,114 @@ unset AUDIOCODEC
 
 case "${BILDQUALIT}" in
 	0)
-		AVC_Q="${AVC_PRESET} -crf 25"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
 		HEVC_Q="${AVC_PRESET} -crf 25"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
-		THEORA_Q="-q:v 1"			# von "0" (schlechteste Qualität) bis "10" (beste Qualität)
 		VP9_Q="-crf 25 -b:v 0"			# von "0" (verlustfrei) bis "63" (schlechteste Qualität)
+		AVC_Q="${AVC_PRESET} -crf 25"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
 		DIVX5_Q="-q:v 10"			# H.263+ ASP
+		FLV_Q="-q:v 10"				# H.263 ASP
 		_3GPP_Q="-q:v 10"			# H.263 ASP
+		THEORA_Q="-q:v 1"			# von "0" (schlechteste Qualität) bis "10" (beste Qualität)
+		MPEG2_Q=""
+		MPEG1_Q=""
 		;;
 	1)
-		AVC_Q="${AVC_PRESET} -crf 24"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
 		HEVC_Q="${AVC_PRESET} -crf 24"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
-		THEORA_Q="-q:v 2"			# von "0" (schlechteste Qualität) bis "10" (beste Qualität)
 		VP9_Q="-crf 24 -b:v 0"			# von "0" (verlustfrei) bis "63" (schlechteste Qualität)
+		AVC_Q="${AVC_PRESET} -crf 24"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
 		DIVX5_Q="-q:v 9"			# H.263+ ASP
+		FLV_Q="-q:v 9"				# H.263 ASP
 		_3GPP_Q="-q:v 9"			# H.263 ASP
+		THEORA_Q="-q:v 2"			# von "0" (schlechteste Qualität) bis "10" (beste Qualität)
+		MPEG2_Q=""
+		MPEG1_Q=""
 		;;
 	2)
-		AVC_Q="${AVC_PRESET} -crf 23"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
 		HEVC_Q="${AVC_PRESET} -crf 23"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
-		THEORA_Q="-q:v 3"			# von "0" (schlechteste Qualität) bis "10" (beste Qualität)
 		VP9_Q="-crf 23 -b:v 0"			# von "0" (verlustfrei) bis "63" (schlechteste Qualität)
+		AVC_Q="${AVC_PRESET} -crf 23"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
 		DIVX5_Q="-q:v 8"			# H.263+ ASP
+		FLV_Q="-q:v 8"				# H.263 ASP
 		_3GPP_Q="-q:v 8"			# H.263 ASP
+		THEORA_Q="-q:v 3"			# von "0" (schlechteste Qualität) bis "10" (beste Qualität)
+		MPEG2_Q=""
+		MPEG1_Q=""
 		;;
 	3)
-		AVC_Q="${AVC_PRESET} -crf 22"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
 		HEVC_Q="${AVC_PRESET} -crf 22"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
-		THEORA_Q="-q:v 4"			# von "0" (schlechteste Qualität) bis "10" (beste Qualität)
 		VP9_Q="-crf 22 -b:v 0"			# von "0" (verlustfrei) bis "63" (schlechteste Qualität)
+		AVC_Q="${AVC_PRESET} -crf 22"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
 		DIVX5_Q="-q:v 7"			# H.263+ ASP
+		FLV_Q="-q:v 7"				# H.263 ASP
 		_3GPP_Q="-q:v 7"			# H.263 ASP
+		THEORA_Q="-q:v 4"			# von "0" (schlechteste Qualität) bis "10" (beste Qualität)
+		MPEG2_Q=""
+		MPEG1_Q=""
 		;;
 	4)
-		AVC_Q="${AVC_PRESET} -crf 21"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
 		HEVC_Q="${AVC_PRESET} -crf 21"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
-		THEORA_Q="-q:v 5"			# von "0" (schlechteste Qualität) bis "10" (beste Qualität)
 		VP9_Q="-crf 21 -b:v 0"			# von "0" (verlustfrei) bis "63" (schlechteste Qualität)
+		AVC_Q="${AVC_PRESET} -crf 21"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
 		DIVX5_Q="-q:v 6"			# H.263+ ASP
+		FLV_Q="-q:v 6"				# H.263 ASP
 		_3GPP_Q="-q:v 6"			# H.263 ASP
+		THEORA_Q="-q:v 5"			# von "0" (schlechteste Qualität) bis "10" (beste Qualität)
+		MPEG2_Q=""
+		MPEG1_Q=""
 		;;
 	5)
-		AVC_Q="${AVC_PRESET} -crf 20"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
 		HEVC_Q="${AVC_PRESET} -crf 20"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
-		THEORA_Q="-q:v 6"			# von "0" (schlechteste Qualität) bis "10" (beste Qualität)
 		VP9_Q="-crf 20 -b:v 0"			# von "0" (verlustfrei) bis "63" (schlechteste Qualität)
+		AVC_Q="${AVC_PRESET} -crf 20"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
 		DIVX5_Q="-q:v 5"			# H.263+ ASP
+		FLV_Q="-q:v 5"				# H.263 ASP
 		_3GPP_Q="-q:v 5"			# H.263 ASP
+		THEORA_Q="-q:v 6"			# von "0" (schlechteste Qualität) bis "10" (beste Qualität)
+		MPEG2_Q=""
+		MPEG1_Q=""
 		;;
 	6)
-		AVC_Q="${AVC_PRESET} -crf 19"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
 		HEVC_Q="${AVC_PRESET} -crf 19"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
-		THEORA_Q="-q:v 7"			# von "0" (schlechteste Qualität) bis "10" (beste Qualität)
 		VP9_Q="-crf 19 -b:v 0"			# von "0" (verlustfrei) bis "63" (schlechteste Qualität)
+		AVC_Q="${AVC_PRESET} -crf 19"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
 		DIVX5_Q="-q:v 4"			# H.263+ ASP
+		FLV_Q="-q:v 4"				# H.263 ASP
 		_3GPP_Q="-q:v 4"			# H.263 ASP
+		THEORA_Q="-q:v 7"			# von "0" (schlechteste Qualität) bis "10" (beste Qualität)
+		MPEG2_Q=""
+		MPEG1_Q=""
 		;;
 	7)
-		AVC_Q="${AVC_PRESET} -crf 18"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
 		HEVC_Q="${AVC_PRESET} -crf 18"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
-		THEORA_Q="-q:v 8"			# von "0" (schlechteste Qualität) bis "10" (beste Qualität)
 		VP9_Q="-crf 18 -b:v 0"			# von "0" (verlustfrei) bis "63" (schlechteste Qualität)
+		AVC_Q="${AVC_PRESET} -crf 18"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
 		DIVX5_Q="-q:v 3"			# H.263+ ASP
+		FLV_Q="-q:v 3"				# H.263 ASP
 		_3GPP_Q="-q:v 3"			# H.263 ASP
+		THEORA_Q="-q:v 8"			# von "0" (schlechteste Qualität) bis "10" (beste Qualität)
+		MPEG2_Q=""
+		MPEG1_Q=""
 		;;
 	8)
-		AVC_Q="${AVC_PRESET} -crf 17"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
 		HEVC_Q="${AVC_PRESET} -crf 17"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
-		THEORA_Q="-q:v 9"			# von "0" (schlechteste Qualität) bis "10" (beste Qualität)
 		VP9_Q="-crf  17 -b:v 0"			# von "0" (verlustfrei) bis "63" (schlechteste Qualität)
+		AVC_Q="${AVC_PRESET} -crf 17"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
 		DIVX5_Q="-q:v 2"			# H.263+ ASP
+		FLV_Q="-q:v 2"				# H.263 ASP
 		_3GPP_Q="-q:v 2"			# H.263 ASP
+		THEORA_Q="-q:v 9"			# von "0" (schlechteste Qualität) bis "10" (beste Qualität)
+		MPEG2_Q=""
+		MPEG1_Q=""
 		;;
 	9)
-		AVC_Q="${AVC_PRESET} -crf 16"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
 		HEVC_Q="${AVC_PRESET} -crf 16"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
-		THEORA_Q="-q:v 10"			# von "0" (schlechteste Qualität) bis "10" (beste Qualität)
 		VP9_Q="-crf  16 -b:v 0"			# von "0" (verlustfrei) bis "63" (schlechteste Qualität)
+		AVC_Q="${AVC_PRESET} -crf 16"		# von "0" (verlustfrei) bis "51" (schlechteste Qualität)
 		DIVX5_Q="-q:v 1"			# H.263+ ASP
+		FLV_Q="-q:v 1"				# H.263 ASP
 		_3GPP_Q="-q:v 1"			# H.263 ASP
+		THEORA_Q="-q:v 10"			# von "0" (schlechteste Qualität) bis "10" (beste Qualität)
+		MPEG2_Q=""
+		MPEG1_Q=""
 		;;
 esac
 
@@ -750,24 +885,9 @@ if [ "FreeBSD" = "$(uname -s)" ] ; then
 	#
 
 	#########################
-	###===---> MP4 <---===###
-	###-------------------###
-	if [ "${ENDUNG}" = mp4 ] ; then
-		#==============================================================#
-		VIDEOCODEC="libx264"				# DivX 7
-		VIDEO_OPTION="${AVC_Q}"
-		#--------------------------------------------------------------#
-		#AUDIOCODEC="aac"				# free-Lizenz; seit 05. Dez. 2015 nicht mehr experimentell
-		#AUDIOCODEC="libfaac"				# "non-free"-Lizenz; funktioniert aber
-		#AUDIO_OPTION="${AAC_Q} ${AUDIO_SAMPLERATE}"
-		#
-		AUDIOCODEC="libfdk_aac"				# 2018-05-10: FreeBSD 11 - FDK-AAC Version 0.1.5
-		AUDIO_OPTION="${AAC_Q} ${AUDIO_SAMPLERATE}"
-		#==============================================================#
-	#########################
 	###===---> MKV <---===###
 	###-------------------###
-	elif [ "${ENDUNG}" = mkv ] ; then
+	if [ "${ENDUNG}" = mkv ] ; then
 		#==============================================================#
 		#VIDEOCODEC="hevc"				# DivX 10
 		VIDEOCODEC="libx265"				# DivX 10
@@ -777,19 +897,6 @@ if [ "FreeBSD" = "$(uname -s)" ] ; then
 		#AUDIOCODEC="libfaac"				# "non-free"-Lizenz; funktioniert aber
 		AUDIOCODEC="libfdk_aac"				# 2018-05-10: FreeBSD 11 - FDK-AAC Version 0.1.5
 		AUDIO_OPTION="${AAC_Q} ${AUDIO_SAMPLERATE}"
-		#==============================================================#
-	#########################
-	###===---> OGV <---===###
-	###-------------------###
-	elif [ "${ENDUNG}" = ogv ] ; then
-		#==============================================================#
-		#VIDEOCODEC="theora"
-		VIDEOCODEC="libtheora"
-		VIDEO_OPTION="${THEORA_Q}"
-		#--------------------------------------------------------------#
-		#AUDIOCODEC="vorbis"				# -strict -2 -ac 2
-		AUDIOCODEC="libvorbis"				# ist noch experimentell aber funktioniert schon
-		AUDIO_OPTION="${VORBIS_Q} ${AUDIO_SAMPLERATE}"
 		#==============================================================#
 	##########################
 	###===---> WebM <---===###
@@ -805,12 +912,39 @@ if [ "FreeBSD" = "$(uname -s)" ] ; then
 		AUDIO_OPTION="-vbr on -compression_level 10 ${OPUS_Q} ${AUDIO_SAMPLERATE}"
 		#==============================================================#
 	#########################
+	###===---> MP4 <---===###
+	###-------------------###
+	elif [ "${ENDUNG}" = mp4 ] ; then
+		#==============================================================#
+		VIDEOCODEC="libx264"				# DivX 7
+		VIDEO_OPTION="${AVC_Q}"
+		#--------------------------------------------------------------#
+		#AUDIOCODEC="aac"				# free-Lizenz; seit 05. Dez. 2015 nicht mehr experimentell
+		#AUDIOCODEC="libfaac"				# "non-free"-Lizenz; funktioniert aber
+		#AUDIO_OPTION="${AAC_Q} ${AUDIO_SAMPLERATE}"
+		#
+		AUDIOCODEC="libfdk_aac"				# 2018-05-10: FreeBSD 11 - FDK-AAC Version 0.1.5
+		AUDIO_OPTION="${AAC_Q} ${AUDIO_SAMPLERATE}"
+		#==============================================================#
+	#########################
 	###===---> AVI <---===###
 	###-------------------###
 	elif [ "${ENDUNG}" = avi ] ; then
 		#==============================================================#
 		VIDEOCODEC="mpeg4"				# DivX 5
 		VIDEO_OPTION="${DIVX5_Q} -vtag DX50"		# https://wiki.ubuntuusers.de/WinFF/#Bedienung
+		#--------------------------------------------------------------#
+		#AUDIOCODEC="mp3"				# ist noch experimentell aber funktioniert schon
+		AUDIOCODEC="libmp3lame"				# seit 2012 ist der Lizenzschutz abgelaufen
+		AUDIO_OPTION="${MP3_Q} ${AUDIO_SAMPLERATE}"
+		#==============================================================#
+	#########################
+	###===---> FLV <---===###
+	###-------------------###
+	elif [ "${ENDUNG}" = flv ] ; then
+		#==============================================================#
+		VIDEOCODEC="flv"
+		VIDEO_OPTION="${FLV_Q}"
 		#--------------------------------------------------------------#
 		#AUDIOCODEC="mp3"				# ist noch experimentell aber funktioniert schon
 		AUDIOCODEC="libmp3lame"				# seit 2012 ist der Lizenzschutz abgelaufen
@@ -828,6 +962,41 @@ if [ "FreeBSD" = "$(uname -s)" ] ; then
 		#AUDIOCODEC="libfaac"				# "non-free"-Licenc; funktioniert aber
 		AUDIOCODEC="libfdk_aac"				# 2018-05-10: FreeBSD 11 - FDK-AAC Version 0.1.5
 		AUDIO_OPTION="${AAC_Q} ${AUDIO_SAMPLERATE}"
+		#==============================================================#
+	#########################
+	###===---> OGV <---===###
+	###-------------------###
+	elif [ "${ENDUNG}" = ogv ] ; then
+		#==============================================================#
+		#VIDEOCODEC="theora"
+		VIDEOCODEC="libtheora"
+		VIDEO_OPTION="${THEORA_Q}"
+		#--------------------------------------------------------------#
+		#AUDIOCODEC="vorbis"				# -strict -2 -ac 2
+		AUDIOCODEC="libvorbis"				# ist noch experimentell aber funktioniert schon
+		AUDIO_OPTION="${VORBIS_Q} ${AUDIO_SAMPLERATE}"
+		#==============================================================#
+	#########################
+	###===---> DVD <---===###
+	###-------------------###
+	elif [ "${ENDUNG}" = mpeg ] ; then
+		#==============================================================#
+		VIDEOCODEC="mpeg2video"
+		VIDEO_OPTION="${MPEG2_Q}"
+		#--------------------------------------------------------------#
+		AUDIOCODEC="ac3"
+		AUDIO_OPTION="${AC3_Q} ${AUDIO_SAMPLERATE}"
+		#==============================================================#
+	#########################
+	###===---> VCD <---===###
+	###-------------------###
+	elif [ "${ENDUNG}" = mpg ] ; then
+		#==============================================================#
+		VIDEOCODEC="mpeg1video"
+		VIDEO_OPTION="${MPEG1_Q}"
+		#--------------------------------------------------------------#
+		AUDIOCODEC="mp2"
+		AUDIO_OPTION="${MP2_Q} ${AUDIO_SAMPLERATE}"
 		#==============================================================#
 	else
 		ausgabe_hilfe
@@ -900,6 +1069,17 @@ else
 		AUDIO_OPTION="${MP3_Q} ${AUDIO_SAMPLERATE}"
 		#==============================================================#
 	#########################
+	###===---> FLV <---===###
+	###-------------------###
+	elif [ "${ENDUNG}" = flv ] ; then
+		#==============================================================#
+		VIDEOCODEC="flv"
+		VIDEO_OPTION="${FLV_Q}"
+		#--------------------------------------------------------------#
+		AUDIOCODEC="mp3"				# ist noch experimentell aber funktioniert schon
+		AUDIO_OPTION="${MP3_Q} ${AUDIO_SAMPLERATE}"
+		#==============================================================#
+	#########################
 	###===---> 3GP <---===###
 	###-------------------###
 	elif [ "${ENDUNG}" = 3gp ] ; then
@@ -909,6 +1089,39 @@ else
 		#--------------------------------------------------------------#
 		AUDIOCODEC="aac"				# free-Licenc; seit 05. Dez. 2015 nicht mehr experimentell
 		AUDIO_OPTION="${AAC_Q} ${AUDIO_SAMPLERATE}"
+		#==============================================================#
+	#########################
+	###===---> OGV <---===###
+	###-------------------###
+	elif [ "${ENDUNG}" = ogv ] ; then
+		#==============================================================#
+		VIDEOCODEC="theora"
+		VIDEO_OPTION="${THEORA_Q}"
+		#--------------------------------------------------------------#
+		AUDIOCODEC="vorbis"				# -strict -2 -ac 2
+		AUDIO_OPTION="${VORBIS_Q} ${AUDIO_SAMPLERATE}"
+		#==============================================================#
+	#########################
+	###===---> DVD <---===###
+	###-------------------###
+	elif [ "${ENDUNG}" = mpeg ] ; then
+		#==============================================================#
+		VIDEOCODEC="mpeg2video"
+		VIDEO_OPTION="${MPEG2_Q}"
+		#--------------------------------------------------------------#
+		AUDIOCODEC="ac3"
+		AUDIO_OPTION="${AC3_Q} ${AUDIO_SAMPLERATE}"
+		#==============================================================#
+	#########################
+	###===---> VCD <---===###
+	###-------------------###
+	elif [ "${ENDUNG}" = mpg ] ; then
+		#==============================================================#
+		VIDEOCODEC="mpeg1video"
+		VIDEO_OPTION="${MPEG1_Q}"
+		#--------------------------------------------------------------#
+		AUDIOCODEC="mp2"
+		AUDIO_OPTION="${MP2_Q} ${AUDIO_SAMPLERATE}"
 		#==============================================================#
 	else
 		ausgabe_hilfe
