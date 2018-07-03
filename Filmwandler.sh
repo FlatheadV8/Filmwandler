@@ -7,7 +7,7 @@
 # Das Ergebnis besteht aus folgenden Formaten:
 #  - DivX10: mkv  + H.265/HEVC + AAC
 #  - WebM:   webm + VP9        + Opus
-#  - AVCHD:  mp4  + H.264/AVC  + AAC
+#  - MP4:    mp4  + H.264/AVC  + AAC
 #  - AVI:    avi  + DivX5      + MP3
 #  - FLV:    flv  + FLV        + MP3  (Sorenson Spark: H.263)
 #  - 3GPP:   3gp  + H.263      + AAC  (128x96 176x144 352x288 704x576 1408x1152)
@@ -80,7 +80,7 @@ echo "
 "
 meldung_divx10
 meldung_webm
-meldung_avchd
+meldung_mp4
 meldung_divx5
 meldung_flv
 meldung_3gpp
@@ -119,28 +119,28 @@ echo "
 * Video-Kodierung:	VP9  (freie Alternative zu H.265 für 4K)               *
 * Audio-Kodierung:	Opus (freie Alternative zu AAC)                        *
 * Beschreibung:                                                                *
-*	- 'Royalty free' (komplett frei von patentierten Technologien)         *
 *	- mit HTML5-Unterstützung                                              *
+*	- 'Royalty free' (komplett frei von patentierten Technologien)         *
 *	- abspielbar auf Android                                               *
 *	- Unterstützung ab Android 5 'Lollipop'                                *
 *	- beste Qualität                                                       *
-*	- kodiert 5-10 mal langsamer als AVCHD                                 *
+*	- kodiert 5-10 mal langsamer als AVCHD/MP4                             *
 ********************************************************************************
 "
 }
 
 
-meldung_avchd()
+meldung_mp4()
 {
 echo "
 ********************************************************************************
-* Name:			AVCHD                                                  *
+* Name:			MP4                                                    *
 * ENDUNG:		.mp4                                                   *
 * Video-Kodierung:	H.264 (MPEG-4 Part 10 / AVC / Blu Ray)                 *
 * Audio-Kodierung:	AAC       (mehrkanalfähiger Nachfolger von MP3)        *
 * Beschreibung:                                                                *
-*	- höchste Kompatibilität mit Konsumerelektronik                        *
 *	- HTML5-Unterstützung                                                  *
+*	- höchste Kompatibilität mit Konsumerelektronik                        *
 *	- abspielbar auf Android                                               *
 ********************************************************************************
 "
@@ -216,12 +216,12 @@ echo "
 * Video-Kodierung:	Theora (freie Alternative zu DivX5)                    *
 * Audio-Kodierung:	Vorbis (freie Alternative zu MP3)                      *
 * Beschreibung:                                                                *
-*	- 'Royalty free' (komplett frei von patentierten Technologien)         *
 *	- mit HTML5-Unterstützung                                              *
+*	- 'Royalty free' (komplett frei von patentierten Technologien)         *
 *	- der ogv-Container ist uneingeschränkt streaming-fähig                *
 *	- abspielbar auf Android                                               *
 *	- kodiert sehr schnell                                                 *
-*	- nicht so gut wie 'AVCHD'                                             *
+*	- nicht so gut wie 'AVCHD/MP4'                                         *
 ********************************************************************************
 "
 }
@@ -472,6 +472,13 @@ fi
 #
 
 case "${ZIELDATEI}" in
+	[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*)
+		ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
+		ENDUNG="mp4"
+		FORMAT="mp4"		# AVC
+		meldung_mp4
+		shift
+		;;
 	[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.][Mm][Kk][Vv])
 		ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
 		ENDUNG="mkv"
@@ -490,7 +497,7 @@ case "${ZIELDATEI}" in
 		ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
 		ENDUNG="mp4"
 		FORMAT="mp4"		# AVC
-		meldung_avchd
+		meldung_mp4
 		shift
 		;;
 	[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.][Aa][Vv][Ii])
@@ -665,7 +672,7 @@ esac
 # Bildqualität entsprechend dem Video-Encoder setzen
 
 #------------------------------------------------------------------------------#
-### AVCHD (AVC) + DivX7 (AVC) + DivX10 (HEVC)
+### MP4 (AVC) + DivX7 (AVC) + DivX10 (HEVC)
 #
 # Mit CRF legt man die Bildqualität fest.
 # Die Option "-crf 16" erzeugt eine sehr gute Blu Ray - Qualität.
