@@ -8,7 +8,7 @@
 #  - DivX10: mkv  + H.265/HEVC + AAC
 #  - WebM:   webm + VP9        + Opus
 #  - MP4:    mp4  + H.264/AVC  + AAC
-#  - AVCHD:  m2ts + H.264/AVC  + AC3
+#  - AVCHD:  mts  + H.264/AVC  + AC3
 #  - AVI:    avi  + DivX5      + MP3
 #  - FLV:    flv  + FLV        + MP3  (Sorenson Spark: H.263)
 #  - 3GPP:   3gp  + H.263      + AAC  (128x96 176x144 352x288 704x576 1408x1152)
@@ -154,7 +154,7 @@ meldung_avchd()
 echo "
 ********************************************************************************
 * Name:			AVCHD                                                  *
-* ENDUNG:		.m2ts                                                  *
+* ENDUNG:		.mts                                                   *
 * Video-Kodierung:	H.264 (MPEG-4 Part 10 / AVC / Blu Ray / MP4)           *
 * Audio-Kodierung:	AC3                                                    *
 * Beschreibung:                                                                *
@@ -512,7 +512,7 @@ case "${ZIELDATEI}" in
 		meldung_mp4
 		shift
 		;;
-	[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.][Mm][2][Tt][Ss])
+	[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.][Mm][Tt][Ss])
 		ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
 		ENDUNG="mts"
 		FORMAT="mpegts"		# AVC
@@ -964,7 +964,6 @@ if [ "FreeBSD" = "$(uname -s)" ] ; then
 		VIDEOCODEC="mpeg4"				# DivX 5
 		VIDEO_OPTION="${DIVX5_Q} -vtag DX50"		# https://wiki.ubuntuusers.de/WinFF/#Bedienung
 		#--------------------------------------------------------------#
-		#AUDIOCODEC="mp3"				# ist noch experimentell aber funktioniert schon
 		AUDIOCODEC="libmp3lame"				# seit 2012 ist der Lizenzschutz abgelaufen
 		AUDIO_OPTION="${MP3_Q} ${AUDIO_SAMPLERATE}"
 		#==============================================================#
@@ -976,7 +975,6 @@ if [ "FreeBSD" = "$(uname -s)" ] ; then
 		VIDEOCODEC="flv"
 		VIDEO_OPTION="${FLV_Q}"
 		#--------------------------------------------------------------#
-		#AUDIOCODEC="mp3"				# ist noch experimentell aber funktioniert schon
 		AUDIOCODEC="libmp3lame"				# seit 2012 ist der Lizenzschutz abgelaufen
 		AUDIO_OPTION="${MP3_Q} ${AUDIO_SAMPLERATE}"
 		#==============================================================#
@@ -1074,7 +1072,7 @@ else
 	###-------------------###
 	elif [ "${ENDUNG}" = mp4 ] ; then
 		#==============================================================#
-		VIDEOCODEC="h264"				# DivX 7
+		VIDEOCODEC="h264"				# DivX 7 / AVCHD
 		VIDEO_OPTION="${AVC_Q}"
 		#--------------------------------------------------------------#
 		AUDIOCODEC="aac"				# free-Lizenz; seit 05. Dez. 2015 nicht mehr experimentell
@@ -1085,7 +1083,7 @@ else
 	###---------------------###
 	elif [ "${ENDUNG}" = mts ] ; then
 		#==============================================================#
-		VIDEOCODEC="libx264"				# DivX 7 / AVCHD
+		VIDEOCODEC="h264"				# DivX 7 / AVCHD
 		VIDEO_OPTION="${AVC_Q}"
 		#--------------------------------------------------------------#
 		AUDIOCODEC="ac3"
