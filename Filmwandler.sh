@@ -509,6 +509,13 @@ case "${ZIELDATEI}" in
 		meldung_mp4
 		shift
 		;;
+	[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.][Mm][2][Tt][Ss])
+		ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
+		ENDUNG="mts"
+		FORMAT="mpegts"		# AVC
+		meldung_avchd
+		shift
+		;;
 	[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.][Aa][Vv][Ii])
 		ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
 		ENDUNG="avi"
@@ -932,7 +939,7 @@ if [ "FreeBSD" = "$(uname -s)" ] ; then
 	###-------------------###
 	elif [ "${ENDUNG}" = mp4 ] ; then
 		#==============================================================#
-		VIDEOCODEC="libx264"				# DivX 7
+		VIDEOCODEC="libx264"				# DivX 7 / AVCHD
 		VIDEO_OPTION="${AVC_Q}"
 		#--------------------------------------------------------------#
 		#AUDIOCODEC="aac"				# free-Lizenz; seit 05. Dez. 2015 nicht mehr experimentell
@@ -941,6 +948,17 @@ if [ "FreeBSD" = "$(uname -s)" ] ; then
 		#
 		AUDIOCODEC="libfdk_aac"				# 2018-05-10: FreeBSD 11 - FDK-AAC Version 0.1.5
 		AUDIO_OPTION="${AAC_Q} ${AUDIO_SAMPLERATE}"
+		#==============================================================#
+	###########################
+	###===---> AVCHD <---===###
+	###---------------------###
+	elif [ "${ENDUNG}" = mts ] ; then
+		#==============================================================#
+		VIDEOCODEC="libx264"				# DivX 7 / AVCHD
+		VIDEO_OPTION="${AVC_Q}"
+		#--------------------------------------------------------------#
+		AUDIOCODEC="ac3"
+		AUDIO_OPTION="${AC3_Q} ${AUDIO_SAMPLERATE}"
 		#==============================================================#
 	#########################
 	###===---> AVI <---===###
@@ -1030,9 +1048,31 @@ else
 	#
 
 	#########################
+	###===---> MKV <---===###
+	###-------------------###
+	if [ "${ENDUNG}" = mkv ] ; then
+		#==============================================================#
+		VIDEOCODEC="hevc"				# DivX 10
+		VIDEO_OPTION="${HEVC_Q}"
+		#--------------------------------------------------------------#
+		AUDIOCODEC="aac"				# free-Lizenz; seit 05. Dez. 2015 nicht mehr experimentell
+		AUDIO_OPTION="${AAC_Q} ${AUDIO_SAMPLERATE}"
+		#==============================================================#
+	##########################
+	###===---> WebM <---===###
+	###--------------------###
+	elif [ "${ENDUNG}" = webm ] ; then
+		#==============================================================#
+		VIDEOCODEC="vp9"
+		VIDEO_OPTION="${VP9_Q}"
+		#--------------------------------------------------------------#
+		AUDIOCODEC="opus"				# ist noch experimentell
+		AUDIO_OPTION="-vbr on -compression_level 10 ${OPUS_Q} ${AUDIO_SAMPLERATE} -strict -2"
+		#==============================================================#
+	#########################
 	###===---> MP4 <---===###
 	###-------------------###
-	if [ "${ENDUNG}" = mp4 ] ; then
+	elif [ "${ENDUNG}" = mp4 ] ; then
 		#==============================================================#
 		VIDEOCODEC="h264"				# DivX 7
 		VIDEO_OPTION="${AVC_Q}"
@@ -1040,16 +1080,16 @@ else
 		AUDIOCODEC="aac"				# free-Lizenz; seit 05. Dez. 2015 nicht mehr experimentell
 		AUDIO_OPTION="${AAC_Q} ${AUDIO_SAMPLERATE}"
 		#==============================================================#
-	#########################
-	###===---> MKV <---===###
-	###-------------------###
-	elif [ "${ENDUNG}" = mkv ] ; then
+	###########################
+	###===---> AVCHD <---===###
+	###---------------------###
+	elif [ "${ENDUNG}" = mts ] ; then
 		#==============================================================#
-		VIDEOCODEC="hevc"				# DivX 10
-		VIDEO_OPTION="${HEVC_Q}"
+		VIDEOCODEC="libx264"				# DivX 7 / AVCHD
+		VIDEO_OPTION="${AVC_Q}"
 		#--------------------------------------------------------------#
-		AUDIOCODEC="aac"				# free-Lizenz; seit 05. Dez. 2015 nicht mehr experimentell
-		AUDIO_OPTION="${AAC_Q} ${AUDIO_SAMPLERATE}"
+		AUDIOCODEC="ac3"
+		AUDIO_OPTION="${AC3_Q} ${AUDIO_SAMPLERATE}"
 		#==============================================================#
 	#########################
 	###===---> OGV <---===###
@@ -1062,16 +1102,6 @@ else
 		AUDIOCODEC="vorbis"				# ist experimentell und kann nur 2 Kanäle
 		AUDIO_OPTION="${VORBIS_Q} -ac 2 ${AUDIO_SAMPLERATE} -ac 2 -strict -2"
 		#==============================================================#
-	##########################
-	###===---> WebM <---===###
-	###--------------------###
-	elif [ "${ENDUNG}" = webm ] ; then
-		#==============================================================#
-		VIDEOCODEC="vp9"
-		VIDEO_OPTION="${VP9_Q}"
-		#--------------------------------------------------------------#
-		AUDIOCODEC="opus"				# ist noch experimentell
-		AUDIO_OPTION="-vbr on -compression_level 10 ${OPUS_Q} ${AUDIO_SAMPLERATE} -strict -2"
 		#==============================================================#
 	#########################
 	###===---> AVI <---===###
@@ -1105,17 +1135,6 @@ else
 		#--------------------------------------------------------------#
 		AUDIOCODEC="aac"				# free-Licenc; seit 05. Dez. 2015 nicht mehr experimentell
 		AUDIO_OPTION="${AAC_Q} ${AUDIO_SAMPLERATE}"
-		#==============================================================#
-	#########################
-	###===---> OGV <---===###
-	###-------------------###
-	elif [ "${ENDUNG}" = ogv ] ; then
-		#==============================================================#
-		VIDEOCODEC="theora"
-		VIDEO_OPTION="${THEORA_Q}"
-		#--------------------------------------------------------------#
-		AUDIOCODEC="vorbis"				# -strict -2 -ac 2
-		AUDIO_OPTION="${VORBIS_Q} ${AUDIO_SAMPLERATE}"
 		#==============================================================#
 	#########################
 	###===---> DVD <---===###
