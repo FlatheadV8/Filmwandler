@@ -8,7 +8,7 @@
 #  - DivX10: mkv  + H.265/HEVC + AAC
 #  - WebM:   webm + VP9        + Opus
 #  - MP4:    mp4  + H.264/AVC  + AAC
-#  - AVCD:   m2ts + H.264/AVC  + AC3
+#  - AVCHD:  m2ts + H.264/AVC  + AC3
 #  - AVI:    avi  + DivX5      + MP3
 #  - FLV:    flv  + FLV        + MP3  (Sorenson Spark: H.263)
 #  - 3GPP:   3gp  + H.263      + AAC  (128x96 176x144 352x288 704x576 1408x1152)
