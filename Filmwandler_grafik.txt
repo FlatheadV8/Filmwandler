@@ -82,8 +82,7 @@ echo "
         -soll_xmaly WSXGA2              # 1600x1024
         -soll_xmaly WSXGA+              # 1680x1050
         -soll_xmaly UXGA                # 1600x1200
-        -soll_xmaly FullHD              # 1920x1080
-        -soll_xmaly HD1080              # 1920x1080
+        -soll_xmaly HD                  # 1920x1080
         -soll_xmaly WUXGA               # 1920x1200
         -soll_xmaly QWXGA               # 2048x1152
         -soll_xmaly TXGA                # 1920x1400
