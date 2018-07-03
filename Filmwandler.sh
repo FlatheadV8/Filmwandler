@@ -105,7 +105,8 @@ echo "
 * Video-Kodierung:	H.265/HEVC (entwickelt für 4K)                         *
 * Audio-Kodierung:	AAC        (mehrkanalfähiger Nachfolger von MP3)       *
 * Beschreibung:                                                                *
-*	- auch abspielbar auf Android                                          *
+*	- H.265/HEVC wird seit Android 5 'Lollipop' unterstützt                *
+*	- kodiert 5-10 mal langsamer als AVCHD/MP4                             *
 ********************************************************************************
 "
 }
@@ -122,7 +123,9 @@ echo "
 * Beschreibung:                                                                *
 *	- mit HTML5-Unterstützung                                              *
 *	- 'Royalty free' (komplett frei von patentierten Technologien)         *
-*	- wird ab Android 5 'Lollipop' unterstützt                             *
+*	- WebM wird seit Android  2.3 'Gingerbread' unterstützt                *
+*	- VP9 wird seit Android 4.4 'KitKat' unterstützt                       *
+*	- Opus wird seit Android 5 'Lollipop' unterstützt                      *
 *	- kodiert 5-10 mal langsamer als AVCHD/MP4                             *
 ********************************************************************************
 "
@@ -576,19 +579,18 @@ esac
 
 #------------------------------------------------------------------------------#
 ### Qualitäts-Parameter-Übersetzung
+###
+### https://slhck.info/video/2017/02/24/vbr-settings.html
 
 ### Tonqualitaet entsprechend dem Audio-Encoder setzen
 #
 #
 ### libopus
+# ffmpeg -h encoder=libopus
 # http://opus-codec.org/
 # http://ffmpeg.org/ffmpeg-codecs.html#libopus-1
 # https://wiki.xiph.org/Opus_Recommended_Settings
 # https://trac.ffmpeg.org/wiki/Encode/???
-#
-#
-### libfaac
-# https://trac.ffmpeg.org/wiki/Encode/AAC
 #
 #
 ### fdk aac
@@ -602,80 +604,80 @@ esac
 
 case "${TONQUALIT}" in
 	0)
-		AAC_Q="-b:a 64k"		# 32k
-		OPUS_Q="-b:a 64k"		# mind. 500 / empf. mind. 32k je Kanal
+		AAC_Q="-vbr 1"			# 1 bis 5, 4 empfohlen
+		OPUS_Q="on -b:a 64k"			# on / 0-2 (fest 96k)
 		MP3_Q="-b:a 64k -ac 2"		# 96k / MPEG-1 Layer 3
 		VORBIS_Q="-q:a 1"		# 0-10, 10 liefert die beste Qualität
 		AC3_Q="-b:a 128k"		#
 		MP2_Q="-b:a 64k -ac 2"		# 96k / MPEG-1 Layer 2
 		;;
 	1)
-		AAC_Q="-b:a 80k"		# 48k
-		OPUS_Q="-b:a 80k"		# 
+		AAC_Q="-vbr 2"			# 1 bis 5, 4 empfohlen
+		OPUS_Q="on -b:a 80k"		# on / 0-2 (fest 96k)
 		MP3_Q="-b:a 80k -ac 2" 		# 112k / MPEG-1 Layer 3
 		VORBIS_Q="-q:a 2"		# 0-10, 10 liefert die beste Qualität
 		AC3_Q="-b:a 144k"		#
 		MP2_Q="-b:a 80k -ac 2" 		# 112k / MPEG-1 Layer 2
 		;;
 	2)
-		AAC_Q="-b:a 104k"		# 64k
-		OPUS_Q="-b:a 104k"		# 
+		AAC_Q="-vbr 3"			# 1 bis 5, 4 empfohlen
+		OPUS_Q="on -b:a 104k"		# on / 0-2 (fest 96k)
 		MP3_Q="-b:a 88k -ac 2" 		# 128k / MPEG-1 Layer 3
 		VORBIS_Q="-q:a 3"		# 0-10, 10 liefert die beste Qualität
 		AC3_Q="-b:a 168k"		#
 		MP2_Q="-b:a 88k -ac 2" 		# 128k / MPEG-1 Layer 2
 		;;
 	3)
-		AAC_Q="-b:a 128k"		# 96k
-		OPUS_Q="-b:a 128k"		# 
+		AAC_Q="-vbr 4"			# 1 bis 5, 4 empfohlen
+		OPUS_Q="on -b:a 128k"		# on / 0-2 (fest 96k)
 		MP3_Q="-b:a 112k -ac 2"		# 144k / MPEG-1 Layer 3
 		VORBIS_Q="-q:a 4"		# 0-10, 10 liefert die beste Qualität
 		AC3_Q="-b:a 192k"		#
 		MP2_Q="-b:a 112k -ac 2"		# 144k / MPEG-1 Layer 2
 		;;
 	4)
-		AAC_Q="-b:a 160k"		# 128k
-		OPUS_Q="-b:a 160k"		# 
+		AAC_Q="-vbr 5"			# 1 bis 5, 4 empfohlen
+		OPUS_Q="on -b:a 160k"		# on / 0-2 (fest 96k)
 		MP3_Q="-b:a 128k -ac 2"		# 160k / MPEG-1 Layer 3
 		VORBIS_Q="-q:a 5"		# 0-10, 10 liefert die beste Qualität
 		AC3_Q="-b:a 224k"		#
 		MP2_Q="-b:a 128k -ac 2"		# 160k / MPEG-1 Layer 2
 		;;
 	5)
-		AAC_Q="-b:a 200k"		# 192k
-		OPUS_Q="-b:a 208k"		# 
+		AAC_Q="-vbr 5"			# 1 bis 5, 4 empfohlen
+		OPUS_Q="on -b:a 200k"		# on / 0-2 (fest 96k)
 		MP3_Q="-b:a 160k -ac 2"		# 192k / MPEG-1 Layer 3
 		VORBIS_Q="-q:a 6"		# 0-10, 10 liefert die beste Qualität
 		AC3_Q="-b:a 256k"		#
 		MP2_Q="-b:a 160k -ac 2"		# 192k / MPEG-1 Layer 2
 		;;
 	6)
-		AAC_Q="-b:a 256k"		# 272k
-		OPUS_Q="-b:a 256k"		# 
+		AAC_Q="-vbr 5"			# 1 bis 5, 4 empfohlen
+		OPUS_Q="on -b:a 256k"		# on / 0-2 (fest 96k)
 		MP3_Q="-b:a 184k -ac 2"		# 224k / MPEG-1 Layer 3
 		VORBIS_Q="-q:a 7"		# 0-10, 10 liefert die beste Qualität
 		AC3_Q="-b:a 296k"		#
 		MP2_Q="-b:a 184k -ac 2"		# 224k / MPEG-1 Layer 2
 		;;
 	7)
-		AAC_Q="-b:a 320k"		# 400k
-		OPUS_Q="-b:a 320k"		# 
+		AAC_Q="-vbr 5"			# 1 bis 5, 4 empfohlen
+		OPUS_Q="on -b:a 320k"		# on / 0-2 (fest 96k)
 		MP3_Q="-b:a 224k -ac 2"		# 248k / MPEG-1 Layer 3
 		VORBIS_Q="-q:a 8"		# 0-10, 10 liefert die beste Qualität
 		AC3_Q="-b:a 336k"		#
 		MP2_Q="-b:a 224k -ac 2"		# 248k / MPEG-1 Layer 2
 		;;
 	8)
-		AAC_Q="-b:a 408k"		# 560k
-		OPUS_Q="-b:a 408k"		# 
+		AAC_Q="-vbr 5"			# 1 bis 5, 4 empfohlen
+		OPUS_Q="on -b:a 408k"		# on / 0-2 (fest 96k)
 		MP3_Q="-b:a 264k -ac 2"		# 280k / MPEG-1 Layer 3
 		VORBIS_Q="-q:a 9"		# 0-10, 10 liefert die beste Qualität
 		AC3_Q="-b:a 392k"		#
 		MP2_Q="-b:a 264k -ac 2"		# 280k / MPEG-1 Layer 2
 		;;
 	9)
-		AAC_Q="-b:a 512k"		# max. 800k
-		OPUS_Q="-b:a 512k"		# max. 256k je Kanal
+		AAC_Q="-vbr 5"			# 1 bis 5, 4 empfohlen
+		OPUS_Q="on -b:a 512k"		# on / 0-2 (fest 96k)
 		MP3_Q="-b:a 320k -ac 2"		# 320k / MPEG-1 Layer 3
 		VORBIS_Q="-q:a 10"		# 0-10, 10 liefert die beste Qualität
 		AC3_Q="-b:a 448k"		#
@@ -916,8 +918,6 @@ if [ "FreeBSD" = "$(uname -s)" ] ; then
 		VIDEOCODEC="libx265"				# DivX 10
 		VIDEO_OPTION="${HEVC_Q}"
 		#--------------------------------------------------------------#
-		#AUDIOCODEC="aac"				# free-Lizenz; seit 05. Dez. 2015 nicht mehr experimentell
-		#AUDIOCODEC="libfaac"				# "non-free"-Lizenz; funktioniert aber
 		AUDIOCODEC="libfdk_aac"				# 2018-05-10: FreeBSD 11 - FDK-AAC Version 0.1.5
 		AUDIO_OPTION="${AAC_Q} ${AUDIO_SAMPLERATE}"
 		#==============================================================#
@@ -930,9 +930,9 @@ if [ "FreeBSD" = "$(uname -s)" ] ; then
 		VIDEOCODEC="libvpx-vp9"
 		VIDEO_OPTION="${VP9_Q}"
 		#--------------------------------------------------------------#
-		#AUDIOCODEC="opus"				# -strict -2 -ac 2
+		#AUDIOCODEC="opus"				# -ac 2 -strict -2
 		AUDIOCODEC="libopus"
-		AUDIO_OPTION="-vbr on -compression_level 10 ${OPUS_Q} ${AUDIO_SAMPLERATE}"
+		AUDIO_OPTION="-vbr ${OPUS_Q} -compression_level 10 ${AUDIO_SAMPLERATE} -ac 2"
 		#==============================================================#
 	#########################
 	###===---> MP4 <---===###
@@ -942,10 +942,6 @@ if [ "FreeBSD" = "$(uname -s)" ] ; then
 		VIDEOCODEC="libx264"				# DivX 7 / AVCHD
 		VIDEO_OPTION="${AVC_Q}"
 		#--------------------------------------------------------------#
-		#AUDIOCODEC="aac"				# free-Lizenz; seit 05. Dez. 2015 nicht mehr experimentell
-		#AUDIOCODEC="libfaac"				# "non-free"-Lizenz; funktioniert aber
-		#AUDIO_OPTION="${AAC_Q} ${AUDIO_SAMPLERATE}"
-		#
 		AUDIOCODEC="libfdk_aac"				# 2018-05-10: FreeBSD 11 - FDK-AAC Version 0.1.5
 		AUDIO_OPTION="${AAC_Q} ${AUDIO_SAMPLERATE}"
 		#==============================================================#
@@ -992,8 +988,6 @@ if [ "FreeBSD" = "$(uname -s)" ] ; then
 		VIDEOCODEC="h263"				# H.263 ASP
 		VIDEO_OPTION="${_3GPP_Q}"
 		#--------------------------------------------------------------#
-		#AUDIOCODEC="aac"				# free-Licenc; seit 05. Dez. 2015 nicht mehr experimentell
-		#AUDIOCODEC="libfaac"				# "non-free"-Licenc; funktioniert aber
 		AUDIOCODEC="libfdk_aac"				# 2018-05-10: FreeBSD 11 - FDK-AAC Version 0.1.5
 		AUDIO_OPTION="${AAC_Q} ${AUDIO_SAMPLERATE}"
 		#==============================================================#
@@ -1047,6 +1041,12 @@ else
 	# auch wenn sie schlechter oder sogar noch experimentell sind
 	#
 
+	#--------------------------------------------------------------
+	# FFmpeg-Option für "aac" (nativ/intern)
+	# https://slhck.info/video/2017/02/24/vbr-settings.html
+	AAC_Q="-q:a 0.12"					# undokumentiert (0.1-?) / 0.12 ~ 128k
+	#--------------------------------------------------------------
+
 	#########################
 	###===---> MKV <---===###
 	###-------------------###
@@ -1067,7 +1067,7 @@ else
 		VIDEO_OPTION="${VP9_Q}"
 		#--------------------------------------------------------------#
 		AUDIOCODEC="opus"				# ist noch experimentell
-		AUDIO_OPTION="-vbr on -compression_level 10 ${OPUS_Q} ${AUDIO_SAMPLERATE} -strict -2"
+		AUDIO_OPTION="-vbr ${OPUS_Q} -compression_level 10 ${AUDIO_SAMPLERATE} -ac 2 -strict -2"
 		#==============================================================#
 	#########################
 	###===---> MP4 <---===###
@@ -1454,17 +1454,19 @@ fi
 ### Übersetzung von Bildauflösungsnamen zu Bildauflösungen
 ### tritt nur bei manueller Auswahl der Bildauflösung in Kraft
 
-AUFLOESUNG_ODER_NAME="$(echo "${SOLL_XY}" | egrep '[0-9][0-9][0-9][x][0-9][0-9]')"
-if [ "x${AUFLOESUNG_ODER_NAME}" = "x" ] ; then
-	### manuelle Auswahl der Bildauflösung per Namen
-	if [ "x${BILD_FORMATNAMEN_AUFLOESUNGEN}" != "x" ] ; then
-		SOLL_XY="$(bildaufloesungen_namen | egrep '[-]soll_xmaly ' | awk '{print $2,$4}' | egrep "^${SOLL_XY} " | awk '{print $2}')"
-		SOLL_SCALE="scale=${SOLL_XY},"
-	else
-		echo "Die gewünschte Bildauflösung wurde als 'Name' angegeben: '${SOLL_XY}'"
-		echo "Für die Übersetzung wird die Datei 'Filmwandler_grafik.txt' benötigt."
-		echo "Leider konnte die Datei '$(dirname ${0})/Filmwandler_grafik.txt' nicht gelesen werden."
-		exit 22
+if [ "x${SOLL_XY}" != "x" ] ; then
+	AUFLOESUNG_ODER_NAME="$(echo "${SOLL_XY}" | egrep '[0-9][0-9][0-9][x][0-9][0-9]')"
+	if [ "x${AUFLOESUNG_ODER_NAME}" = "x" ] ; then
+		### manuelle Auswahl der Bildauflösung per Namen
+		if [ "x${BILD_FORMATNAMEN_AUFLOESUNGEN}" != "x" ] ; then
+			SOLL_XY="$(bildaufloesungen_namen | egrep '[-]soll_xmaly ' | awk '{print $2,$4}' | egrep "^${SOLL_XY} " | awk '{print $2}')"
+			SOLL_SCALE="scale=${SOLL_XY},"
+		else
+			echo "Die gewünschte Bildauflösung wurde als 'Name' angegeben: '${SOLL_XY}'"
+			echo "Für die Übersetzung wird die Datei 'Filmwandler_grafik.txt' benötigt."
+			echo "Leider konnte die Datei '$(dirname ${0})/Filmwandler_grafik.txt' nicht gelesen werden."
+			exit 22
+		fi
 	fi
 fi
 
