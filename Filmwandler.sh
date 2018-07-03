@@ -8,6 +8,7 @@
 #  - DivX10: mkv  + H.265/HEVC + AAC
 #  - WebM:   webm + VP9        + Opus
 #  - MP4:    mp4  + H.264/AVC  + AAC
+#  - AVCD:   m2ts + H.264/AVC  + AC3
 #  - AVI:    avi  + DivX5      + MP3
 #  - FLV:    flv  + FLV        + MP3  (Sorenson Spark: H.263)
 #  - 3GPP:   3gp  + H.263      + AAC  (128x96 176x144 352x288 704x576 1408x1152)
@@ -81,6 +82,7 @@ echo "
 meldung_divx10
 meldung_webm
 meldung_mp4
+meldung_avchd
 meldung_divx5
 meldung_flv
 meldung_3gpp
@@ -103,8 +105,7 @@ echo "
 * Video-Kodierung:	H.265/HEVC (entwickelt für 4K)                         *
 * Audio-Kodierung:	AAC        (mehrkanalfähiger Nachfolger von MP3)       *
 * Beschreibung:                                                                *
-*	- (noch) keine HTML5-Unterstützung                                     *
-*	- abspielbar auf Android                                               *
+*	- auch abspielbar auf Android                                          *
 ********************************************************************************
 "
 }
@@ -121,9 +122,7 @@ echo "
 * Beschreibung:                                                                *
 *	- mit HTML5-Unterstützung                                              *
 *	- 'Royalty free' (komplett frei von patentierten Technologien)         *
-*	- abspielbar auf Android                                               *
-*	- Unterstützung ab Android 5 'Lollipop'                                *
-*	- beste Qualität                                                       *
+*	- wird ab Android 5 'Lollipop' unterstützt                             *
 *	- kodiert 5-10 mal langsamer als AVCHD/MP4                             *
 ********************************************************************************
 "
@@ -136,12 +135,28 @@ echo "
 ********************************************************************************
 * Name:			MP4                                                    *
 * ENDUNG:		.mp4                                                   *
-* Video-Kodierung:	H.264 (MPEG-4 Part 10 / AVC / Blu Ray)                 *
+* Video-Kodierung:	H.264 (MPEG-4 Part 10 / AVC / Blu Ray / AVCHD)         *
 * Audio-Kodierung:	AAC       (mehrkanalfähiger Nachfolger von MP3)        *
 * Beschreibung:                                                                *
 *	- HTML5-Unterstützung                                                  *
-*	- höchste Kompatibilität mit Konsumerelektronik                        *
-*	- abspielbar auf Android                                               *
+*	- hohe Kompatibilität mit Konsumerelektronik                           *
+*	- auch abspielbar auf Android                                          *
+********************************************************************************
+"
+}
+
+
+meldung_avchd()
+{
+echo "
+********************************************************************************
+* Name:			AVCHD                                                  *
+* ENDUNG:		.m2ts                                                  *
+* Video-Kodierung:	H.264 (MPEG-4 Part 10 / AVC / Blu Ray / MP4)           *
+* Audio-Kodierung:	AC3                                                    *
+* Beschreibung:                                                                *
+*	- hohe Kompatibilität mit Konsumerelektronik                           *
+*	- auch abspielbar auf Android                                          *
 ********************************************************************************
 "
 }
@@ -153,15 +168,10 @@ echo "
 ********************************************************************************
 * Name:			DivX5                                                  *
 * ENDUNG:		.avi                                                   *
-* Video-Kodierung:	DivX Version 5 (H.263+)                                *
+* Video-Kodierung:	H.263+ (MPEG-4 Part 2 / ASP / DivX Version 5)          *
 * Audio-Kodierung:	MP3                                                    *
 * Beschreibung:                                                                *
-*	- abspielbar auf vielen größeren Konsumergeräten                       *
-*	- Advanced Simple Profile (ASP)                                        *
-*	- ASP-Codec mit der größten Verbreitung, bevor AVC ihn verdrengt hat   *
-*	- FourCC DIVX (Hack of AVI)                                            *
-*	- FourCC DX50 (MPEG-4 Visual)                                          *
-*	- MP3 -> MPEG-1 Layer 3                                                *
+*	- hohe Kompatibilität mit Konsumerelektronik (DivX 5)                  *
 ********************************************************************************
 "
 }
@@ -173,7 +183,7 @@ echo "
 ********************************************************************************
 * Name:			FlashV                                                 *
 * ENDUNG:		.flv                                                   *
-* Video-Kodierung:	Sorenson Spark (H.263)                                 *
+* Video-Kodierung:	H.263 (MPEG-4 Part 2 / ASP / Sorenson Spark)           *
 * Audio-Kodierung:	MP3                                                    *
 * Beschreibung:                                                                *
 *	- ab Adobe Flash Player Version 6 abspielbar                           *
@@ -190,12 +200,11 @@ echo "
 ********************************************************************************
 * Name:			3GPP                                                   *
 * ENDUNG:		.3gp                                                   *
-* Video-Kodierung:	H.263                                                  *
+* Video-Kodierung:	H.263 (MPEG-4 Part 2 / ASP)                            *
 * Audio-Kodierung:	AAC                                                    *
 * Beschreibung:                                                                *
 *	- abspielbar auf vielen kleineren Konsumergeräten                      *
 *           * die meisten dieser Abspielgeräte können nur 15 FPS               *
-*	- Advanced Simple Profile (ASP)                                        *
 *	- H.263 kann aber leider nur diese Formate beherbergen:                *
 *           * 128x96                                                           *
 *           * 176x144                                                          *
@@ -217,9 +226,9 @@ echo "
 * Audio-Kodierung:	Vorbis (freie Alternative zu MP3)                      *
 * Beschreibung:                                                                *
 *	- mit HTML5-Unterstützung                                              *
+*	- auch abspielbar auf Android                                          *
 *	- 'Royalty free' (komplett frei von patentierten Technologien)         *
 *	- der ogv-Container ist uneingeschränkt streaming-fähig                *
-*	- abspielbar auf Android                                               *
 *	- kodiert sehr schnell                                                 *
 *	- nicht so gut wie 'AVCHD/MP4'                                         *
 ********************************************************************************
@@ -236,8 +245,8 @@ echo "
 * Video-Kodierung:	MPEG-2                                                 *
 * Audio-Kodierung:	AC3                                                    *
 * Beschreibung:                                                                *
-*	- abspielbar auf vielen größeren Konsumergeräten                       *
-*	- übliches DVD-Format                                                  *
+*	- hohe Kompatibilität mit Konsumerelektronik                           *
+*	- ähnlich dem DVD-Format                                               *
 ********************************************************************************
 "
 }
@@ -252,8 +261,8 @@ echo "
 * Video-Kodierung:	MPEG-1                                                 *
 * Audio-Kodierung:	MP2                                                    *
 * Beschreibung:                                                                *
-*	- abspielbar auf vielen größeren Konsumergeräten                       *
-*	- übliches VCD-Format                                                  *
+*	- hohe Kompatibilität mit Konsumerelektronik                           *
+*	- ähnlich dem VCD-Format                                               *
 ********************************************************************************
 "
 }
@@ -474,9 +483,9 @@ fi
 case "${ZIELDATEI}" in
 	[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*)
 		ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
-		ENDUNG="mp4"
-		FORMAT="mp4"		# AVC
-		meldung_mp4
+		ENDUNG="webm"
+		FORMAT="webm"		# HEVC
+		meldung_webm
 		shift
 		;;
 	[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.][Mm][Kk][Vv])
