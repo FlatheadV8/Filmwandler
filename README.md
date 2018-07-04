@@ -1,5 +1,5 @@
 # Filmwandler
-Mit diesem Skript kann man einen beliebigen Film in eines von 6 sehr verbreiteten Formaten umwandeln.
+Mit diesem Skript kann man einen beliebigen Film in eines von 10 sehr verbreiteten Formaten umwandeln.
 
 Das Skript besitzt viele weitere nützliche Optionen, siehe:
 
