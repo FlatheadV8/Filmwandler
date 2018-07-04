@@ -1,0 +1,30 @@
+# Format
+ENDUNG="mpeg"
+START_ZIEL_FORMAT="-f vcd"
+
+# Audio
+AUDIOCODEC="ac3"
+AUDIO_OPTION="-b:a 256k"
+
+# Video
+VIDEOCODEC="mpeg2video"
+VIDEO_OPTION=""
+IFRAME="-keyint_min 2-8"
+
+#==============================================================================#
+# Funktionen
+
+ausgabe_hilfe()
+{
+echo "
+********************************************************************************
+* Name:                 MPEG-2                                                 *
+* ENDUNG:               .mpeg                                                  *
+* Video-Kodierung:      MPEG-2                                                 *
+* Audio-Kodierung:      AC3                                                    *
+* Beschreibung:                                                                *
+*       - hohe Kompatibilität mit Konsumerelektronik                           *
+*       - ähnlich dem DVD-Format                                               *
+********************************************************************************
+"
+}
