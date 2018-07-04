@@ -1,0 +1,34 @@
+# Format
+ENDUNG="ogv"
+START_ZIEL_FORMAT="-f ogg"
+
+# Audio
+AUDIOCODEC="libvorbis"
+AUDIO_OPTION="-q:a 6"
+
+# Video
+VIDEOCODEC="libtheora"
+VIDEO_OPTION="-q:v 6"
+IFRAME="-keyint_min 2-8"
+
+#==============================================================================#
+# Funktionen
+
+ausgabe_hilfe()
+{
+echo "
+********************************************************************************
+* Name:                 OGG                                                    *
+* ENDUNG:               .ogv                                                   *
+* Video-Kodierung:      Theora (freie Alternative zu DivX5)                    *
+* Audio-Kodierung:      Vorbis (freie Alternative zu MP3)                      *
+* Beschreibung:                                                                *
+*       - mit HTML5-Unterstützung                                              *
+*       - auch abspielbar auf Android                                          *
+*       - 'Royalty free' (komplett frei von patentierten Technologien)         *
+*       - der ogv-Container ist uneingeschränkt streaming-fähig                *
+*       - kodiert sehr schnell                                                 *
+*       - nicht so gut wie 'AVCHD/MP4'                                         *
+********************************************************************************
+"
+}
