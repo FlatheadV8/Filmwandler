@@ -1,1 +1,31 @@
 
+# Format
+ENDUNG="mpg"
+START_ZIEL_FORMAT="-f dvd"
+
+# Audio
+AUDIOCODEC="mp2"
+AUDIO_OPTION="-b:a 160k -ac 2"
+
+# Video
+VIDEOCODEC="mpeg1video"
+VIDEO_OPTION=""
+IFRAME="-keyint_min 2-8"
+
+#==============================================================================#
+# Funktionen
+
+ausgabe_hilfe()
+{
+echo "
+********************************************************************************
+* Name:                 MPEG-1                                                 *
+* ENDUNG:               .mpg                                                   *
+* Video-Kodierung:      MPEG-1                                                 *
+* Audio-Kodierung:      MP2                                                    *
+* Beschreibung:                                                                *
+*       - hohe Kompatibilität mit Konsumerelektronik                           *
+*       - ähnlich dem VCD-Format                                               *
+********************************************************************************
+"
+}
