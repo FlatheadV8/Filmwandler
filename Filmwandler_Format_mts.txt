@@ -1,0 +1,30 @@
+# Format
+ENDUNG="mts"
+START_ZIEL_FORMAT="-f mpegts"
+
+# Audio
+AUDIOCODEC="ac3"
+AUDIO_OPTION="-b:a 256k"
+
+# Video
+VIDEOCODEC="libx264"
+VIDEO_OPTION="-preset slow -crf 20"
+IFRAME="-keyint_min 2-8"
+
+#==============================================================================#
+# Funktionen
+
+ausgabe_hilfe()
+{
+echo "
+********************************************************************************
+* Name:                 AVCHD                                                  *
+* ENDUNG:               .mts                                                   *
+* Video-Kodierung:      H.264 (MPEG-4 Part 10 / AVC / Blu Ray / MP4)           *
+* Audio-Kodierung:      AC3                                                    *
+* Beschreibung:                                                                *
+*       - hohe Kompatibilität mit Konsumerelektronik                           *
+*       - auch abspielbar auf Android                                          *
+********************************************************************************
+"
+}
