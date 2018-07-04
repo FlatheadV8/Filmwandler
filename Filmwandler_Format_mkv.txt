@@ -1,0 +1,30 @@
+# Format
+ENDUNG="mkv"
+START_ZIEL_FORMAT="-f matroska"
+
+# Audio
+AUDIOCODEC="libfdk_aac"
+AUDIO_OPTION="-vbr 5"
+
+# Video
+VIDEOCODEC="libx265"
+VIDEO_OPTION="-preset slow -crf 20"
+IFRAME="-keyint_min 2-8"
+
+#==============================================================================#
+# Funktionen
+
+ausgabe_hilfe()
+{
+echo "
+********************************************************************************
+* Name:                 DivX10                                                 *
+* ENDUNG:               .mkv                                                   *
+* Video-Kodierung:      H.265/HEVC (entwickelt für 4K)                         *
+* Audio-Kodierung:      AAC        (mehrkanalfähiger Nachfolger von MP3)       *
+* Beschreibung:                                                                *
+*       - H.265/HEVC wird seit Android 5 'Lollipop' unterstützt                *
+*       - kodiert 5-10 mal langsamer als AVCHD/MP4                             *
+********************************************************************************
+"
+}
