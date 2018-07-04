@@ -1,4 +1,4 @@
-VERSION="v2018063000"
+VERSION="v2018070400"
 
 bildaufloesungen_namen()
 {
