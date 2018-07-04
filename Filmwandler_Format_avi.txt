@@ -1,0 +1,29 @@
+# Format
+ENDUNG="avi"
+START_ZIEL_FORMAT="-f avi"
+
+# Audio
+AUDIOCODEC="libmp3lame"
+AUDIO_OPTION="-b:a 160k -ac 2"
+
+# Video
+VIDEOCODEC="mpeg4"
+VIDEO_OPTION="-q:v 5 -vtag DX50"
+IFRAME="-keyint_min 2-8"
+
+#==============================================================================#
+# Funktionen
+
+ausgabe_hilfe()
+{
+echo "
+********************************************************************************
+* Name:                 DivX5                                                  *
+* ENDUNG:               .avi                                                   *
+* Video-Kodierung:      H.263+ (MPEG-4 Part 2 / ASP / DivX Version 5)          *
+* Audio-Kodierung:      MP3                                                    *
+* Beschreibung:                                                                *
+*       - hohe Kompatibilität mit Konsumerelektronik (DivX 5)                  *
+********************************************************************************
+"
+}
