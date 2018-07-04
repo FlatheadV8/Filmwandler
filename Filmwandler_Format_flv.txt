@@ -1,0 +1,31 @@
+# Format
+ENDUNG="flv"
+START_ZIEL_FORMAT="-f flv"
+
+# Audio
+AUDIOCODEC="libmp3lame"
+AUDIO_OPTION="-b:a 160k -ac 2"
+
+# Video
+VIDEOCODEC="flv"
+VIDEO_OPTION="-q:v 5"
+IFRAME="-keyint_min 2-8"
+
+#==============================================================================#
+# Funktionen
+
+ausgabe_hilfe()
+{
+echo "
+********************************************************************************
+* Name:                 FlashV                                                 *
+* ENDUNG:               .flv                                                   *
+* Video-Kodierung:      H.263 (MPEG-4 Part 2 / ASP / Sorenson Spark)           *
+* Audio-Kodierung:      MP3                                                    *
+* Beschreibung:                                                                *
+*       - ab Adobe Flash Player Version 6 abspielbar                           *
+*       - Flash Video Version 1                                                *
+*       - FourCC: FLV1                                                         *
+********************************************************************************
+"
+}
