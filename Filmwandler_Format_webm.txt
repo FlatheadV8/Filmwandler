@@ -1,0 +1,34 @@
+# Format
+ENDUNG="webm"
+START_ZIEL_FORMAT="-f webm"
+
+# Audio
+AUDIOCODEC="libopus"
+AUDIO_OPTION="-vbr on -b:a 200k -compression_level 10  -ac 2"
+
+# Video
+VIDEOCODEC="libvpx-vp9"
+VIDEO_OPTION="-crf 20 -b:v 0"
+IFRAME="-keyint_min 2-8"
+
+#==============================================================================#
+# Funktionen
+
+ausgabe_hilfe()
+{
+echo "
+********************************************************************************
+* Name:                 WebM                                                   *
+* ENDUNG:               .webm                                                  *
+* Video-Kodierung:      VP9  (freie Alternative zu H.265 für 4K)               *
+* Audio-Kodierung:      Opus (freie Alternative zu AAC)                        *
+* Beschreibung:                                                                *
+*       - mit HTML5-Unterstützung                                              *
+*       - 'Royalty free' (komplett frei von patentierten Technologien)         *
+*       - WebM wird seit Android  2.3 'Gingerbread' unterstützt                *
+*       - VP9 wird seit Android 4.4 'KitKat' unterstützt                       *
+*       - Opus wird seit Android 5 'Lollipop' unterstützt                      *
+*       - kodiert 5-10 mal langsamer als AVCHD/MP4                             *
+********************************************************************************
+"
+}
