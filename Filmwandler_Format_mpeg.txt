@@ -1,30 +1,49 @@
+
+#==============================================================================#
+
 # Format
 ENDUNG="mpeg"
-START_ZIEL_FORMAT="-f vcd"
+FORMAT="dvd"
 
 # Audio
 AUDIOCODEC="ac3"
-AUDIO_OPTION="-b:a 256k"
+AUDIO_QUALITAET_0="-b:a 128k"
+AUDIO_QUALITAET_1="-b:a 144k"
+AUDIO_QUALITAET_2="-b:a 168k"
+AUDIO_QUALITAET_3="-b:a 192k"
+AUDIO_QUALITAET_4="-b:a 224k"
+AUDIO_QUALITAET_5="-b:a 256k"
+AUDIO_QUALITAET_6="-b:a 296k"
+AUDIO_QUALITAET_7="-b:a 336k"
+AUDIO_QUALITAET_8="-b:a 392k"
+AUDIO_QUALITAET_9="-b:a 448k"
 
 # Video
 VIDEOCODEC="mpeg2video"
 VIDEO_OPTION=""
+VIDEO_QUALITAET_0="-b:v $(echo "1 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_1="-b:v $(echo "2 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_2="-b:v $(echo "3 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_3="-b:v $(echo "4 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_4="-b:v $(echo "5 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_5="-b:v $(echo "6 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_6="-b:v $(echo "7 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_7="-b:v $(echo "8 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_8="-b:v $(echo "9 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_9="-b:v $(echo "10 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
 IFRAME="-keyint_min 2-8"
 
 #==============================================================================#
 # Funktionen
 
-ausgabe_hilfe()
-{
-echo "
+FORMAT_BESCHREIBUNG="
 ********************************************************************************
-* Name:                 MPEG-2                                                 *
-* ENDUNG:               .mpeg                                                  *
-* Video-Kodierung:      MPEG-2                                                 *
-* Audio-Kodierung:      AC3                                                    *
+* Name:			MPEG-2                                                 *
+* ENDUNG:		.mpeg                                                  *
+* Video-Kodierung:	MPEG-2                                                 *
+* Audio-Kodierung:	AC3                                                    *
 * Beschreibung:                                                                *
-*       - hohe Kompatibilität mit Konsumerelektronik                           *
-*       - ähnlich dem DVD-Format                                               *
+*	- hohe Kompatibilität mit Konsumerelektronik                           *
+*	- ähnlich dem DVD-Format                                               *
 ********************************************************************************
 "
-}
