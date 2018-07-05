@@ -1,34 +1,117 @@
+
+#==============================================================================#
+#
+# ffmpeg -h encoder=libopus
+# http://opus-codec.org/
+# http://ffmpeg.org/ffmpeg-codecs.html#libopus-1
+# https://wiki.xiph.org/Opus_Recommended_Settings
+#
+#==============================================================================#
+
+### https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio
+#
+#   Seit 2017 verfügt FFmpeg über einen eigenen, nativen Opus-Encoder
+#   und -Decoder.
+#   Die Mobil-Plattform Android unterstützt ab Version 5 (Lollipop)
+#   Opus eingebettet in das Matroska-Containerformat nativ.
+#
+
+#------------------------------------------------------------------------------#
+### VP9
+#
+### konstante Qualität
+# https://trac.ffmpeg.org/wiki/Encode/VP9#variableb -> Constant Quality
+# To trigger this mode, you must use a combination of "-crf" and "-b:v 0".
+# "-b:v" MUST be 0!
+#
+# https://developers.google.com/media/vp9/settings/vod/
+# Der Wert für "CRF" ist abhängig von der Bildhöhe:
+#        240 Pixel:   -crf 37
+#        360 Pixel:   -crf 36
+#        480 Pixel:   -crf 33
+#        720 Pixel:   -crf 32
+#       1080 Pixel:   -crf 31
+#       1440 Pixel:   -crf 24
+#       2160 Pixel:   -crf 15
+#               empfohlen: 15-35
+
+#==============================================================================#
+# Betriebssystemabhängigkeiten
+
+#
+# Die internen (nativen) Codecs funktionieren immer (die sind ja fest drin),
+# die externen Bibliotheken sind oft besser,
+# müssen aber extra installiert werden.
+#
+# Weil die GPL-Lizenz, unter der Linux steht, nicht kompatiebel mit den Lizenzen
+# vieler Codec-Bibliotheken ist (z. B. solcher, die unter BSD-Lizenz stehen),
+# ist es auf den meisten Linux-Distributionen schwierig, diese Codec-Bibliotheken 
+# zu installieren.
+# Deshalb werden hier nur interne Codecs zur Verwendung vorgesehen.
+# (auch wenn sie schlechter oder sogar noch experimentell sind)
+#
+
+if [ "FreeBSD" = "$(uname -s)" ] ; then
+	AUDIOCODEC="libopus -ac 2"		# kann z.Z. nur Stereo
+	VIDEOCODEC="libvpx-vp9"
+else
+	AUDIOCODEC="opus -strict -2"		# ist noch experimentel
+	VIDEOCODEC="vp9"
+fi
+
+
+#==============================================================================#
+
 # Format
 ENDUNG="webm"
-START_ZIEL_FORMAT="-f webm"
+FORMAT="webm"
 
-# Audio
-AUDIOCODEC="libopus"
-AUDIO_OPTION="-vbr on -b:a 200k -compression_level 10  -ac 2"
+### Audio
+## -vbr on -b:a 128k
+## -vbr 0 (fest 96k)
+## -vbr 1 (fest 96k)
+## -vbr 2 (fest 96k)
+AUDIO_OPTION="-vbr on -compression_level 10"
+AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 64k"
+AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 80k"
+AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 104k"
+AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 128k"
+AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 160k"
+AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 200k"
+AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 256k"
+AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 320k"
+AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 408k"
+AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 512k"
 
 # Video
-VIDEOCODEC="libvpx-vp9"
-VIDEO_OPTION="-crf 20 -b:v 0"
+VIDEO_OPTION="-b:v 0"
+VIDEO_QUALITAET_0="-crf 25 ${VIDEO_OPTION}"	# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_0="-crf 24 ${VIDEO_OPTION}"	# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_0="-crf 23 ${VIDEO_OPTION}"	# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_0="-crf 22 ${VIDEO_OPTION}"	# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_0="-crf 21 ${VIDEO_OPTION}"	# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_0="-crf 20 ${VIDEO_OPTION}"	# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_0="-crf 19 ${VIDEO_OPTION}"	# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_0="-crf 18 ${VIDEO_OPTION}"	# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_0="-crf 17 ${VIDEO_OPTION}"	# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_0="-crf 16 ${VIDEO_OPTION}"	# von "0" (verlustfrei) bis "63"
 IFRAME="-keyint_min 2-8"
 
 #==============================================================================#
 # Funktionen
 
-ausgabe_hilfe()
-{
-echo "
+FORMAT_BESCHREIBUNG="
 ********************************************************************************
-* Name:                 WebM                                                   *
-* ENDUNG:               .webm                                                  *
-* Video-Kodierung:      VP9  (freie Alternative zu H.265 für 4K)               *
-* Audio-Kodierung:      Opus (freie Alternative zu AAC)                        *
+* Name:			WebM                                                   *
+* ENDUNG:		.webm                                                  *
+* Video-Kodierung:	VP9  (freie Alternative zu H.265 für 4K)               *
+* Audio-Kodierung:	Opus (freie Alternative zu AAC)                        *
 * Beschreibung:                                                                *
-*       - mit HTML5-Unterstützung                                              *
-*       - 'Royalty free' (komplett frei von patentierten Technologien)         *
-*       - WebM wird seit Android  2.3 'Gingerbread' unterstützt                *
-*       - VP9 wird seit Android 4.4 'KitKat' unterstützt                       *
-*       - Opus wird seit Android 5 'Lollipop' unterstützt                      *
-*       - kodiert 5-10 mal langsamer als AVCHD/MP4                             *
+*	- mit HTML5-Unterstützung                                              *
+*	- 'Royalty free' (komplett frei von patentierten Technologien)         *
+*	- WebM wird seit Android  2.3 'Gingerbread' unterstützt                *
+*	- VP9 wird seit Android 4.4 'KitKat' unterstützt                       *
+*	- Opus wird seit Android 5 'Lollipop' unterstützt                      *
+*	- kodiert 5-10 mal langsamer als AVCHD/MP4                             *
 ********************************************************************************
 "
-}
