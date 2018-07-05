@@ -1,34 +1,78 @@
+
+#==============================================================================#
+# Betriebssystemabhängigkeiten
+
+#
+# Die internen (nativen) Codecs funktionieren immer (die sind ja fest drin),
+# die externen Bibliotheken sind oft besser,
+# müssen aber extra installiert werden.
+#
+# Weil die GPL-Lizenz, unter der Linux steht, nicht kompatiebel mit den Lizenzen
+# vieler Codec-Bibliotheken ist (z. B. solcher, die unter BSD-Lizenz stehen),
+# ist es auf den meisten Linux-Distributionen schwierig, diese Codec-Bibliotheken 
+# zu installieren.
+# Deshalb werden hier nur interne Codecs zur Verwendung vorgesehen.
+# (auch wenn sie schlechter oder sogar noch experimentell sind)
+#
+
+if [ "FreeBSD" = "$(uname -s)" ] ; then
+	AUDIOCODEC="libvorbis"
+	VIDEOCODEC="libtheora"
+else
+	AUDIOCODEC="vorbis"
+	VIDEOCODEC="theora"
+fi
+
+
+#==============================================================================#
+
 # Format
 ENDUNG="ogv"
-START_ZIEL_FORMAT="-f ogg"
+FORMAT="ogg"
 
 # Audio
-AUDIOCODEC="libvorbis"
-AUDIO_OPTION="-q:a 6"
+# -q:a 3 (Standard)
+AUDIO_QUALITAET_0="-q:a 1"			# 0-10, 10 ist am besten
+AUDIO_QUALITAET_1="-q:a 2"			# 0-10, 10 ist am besten
+AUDIO_QUALITAET_2="-q:a 3"			# 0-10, 10 ist am besten
+AUDIO_QUALITAET_3="-q:a 4"			# 0-10, 10 ist am besten
+AUDIO_QUALITAET_4="-q:a 5"			# 0-10, 10 ist am besten
+AUDIO_QUALITAET_5="-q:a 6"			# 0-10, 10 ist am besten
+AUDIO_QUALITAET_6="-q:a 7"			# 0-10, 10 ist am besten
+AUDIO_QUALITAET_7="-q:a 8"			# 0-10, 10 ist am besten
+AUDIO_QUALITAET_8="-q:a 9"			# 0-10, 10 ist am besten
+AUDIO_QUALITAET_9="-q:a 10"			# 0-10, 10 ist am besten
 
 # Video
-VIDEOCODEC="libtheora"
-VIDEO_OPTION="-q:v 6"
+# -b:v 200k (Standard)
+VIDEO_OPTION=""
+VIDEO_QUALITAET_0="-q:v 1 ${VIDEO_OPTION}"	# 0-10, 10 ist am besten
+VIDEO_QUALITAET_0="-q:v 2 ${VIDEO_OPTION}"	# 0-10, 10 ist am besten
+VIDEO_QUALITAET_0="-q:v 3 ${VIDEO_OPTION}"	# 0-10, 10 ist am besten
+VIDEO_QUALITAET_0="-q:v 4 ${VIDEO_OPTION}"	# 0-10, 10 ist am besten
+VIDEO_QUALITAET_0="-q:v 5 ${VIDEO_OPTION}"	# 0-10, 10 ist am besten
+VIDEO_QUALITAET_0="-q:v 6 ${VIDEO_OPTION}"	# 0-10, 10 ist am besten
+VIDEO_QUALITAET_0="-q:v 7 ${VIDEO_OPTION}"	# 0-10, 10 ist am besten
+VIDEO_QUALITAET_0="-q:v 8 ${VIDEO_OPTION}"	# 0-10, 10 ist am besten
+VIDEO_QUALITAET_0="-q:v 9 ${VIDEO_OPTION}"	# 0-10, 10 ist am besten
+VIDEO_QUALITAET_0="-q:v 10 ${VIDEO_OPTION}"	# 0-10, 10 ist am besten
 IFRAME="-keyint_min 2-8"
 
 #==============================================================================#
 # Funktionen
 
-ausgabe_hilfe()
-{
-echo "
+FORMAT_BESCHREIBUNG="
 ********************************************************************************
-* Name:                 OGG                                                    *
-* ENDUNG:               .ogv                                                   *
-* Video-Kodierung:      Theora (freie Alternative zu DivX5)                    *
-* Audio-Kodierung:      Vorbis (freie Alternative zu MP3)                      *
+* Name:			OGG                                                    *
+* ENDUNG:		.ogv                                                   *
+* Video-Kodierung:	Theora (freie Alternative zu DivX5)                    *
+* Audio-Kodierung:	Vorbis (freie Alternative zu MP3)                      *
 * Beschreibung:                                                                *
-*       - mit HTML5-Unterstützung                                              *
-*       - auch abspielbar auf Android                                          *
-*       - 'Royalty free' (komplett frei von patentierten Technologien)         *
-*       - der ogv-Container ist uneingeschränkt streaming-fähig                *
-*       - kodiert sehr schnell                                                 *
-*       - nicht so gut wie 'AVCHD/MP4'                                         *
+*	- mit HTML5-Unterstützung                                              *
+*	- auch abspielbar auf Android                                          *
+*	- 'Royalty free' (komplett frei von patentierten Technologien)         *
+*	- der ogv-Container ist uneingeschränkt streaming-fähig                *
+*	- kodiert sehr schnell                                                 *
+*	- nicht so gut wie 'AVCHD/MP4'                                         *
 ********************************************************************************
 "
-}
