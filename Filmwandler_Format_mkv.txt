@@ -1,30 +1,105 @@
+
+#==============================================================================#
+#
+# https://trac.ffmpeg.org/wiki/Encode/AAC
+#
+#==============================================================================#
+
+#------------------------------------------------------------------------------#
+### https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio
+#
+#   Seit 2017 verfügt FFmpeg über einen eigenen, nativen Opus-Encoder
+#   und -Decoder.
+#   Die Mobil-Plattform Android unterstützt ab Version 5 (Lollipop)
+#   Opus eingebettet in das Matroska-Containerformat nativ.
+#------------------------------------------------------------------------------#
+
+### libfdk_aac
+#
+# laut Debian ist libfdk_aac "non-free"-Licenc
+# laut FSF, Fedora, RedHat ist libfdk_aac "free"-Licenc
+#
+# http://wiki.hydrogenaud.io/index.php?title=Fraunhofer_FDK_AAC#Recommended_Sampling_Rate_and_Bitrate_Combinations
+#
+# libfdk_aac -> Note, the VBR setting is unsupported and only works with some parameter combinations.
+#
+# FDK AAC kann im Modus "VBR" keine beliebige Kombination von Tonkanäle, Bit-Rate und Saple-Rate verarbeiten!
+# Will man "VBR" verwenden, dann muss man explizit alle drei Parameter in erlaubter Größe angeben.
+#
+#--------------------------------------------------------------
+# FFmpeg-Option für "aac" (nativ/intern)
+# https://slhck.info/video/2017/02/24/vbr-settings.html
+# -q:a 0.12		# undokumentiert (0.1-?) / 0.12 ~ 128k
+#--------------------------------------------------------------
+
+#==============================================================================#
+# Betriebssystemabhängigkeiten
+
+#
+# Die internen (nativen) Codecs funktionieren immer (die sind ja fest drin),
+# die externen Bibliotheken sind oft besser,
+# müssen aber extra installiert werden.
+#
+# Weil die GPL-Lizenz, unter der Linux steht, nicht kompatiebel mit den Lizenzen
+# vieler Codec-Bibliotheken ist (z. B. solcher, die unter BSD-Lizenz stehen),
+# ist es auf den meisten Linux-Distributionen schwierig, diese Codec-Bibliotheken 
+# zu installieren.
+# Deshalb werden hier nur interne Codecs zur Verwendung vorgesehen.
+# (auch wenn sie schlechter oder sogar noch experimentell sind)
+#
+
+if [ "FreeBSD" = "$(uname -s)" ] ; then
+	AUDIOCODEC="libfdk_aac"
+else
+	AUDIOCODEC="aac"
+fi
+
+
+#==============================================================================#
+
+
 # Format
 ENDUNG="mkv"
-START_ZIEL_FORMAT="-f matroska"
+FORMAT="matroska"
 
 # Audio
-AUDIOCODEC="libfdk_aac"
-AUDIO_OPTION="-vbr 5"
+AUDIO_QUALITAET_0="-vbr 1"			# 1 bis 5, 4 empfohlen
+AUDIO_QUALITAET_1="-vbr 2"			# 1 bis 5, 4 empfohlen
+AUDIO_QUALITAET_2="-vbr 3"			# 1 bis 5, 4 empfohlen
+AUDIO_QUALITAET_3="-vbr 4"			# 1 bis 5, 4 empfohlen
+AUDIO_QUALITAET_4="-vbr 4"			# 1 bis 5, 4 empfohlen
+AUDIO_QUALITAET_5="-vbr 4"			# 1 bis 5, 4 empfohlen
+AUDIO_QUALITAET_6="-vbr 5"			# 1 bis 5, 4 empfohlen
+AUDIO_QUALITAET_7="-vbr 5"			# 1 bis 5, 4 empfohlen
+AUDIO_QUALITAET_8="-vbr 5"			# 1 bis 5, 4 empfohlen
+AUDIO_QUALITAET_9="-vbr 5"			# 1 bis 5, 4 empfohlen
 
 # Video
 VIDEOCODEC="libx265"
-VIDEO_OPTION="-preset slow -crf 20"
+VIDEO_OPTION="-preset slow"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 25"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 24"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 23"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 22"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 21"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 20"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 19"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 18"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 17"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 16"	# von "0" (verlustfrei) bis "51"
 IFRAME="-keyint_min 2-8"
 
 #==============================================================================#
 # Funktionen
 
-ausgabe_hilfe()
-{
-echo "
+FORMAT_BESCHREIBUNG="
 ********************************************************************************
-* Name:                 DivX10                                                 *
-* ENDUNG:               .mkv                                                   *
-* Video-Kodierung:      H.265/HEVC (entwickelt für 4K)                         *
-* Audio-Kodierung:      AAC        (mehrkanalfähiger Nachfolger von MP3)       *
+* Name:			DivX10                                                 *
+* ENDUNG:		.mkv                                                   *
+* Video-Kodierung:	H.265/HEVC (entwickelt für 4K)                         *
+* Audio-Kodierung:	AAC        (mehrkanalfähiger Nachfolger von MP3)       *
 * Beschreibung:                                                                *
-*       - H.265/HEVC wird seit Android 5 'Lollipop' unterstützt                *
-*       - kodiert 5-10 mal langsamer als AVCHD/MP4                             *
+*	- H.265/HEVC wird seit Android 5 'Lollipop' unterstützt                *
+*	- kodiert 5-10 mal langsamer als AVCHD/MP4                             *
 ********************************************************************************
 "
-}
