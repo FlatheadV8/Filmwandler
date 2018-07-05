@@ -1,31 +1,50 @@
 
+#==============================================================================#
+
 # Format
 ENDUNG="mpg"
-START_ZIEL_FORMAT="-f dvd"
+FORMAT="vcd"
 
 # Audio
-AUDIOCODEC="mp2"
-AUDIO_OPTION="-b:a 160k -ac 2"
+AUDIOCODEC="mp2"					# MPEG-1 Layer 2
+AUDIO_OPTION="-ac 2"
+AUDIO_QUALITAET="-b:a 64k ${AUDIO_OPTION}"		# 96k
+AUDIO_QUALITAET="-b:a 80k ${AUDIO_OPTION}" 		# 112k
+AUDIO_QUALITAET="-b:a 88k ${AUDIO_OPTION}" 		# 128k
+AUDIO_QUALITAET="-b:a 112k ${AUDIO_OPTION}"		# 144k
+AUDIO_QUALITAET="-b:a 128k ${AUDIO_OPTION}"		# 160k
+AUDIO_QUALITAET="-b:a 160k ${AUDIO_OPTION}"		# 192k
+AUDIO_QUALITAET="-b:a 184k ${AUDIO_OPTION}"		# 224k
+AUDIO_QUALITAET="-b:a 224k ${AUDIO_OPTION}"		# 248k
+AUDIO_QUALITAET="-b:a 264k ${AUDIO_OPTION}"		# 280k
+AUDIO_QUALITAET="-b:a 320k ${AUDIO_OPTION}"		# 320k
 
 # Video
 VIDEOCODEC="mpeg1video"
 VIDEO_OPTION=""
+VIDEO_QUALITAET_0="-b:v $(echo "1 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_1="-b:v $(echo "2 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_2="-b:v $(echo "3 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_3="-b:v $(echo "4 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_4="-b:v $(echo "5 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_5="-b:v $(echo "6 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_6="-b:v $(echo "7 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_7="-b:v $(echo "8 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_8="-b:v $(echo "9 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_9="-b:v $(echo "10 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
 IFRAME="-keyint_min 2-8"
 
 #==============================================================================#
 # Funktionen
 
-ausgabe_hilfe()
-{
-echo "
+FORMAT_BESCHREIBUNG="
 ********************************************************************************
-* Name:                 MPEG-1                                                 *
-* ENDUNG:               .mpg                                                   *
-* Video-Kodierung:      MPEG-1                                                 *
-* Audio-Kodierung:      MP2                                                    *
+* Name:			MPEG-1                                                 *
+* ENDUNG:		.mpg                                                   *
+* Video-Kodierung:	MPEG-1                                                 *
+* Audio-Kodierung:	MP2                                                    *
 * Beschreibung:                                                                *
-*       - hohe Kompatibilität mit Konsumerelektronik                           *
-*       - ähnlich dem VCD-Format                                               *
+*	- hohe Kompatibilität mit Konsumerelektronik                           *
+*	- ähnlich dem VCD-Format                                               *
 ********************************************************************************
 "
-}
