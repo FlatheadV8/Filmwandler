@@ -22,9 +22,9 @@
 #
 
 if [ "FreeBSD" = "$(uname -s)" ] ; then
-	AUDIOCODEC_LIB="libmp3lame"		# MPEG-1 Layer 3
+	AUDIOCODEC="libmp3lame"			# MPEG-1 Layer 3
 else
-	AUDIOCODEC_NAT="mp3"			# MPEG-1 Layer 3
+	AUDIOCODEC="mp3"			# MPEG-1 Layer 3
 fi
 
 
