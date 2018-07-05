@@ -1,30 +1,93 @@
+
+#==============================================================================#
+
+#------------------------------------------------------------------------------#
+
+# Mit CRF legt man die Bildqualität fest.
+# Die Option "-crf 16" erzeugt eine sehr gute Blu Ray - Qualität.
+# -crf 12-21 sind hinsichtlich Kodiergeschwindigkeit und Dateigröße "gut"
+# -crf 16-21 ist ein praxistauglicher Bereich für sehr gute Qualität
+#
+# Mit dem PRESET legt man die Dateigröße und die Kodiergeschwindigkeit fest.
+# -preset ultrafast
+# -preset superfast
+# -preset veryfast
+# -preset faster
+# -preset fast
+# -preset medium   (Standard)
+# -preset slow     (bester Kompromiss)
+# -preset slower   (nur unwesentlich besser als "slow" aber merklich langsamer)
+# -preset veryslow (wenig besser aber sehr viel langsamer)
+#
+# -tune film verbessert die Qualität (gibt z.Z folgende: psnr ssim grain zerolatency fastdecode)
+
+#==============================================================================#
+# Betriebssystemabhängigkeiten
+
+#
+# Die internen (nativen) Codecs funktionieren immer (die sind ja fest drin),
+# die externen Bibliotheken sind oft besser,
+# müssen aber extra installiert werden.
+#
+# Weil die GPL-Lizenz, unter der Linux steht, nicht kompatiebel mit den Lizenzen
+# vieler Codec-Bibliotheken ist (z. B. solcher, die unter BSD-Lizenz stehen),
+# ist es auf den meisten Linux-Distributionen schwierig, diese Codec-Bibliotheken 
+# zu installieren.
+# Deshalb werden hier nur interne Codecs zur Verwendung vorgesehen.
+# (auch wenn sie schlechter oder sogar noch experimentell sind)
+#
+
+if [ "FreeBSD" = "$(uname -s)" ] ; then
+	VIDEOCODEC="libx264"
+else
+	VIDEOCODEC="h264"
+fi
+
+
+#==============================================================================#
+
 # Format
 ENDUNG="mts"
-START_ZIEL_FORMAT="-f mpegts"
+FORMAT="mpegts"
 
 # Audio
 AUDIOCODEC="ac3"
-AUDIO_OPTION="-b:a 256k"
+AUDIO_QUALITAET_0="-b:a 128k"
+AUDIO_QUALITAET_1="-b:a 144k"
+AUDIO_QUALITAET_2="-b:a 168k"
+AUDIO_QUALITAET_3="-b:a 192k"
+AUDIO_QUALITAET_4="-b:a 224k"
+AUDIO_QUALITAET_5="-b:a 256k"
+AUDIO_QUALITAET_6="-b:a 296k"
+AUDIO_QUALITAET_7="-b:a 336k"
+AUDIO_QUALITAET_8="-b:a 392k"
+AUDIO_QUALITAET_9="-b:a 448k"
 
 # Video
-VIDEOCODEC="libx264"
-VIDEO_OPTION="-preset slow -crf 20"
+VIDEO_OPTION="-preset slow"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 25"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 24"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 23"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 22"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 21"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 20"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 19"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 18"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 17"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 16"	# von "0" (verlustfrei) bis "51"
 IFRAME="-keyint_min 2-8"
 
 #==============================================================================#
 # Funktionen
 
-ausgabe_hilfe()
-{
-echo "
+FORMAT_BESCHREIBUNG="
 ********************************************************************************
-* Name:                 AVCHD                                                  *
-* ENDUNG:               .mts                                                   *
-* Video-Kodierung:      H.264 (MPEG-4 Part 10 / AVC / Blu Ray / MP4)           *
-* Audio-Kodierung:      AC3                                                    *
+* Name:			AVCHD                                                  *
+* ENDUNG:		.mts                                                   *
+* Video-Kodierung:	H.264 (MPEG-4 Part 10 / AVC / Blu Ray / MP4)           *
+* Audio-Kodierung:	AC3                                                    *
 * Beschreibung:                                                                *
-*       - hohe Kompatibilität mit Konsumerelektronik                           *
-*       - auch abspielbar auf Android                                          *
+*	- hohe Kompatibilität mit Konsumerelektronik                           *
+*	- auch abspielbar auf Android                                          *
 ********************************************************************************
 "
-}
