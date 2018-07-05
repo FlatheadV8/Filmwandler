@@ -1,32 +1,124 @@
 
+#==============================================================================#
+#
+# https://trac.ffmpeg.org/wiki/Encode/AAC
+#
+#==============================================================================#
+
+#------------------------------------------------------------------------------#
+### Änderungen an der Bildauflösung müssen hier als erstes vorgenommen werden
+### weil ggf. an Hand der Anzahl der Bildpunkte die Bit-Rate errechnet wird.
+
+### H.263 kann nur diese 5 Formate
+# SQCIF -  128x96   =   12288 Bildpunkte (Pixel)
+# QCIF  -  176x144  =   25344 Bildpunkte (Pixel)
+# VCD   -  352x288  =  101376 Bildpunkte (Pixel)
+# 4CIF  -  704x576  =  405504 Bildpunkte (Pixel)
+# 16CIF - 1408x1152 = 1622016 Bildpunkte (Pixel)
+
+if [ "x${SOLL_XY}" = "x" ] ; then
+	### automatische auswahl der richtigen Bildauflösung
+	SOLL_SCALE="scale=$(echo "12288 25344 101376 405504 1622016 ${IN_BREIT} ${IN_HOCH}" | awk '{bild=$6*$7 ; h263="sonstige" ; if (bild <= $5) h263="1408x1152" ; if (bild <= $4) h263="704x576" ; if (bild <= $3) h263="352x288" ; if (bild <= $2) h263="176x144" ; if (bild <= $1) h263="128x96" ; print h263}')"
+else
+	### manuelle Auswahl mit Bildauflösung
+	SOLL_SCALE="scale=${SOLL_XY}"
+fi
+
+#------------------------------------------------------------------------------#
+
+#==============================================================================#
+
+### libfdk_aac
+#
+# laut Debian ist libfdk_aac "non-free"-Licenc
+# laut FSF, Fedora, RedHat ist libfdk_aac "free"-Licenc
+#
+# http://wiki.hydrogenaud.io/index.php?title=Fraunhofer_FDK_AAC#Recommended_Sampling_Rate_and_Bitrate_Combinations
+#
+# libfdk_aac -> Note, the VBR setting is unsupported and only works with some parameter combinations.
+#
+# FDK AAC kann im Modus "VBR" keine beliebige Kombination von Tonkanäle, Bit-Rate und Saple-Rate verarbeiten!
+# Will man "VBR" verwenden, dann muss man explizit alle drei Parameter in erlaubter Größe angeben.
+#
+#--------------------------------------------------------------
+# FFmpeg-Option für "aac" (nativ/intern)
+# https://slhck.info/video/2017/02/24/vbr-settings.html
+# -q:a 0.12		# undokumentiert (0.1-?) / 0.12 ~ 128k
+#--------------------------------------------------------------
+
+#==============================================================================#
+# Betriebssystemabhängigkeiten
+
+#
+# Die internen (nativen) Codecs funktionieren immer (die sind ja fest drin),
+# die externen Bibliotheken sind oft besser,
+# müssen aber extra installiert werden.
+#
+# Weil die GPL-Lizenz, unter der Linux steht, nicht kompatiebel mit den Lizenzen
+# vieler Codec-Bibliotheken ist (z. B. solcher, die unter BSD-Lizenz stehen),
+# ist es auf den meisten Linux-Distributionen schwierig, diese Codec-Bibliotheken 
+# zu installieren.
+# Deshalb werden hier nur interne Codecs zur Verwendung vorgesehen.
+# (auch wenn sie schlechter oder sogar noch experimentell sind)
+#
+
+if [ "FreeBSD" = "$(uname -s)" ] ; then
+	AUDIOCODEC="libfdk_aac"
+	VIDEOCODEC="h263"
+else
+	AUDIOCODEC="aac"
+	VIDEOCODEC="h263"
+fi
+
+
+#==============================================================================#
+
 # Format
 ENDUNG="3gp"
-START_ZIEL_FORMAT="-f 3gp"
+FORMAT="3gp"
 
 # Audio
-AUDIOCODEC="libfdk_aac"
-AUDIO_OPTION="-vbr 5"
+AUDIO_QUALITAET_0="-vbr 1"		# 1 bis 5, 4 empfohlen
+AUDIO_QUALITAET_1="-vbr 2"		# 1 bis 5, 4 empfohlen
+AUDIO_QUALITAET_2="-vbr 3"		# 1 bis 5, 4 empfohlen
+AUDIO_QUALITAET_3="-vbr 4"		# 1 bis 5, 4 empfohlen
+AUDIO_QUALITAET_4="-vbr 4"		# 1 bis 5, 4 empfohlen
+AUDIO_QUALITAET_5="-vbr 4"		# 1 bis 5, 4 empfohlen
+AUDIO_QUALITAET_6="-vbr 5"		# 1 bis 5, 4 empfohlen
+AUDIO_QUALITAET_7="-vbr 5"		# 1 bis 5, 4 empfohlen
+AUDIO_QUALITAET_8="-vbr 5"		# 1 bis 5, 4 empfohlen
+AUDIO_QUALITAET_9="-vbr 5"		# 1 bis 5, 4 empfohlen
 
 # Video
-VIDEOCODEC="h263"
-VIDEO_OPTION="-q:v 5"
+VIDEO_QUALITAET_0="-q:v 10"		# H.263 ASP
+VIDEO_QUALITAET_1="-q:v 9"		# H.263 ASP
+VIDEO_QUALITAET_2="-q:v 8"		# H.263 ASP
+VIDEO_QUALITAET_3="-q:v 7"		# H.263 ASP
+VIDEO_QUALITAET_4="-q:v 6"		# H.263 ASP
+VIDEO_QUALITAET_5="-q:v 5"		# H.263 ASP
+VIDEO_QUALITAET_6="-q:v 4"		# H.263 ASP
+VIDEO_QUALITAET_7="-q:v 3"		# H.263 ASP
+VIDEO_QUALITAET_8="-q:v 2"		# H.263 ASP
+VIDEO_QUALITAET_9="-q:v 1"		# H.263 ASP
 IFRAME="-keyint_min 2-8"
+
+#------------------------------------------------------------------------------#
+### 3GPP kann nicht zwingend quadratische Bildpunkte haben
+unset FORMAT_ANPASSUNG
 
 #==============================================================================#
 # Funktionen
 
-ausgabe_hilfe()
-{
-echo "
+FORMAT_BESCHREIBUNG="
 ********************************************************************************
-* Name:                 3GPP                                                   *
-* ENDUNG:               .3gp                                                   *
-* Video-Kodierung:      H.263 (MPEG-4 Part 2 / ASP)                            *
-* Audio-Kodierung:      AAC                                                    *
+* Name:			3GPP                                                   *
+* ENDUNG:		.3gp                                                   *
+* Video-Kodierung:	H.263 (MPEG-4 Part 2 / ASP)                            *
+* Audio-Kodierung:	AAC                                                    *
 * Beschreibung:                                                                *
-*       - abspielbar auf vielen kleineren Konsumergeräten                      *
+*	- abspielbar auf vielen kleineren Konsumergeräten                      *
 *           * die meisten dieser Abspielgeräte können nur 15 FPS               *
-*       - H.263 kann aber leider nur diese Formate beherbergen:                *
+*	- H.263 kann aber leider nur diese Formate beherbergen:                *
 *           * 128x96                                                           *
 *           * 176x144                                                          *
 *           * 352x288                                                          *
@@ -34,4 +126,3 @@ echo "
 *           * 1408x1152                                                        *
 ********************************************************************************
 "
-}
