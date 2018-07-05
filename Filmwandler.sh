@@ -602,7 +602,7 @@ fi
 
 #------------------------------------------------------------------------------#
 
-if [ "x${SOLL_XY}" != "x" ] ; then
+if [ "x${SOLL_XY}" = "x" ] ; then
 	PIXELZAHL="$(echo "${IN_BREIT} ${IN_HOCH}" | awk '{print $1 * $2}')"
 else
 	PIXELZAHL="$(echo "${SOLL_XY}" | awk -F'x' '{print $1 * $2}')"
@@ -631,34 +631,32 @@ FORMAT_ANPASSUNG="setsar='1/1'"
 ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
 ENDUNG="$(echo "${ZIELDATEI}" | sed 's/[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.]/&"/;s/.*"//' | awk '{print tolower($0)}')"
 . ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt
-echo "${FORMAT_BESCHREIBUNG}"
-
 
 #------------------------------------------------------------------------------#
+### ab hier kann in die Log-Datei geschrieben werden
 
-VIDEOOPTION="-vf ${ZEILENSPRUNG}${CROP}${QUADR_SCALE}${PAD}${SOLL_SCALE}${FORMAT_ANPASSUNG}"
+#rm -f ${ZIELVERZ}/${ZIELNAME}.txt
+echo "# $(date +'%F %T')
+${0} ${Film2Standardformat_OPTIONEN}" | tee ${ZIELVERZ}/${ZIELNAME}.txt
 
-START_ZIEL_FORMAT="-f ${FORMAT}"
+echo "
+${FORMAT_BESCHREIBUNG}
+" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
 
 #------------------------------------------------------------------------------#
 
 echo "
-${VIDEOOPTION}
-"
+AUDIOCODEC=${AUDIOCODEC}
+AUDIO_QUALITAET_0=${AUDIO_QUALITAET_0}
+AUDIO_QUALITAET_5=${AUDIO_QUALITAET_5}
+AUDIO_QUALITAET_9=${AUDIO_QUALITAET_9}
+
+VIDEOCODEC=${VIDEOCODEC}
+VIDEO_QUALITAET_0=${VIDEO_QUALITAET_0}
+VIDEO_QUALITAET_5=${VIDEO_QUALITAET_5}
+VIDEO_QUALITAET_9=${VIDEO_QUALITAET_9}
+" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
 #exit
-
-#==============================================================================#
-
-STREAM_AUDIO="$(ffprobe "${FILMDATEI}" 2>&1 | fgrep ' Stream ' | fgrep Audio:)"
-STREAMAUDIO="$(echo "${STREAM_AUDIO}" | wc -w | awk '{print $1}')"
-
-if [ "${STREAMAUDIO}" -gt 0 ] ; then
-	AUDIO_VERARBEITUNG_01="-map 0:a:${TONSPUR} -c:a ${AUDIOCODEC}"
-	AUDIO_VERARBEITUNG_02="-c:a copy"
-else
-	AUDIO_VERARBEITUNG_01="-an"
-	AUDIO_VERARBEITUNG_02="-an"
-fi
 
 #==============================================================================#
 ### Qualität
@@ -740,18 +738,55 @@ case "${BILDQUALIT}" in
 esac
 
 
+#exit
+#==============================================================================#
+# Audio
+
+STREAM_AUDIO="$(ffprobe "${FILMDATEI}" 2>&1 | fgrep ' Stream ' | fgrep Audio:)"
+STREAMAUDIO="$(echo "${STREAM_AUDIO}" | wc -w | awk '{print $1}')"
+
+if [ "${STREAMAUDIO}" -gt 0 ] ; then
+	AUDIO_VERARBEITUNG_01="-map 0:a:${TONSPUR} -c:a ${AUDIOCODEC} ${AUDIOQUALITAET}"
+	AUDIO_VERARBEITUNG_02="-c:a copy"
+else
+	AUDIO_VERARBEITUNG_01="-an"
+	AUDIO_VERARBEITUNG_02="-an"
+fi
+
+#==============================================================================#
+# Video
+
+VIDEOOPTION="${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${QUADR_SCALE}${PAD}${SOLL_SCALE}${FORMAT_ANPASSUNG}"
+
+START_ZIEL_FORMAT="-f ${FORMAT}"
+
 #==============================================================================#
 
-#rm -f ${ZIELVERZ}/${ZIELNAME}.txt
-echo "${0} ${Film2Standardformat_OPTIONEN}" > ${ZIELVERZ}/${ZIELNAME}.txt
+echo "
+STREAM_AUDIO=${STREAM_AUDIO}
+STREAMAUDIO=${STREAMAUDIO}
+
+AUDIO_VERARBEITUNG_01=${AUDIO_VERARBEITUNG_01}
+AUDIO_VERARBEITUNG_02=${AUDIO_VERARBEITUNG_02}
+
+VIDEOOPTION=${VIDEOOPTION}
+START_ZIEL_FORMAT=${START_ZIEL_FORMAT}
+" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+#exit
 
 
+#------------------------------------------------------------------------------#
 if [ -z "${SCHNITTZEITEN}" ] ; then
+
 	echo
-	echo "${PROGRAMM} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+	echo "1: ${PROGRAMM} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
 	echo
+#>
 	${PROGRAMM} -i "${FILMDATEI}" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} 2>&1
+
 else
+
+	#----------------------------------------------------------------------#
 	ZUFALL="$(head -c 100 /dev/urandom | base64 | tr -d '\n' | tr -cd '[:alnum:]' | cut -b-12)"
 	NUMMER="0"
 	for _SCHNITT in ${SCHNITTZEITEN}
@@ -761,29 +796,34 @@ else
 		BIS="$(echo "${_SCHNITT}" | tr -d '"' | awk -F'-' '{print $2}')"
 
 		echo
-		echo "${PROGRAMM} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} -ss ${VON} -to ${BIS} -f matroska -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.mkv" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+		echo "2: ${PROGRAMM} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} -ss ${VON} -to ${BIS} -f matroska -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.mkv" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
 		echo
+#>
 		${PROGRAMM} -i "${FILMDATEI}" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} -ss ${VON} -to ${BIS} -f matroska -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.mkv 2>&1
 		echo "---------------------------------------------------------"
 	done
 
 	FILM_TEILE="$(ls -1 ${ZIELVERZ}/${ZUFALL}_*_${ZIELNAME}.mkv | tr -s '\n' '|' | sed 's/|/ + /g;s/ + $//')"
-	echo "# mkvmerge -o '${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv' '${FILM_TEILE}'"
+	echo "3: mkvmerge -o '${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv' '${FILM_TEILE}'"
+#>
 	mkvmerge -o ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv ${FILM_TEILE}
 
 	# den vertigen Film aus dem MKV-Format in das MP$-Format umwandeln
-	echo "${PROGRAMM} -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv -c:v copy ${AUDIO_VERARBEITUNG_02} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}"
+	echo "4: ${PROGRAMM} -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv -c:v copy ${AUDIO_VERARBEITUNG_02} ${U_TITEL_MKV} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}"
+#>
 	${PROGRAMM} -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv -c:v copy ${AUDIO_VERARBEITUNG_02} ${U_TITEL_MKV} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
 
 	#ls -lh ${ZIELVERZ}/${ZUFALL}_*_${ZIELNAME}.mkv ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv
 	#echo "rm -f ${ZIELVERZ}/${ZUFALL}_*_${ZIELNAME}.mkv ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv"
 	rm -f ${ZIELVERZ}/${ZUFALL}_*_${ZIELNAME}.mkv ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv
-fi
 
-#echo "
-#${PROGRAMM} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} -map 0:a:${TONSPUR} -c:a ${AUDIOCODEC} ${UNTERTITEL} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
-#"
+fi
 #------------------------------------------------------------------------------#
 
-ls -lh ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} ${ZIELVERZ}/${ZIELNAME}.txt
+echo "
+5: ${PROGRAMM} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} -map 0:a:${TONSPUR} -c:a ${AUDIOCODEC} ${UNTERTITEL} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
+"
+#------------------------------------------------------------------------------#
+
+ls -lh ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} ${ZIELVERZ}/${ZIELNAME}.txt | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
 #exit
