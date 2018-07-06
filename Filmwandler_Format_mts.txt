@@ -51,7 +51,7 @@ ENDUNG="mts"
 FORMAT="mpegts"
 
 # Audio
-AUDIOCODEC="ac3"
+AUDIOCODEC="ac3"				# a52
 AUDIO_QUALITAET_0="-b:a 128k"
 AUDIO_QUALITAET_1="-b:a 144k"
 AUDIO_QUALITAET_2="-b:a 168k"
