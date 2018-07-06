@@ -63,7 +63,7 @@ IFRAME="-keyint_min 2-8"
 
 #------------------------------------------------------------------------------#
 ### AVI kann nicht zwingend quadratische Bildpunkte haben
-unset FORMAT_ANPASSUNG
+FORMAT_ANPASSUNG="setdar=${HOEHE}/${BREITE}"
 
 #==============================================================================#
 # Funktionen
