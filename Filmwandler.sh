@@ -300,6 +300,15 @@ fi
 ### Video
 
 #------------------------------------------------------------------------------#
+### FFmpeg verwendet drei verschiedene Zeitangaben:
+# http://ffmpeg-users.933282.n4.nabble.com/What-does-the-output-of-ffmpeg-mean-tbr-tbn-tbc-etc-td941538.html
+# http://stackoverflow.com/questions/3199489/meaning-of-ffmpeg-output-tbc-tbn-tbr
+# tbn = the time base in AVStream that has come from the container
+# tbc = the time base in AVCodecContext for the codec used for a particular stream
+# tbr = tbr is guessed from the video stream and is the value users want to see when they look for the video frame rate
+#------------------------------------------------------------------------------#
+
+#------------------------------------------------------------------------------#
 ### IN-Daten (META-Daten) aus der Filmdatei lesen
 
 #------------------------------------------------------------------------------#
