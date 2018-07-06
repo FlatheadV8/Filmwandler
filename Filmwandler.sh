@@ -618,7 +618,7 @@ PIXELZAHL           =${PIXELZAHL}
 #exit
 
 #------------------------------------------------------------------------------#
-### AVI und 3GPP können nicht zwingend quadratische Bildpunkte haben
+### quadratische Bildpunkte sind der Standard
 
 FORMAT_ANPASSUNG="setsar='1/1'"
 
