@@ -32,7 +32,7 @@ TONQUALIT="5"
 
 
 #VERSION="v2017102900"
-VERSION="v2018070500"
+VERSION="v2018070700"
 
 #set -x
 PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -653,16 +653,16 @@ else
 
 	VIDEOCODEC="h264"
 	VIDEO_OPTION="-preset slow"
-	VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 25"     # von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 24"     # von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 23"     # von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 22"     # von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 21"     # von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 20"     # von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 19"     # von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 18"     # von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 17"     # von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 16"     # von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_0="${VIDEO_OPTION}  -crf 25"	# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_1="${VIDEO_OPTION}  -crf 24"	# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_2="${VIDEO_OPTION}  -crf 23"	# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_3="${VIDEO_OPTION}  -crf 22"	# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_4="${VIDEO_OPTION}  -crf 21"	# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_5="${VIDEO_OPTION}  -crf 20"	# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_6="${VIDEO_OPTION}  -crf 19"	# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_7="-preset slower   -crf 18"	# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_8="-preset slower   -crf 17"	# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_9="-preset veryslow -crf 16"	# von "0" (verlustfrei) bis "51"
 	IFRAME="-keyint_min 2-8"
 
 FORMAT_BESCHREIBUNG="
