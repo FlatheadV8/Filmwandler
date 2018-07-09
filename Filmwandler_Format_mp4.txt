@@ -1,10 +1,20 @@
 
 #==============================================================================#
 #
-# https://trac.ffmpeg.org/wiki/Encode/AAC
+# MP4 - optimiert auf Enkodiergeschwindigkeit
+#
+# -x264opts
+# tune=fastdecode
+# profile=baseline
+# preset=medium
+# no-psy
+# b-pyramid=normal
 #
 #==============================================================================#
-
+#
+# https://trac.ffmpeg.org/wiki/Encode/AAC
+#
+#------------------------------------------------------------------------------#
 ### libfdk_aac
 #
 # laut Debian ist libfdk_aac "non-free"-Licenc
@@ -19,24 +29,14 @@
 #
 
 #------------------------------------------------------------------------------#
+### Qualität
 
-# Mit CRF legt man die Bildqualität fest.
-# Die Option "-crf 16" erzeugt eine sehr gute Blu Ray - Qualität.
-# -crf 12-21 sind hinsichtlich Kodiergeschwindigkeit und Dateigröße "gut"
-# -crf 16-21 ist ein praxistauglicher Bereich für sehr gute Qualität
-#
-# Mit dem PRESET legt man die Dateigröße und die Kodiergeschwindigkeit fest.
-# -preset ultrafast
-# -preset superfast
-# -preset veryfast
-# -preset faster
-# -preset fast
-# -preset medium   (Standard)
-# -preset slow     (bester Kompromiss)
-# -preset slower   (nur unwesentlich besser als "slow" aber merklich langsamer)
-# -preset veryslow (wenig besser aber sehr viel langsamer)
-#
-# -tune film verbessert die Qualität (gibt z.Z folgende: psnr ssim grain zerolatency fastdecode)
+### https://encodingwissen.de/codecs/x264/referenz/#no-psy
+### alle psychovisuellen Algorithmen werden abgeschaltet
+### (auch interne, die keinen Schalter besitzen)
+### mit diesem Parameter wird ca. 15% schneller kodiert
+### und die kodierte Datei wird 10-36% kleiner sein
+# --no-psy
 
 #==============================================================================#
 # Betriebssystemabhängigkeiten
@@ -95,17 +95,17 @@ ENDUNG="mp4"
 FORMAT="mp4"
 
 # Video
-VIDEO_OPTION="-preset slow"
-VIDEO_QUALITAET_0="${VIDEO_OPTION}  -crf 25"	# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_1="${VIDEO_OPTION}  -crf 24"	# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_2="${VIDEO_OPTION}  -crf 23"	# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_3="${VIDEO_OPTION}  -crf 22"	# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_4="${VIDEO_OPTION}  -crf 21"	# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_5="${VIDEO_OPTION}  -crf 20"	# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_6="${VIDEO_OPTION}  -crf 19"	# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_7="-preset slower   -crf 18"    # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_8="-preset slower   -crf 17"    # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_9="-preset veryslow -crf 16"    # von "0" (verlustfrei) bis "51"
+VIDEO_OPTION="-preset medium -profile:v baseline -tune fastdecode -x264opts no-psy:ref=1:subme=6:b-pyramid=normal:threads=auto"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 29"     # von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_1="${VIDEO_OPTION} -crf 28"     # von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_2="${VIDEO_OPTION} -crf 27"     # von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_3="${VIDEO_OPTION} -crf 26"     # von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_4="${VIDEO_OPTION} -crf 25"     # von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_5="${VIDEO_OPTION} -crf 24"     # von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_6="${VIDEO_OPTION} -crf 23"     # von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_7="${VIDEO_OPTION} -crf 22"     # von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_8="${VIDEO_OPTION} -crf 21"     # von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_9="${VIDEO_OPTION} -crf 20"     # von "0" (verlustfrei) bis "51"
 IFRAME="-keyint_min 2-8"
 
 #==============================================================================#
@@ -119,7 +119,6 @@ FORMAT_BESCHREIBUNG="
 * Audio-Kodierung:	AAC       (mehrkanalfähiger Nachfolger von MP3)        *
 * Beschreibung:                                                                *
 *	- HTML5-Unterstützung                                                  *
-*	- hohe Kompatibilität mit Konsumerelektronik                           *
 *	- auch abspielbar auf Android                                          *
 ********************************************************************************
 "
