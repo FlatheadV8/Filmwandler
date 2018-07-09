@@ -661,29 +661,28 @@ else
 
 	# https://slhck.info/video/2017/02/24/vbr-settings.html
 	AUDIOCODEC="aac"
-	AUDIO_QUALITAET_0="-q:a 0.10"                   # undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_1="-q:a 0.11"                   # undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_2="-q:a 0.12"                   # undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_3="-q:a 0.13"                   # undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_4="-q:a 0.14"                   # undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_5="-q:a 0.15"                   # undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_6="-q:a 0.16"                   # undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_7="-q:a 0.17"                   # undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_8="-q:a 0.18"                   # undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_9="-q:a 0.19"                   # undokumentiert (0.1-?) / 0.12 ~ 128k
+	AUDIO_QUALITAET_0="-q:a 0.10"					# undokumentiert (0.1-?) / 0.12 ~ 128k
+	AUDIO_QUALITAET_1="-q:a 0.11"					# undokumentiert (0.1-?) / 0.12 ~ 128k
+	AUDIO_QUALITAET_2="-q:a 0.12"					# undokumentiert (0.1-?) / 0.12 ~ 128k
+	AUDIO_QUALITAET_3="-q:a 0.13"					# undokumentiert (0.1-?) / 0.12 ~ 128k
+	AUDIO_QUALITAET_4="-q:a 0.14"					# undokumentiert (0.1-?) / 0.12 ~ 128k
+	AUDIO_QUALITAET_5="-q:a 0.15"					# undokumentiert (0.1-?) / 0.12 ~ 128k
+	AUDIO_QUALITAET_6="-q:a 0.16"					# undokumentiert (0.1-?) / 0.12 ~ 128k
+	AUDIO_QUALITAET_7="-q:a 0.17"					# undokumentiert (0.1-?) / 0.12 ~ 128k
+	AUDIO_QUALITAET_8="-q:a 0.18"					# undokumentiert (0.1-?) / 0.12 ~ 128k
+	AUDIO_QUALITAET_9="-q:a 0.19"					# undokumentiert (0.1-?) / 0.12 ~ 128k
 
 	VIDEOCODEC="h264"
-	VIDEO_OPTION="-preset slow"
-	VIDEO_QUALITAET_0="${VIDEO_OPTION}  -crf 25"	# von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_1="${VIDEO_OPTION}  -crf 24"	# von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_2="${VIDEO_OPTION}  -crf 23"	# von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_3="${VIDEO_OPTION}  -crf 22"	# von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_4="${VIDEO_OPTION}  -crf 21"	# von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_5="${VIDEO_OPTION}  -crf 20"	# von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_6="${VIDEO_OPTION}  -crf 19"	# von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_7="-preset slower   -crf 18"	# von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_8="-preset slower   -crf 17"	# von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_9="-preset veryslow -crf 16"	# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_0="-preset ultrafast -crf 34"			# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_1="-preset superfast -crf 32"			# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_2="-preset veryfast  -crf 30"			# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_3="-preset faster    -crf 28"			# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_4="-preset fast      -crf 26"			# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_5="-preset medium    -crf 24"			# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_6="-preset slow      -crf 22"			# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_7="-preset slower    -crf 20"			# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_8="-preset veryslow  -crf 18"			# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_9="-preset veryslow  -tune film -crf 16"	# von "0" (verlustfrei) bis "51"
 	IFRAME="-keyint_min 2-8"
 
 FORMAT_BESCHREIBUNG="
