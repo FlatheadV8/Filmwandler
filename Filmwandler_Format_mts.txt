@@ -1,7 +1,33 @@
 
 #==============================================================================#
+#
+# MTS - optimiert auf Kompatibilität zur Blu-ray
+#
+# -x264opts
+# preset=veryslow
+# no-psy
+# bluray-compat => http://www.x264bluray.com/
+# b-pyramid=strict
+#
+#==============================================================================#
+
+# http://forum.doom9.org/showthread.php?p=730001#post730001
+# These are the properties listed in the levels tables in the standard, and how they should limit x264 settings:
+#
+# MaxMBPS >= width*height*fps. (w&h measured in macroblocks, i.e. pixels/16 round up in each dimension)
+# MaxFS >= width*height
+# sqrt(MaxFS*8) >= width
+# sqrt(MaxFS*8) >= height
+# MaxDPB >= if(pyramid) ; then MaxDPB >= (bytes in a frame) * min(16, ref + 2) ; elif(bframes) MaxDPB >= (bytes in a frame) * min(16, ref + 1) ; else MaxDPB >= (bytes in a frame) * ref ; fi
+# MaxBR >= vbv_maxrate. It isn't strictly required since we don't write the VCL HRD parameters, but this satisfies the intent.
+# MaxCPB >= vbv_bufsize. Likewise.
+# MaxVmvR >= max_mv_range. (Not exposed in the cli, I'll add it if people care.)
+# MaxMvsPer2Mb, MinLumaBiPredSize, direct_8x8_inference_flag : are not enforced by x264. The only way to ensure compliance is to disable p4x4 at level>=3.1, or at level>=3 w/ B-frames.
+# MinCR : is not enforced by x264. Won't ever be an issue unless you use lossless.
+# SliceRate : I don't know what this limits.
 
 #------------------------------------------------------------------------------#
+### Qualität
 
 # Mit CRF legt man die Bildqualität fest.
 # Die Option "-crf 16" erzeugt eine sehr gute Blu Ray - Qualität.
@@ -20,6 +46,250 @@
 # -preset veryslow (wenig besser aber sehr viel langsamer)
 #
 # -tune film verbessert die Qualität (gibt z.Z folgende: psnr ssim grain zerolatency fastdecode)
+
+### https://encodingwissen.de/codecs/x264/referenz/#no-psy
+### alle psychovisuellen Algorithmen werden abgeschaltet
+### (auch interne, die keinen Schalter besitzen)
+### mit diesem Parameter wird ca. 15% schneller kodiert
+### und die kodierte Datei wird 10-36% kleiner sein
+# --no-psy
+
+### diese Option verbessert die Qualität
+### und vergrößert die kodierte Datei um ca. 15-20%
+# -tune film
+
+#------------------------------------------------------------------------------#
+### Kompatibilität zur Blu-ray
+
+### 2010-03-27 - Neuigkeiten vom x264-Team:
+# x264 can now generate Blu-ray-compliant streams for authoring Blu-ray Discs!
+# Compliance tested using Sony BD-ROM Verifier 1.21.
+# x264 --crf 16 --preset veryslow --tune film --weightp 0 --bframes 3 \
+#         --nal-hrd vbr --vbv-maxrate 40000 --vbv-bufsize 30000 --level 4.1 \
+#         --keyint 24 --b-pyramid strict --slices 4 --aud --colorprim "bt709" \
+#         --transfer "bt709" --colormatrix "bt709" --sar 1:1 <input> -o <output>
+
+### https://encodingwissen.de/codecs/x264/referenz/#b-pyramid-modus
+# "--b-pyramid strict" hat eine etwas schlechtere Qualität als "--b-pyramid normal",
+# ist aber für Blu-Ray-kompatible B-Pyramide zwingend notwendig,
+# ansonsten aber wenig nützlich.
+
+### https://encodingwissen.de/codecs/x264/referenz/#bluray-compat
+# "--bluray-compat" erzwingt ein blu-ray-kompatibles Encoding,
+# der Schalter allein reicht aber für garantierte Kompatibilität zur Blu-ray
+# nicht aus. => http://www.x264bluray.com/
+# Mit diesem Schalter ist die Qualität etwas schlechtere.
+
+### https://encodingwissen.de/codecs/x264/referenz/#slices-anzahl
+# Legt die Anzahl an Slices fest, in jedes Bild zerlegt werden soll.
+# Slices senken die Effizienz. Für ein normales Encoding sind sie unnötig
+# und sollten deaktiviert bleiben.
+# Lediglich wer H.264-Material für eine Video-BluRay erzeugt,
+# muss mindestens vier Slices verwenden.
+
+#==============================================================================#
+
+#echo "68 IN_FPS='${IN_FPS}'"
+#exit
+
+#----------------------------------------------------------------------#
+
+# MPEG-4 Part 10 (AVC) / x264
+### funktioniert erst mit dem x264 ab Version vom 2010-04-25 (Bluray-kompatibel: --nal-hrd vbr)
+
+#==============================================================================#
+#==============================================================================#
+### Funktionen
+
+#----------------------------------------------------------------------#
+### Bluray-kompatibele Werte errechnen
+
+AVC_LEVEL()
+{
+        VERSION="v2014110200"
+    
+        # ${0} "Bildbreite in Makobloecke" "Bildhoehe in Makobloecke" "Bilder pro Sekunde"
+    
+	#----------------------------------------------------------------------#
+	# [libx264 @ 0x81361a100] frame MB size (120x68) > level limit (5120)
+	# [libx264 @ 0x81361a100] DPB size (4 frames, 32640 mbs) > level limit (2 frames, 20480 mbs)
+        #----------------------------------------------------------------------#
+    
+
+        ### frame MakroBlock size
+	#echo "${1} ${2}" | awk '{print $1,"*",$2,"=",$1*$2}';
+
+        MLEVEL="$(echo "${1} ${2}" | awk '{fmbs=$1*$2 ;\
+		LEVEL=52 ;\
+		if (fmbs < 36865) LEVEL=51 ;\
+		if (fmbs < 22081) LEVEL=50 ;\
+		if (fmbs < 8193) LEVEL=42 ;\
+		if (fmbs < 5121) LEVEL=32 ;\
+		if (fmbs < 3601) LEVEL=31 ;\
+		if (fmbs < 1621) LEVEL=30 ;\
+		if (fmbs < 793) LEVEL=21 ;\
+		if (fmbs < 397) LEVEL=20 ;\
+		if (fmbs < 100) LEVEL=10 ;\
+		print LEVEL}')"
+    
+
+        ### MakroBlock rate
+	#echo "${1} ${2} ${3}" | awk '{print $1,"*",$2,"*",$3,"=",$1*$2*$3}';
+
+        RLEVEL="$(echo "${1} ${2} ${3}" | awk '{mbr=$1*$2*$3 ;\
+		LEVEL=52 ;\
+		if (mbr < 983041) LEVEL=51 ;\
+		if (mbr < 589825) LEVEL=50 ;\
+		if (mbr < 589825) LEVEL=42 ;\
+		if (mbr < 216001) LEVEL=32 ;\
+		if (mbr < 108001) LEVEL=31 ;\
+		if (mbr < 40501) LEVEL=30 ;\
+		if (mbr < 19801) LEVEL=21 ;\
+		if (mbr < 11881) LEVEL=20 ;\
+		if (mbr < 1486) LEVEL=10 ;\
+		print LEVEL}')"
+    
+        #echo "${MLEVEL} -gt ${RLEVEL}"
+
+        AVCLEVEL=""
+        if [ "${MLEVEL}" -gt "${RLEVEL}" ] ; then
+                AVCLEVEL="${MLEVEL}"
+        else
+                AVCLEVEL="${RLEVEL}"
+        fi
+    
+        #----------------------------------------------------------------------#
+    
+        echo "${AVCLEVEL}" #| awk '{print $1 / 10}'
+}
+
+#----------------------------------------------------------------------#
+BLURAY_PARAMETER()
+{
+        VERSION="v2014010500"
+        PROFILE="high"
+
+	# LEVEL="$(AVC_LEVEL ${IN_FPS} ${QUADR_MAKROBLOECKE})"
+	# MaxFS="$(echo "${QUADR_BREITE} ${QUADR_HOCH}" | awk '{print $1 * $2}')"
+	# BLURAY_PARAMETER ${LEVEL} ${QUADR_MAKROBLOECKE} ${MaxFS}
+        FNKLEVEL="${1}"
+        MBREITE="${2}"
+        MHOEHE="${3}"
+        MaxFS="${4}"
+
+        #----------------------------------------------------------------------#
+        ### Blu-ray-kompatible Parameter ermitteln
+
+        # --bluray-compat
+
+        BHVERH="$(echo "${MBREITE} ${MHOEHE} ${MaxFS}" | awk '{verhaeltnis="gut"; if ($1 > (sqrt($3 * 8))) verhaeltnis="schlecht" ; if ($2 > (sqrt($3 * 8))) verhaeltnis="schlecht" ; print verhaeltnis}')"
+
+        if [ "${BHVERH}" != "gut" ] ; then
+                echo "# BLURAY_PARAMETER:
+                Seitenverhaeltnis wird von AVC nicht unterstuetzt!
+                ABBRUCH
+                "
+                exit 1
+        fi
+
+        BIAF420="$(echo "${QUADR_BREITE} ${QUADR_HOCH}" | awk '{print $1 * $2 * 1.5}')"
+
+        #----------------------------------------------------------------------#
+
+        #LEVEL="$(echo "${FNKLEVEL}" | sed 's/[0-9]$/.&/')"
+        LEVEL="$(echo "${FNKLEVEL}" | awk '{print $1 / 10}')"
+
+        ### fuer 1000 bit/s !!!
+        #   http://forum.doom9.org/showthread.php?t=101345
+        if [ "${FNKLEVEL}" = "10" -a "${PROFILE}" = "high" ] ; then
+                MaxBR="80"
+                MaxCPB="175"
+                MaxVmvR="-64,63.75"             # max. Vertical MV component range
+                MinCR="2"
+                CRF="25"
+        elif [ "${FNKLEVEL}" = "20" -a "${PROFILE}" = "high" ] ; then
+                MaxBR="2500"
+                MaxCPB="2500"
+                MaxVmvR="-128,127.75"           # max. Vertical MV component range
+                MinCR="2"
+                CRF="24"
+        elif [ "${FNKLEVEL}" = "21" -a "${PROFILE}" = "high" ] ; then
+                MaxBR="5000"
+                MaxCPB="5000"
+                MaxVmvR="-256,255.75"           # max. Vertical MV component range
+                MinCR="2"
+                CRF="24"
+        elif [ "${FNKLEVEL}" = "30" -a "${PROFILE}" = "high" ] ; then
+                MaxBR="12500"
+                MaxCPB="12500"
+                MaxVmvR="-256,255.75"           # max. Vertical MV component range
+                MinCR="2"
+                CRF="23"
+        elif [ "${FNKLEVEL}" = "31" -a "${PROFILE}" = "high" ] ; then
+                MaxBR="17500"
+                MaxCPB="17500"
+                MaxVmvR="-512,511.75"           # max. Vertical MV component range
+                MinCR="4"
+                CRF="23"
+        elif [ "${FNKLEVEL}" = "32" -a "${PROFILE}" = "high" ] ; then
+                MaxBR="25000"
+                MaxCPB="25000"
+                MaxVmvR="-512,511.75"           # max. Vertical MV component range
+                MinCR="4"
+                CRF="23"
+        elif [ "${FNKLEVEL}" = "42" -a "${PROFILE}" = "high" ] ; then
+                MaxBR="62500"
+                MaxCPB="62500"
+                MaxVmvR="-512,511.75"           # max. Vertical MV component range
+                MinCR="2"
+                CRF="22"
+        elif [ "${FNKLEVEL}" = "50" -a "${PROFILE}" = "high" ] ; then
+                MaxBR="168750"
+                MaxCPB="168750"
+                MaxVmvR="-512,511.75"           # max. Vertical MV component range
+                MinCR="2"
+                CRF="21"
+        elif [ "${FNKLEVEL}" = "51" -a "${PROFILE}" = "high" ] ; then
+                MaxBR="300000"
+                MaxCPB="300000"
+                MaxVmvR="-512,511.75"           # max. Vertical MV component range
+                MinCR="2"
+                CRF="20"
+        fi
+
+}
+
+#==============================================================================#
+#==============================================================================#
+
+#----------------------------------------------------------------------#
+
+# if(pyramid)
+#     MaxDPB >= (bytes in a frame) * min(16, ref + 2)
+# else if(bframes)
+#     MaxDPB >= (bytes in a frame) * min(16, ref + 1)
+# else
+#     MaxDPB >= (bytes in a frame) * ref
+
+#----------------------------------------------------------------------#
+### NTSC-, PAL- oder Blu-ray-Farbraum
+
+if [ "${IN_FPS}" = "10" -o "${IN_FPS}" = "15" -o "${IN_FPS}" = "20" -o "${IN_FPS}" = "24" ] ; then
+	# HDTV-Standard
+	FARBCOD="bt470"
+elif [ "${IN_FPS}" = "25" -o "${IN_FPS}" = "50" ] ; then
+	# DVD (PAL): 4/3 - 720x576
+	FARBCOD="bt470bg"
+else
+	# DVD (NTSC): 4/3 - 720x480
+	FARBCOD="smpte170m"
+fi
+
+KEYINT="$(echo "${IN_FPS}" | awk '{printf "%.0f\n", $1 * 2}')"	# alle 2 Sekunden ein Key-Frame
+QUADR_MAKROBLOECKE="$(echo "${QUADR_BREITE} ${QUADR_HOCH}" | awk '{printf "%f %.0f %f %.0f\n",$1/16,$1/16,$2/16,$2/16}' | awk '{if ($1 > $2) $2 = $2+1 ; if ($3 > $4) $4 = $4+1 ; print $2,$4}')"
+LEVEL="$(AVC_LEVEL ${QUADR_MAKROBLOECKE} ${IN_FPS})"
+MaxFS="$(echo "${QUADR_BREITE} ${QUADR_HOCH}" | awk '{print $1 * $2}')"
+BLURAY_PARAMETER ${LEVEL} ${QUADR_MAKROBLOECKE} ${MaxFS}
 
 #==============================================================================#
 # Betriebssystemabhängigkeiten
@@ -43,14 +313,13 @@ else
 	VIDEOCODEC="h264"
 fi
 
-
 #==============================================================================#
 
-# Format
+### Format
 ENDUNG="mts"
 FORMAT="mpegts"
 
-# Audio
+### Audio
 AUDIOCODEC="ac3"				# a52
 AUDIO_QUALITAET_0="-b:a 128k"
 AUDIO_QUALITAET_1="-b:a 144k"
@@ -63,22 +332,37 @@ AUDIO_QUALITAET_7="-b:a 336k"
 AUDIO_QUALITAET_8="-b:a 392k"
 AUDIO_QUALITAET_9="-b:a 448k"
 
-# Video
-VIDEO_OPTION="-preset slow"
-VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 25"	# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_1="${VIDEO_OPTION} -crf 24"	# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_2="${VIDEO_OPTION} -crf 23"	# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_3="${VIDEO_OPTION} -crf 22"	# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_4="${VIDEO_OPTION} -crf 21"	# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_5="${VIDEO_OPTION} -crf 20"	# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_6="${VIDEO_OPTION} -crf 19"	# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_7="${VIDEO_OPTION} -crf 18"	# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_8="${VIDEO_OPTION} -crf 17"	# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_9="${VIDEO_OPTION} -crf 16"	# von "0" (verlustfrei) bis "51"
+### Video
+VIDEO_OPTION="-preset veryslow -profile:v ${PROFILE} -tune film -x264opts ref=4:subme=9:b-pyramid=strict:bluray-compat=1:weightp=0:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=4:threads=1:bframes=16:b-adapt=2:direct=auto:no-fast-pskip:me=tesa:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:aud"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 23"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_1="${VIDEO_OPTION} -crf 22"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_2="${VIDEO_OPTION} -crf 21"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_3="${VIDEO_OPTION} -crf 20"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_4="${VIDEO_OPTION} -crf 19"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_5="${VIDEO_OPTION} -crf 18"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_6="${VIDEO_OPTION} -crf 17"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_7="${VIDEO_OPTION} -crf 16"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_8="${VIDEO_OPTION} -crf 15"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_9="${VIDEO_OPTION} -crf 14"	# von "0" (verlustfrei) bis "51"
 IFRAME="-keyint_min 2-8"
 
+echo "
+MLEVEL='${MLEVEL}'
+RLEVEL='${RLEVEL}'
+FNKLEVEL='${FNKLEVEL}'
+LEVEL='${LEVEL}'
+
+profile=${PROFILE}
+rate=${MaxBR}
+vbv-bufsize=${MaxCPB}
+level=${LEVEL}
+colormatrix='${FARBCOD}'
+
+IN_FPS='${IN_FPS}'
+VIDEO_OPTION='${VIDEO_OPTION}'
+"
+
 #==============================================================================#
-# Funktionen
 
 FORMAT_BESCHREIBUNG="
 ********************************************************************************
