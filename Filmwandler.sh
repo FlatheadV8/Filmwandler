@@ -49,6 +49,7 @@ IFRAME="-keyint_min 2-8"
 LANG=C					# damit AWK richtig rechnet
 Film2Standardformat_OPTIONEN="${@}"
 ORIGINAL_PIXEL="Nein"
+STOP="Nein"
 
 #==============================================================================#
 ### Funktionen
@@ -232,14 +233,21 @@ while [ "${#}" -ne "0" ]; do
                 *)
                         if [ "$(echo "${1}"|egrep '^-')" ] ; then
                                 echo "Der Parameter '${1}' wird nicht unterstützt!"
+				export STOP="Ja"
                         fi
                         shift
                         ;;
         esac
 done
 
+
 #==============================================================================#
 ### Trivialitäts-Check
+
+if [ "${STOP}" = "Ja" ] ; then
+        echo "Bitte korrigieren sie die falschen Parameter. Abbruch!"
+        exit 13
+fi
 
 #------------------------------------------------------------------------------#
 
