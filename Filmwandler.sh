@@ -345,12 +345,18 @@ if [ "${SCAN_TYPE}" != "Progressive" ] ; then
         ZEILENSPRUNG="yadif,"
 fi
 
+echo "MEDIAINFO='${MEDIAINFO}'"
+#exit
+
 # MEDIAINFO=' 720x576 SAR 64:45 DAR 16:9 25 fps '
 # MEDIAINFO=" 852x480 SAR 1:1 DAR 71:40 25 fps "
+# MEDIAINFO=' 1920x800 SAR 1:1 DAR 12:5 23.98 fps '
 IN_XY="$(echo "${MEDIAINFO}" | fgrep ' DAR ' | awk '{print $1}')"
+IN_BREITE="$(echo "${IN_XY}" | awk -F'x' '{print $1}')"
+IN_HOCH="$(echo   "${IN_XY}" | awk -F'x' '{print $2}')"
 IN_PAR="$(echo "${MEDIAINFO}" | fgrep ' DAR ' | awk '{print $3}')"
 IN_DAR="$(echo "${MEDIAINFO}" | fgrep ' DAR ' | awk '{print $5}')"
-#IN_FPS="$(echo "${MEDIAINFO}" | fgrep ' DAR ' | awk '{print $6}')"
+IN_FPS="$(echo "${MEDIAINFO}" | fgrep ' DAR ' | awk '{print $6}')"	# wird benötigt um den Farbraum für BluRay zu ermitteln
 
 
 #==============================================================================#
@@ -536,6 +542,7 @@ if [ -z "${DAR_FAKTOR}" ] ; then
 fi
 
 
+### wenn die Pixel bereits quadratisch sind
 if [ "${PAR_FAKTOR}" -ne "100000" ] ; then
 
 	### Umrechnung in quadratische Pixel - Version 1
@@ -557,6 +564,9 @@ if [ "${PAR_FAKTOR}" -ne "100000" ] ; then
 
 	QUADR_BREITE="$(echo "${QUADR_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $1}')"
 	QUADR_HOCH="$(echo "${QUADR_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $2}')"
+else
+	QUADR_BREITE="${IN_BREITE}"
+	QUADR_HOCH="${IN_HOCH}"
 fi
 
 
@@ -641,6 +651,8 @@ ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk
 ENDUNG="$(echo "${ZIELDATEI}" | sed 's/[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.]/&"/;s/.*"//' | awk '{print tolower($0)}')"
 
 if [ -r ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt ] ; then
+#echo "IN_FPS='${IN_FPS}'"
+#exit
 . ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt
 else
 	# wenn die gewünschte Formatdatei nicht gelesen werden kann, dann wird ein MP4 gebaut
