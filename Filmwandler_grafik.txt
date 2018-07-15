@@ -1,4 +1,4 @@
-VERSION="v2018070400"
+VERSION="v2018071500"
 
 bildaufloesungen_namen()
 {
@@ -37,6 +37,7 @@ echo "
         -soll_xmaly 4CIF                # 704x576 - es ist ein h263-Format
         -soll_xmaly WVGA4               # 848x480
         -soll_xmaly WVGA5               # 852x480
+        -soll_xmaly FWVGA               # 854x480 - Full Wide VGA - Nintendo Wii U GamePad, LG K3 (LGE K100, LS450)
         -soll_xmaly WVGA7               # 864x480
         -soll_xmaly PAL                 # 720x576
         -soll_xmaly WVGA6               # 858x484
