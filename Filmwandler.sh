@@ -32,11 +32,12 @@ TONQUALIT="5"
 
 
 #VERSION="v2017102900"
-VERSION="v2018070700"
+VERSION="v2018071500"
 
 #set -x
 PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
+STARTZEITPUNKT="$(date +'%s')"
 
 #
 # https://sites.google.com/site/linuxencoding/x264-ffmpeg-mapping
@@ -658,6 +659,19 @@ FORMAT_ANPASSUNG="setsar='1/1'"
 ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
 ENDUNG="$(echo "${ZIELDATEI}" | sed 's/[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.]/&"/;s/.*"//' | awk '{print tolower($0)}')"
 
+#------------------------------------------------------------------------------#
+### ab hier kann in die Log-Datei geschrieben werden
+
+#rm -f ${ZIELVERZ}/${ZIELNAME}.txt
+echo "# $(date +'%F %T')
+${0} ${Film2Standardformat_OPTIONEN}" | tee ${ZIELVERZ}/${ZIELNAME}.txt
+
+echo "
+${FORMAT_BESCHREIBUNG}
+" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+
+#------------------------------------------------------------------------------#
+
 if [ -r ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt ] ; then
 #echo "IN_FPS='${IN_FPS}'"
 #exit
@@ -697,7 +711,7 @@ FORMAT_BESCHREIBUNG="
 ********************************************************************************
 * Name:			MP4                                                    *
 * ENDUNG:		.mp4                                                   *
-* Video-Kodierung:	H.264 (MPEG-4 Part 10 / AVC / Blu Ray / AVCHD)         *
+* Video-Kodierung:	H.264 (MPEG-4 Part 10 / AVC)                           *
 * Audio-Kodierung:	AAC       (mehrkanalfähiger Nachfolger von MP3)        *
 * Beschreibung:                                                                *
 *	- HTML5-Unterstützung                                                  *
@@ -706,32 +720,6 @@ FORMAT_BESCHREIBUNG="
 ********************************************************************************
 "
 fi
-
-#------------------------------------------------------------------------------#
-### ab hier kann in die Log-Datei geschrieben werden
-
-#rm -f ${ZIELVERZ}/${ZIELNAME}.txt
-echo "# $(date +'%F %T')
-${0} ${Film2Standardformat_OPTIONEN}" | tee ${ZIELVERZ}/${ZIELNAME}.txt
-
-echo "
-${FORMAT_BESCHREIBUNG}
-" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
-
-#------------------------------------------------------------------------------#
-
-echo "
-AUDIOCODEC=${AUDIOCODEC}
-AUDIO_QUALITAET_0=${AUDIO_QUALITAET_0}
-AUDIO_QUALITAET_5=${AUDIO_QUALITAET_5}
-AUDIO_QUALITAET_9=${AUDIO_QUALITAET_9}
-
-VIDEOCODEC=${VIDEOCODEC}
-VIDEO_QUALITAET_0=${VIDEO_QUALITAET_0}
-VIDEO_QUALITAET_5=${VIDEO_QUALITAET_5}
-VIDEO_QUALITAET_9=${VIDEO_QUALITAET_9}
-" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
-#exit
 
 #==============================================================================#
 ### Qualität
@@ -813,7 +801,17 @@ case "${BILDQUALIT}" in
 esac
 
 
+#------------------------------------------------------------------------------#
+
+echo "
+AUDIOCODEC=${AUDIOCODEC}
+AUDIOQUALITAET=${AUDIOQUALITAET}
+
+VIDEOCODEC=${VIDEOCODEC}
+VIDEOQUALITAET=${VIDEOQUALITAET}
+" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
 #exit
+
 #==============================================================================#
 # Audio
 
@@ -901,4 +899,6 @@ echo "
 #------------------------------------------------------------------------------#
 
 ls -lh ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} ${ZIELVERZ}/${ZIELNAME}.txt | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+LAUFZEIT="$(echo "${STARTZEITPUNKT} $(date +'%s')" | awk '{print $2 - $1}')"
+echo "# $(date +'%F %T') (${LAUFZEIT})" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
 #exit
