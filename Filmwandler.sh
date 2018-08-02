@@ -254,7 +254,7 @@ fi
 
 if [ ! -r "${FILMDATEI}" ] ; then
         echo "Der Film '${FILMDATEI}' konnte nicht gefunden werden. Abbruch!"
-        exit 13
+        exit 14
 fi
 
 if [ -z "${TONSPUR}" ] ; then
@@ -287,7 +287,7 @@ fi
 
 if [ -z "${PROGRAMM}" ] ; then
 	echo "Weder avconv noch ffmpeg konnten gefunden werden. Abbruch!"
-	exit 14
+	exit 15
 fi
 
 #==============================================================================#
@@ -300,7 +300,7 @@ if [ -n "${UNTERTITEL}" ] ; then
 	if [ "${U_TITEL}" = "Fehler" ] ; then
 		echo "Für die Untertitelspur muss eine Zahl angegeben werden. Abbruch!"
 		echo "z.B.: ${0} -q Film.avi -u 0 -z Film.mp4"
-		exit 15
+		exit 16
 	fi
 fi
 
@@ -355,7 +355,7 @@ if [ "${SCAN_TYPE}" != "Progressive" ] ; then
 fi
 
 echo "MEDIAINFO='${MEDIAINFO}'"
-#exit
+#exit 17
 
 # MEDIAINFO=' 720x576 SAR 64:45 DAR 16:9 25 fps '
 # MEDIAINFO=" 852x480 SAR 1:1 DAR 71:40 25 fps "
@@ -643,7 +643,7 @@ Originalauflösung   =${IN_BREIT}x${IN_HOCH}
 erwünschte Auflösung=${SOLL_XY}
 PIXELZAHL           =${PIXELZAHL}
 "
-#exit
+#exit 23
 
 #------------------------------------------------------------------------------#
 ### quadratische Bildpunkte sind der Standard
@@ -657,7 +657,7 @@ FORMAT_ANPASSUNG="setsar='1/1'"
 #
 
 ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
-ENDUNG="$(echo "${ZIELDATEI}" | sed 's/[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.]/&"/;s/.*"//' | awk '{print tolower($0)}')"
+ENDUNG="$(echo "${ZIELDATEI}" | rev | sed 's/[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.]/&"/;s/[.]".*//' | rev | awk '{print tolower($0)}')"
 
 #------------------------------------------------------------------------------#
 ### ab hier kann in die Log-Datei geschrieben werden
@@ -675,7 +675,7 @@ ${FORMAT_BESCHREIBUNG}
 if [ -r ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt ] ; then
 	OP_QUELLE="1"
 #echo "IN_FPS='${IN_FPS}'"
-#exit
+#exit 24
 . ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt
 else
 	OP_QUELLE="2"
@@ -727,7 +727,7 @@ fi
 echo "
 OP_QUELLE='${OP_QUELLE}'
 " | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
-#exit
+#exit 25
 
 #==============================================================================#
 ### Qualität
@@ -818,7 +818,7 @@ AUDIOQUALITAET=${AUDIOQUALITAET}
 VIDEOCODEC=${VIDEOCODEC}
 VIDEOQUALITAET=${VIDEOQUALITAET}
 " | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
-#exit
+#exit 26
 
 #==============================================================================#
 # Audio
@@ -853,7 +853,7 @@ AUDIO_VERARBEITUNG_02=${AUDIO_VERARBEITUNG_02}
 VIDEOOPTION=${VIDEOOPTION}
 START_ZIEL_FORMAT=${START_ZIEL_FORMAT}
 " | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
-#exit
+#exit 27
 
 
 #------------------------------------------------------------------------------#
@@ -909,4 +909,4 @@ echo "
 ls -lh ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} ${ZIELVERZ}/${ZIELNAME}.txt | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
 LAUFZEIT="$(echo "${STARTZEITPUNKT} $(date +'%s')" | awk '{print $2 - $1}')"
 echo "# $(date +'%F %T') (${LAUFZEIT})" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
-#exit
+#exit 28
