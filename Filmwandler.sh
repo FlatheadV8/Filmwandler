@@ -32,7 +32,7 @@ TONQUALIT="5"
 
 
 #VERSION="v2017102900"
-VERSION="v2018071500"
+VERSION="v2018072300"
 
 #set -x
 PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -673,10 +673,13 @@ ${FORMAT_BESCHREIBUNG}
 #------------------------------------------------------------------------------#
 
 if [ -r ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt ] ; then
+	OP_QUELLE="1"
 #echo "IN_FPS='${IN_FPS}'"
 #exit
 . ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt
 else
+	OP_QUELLE="2"
+
 	# wenn die gewünschte Formatdatei nicht gelesen werden kann, dann wird ein MP4 gebaut
 	ENDUNG="mp4"
 	FORMAT="mp4"
@@ -720,6 +723,11 @@ FORMAT_BESCHREIBUNG="
 ********************************************************************************
 "
 fi
+
+echo "
+OP_QUELLE='${OP_QUELLE}'
+" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+#exit
 
 #==============================================================================#
 ### Qualität
