@@ -32,7 +32,7 @@ TONQUALIT="5"
 
 
 #VERSION="v2017102900"
-VERSION="v2018072300"
+VERSION="v2018080300"
 
 #set -x
 PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
