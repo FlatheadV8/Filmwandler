@@ -5,6 +5,8 @@
 #
 #==============================================================================#
 
+VERSION="v2018080400"
+
 #------------------------------------------------------------------------------#
 # H.265
 
@@ -85,23 +87,27 @@ else
 fi
 
 #==============================================================================#
+# Video
 
 # Format
 ENDUNG="mkv"
 FORMAT="matroska"
 
-# Video
-VIDEO_OPTION=""
-VIDEO_QUALITAET_0="-preset fast     ${VIDEO_OPTION}:subme=2:no-psy -crf 32"                     # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_1="-preset medium   ${VIDEO_OPTION}:subme=3:no-psy -crf 30"                     # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_2="-preset medium   ${VIDEO_OPTION}:subme=4 -crf 28"                            # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_3="-preset slow     ${VIDEO_OPTION}:subme=5 -crf 26"                            # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_4="-preset slow     ${VIDEO_OPTION}:subme=6 -crf 24"                            # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_5="-preset slow     ${VIDEO_OPTION}:subme=7 -crf 22"                            # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_6="-preset veryslow ${VIDEO_OPTION}:subme=8:threads=1 -crf 21"                  # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_7="-preset veryslow ${VIDEO_OPTION}:subme=9:threads=1 -crf 19 -tune film"       # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_8="-preset veryslow ${VIDEO_OPTION}:subme=10:threads=1 -crf 17 -tune film"      # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_9="-preset veryslow ${VIDEO_OPTION}:subme=11:threads=1 -crf 15 -tune film"      # von "0" (verlustfrei) bis "51"
+# 2018-07-06: [libx265 @ 0x813618d00] Possible presets: ultrafast superfast veryfast faster fast medium slow slower veryslow placebo
+# 2018-07-06: [libx265 @ 0x813618d00] Possible tunes: psnr ssim grain zerolatency fastdecode
+# 2018-07-06: [libx265 @ 0x813618d00] Possible profiles: main main10 mainstillpicture msp main-intra main10-intra main444-8 main444-intra main444-stillpicture main422-10 main422-10-intra main444-10 main444-10-intra main12 main12-intra main422-12 main422-12-intra main444-12 main444-12-intra main444-16-intra main444-16-stillpicture
+PROFILE="main10"
+VIDEO_OPTION="-profile:v ${PROFILE}"
+VIDEO_QUALITAET_0="-preset faster   ${VIDEO_OPTION} -crf 32 -tune zerolatency"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_1="-preset fast     ${VIDEO_OPTION} -crf 30 -tune fastdecode"	# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_2="-preset medium   ${VIDEO_OPTION} -crf 28"			# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_3="-preset medium   ${VIDEO_OPTION} -crf 26"			# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_4="-preset slow     ${VIDEO_OPTION} -crf 24"			# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_5="-preset slow     ${VIDEO_OPTION} -crf 22"			# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_6="-preset slower   ${VIDEO_OPTION} -crf 20"			# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_7="-preset slower   ${VIDEO_OPTION} -crf 18"			# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_8="-preset veryslow ${VIDEO_OPTION} -crf 16"			# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_9="-preset veryslow ${VIDEO_OPTION} -crf 14"			# von "0" (verlustfrei) bis "51"
 IFRAME="-keyint_min 2-8"
 
 #==============================================================================#
