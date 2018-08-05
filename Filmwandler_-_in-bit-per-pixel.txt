@@ -64,7 +64,7 @@ echo "IN_BIT_RATE='${IN_BIT_RATE}'" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
 
 if [ "${BILDQUALIT}" = "auto" ] ; then
 	if [ "x${IN_BIT_RATE}" != "x" ] ; then
-		IN_BIT_je_BP="$(echo "${IN_BIT_RATE} ${IN_BREITE} ${IN_HOCH}" | awk '{printf "%.0f\n", $1 * 10000 / $2 / $3}')"
+		IN_BIT_je_BP="$(echo "${IN_BIT_RATE} ${IN_BREIT} ${IN_HOCH}" | awk '{printf "%.0f\n", $1 * 10000 / $2 / $3}')"
 		echo "IN_BIT_je_BP='${IN_BIT_je_BP}'" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
 
 		if   [ "${IN_BIT_je_BP}" -gt "26" ] ; then
