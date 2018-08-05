@@ -5,8 +5,9 @@
 #
 #==============================================================================#
 
-# MPEG-4 Part 10 (AVC) / x264
-### funktioniert erst mit dem x264 ab Version vom 2010-04-25 (Bluray-kompatibel: --nal-hrd vbr)
+VERSION="v2018080500"
+
+. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
 #==============================================================================#
 ### Video
@@ -15,6 +16,9 @@
 ### Bluray-kompatibele Werte errechnen
 
 . ${AVERZ}/Filmwandler_-_Blu-ray-Disc_-_AVC.txt
+
+# MPEG-4 Part 10 (AVC) / x264
+# Kompatibilität mit Blu-ray Disk funktioniert erst mit dem x264 ab Version vom 2010-04-25 (Bluray-kompatibel: --nal-hrd vbr)
 
 #------------------------------------------------------------------------------#
 # Betriebssystemabhängigkeiten
