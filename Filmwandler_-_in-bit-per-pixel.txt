@@ -1,0 +1,95 @@
+
+#==============================================================================#
+#
+# automatische Parameterermittlung für gleiche Qualität
+#
+# das geht z.Z. nur mit AVC (MP4 und MTS)
+#
+#==============================================================================#
+
+VERSION="v2018080500"
+
+#------------------------------------------------------------------------------#
+
+# bei -c:v libx264 -profile:v high / FullHD - 1920×1080 = 2073600 Bildpunkte
+# crf 15 ~ 8350 kb/s
+# crf 16 ~ 7250 kb/s
+# crf 17 ~ 6290 kb/s
+# crf 18 ~ 5460 kb/s
+# crf 19 ~ 4740 kb/s
+# crf 20 ~ 4130 kb/s
+# crf 21 ~ 3590 kb/s
+# crf 22 ~ 3130 kb/s
+# crf 23 ~ 2720 kb/s
+# crf 24 ~ 2370 kb/s
+# crf 25 ~ 2070 kb/s
+# crf 26 ~ 1810 kb/s
+# crf 27 ~ 1590 kb/s
+# crf 28 ~ 1400 kb/s
+# crf 29 ~ 1240 kb/s
+# crf 30 ~ 1100 kb/s
+# crf 31 ~ 980 kb/s
+# crf 32 ~ 870 kb/s
+# crf 33 ~ 780 kb/s
+# crf 34 ~ 700 kb/s
+# crf 35 ~ 630 kb/s
+
+# CRF Bit/10Pixel BILDQUALIT
+#  15 40
+#  16 35          9
+#  17 30
+#  18 26          8
+#  19 23
+#  20 20          7
+#  21 17
+#  22 15          6
+#  23 13
+#  24 11          5
+#  25 10
+#  26 9           4
+#  27 8
+#  28 7           3
+#  29 6
+#  30 5           2
+#  31 5
+#  32 4           1
+#  33 4
+#  34 3           0
+#  35 3
+
+#------------------------------------------------------------------------------#
+
+echo "1 BILDQUALIT='${BILDQUALIT}'" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+echo "IN_BIT_RATE='${IN_BIT_RATE}'" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+
+if [ "${BILDQUALIT}" = "auto" ] ; then
+	if [ "x${IN_BIT_RATE}" != "x" ] ; then
+		IN_BIT_je_BP="$(echo "${IN_BIT_RATE} ${IN_BREITE} ${IN_HOCH}" | awk '{printf "%.0f\n", $1 * 10000 / $2 / $3}')"
+		echo "IN_BIT_je_BP='${IN_BIT_je_BP}'" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+
+		if   [ "${IN_BIT_je_BP}" -gt "26" ] ; then
+			BILDQUALIT="9"
+		elif [ "${IN_BIT_je_BP}" -gt "20" ] ; then
+			BILDQUALIT="8"
+		elif [ "${IN_BIT_je_BP}" -gt "15" ] ; then
+			BILDQUALIT="7"
+		elif [ "${IN_BIT_je_BP}" -gt "11" ] ; then
+			BILDQUALIT="6"
+		elif [ "${IN_BIT_je_BP}" -gt "9" ] ; then
+			BILDQUALIT="5"
+		elif [ "${IN_BIT_je_BP}" -gt "7" ] ; then
+			BILDQUALIT="4"
+		elif [ "${IN_BIT_je_BP}" -gt "5" ] ; then
+			BILDQUALIT="3"
+		elif [ "${IN_BIT_je_BP}" -gt "4" ] ; then
+			BILDQUALIT="2"
+		elif [ "${IN_BIT_je_BP}" -gt "3" ] ; then
+			BILDQUALIT="1"
+		else
+			BILDQUALIT="0"
+		fi
+	fi
+	echo "2 BILDQUALIT='${BILDQUALIT}'" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+fi
+
+#------------------------------------------------------------------------------#
