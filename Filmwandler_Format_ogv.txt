@@ -1,5 +1,13 @@
 
 #==============================================================================#
+#
+# OGG -> eine freie und von Softwarepatenten unbeschränkte Alternative zu proprietären Formaten, kann ohne zusätzliche Anpassungen gestreamt werden
+#
+#==============================================================================#
+
+VERSION="v2018080500"
+
+#==============================================================================#
 # Betriebssystemabhängigkeiten
 
 #
