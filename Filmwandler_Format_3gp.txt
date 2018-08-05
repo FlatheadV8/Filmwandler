@@ -1,10 +1,18 @@
 
 #==============================================================================#
 #
-# https://trac.ffmpeg.org/wiki/Encode/AAC
+# 3GPP -> weltweite Kooperation von Standardisierungsgremien für die Standardisierung im Mobilfunk (GSM, UMTS)
 #
 #==============================================================================#
 
+VERSION="v2018080500"
+
+#. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
+
+#------------------------------------------------------------------------------#
+#
+# https://trac.ffmpeg.org/wiki/Encode/AAC
+#
 #------------------------------------------------------------------------------#
 ### Änderungen an der Bildauflösung müssen hier als erstes vorgenommen werden
 ### weil ggf. an Hand der Anzahl der Bildpunkte die Bit-Rate errechnet wird.
