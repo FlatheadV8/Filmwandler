@@ -27,12 +27,12 @@
 #------------------------------------------------------------------------------#
 
 
-BILDQUALIT="5"
-TONQUALIT="5"
+BILDQUALIT="auto"
+TONQUALIT="auto"
 
 
 #VERSION="v2017102900"
-VERSION="v2018080400"
+VERSION="v2018080500"
 
 #set -x
 PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -339,35 +339,64 @@ fi
 #echo "--------------------------------------------------------------------------------"
 #probe "${FILMDATEI}" 2>&1 | fgrep Video:
 #echo "--------------------------------------------------------------------------------"
-MEDIAINFO="$(ffprobe "${FILMDATEI}" 2>&1 | fgrep Video: | sed 's/.* Video:/Video:/' | tr -s '[\[,\]]' '\n' | egrep '[0-9]x[0-9]|SAR |DAR | fps' | grep -Fv 'Stream #' | grep -Fv 'Video:' | tr -s '\n' ' ')"
+FFPROBE="$(ffprobe "${FILMDATEI}" 2>&1 | fgrep Video: | sed 's/.* Video:/Video:/' | tr -s '[\[,\]]' '\n' | egrep '[0-9]x[0-9]|SAR |DAR | fps' | grep -Fv 'Stream #' | grep -Fv 'Video:' | tr -s '\n' ' ')"
 # tbn (FPS vom Container)= the time base in AVStream that has come from the container
 # tbc (FPS vom Codec) = the time base in AVCodecContext for the codec used for a particular stream
 # tbr (FPS vom Video-Stream geraten) = tbr is guessed from the video stream and is the value users want to see when they look for the video frame rate
-
+echo "FFPROBE='${FFPROBE}'"
 
 ### hier wird ermittelt, ob der film progressiv oder im Zeilensprungverfahren vorliegt
 #
 # leider kann das z.Z. nur mit "mediainfo" einfach und zuverlässig ermittelt werden
 # mit "ffprobe" ist es etwas komplizierter...
 #
-SCAN_TYPE="$(mediainfo --BOM -f "${FILMDATEI}" 2>/dev/null | grep -Fv pixels | awk -F':' '/Scan type[ ]+/{print $2}' | tr -s ' ' '\n' | egrep -v '^$' | head -n1)"
+MEDIAINFO="$(mediainfo --BOM -f "${FILMDATEI}" 2>/dev/null)"
+#echo "MEDIAINFO='${MEDIAINFO}'"
+
+SCAN_TYPE="$(echo "${MEDIAINFO}" | grep -Fv pixels | awk -F':' '/Scan type[ ]+/{print $2}' | tr -s ' ' '\n' | egrep -v '^$' | head -n1)"
+echo "SCAN_TYPE='${SCAN_TYPE}'"
 if [ "${SCAN_TYPE}" != "Progressive" ] ; then
         ### wenn der Film im Zeilensprungverfahren vorliegt
         ZEILENSPRUNG="yadif,"
 fi
 
-echo "MEDIAINFO='${MEDIAINFO}'"
 #exit 17
 
-# MEDIAINFO=' 720x576 SAR 64:45 DAR 16:9 25 fps '
-# MEDIAINFO=" 852x480 SAR 1:1 DAR 71:40 25 fps "
-# MEDIAINFO=' 1920x800 SAR 1:1 DAR 12:5 23.98 fps '
-IN_XY="$(echo "${MEDIAINFO}" | fgrep ' DAR ' | awk '{print $1}')"
-IN_BREITE="$(echo "${IN_XY}" | awk -F'x' '{print $1}')"
-IN_HOCH="$(echo   "${IN_XY}" | awk -F'x' '{print $2}')"
-IN_PAR="$(echo "${MEDIAINFO}" | fgrep ' DAR ' | awk '{print $3}')"
-IN_DAR="$(echo "${MEDIAINFO}" | fgrep ' DAR ' | awk '{print $5}')"
-IN_FPS="$(echo "${MEDIAINFO}" | fgrep ' DAR ' | awk '{print $6}')"	# wird benötigt um den Farbraum für BluRay zu ermitteln
+# FFPROBE=' 720x576 SAR 64:45 DAR 16:9 25 fps '
+# FFPROBE=" 852x480 SAR 1:1 DAR 71:40 25 fps "
+# FFPROBE=' 1920x800 SAR 1:1 DAR 12:5 23.98 fps '
+IN_XY="$(echo "${FFPROBE}" | fgrep ' DAR ' | awk '{print $1}')"
+IN_BREIT="$(echo "${IN_XY}" | awk -F'x' '{print $1}')"
+IN_HOCH="$(echo  "${IN_XY}" | awk -F'x' '{print $2}')"
+IN_PAR="$(echo "${FFPROBE}" | fgrep ' DAR ' | awk '{print $3}')"
+IN_DAR="$(echo "${FFPROBE}" | fgrep ' DAR ' | awk '{print $5}')"
+IN_FPS="$(echo "${FFPROBE}" | fgrep ' DAR ' | awk '{print $6}')"	# wird benötigt um den Farbraum für BluRay zu ermitteln
+IN_BITRATE="$(echo "${MEDIAINFO}" | sed -ne '/^Video$/,/^$/ p' | egrep '^Bit rate' | awk -F':' '{print $2}' | sed 's/[ ]*//g;s/[a-zA-Z/][a-zA-Z/]*$/ &/' | tail -n1)"
+IN_BIT_RATE="$(echo "${IN_BITRATE}" | awk '{print $1}')"
+IN_BIT_EINH="$(echo "${IN_BITRATE}" | awk '{print $2}')"
+
+M_INFOS="
+IN_XY='${IN_XY}'
+IN_BREIT='${IN_BREIT}'
+IN_HOCH='${IN_HOCH}'
+IN_PAR='${IN_PAR}'
+IN_DAR='${IN_DAR}'
+IN_FPS='${IN_FPS}'
+IN_BITRATE='${IN_BITRATE}'
+IN_BIT_RATE='${IN_BIT_RATE}'
+IN_BIT_EINH='${IN_BIT_EINH}'
+BILDQUALIT='${BILDQUALIT}'
+TONQUALIT='${TONQUALIT}'
+"
+echo "${M_INFOS}"
+
+unset IN_BITRATE
+if [ "${IN_BIT_EINH}" != "kb/s" ] ; then
+	unset IN_BIT_RATE
+	BILDQUALIT="5"
+	TONQUALIT="5"
+fi
+unset IN_BIT_EINH
 
 
 #==============================================================================#
@@ -411,9 +440,6 @@ if [ -z "${IN_XY}" ] ; then
 	echo "ABBRUCH!"
 	exit 19
 fi
-
-IN_BREIT="$(echo "${IN_XY}" | awk -F'x' '{print $1}')"
-IN_HOCH="$(echo "${IN_XY}" | awk -F'x' '{print $2}')"
 
 
 #------------------------------------------------------------------------------#
@@ -573,10 +599,10 @@ if [ "${PAR_FAKTOR}" -ne "100000" ] ; then
 	TEIL_HOEHE="$(echo "${IN_BREIT} ${IN_HOCH} ${DAR_KOMMA} ${TEILER}" | awk '{h=sqrt($1*$2/$3); printf "%.0f\n", h/$4}')"
 	QUADR_SCALE="scale=$(echo "${TEIL_HOEHE} ${DAR_KOMMA}" | awk '{printf "%.0f %.0f\n", $1*$2, $1}' | awk -v teiler="${TEILER}" '{print $1*teiler"x"$2*teiler}'),"
 
-	QUADR_BREITE="$(echo "${QUADR_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $1}')"
+	QUADR_BREIT="$(echo "${QUADR_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $1}')"
 	QUADR_HOCH="$(echo "${QUADR_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $2}')"
 else
-	QUADR_BREITE="${IN_BREITE}"
+	QUADR_BREIT="${IN_BREIT}"
 	QUADR_HOCH="${IN_HOCH}"
 fi
 
@@ -601,8 +627,8 @@ fi
 # pad=640:480:0:40:violet
 # pad=width=640:height=480:x=0:y=40:color=violet
 #
-# SCHWARZ="$(echo "${HOEHE} ${BREITE} ${QUADR_BREITE} ${QUADR_HOCH}" | awk '{sw="oben"; if (($1/$2) < ($3/$4)) sw="oben"; print sw}')"
-# SCHWARZ="$(echo "${HOEHE} ${BREITE} ${QUADR_BREITE} ${QUADR_HOCH}" | awk '{sw="oben"; if (($1/$2) > ($3/$4)) sw="links"; print sw}')"
+# SCHWARZ="$(echo "${HOEHE} ${BREITE} ${QUADR_BREIT} ${QUADR_HOCH}" | awk '{sw="oben"; if (($1/$2) < ($3/$4)) sw="oben"; print sw}')"
+# SCHWARZ="$(echo "${HOEHE} ${BREITE} ${QUADR_BREIT} ${QUADR_HOCH}" | awk '{sw="oben"; if (($1/$2) > ($3/$4)) sw="links"; print sw}')"
 #
 if [ "${ORIGINAL_PIXEL}" = Ja ] ; then
 	unset PAD
@@ -677,6 +703,10 @@ echo "
 ${FORMAT_BESCHREIBUNG}
 " | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
 
+echo "${M_INFOS}
+PAR_FAKTOR='${PAR_FAKTOR}'
+" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+
 #------------------------------------------------------------------------------#
 
 if [ -r ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt ] ; then
@@ -745,6 +775,14 @@ OP_QUELLE='${OP_QUELLE}'
 
 #------------------------------------------------------------------------------#
 ### Audio
+
+if [ "${BILDQUALIT}" = "auto" ] ; then
+        BILDQUALIT="5"
+fi
+
+if [ "${TONQUALIT}" = "auto" ] ; then
+        TONQUALIT="5"
+fi
 
 case "${TONQUALIT}" in
 	0)
