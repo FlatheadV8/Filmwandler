@@ -27,12 +27,12 @@
 #------------------------------------------------------------------------------#
 
 
+#VERSION="v2017102900"
+VERSION="v2018080900"
+
+
 BILDQUALIT="auto"
 TONQUALIT="auto"
-
-
-#VERSION="v2017102900"
-VERSION="v2018080500"
 
 #set -x
 PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -135,8 +135,7 @@ while [ "${#}" -ne "0" ]; do
                         shift
                         ;;
                 -ton)
-                        TONSPUR="${2}"		# "3" für die 4. Tonspur (0, 1, 2, 3)
-                        TSNAME="${2}"
+                        TONSPUR="${2}"		# Tonspur (1, 2, 3, 4)
                         shift
                         ;;
                 -schnitt)
@@ -259,6 +258,12 @@ fi
 
 if [ -z "${TONSPUR}" ] ; then
         TONSPUR=0	# die erste Tonspur ist "0"
+else
+	if [ "${TONSPUR}" -gt 0 ] ; then
+		TSNAME="$(echo "${TONSPUR}" | awk '{print $1 - 1}')"
+	else
+		TSNAME="${TONSPUR}"
+	fi
 fi
 
 #------------------------------------------------------------------------------#
@@ -271,10 +276,10 @@ ZIELDATEI="$(basename ${ZIELPFAD})"
 # damit keine Leerzeichen im Dateinamen enthalten sind
 
 if [ -z "${TSNAME}" ] ; then
-        ZIELDATEI="$(echo "${ZIELDATEI} ${TSNAME}" | rev | sed 's/[.]/ /' | rev | awk '{print $1"."$2}')"
+        ZIELDATEI="$(echo "${ZIELDATEI}" | rev | sed 's/[.]/ /' | rev | awk '{print $1"."$2}')"
 else
 	# damit man erkennt welche Tonspur aus dem Original verwendet wurde
-        ZIELDATEI="$(echo "${ZIELDATEI} ${TSNAME}" | rev | sed 's/[.]/ /' | rev | awk '{print $1"_-_Tonspur_"$3"."$2}')"
+        ZIELDATEI="$(echo "${ZIELDATEI} ${TONSPUR}" | rev | sed 's/[.]/ /' | rev | awk '{print $1"_-_Tonspur_"$3"."$2}')"
 fi
 
 #==============================================================================#
@@ -372,8 +377,19 @@ IN_PAR="$(echo "${FFPROBE}" | fgrep ' DAR ' | awk '{print $3}')"
 IN_DAR="$(echo "${FFPROBE}" | fgrep ' DAR ' | awk '{print $5}')"
 IN_FPS="$(echo "${FFPROBE}" | fgrep ' DAR ' | awk '{print $6}')"	# wird benötigt um den Farbraum für BluRay zu ermitteln
 IN_BITRATE="$(echo "${MEDIAINFO}" | sed -ne '/^Video$/,/^$/ p' | egrep '^Bit rate' | awk -F':' '{print $2}' | sed 's/[ ]*//g;s/[a-zA-Z/][a-zA-Z/]*$/ &/' | tail -n1)"
-IN_BIT_RATE="$(echo "${IN_BITRATE}" | awk '{print $1}')"
 IN_BIT_EINH="$(echo "${IN_BITRATE}" | awk '{print $2}')"
+
+if [ "${IN_BIT_EINH}" = "kb/s" ] ; then
+	IN_BIT_RATE="$(echo "${IN_BITRATE}" | awk '{print $1}')"
+elif [ "${IN_BIT_EINH}" = "Mb/s" ] ; then
+	IN_BIT_RATE="$(echo "${IN_BITRATE}" | awk '{print $1 * 1024}')"
+else
+	unset IN_BIT_RATE
+	BILDQUALIT="5"
+	TONQUALIT="5"
+fi
+unset IN_BITRATE
+unset IN_BIT_EINH
 
 M_INFOS="
 IN_XY='${IN_XY}'
@@ -389,14 +405,6 @@ BILDQUALIT='${BILDQUALIT}'
 TONQUALIT='${TONQUALIT}'
 "
 echo "${M_INFOS}"
-
-unset IN_BITRATE
-if [ "${IN_BIT_EINH}" != "kb/s" ] ; then
-	unset IN_BIT_RATE
-	BILDQUALIT="5"
-	TONQUALIT="5"
-fi
-unset IN_BIT_EINH
 
 
 #==============================================================================#
@@ -695,17 +703,17 @@ fi
 #------------------------------------------------------------------------------#
 ### ab hier kann in die Log-Datei geschrieben werden
 
-#rm -f ${ZIELVERZ}/${ZIELNAME}.txt
+#rm -f ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 echo "# $(date +'%F %T')
-${0} ${Film2Standardformat_OPTIONEN}" | tee ${ZIELVERZ}/${ZIELNAME}.txt
+${0} ${Film2Standardformat_OPTIONEN}" | tee ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 
 echo "
 ${FORMAT_BESCHREIBUNG}
-" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 
 echo "${M_INFOS}
 PAR_FAKTOR='${PAR_FAKTOR}'
-" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 
 #------------------------------------------------------------------------------#
 
@@ -763,7 +771,7 @@ fi
 
 echo "
 OP_QUELLE='${OP_QUELLE}'
-" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 #exit 25
 
 #==============================================================================#
@@ -862,7 +870,7 @@ AUDIOQUALITAET=${AUDIOQUALITAET}
 
 VIDEOCODEC=${VIDEOCODEC}
 VIDEOQUALITAET=${VIDEOQUALITAET}
-" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 #exit 26
 
 #==============================================================================#
@@ -872,7 +880,7 @@ STREAM_AUDIO="$(ffprobe "${FILMDATEI}" 2>&1 | fgrep ' Stream ' | fgrep Audio:)"
 STREAMAUDIO="$(echo "${STREAM_AUDIO}" | wc -w | awk '{print $1}')"
 
 if [ "${STREAMAUDIO}" -gt 0 ] ; then
-	AUDIO_VERARBEITUNG_01="-map 0:a:${TONSPUR} -c:a ${AUDIOCODEC} ${AUDIOQUALITAET}"
+	AUDIO_VERARBEITUNG_01="-map 0:a:${TSNAME} -c:a ${AUDIOCODEC} ${AUDIOQUALITAET}"
 	AUDIO_VERARBEITUNG_02="-c:a copy"
 else
 	AUDIO_VERARBEITUNG_01="-an"
@@ -897,7 +905,7 @@ AUDIO_VERARBEITUNG_02=${AUDIO_VERARBEITUNG_02}
 
 VIDEOOPTION=${VIDEOOPTION}
 START_ZIEL_FORMAT=${START_ZIEL_FORMAT}
-" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 #exit 27
 
 
@@ -905,10 +913,10 @@ START_ZIEL_FORMAT=${START_ZIEL_FORMAT}
 if [ -z "${SCHNITTZEITEN}" ] ; then
 
 	echo
-	echo "1: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${START_ZIEL_FORMAT} ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+	echo "1: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${START_ZIEL_FORMAT} ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 	echo
 #>
-	${PROGRAMM} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${START_ZIEL_FORMAT} ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} 2>&1
+	${PROGRAMM} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} 2>&1
 
 else
 
@@ -922,7 +930,7 @@ else
 		BIS="$(echo "${_SCHNITT}" | tr -d '"' | awk -F'-' '{print $2}')"
 
 		echo
-		echo "2: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} -ss ${VON} -to ${BIS} -f matroska -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.mkv" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+		echo "2: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} -ss ${VON} -to ${BIS} -f matroska -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.mkv" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 		echo
 #>
 		${PROGRAMM} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} -ss ${VON} -to ${BIS} -f matroska -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.mkv 2>&1
@@ -947,11 +955,11 @@ fi
 #------------------------------------------------------------------------------#
 
 echo "
-5: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} -map 0:a:${TONSPUR} -c:a ${AUDIOCODEC} ${UNTERTITEL} ${START_ZIEL_FORMAT} ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
+5: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} -map 0:a:${TSNAME} -c:a ${AUDIOCODEC} ${UNTERTITEL} ${START_ZIEL_FORMAT} ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
 "
 #------------------------------------------------------------------------------#
 
-ls -lh ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} ${ZIELVERZ}/${ZIELNAME}.txt | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+ls -lh ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 LAUFZEIT="$(echo "${STARTZEITPUNKT} $(date +'%s')" | awk '{print $2 - $1}')"
-echo "# $(date +'%F %T') (${LAUFZEIT})" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+echo "# $(date +'%F %T') (${LAUFZEIT})" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 #exit 28
