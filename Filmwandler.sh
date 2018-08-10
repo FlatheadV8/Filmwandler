@@ -28,7 +28,7 @@
 
 
 #VERSION="v2017102900"
-VERSION="v2018080900"
+VERSION="v2018081000"
 
 
 BILDQUALIT="auto"
@@ -599,11 +599,13 @@ if [ "${PAR_FAKTOR}" -ne "100000" ] ; then
 	#QUADR_SCALE="scale=$(echo "${HALBE_HOEHE} ${DAR_KOMMA}" | awk '{printf "%.0f %.0f\n", $1*$2, $1}' | awk '{print $1*2"x"$2*2}'),"
 	#
 	### [swscaler @ 0x81520d000] Warning: data is not aligned! This can lead to a speed loss
-	### laut Googel müssen die Pixel durch 16 teilbar sein, beseitigt aber leider das Problem hier nicht
-	#TEILER="2"
-	#TEILER="8"
-	TEILER="16"
-	#TEILER="32"
+        ### laut Googel müssen die Pixel durch 16 teilbar sein, beseitigt aber leider dieses Problem nicht
+        #
+        ### die Pixel sollten wenigstens durch 2 teilbar sein! besser aber durch 8
+        #TEILER="2"
+        #TEILER="4"
+        TEILER="8"
+        #TEILER="16"
 	TEIL_HOEHE="$(echo "${IN_BREIT} ${IN_HOCH} ${DAR_KOMMA} ${TEILER}" | awk '{h=sqrt($1*$2/$3); printf "%.0f\n", h/$4}')"
 	QUADR_SCALE="scale=$(echo "${TEIL_HOEHE} ${DAR_KOMMA}" | awk '{printf "%.0f %.0f\n", $1*$2, $1}' | awk -v teiler="${TEILER}" '{print $1*teiler"x"$2*teiler}'),"
 
