@@ -5,14 +5,10 @@
 #
 #==============================================================================#
 
-VERSION="v2018080500"
+VERSION="v2018081600"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
-#==============================================================================#
-#
-# https://trac.ffmpeg.org/wiki/Encode/MP3
-#
 #==============================================================================#
 # Betriebssystemabhängigkeiten
 
@@ -29,10 +25,34 @@ VERSION="v2018080500"
 # (auch wenn sie schlechter oder sogar noch experimentell sind)
 #
 
+# Audio
+
+# https://trac.ffmpeg.org/wiki/Encode/MP3
+
 if [ "FreeBSD" = "$(uname -s)" ] ; then
 	AUDIOCODEC="libmp3lame"			# MPEG-1 Layer 3
+	AUDIO_QUALITAET_0="-q:a 9 -ac 2"
+	AUDIO_QUALITAET_1="-q:a 8 -ac 2"
+	AUDIO_QUALITAET_2="-q:a 7 -ac 2"
+	AUDIO_QUALITAET_3="-q:a 6 -ac 2"
+	AUDIO_QUALITAET_4="-q:a 5 -ac 2"
+	AUDIO_QUALITAET_5="-q:a 4 -ac 2"
+	AUDIO_QUALITAET_6="-q:a 3 -ac 2"
+	AUDIO_QUALITAET_7="-q:a 2 -ac 2"
+	AUDIO_QUALITAET_8="-q:a 1 -ac 2"
+	AUDIO_QUALITAET_9="-q:a 1 -ac 2"
 else
 	AUDIOCODEC="mp3"			# MPEG-1 Layer 3
+	AUDIO_QUALITAET_0="-b:a 64k -ac 2"
+	AUDIO_QUALITAET_1="-b:a 80k -ac 2"
+	AUDIO_QUALITAET_2="-b:a 88k -ac 2"
+	AUDIO_QUALITAET_3="-b:a 112k -ac 2"
+	AUDIO_QUALITAET_4="-b:a 128k -ac 2"
+	AUDIO_QUALITAET_5="-b:a 160k -ac 2"
+	AUDIO_QUALITAET_6="-b:a 184k -ac 2"
+	AUDIO_QUALITAET_7="-b:a 224k -ac 2"
+	AUDIO_QUALITAET_8="-b:a 264k -ac 2"
+	AUDIO_QUALITAET_9="-b:a 320k -ac 2"
 fi
 
 
@@ -42,31 +62,19 @@ fi
 ENDUNG="avi"
 FORMAT="avi"
 
-# Audio
-AUDIO_QUALITAET_0="-b:a 64k -ac 2"
-AUDIO_QUALITAET_1="-b:a 80k -ac 2"
-AUDIO_QUALITAET_2="-b:a 88k -ac 2"
-AUDIO_QUALITAET_3="-b:a 112k -ac 2"
-AUDIO_QUALITAET_4="-b:a 128k -ac 2"
-AUDIO_QUALITAET_5="-b:a 160k -ac 2"
-AUDIO_QUALITAET_6="-b:a 184k -ac 2"
-AUDIO_QUALITAET_7="-b:a 224k -ac 2"
-AUDIO_QUALITAET_8="-b:a 264k -ac 2"
-AUDIO_QUALITAET_9="-b:a 320k -ac 2"
-
 # Video
-VIDEOCODEC="mpeg4"				# H.263+ ASP
+VIDEOCODEC="mpeg4"				# H.263+ ASP (https://trac.ffmpeg.org/wiki/Encode/MPEG-4)
 VIDEO_OPTION="-vtag DX50"			# DivX Version 5
-VIDEO_QUALITAET_0="-q:v 10 ${VIDEO_OPTION}"
-VIDEO_QUALITAET_1="-q:v 9 ${VIDEO_OPTION}"
-VIDEO_QUALITAET_2="-q:v 8 ${VIDEO_OPTION}"
-VIDEO_QUALITAET_3="-q:v 7 ${VIDEO_OPTION}"
-VIDEO_QUALITAET_4="-q:v 6 ${VIDEO_OPTION}"
-VIDEO_QUALITAET_5="-q:v 5 ${VIDEO_OPTION}"
-VIDEO_QUALITAET_6="-q:v 4 ${VIDEO_OPTION}"
-VIDEO_QUALITAET_7="-q:v 3 ${VIDEO_OPTION}"
-VIDEO_QUALITAET_8="-q:v 2 ${VIDEO_OPTION}"
-VIDEO_QUALITAET_9="-q:v 1 ${VIDEO_OPTION}"
+VIDEO_QUALITAET_0="-q:v 7 ${VIDEO_OPTION}"	# qscale:v 1 - 31
+VIDEO_QUALITAET_1="-q:v 6 ${VIDEO_OPTION}"	# qscale:v 1 - 31
+VIDEO_QUALITAET_2="-q:v 5 ${VIDEO_OPTION}"	# qscale:v 1 - 31
+VIDEO_QUALITAET_3="-q:v 4 ${VIDEO_OPTION}"	# qscale:v 1 - 31
+VIDEO_QUALITAET_4="-q:v 3 ${VIDEO_OPTION}"	# qscale:v 1 - 31
+VIDEO_QUALITAET_5="-q:v 2 ${VIDEO_OPTION}"	# qscale:v 1 - 31
+VIDEO_QUALITAET_6="-q:v 1.68 ${VIDEO_OPTION}"	# qscale:v 1 - 31
+VIDEO_QUALITAET_7="-q:v 1.41 ${VIDEO_OPTION}"	# qscale:v 1 - 31
+VIDEO_QUALITAET_8="-q:v 1.19 ${VIDEO_OPTION}"	# qscale:v 1 - 31
+VIDEO_QUALITAET_9="-q:v 1 ${VIDEO_OPTION}"	# qscale:v 1 - 31
 IFRAME="-keyint_min 2-8"
 
 #------------------------------------------------------------------------------#
