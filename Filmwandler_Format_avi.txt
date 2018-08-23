@@ -5,7 +5,7 @@
 #
 #==============================================================================#
 
-VERSION="v2018081600"
+VERSION="v2018082300"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -64,7 +64,7 @@ FORMAT="avi"
 
 # Video
 VIDEOCODEC="mpeg4"				# H.263+ ASP (https://trac.ffmpeg.org/wiki/Encode/MPEG-4)
-VIDEO_OPTION="-vtag DX50"			# DivX Version 5
+#VIDEO_OPTION="-vtag DX50"			# DivX 5 / unser Blu-ray-Player mag den vtag nicht
 VIDEO_QUALITAET_0="-q:v 7 ${VIDEO_OPTION}"	# qscale:v 1 - 31
 VIDEO_QUALITAET_1="-q:v 6 ${VIDEO_OPTION}"	# qscale:v 1 - 31
 VIDEO_QUALITAET_2="-q:v 5 ${VIDEO_OPTION}"	# qscale:v 1 - 31
