@@ -28,7 +28,7 @@
 
 
 #VERSION="v2017102900"
-VERSION="v2018081500"
+VERSION="v2018082300"
 
 
 BILDQUALIT="auto"
@@ -269,6 +269,7 @@ fi
 #------------------------------------------------------------------------------#
 # damit die Zieldatei mit Verzeichnis angegeben werden kann
 
+QUELL_DATEI="$(basename ${FILMDATEI})"
 ZIELVERZ="$(dirname ${ZIELPFAD})"
 ZIELDATEI="$(basename ${ZIELPFAD})"
 
@@ -692,13 +693,19 @@ FORMAT_ANPASSUNG="setsar='1/1'"
 #==============================================================================#
 #==============================================================================#
 # Das Video-Format wird nach der Dateiendung ermittelt
+# deshalb muss ermittelt werden, welche Dateiendung der Name der Ziel-Datei hat
+#
+# Wenn der Name der Quell-Datei und der Name der Ziel-Datei gleich sind,
+# dann wird dem Namen der Ziel-Datei ein "Nr2" vor der Endung angehängt
 #
 
-ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
-Q_ENDUNG="$(echo "${FILMDATEI}" | rev | sed 's/[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.]/&"/;s/[.]".*//' | rev | awk '{print tolower($0)}')"
-ENDUNG="$(echo "${ZIELDATEI}" | rev | sed 's/[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.]/&"/;s/[.]".*//' | rev | awk '{print tolower($0)}')"
+QUELL_BASIS_NAME="$(echo "${QUELL_DATEI}" | awk '{print tolower($0)}')"
+ZIEL_BASIS_NAME="$(echo "${ZIELDATEI}" | awk '{print tolower($0)}')"
 
-if [ "${Q_ENDUNG}" = "${ENDUNG}" ] ; then
+ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/.*[.]//' | rev)"
+ENDUNG="$(echo "${ZIEL_BASIS_NAME}" | rev | sed 's/[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.]/&"/;s/[.]".*//' | rev)"
+
+if [ "${QUELL_BASIS_NAME}" = "${ZIEL_BASIS_NAME}" ] ; then
 	ZIELNAME="${ZIELNAME}_Nr2"
 fi
 
