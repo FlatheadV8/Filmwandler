@@ -12,7 +12,7 @@
 #==============================================================================#
 ### Video
 
-VERSION="v2018080500"
+VERSION="v2018082300"
 
 #------------------------------------------------------------------------------#
 ### Kompatibilität zur Blu-ray
@@ -159,14 +159,14 @@ BLURAY_PARAMETER()
 	MBREITE='${MBREITE}'
 	MHOEHE='${MHOEHE}'
 	MaxFS='${MaxFS}'
-        " | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+        " | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
         BHVERH="$(echo "${MBREITE} ${MHOEHE} ${MaxFS}" | awk '{verhaeltnis="gut"; if ($1 > (sqrt($3 * 8))) verhaeltnis="schlecht" ; if ($2 > (sqrt($3 * 8))) verhaeltnis="schlecht" ; print verhaeltnis}')"
 
         if [ "${BHVERH}" != "gut" ] ; then
                 echo "# BLURAY_PARAMETER:
                 Seitenverhaeltnis wird von AVC nicht unterstuetzt!
                 ABBRUCH
-                " | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+                " | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
                 exit 1
         fi
 
@@ -354,6 +354,6 @@ colormatrix='${FARBCOD}'
 
 IN_FPS='${IN_FPS}'
 VIDEO_OPTION='${VIDEO_OPTION}'
-" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 
 #==============================================================================#
