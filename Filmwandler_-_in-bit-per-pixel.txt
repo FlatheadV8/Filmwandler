@@ -7,7 +7,7 @@
 #
 #==============================================================================#
 
-VERSION="v2018080500"
+VERSION="v2018082300"
 
 #------------------------------------------------------------------------------#
 
@@ -59,13 +59,13 @@ VERSION="v2018080500"
 
 #------------------------------------------------------------------------------#
 
-echo "1 BILDQUALIT='${BILDQUALIT}'" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
-echo "IN_BIT_RATE='${IN_BIT_RATE}'" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+echo "1 BILDQUALIT='${BILDQUALIT}'" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+echo "IN_BIT_RATE='${IN_BIT_RATE}'" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 
 if [ "${BILDQUALIT}" = "auto" ] ; then
 	if [ "x${IN_BIT_RATE}" != "x" ] ; then
 		IN_BIT_je_BP="$(echo "${IN_BIT_RATE} ${IN_BREIT} ${IN_HOCH}" | awk '{printf "%.0f\n", $1 * 10000 / $2 / $3}')"
-		echo "IN_BIT_je_BP='${IN_BIT_je_BP}'" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+		echo "IN_BIT_je_BP='${IN_BIT_je_BP}'" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 
 		if   [ "${IN_BIT_je_BP}" -gt "26" ] ; then
 			BILDQUALIT="9"
@@ -89,7 +89,7 @@ if [ "${BILDQUALIT}" = "auto" ] ; then
 			BILDQUALIT="0"
 		fi
 	fi
-	echo "2 BILDQUALIT='${BILDQUALIT}'" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+	echo "2 BILDQUALIT='${BILDQUALIT}'" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 fi
 
 #------------------------------------------------------------------------------#
