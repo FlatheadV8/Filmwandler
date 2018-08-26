@@ -739,23 +739,67 @@ else
 	ENDUNG="mp4"
 	FORMAT="mp4"
 
-	# https://slhck.info/video/2017/02/24/vbr-settings.html
-	# undokumentiert (0.1-?) -> "-q:a 0.12" ~ 128k
-	# August 2018: viel zu schlechte Qualität!
-	# er bei "-q:a" nimmt immer: "Stream #0:1(und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, 5.1, fltp, 341 kb/s (default)"
-	AUDIOCODEC="aac"
-	AUDIO_QUALITAET_0="-b:a 64k -ac 2"
-	AUDIO_QUALITAET_1="-b:a 80k -ac 2"
-	AUDIO_QUALITAET_2="-b:a 88k -ac 2"
-	AUDIO_QUALITAET_3="-b:a 112k -ac 2"
-	AUDIO_QUALITAET_4="-b:a 128k -ac 2"
-	AUDIO_QUALITAET_5="-b:a 160k -ac 2"
-	AUDIO_QUALITAET_6="-b:a 184k -ac 2"
-	AUDIO_QUALITAET_7="-b:a 224k -ac 2"
-	AUDIO_QUALITAET_8="-b:a 264k -ac 2"
-	AUDIO_QUALITAET_9="-b:a 320k -ac 2"
 
-	VIDEOCODEC="h264"
+	# Audio
+	AUDIOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep aac | head -n1)"
+	if [ "x${AUDIOCODEC}" = "x" ] ; then
+		AUDIOCODEC="aac"
+	fi
+
+	if [ "${AUDIOCODEC}" = "libfdk_aac" ] ; then
+		### 2018-07-15: [libfdk_aac @ 0x813af3900] Note, the VBR setting is unsupported and only works with some parameter combinations
+		### https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio
+		### http://wiki.hydrogenaud.io/index.php?title=Fraunhofer_FDK_AAC#Audio_Object_Types
+		### http://wiki.hydrogenaud.io/index.php?title=Fraunhofer_FDK_AAC#Usage.2FExamples
+		#AUDIO_OPTION="-profile:a aac_he"
+		#AUDIO_OPTION="-profile:a aac_he_v2"
+		AUDIO_QUALITAET_0="-vbr 1"					# 1 bis 5, 4 empfohlen / Constant (CBR): ~ 184 kb/s
+		AUDIO_QUALITAET_1="-vbr 2"					# 1 bis 5, 4 empfohlen / Constant (CBR): ~ 201 kb/s
+		AUDIO_QUALITAET_2="-vbr 3"					# 1 bis 5, 4 empfohlen / Constant (CBR): ~ 235 kb/s
+		AUDIO_QUALITAET_3="-vbr 4"					# 1 bis 5, 4 empfohlen / Constant (CBR): ~ 288 kb/s
+		AUDIO_QUALITAET_4="-vbr 4"					# 1 bis 5, 4 empfohlen / Constant (CBR): ~ 288 kb/s
+		AUDIO_QUALITAET_5="-vbr 4"					# 1 bis 5, 4 empfohlen / Constant (CBR): ~ 288 kb/s
+		AUDIO_QUALITAET_6="-vbr 5"					# 1 bis 5, 4 empfohlen / Constant (CBR): ~ 427 kb/s
+		AUDIO_QUALITAET_7="-vbr 5"					# 1 bis 5, 4 empfohlen / Constant (CBR): ~ 427 kb/s
+		AUDIO_QUALITAET_8="-vbr 5"					# 1 bis 5, 4 empfohlen / Constant (CBR): ~ 427 kb/s
+		AUDIO_QUALITAET_9="-vbr 5"					# 1 bis 5, 4 empfohlen / Constant (CBR): ~ 427 kb/s
+	else
+		# https://slhck.info/video/2017/02/24/vbr-settings.html
+		# undokumentiert (0.1-?) -> "-q:a 0.12" ~ 128k
+		# August 2018: viel zu schlechte Qualität!
+		# er bei "-q:a" nimmt immer: "Stream #0:1(und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, 5.1, fltp, 341 kb/s (default)"
+		if [ "${AUDIO_KANAELE}" -gt 2 ] ; then
+			AUDIO_QUALITAET_0="-b:a 160k"
+			AUDIO_QUALITAET_1="-b:a 184k"
+			AUDIO_QUALITAET_2="-b:a 216k"
+			AUDIO_QUALITAET_3="-b:a 256k"
+			AUDIO_QUALITAET_4="-b:a 296k"
+			AUDIO_QUALITAET_5="-b:a 344k"
+			AUDIO_QUALITAET_6="-b:a 400k"
+			AUDIO_QUALITAET_7="-b:a 472k"
+			AUDIO_QUALITAET_8="-b:a 552k"
+			AUDIO_QUALITAET_9="-b:a 640k"
+		else
+			AUDIO_QUALITAET_0="-b:a 64k"
+			AUDIO_QUALITAET_1="-b:a 80k"
+			AUDIO_QUALITAET_2="-b:a 88k"
+			AUDIO_QUALITAET_3="-b:a 112k"
+			AUDIO_QUALITAET_4="-b:a 128k"
+			AUDIO_QUALITAET_5="-b:a 160k"
+			AUDIO_QUALITAET_6="-b:a 184k"
+			AUDIO_QUALITAET_7="-b:a 224k"
+			AUDIO_QUALITAET_8="-b:a 264k"
+			AUDIO_QUALITAET_9="-b:a 320k"
+		fi
+	fi
+
+
+	# Video
+	VIDEOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep 264 | head -n1)"
+	if [ "x${VIDEOCODEC}" = "x" ] ; then
+		VIDEOCODEC="h264"
+	fi
+
 	VIDEO_QUALITAET_0="-preset veryslow -crf 30 -tune film"		# von "0" (verlustfrei) bis "51"
 	VIDEO_QUALITAET_1="-preset veryslow -crf 28 -tune film"		# von "0" (verlustfrei) bis "51"
 	VIDEO_QUALITAET_2="-preset veryslow -crf 26 -tune film"		# von "0" (verlustfrei) bis "51"
@@ -767,6 +811,7 @@ else
 	VIDEO_QUALITAET_8="-preset veryslow -crf 17 -tune film"		# von "0" (verlustfrei) bis "51"
 	VIDEO_QUALITAET_9="-preset veryslow -crf 16 -tune film"		# von "0" (verlustfrei) bis "51"
 	IFRAME="-keyint_min 2-8"
+
 
 FORMAT_BESCHREIBUNG="
 ********************************************************************************
