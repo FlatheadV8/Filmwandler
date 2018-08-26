@@ -5,7 +5,7 @@
 #
 #==============================================================================#
 
-VERSION="v2018080500"
+VERSION="v2018082500"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -24,16 +24,41 @@ VERSION="v2018080500"
 # 4CIF  -  704x576  =  405504 Bildpunkte (Pixel)
 # 16CIF - 1408x1152 = 1622016 Bildpunkte (Pixel)
 
+#------------------------------------------------------------------------------#
+### Test
+
+echo "#------------------------------------------------------------------------#
+Filmwandler_Format_3gp.txt
+SOLL_XY='${SOLL_XY}'
+IN_BREIT='${IN_BREIT}'
+IN_HOCH='${IN_HOCH}'
+SOLL_SCALE='${SOLL_SCALE}'
+"
+
+#==============================================================================#
+
 if [ "x${SOLL_XY}" = "x" ] ; then
+	echo "
 	### automatische auswahl der richtigen Bildauflösung
-	SOLL_SCALE="scale=$(echo "12288 25344 101376 405504 1622016 ${IN_BREIT} ${IN_HOCH}" | awk '{bild=$6*$7 ; h263="sonstige" ; if (bild <= $5) h263="1408x1152" ; if (bild <= $4) h263="704x576" ; if (bild <= $3) h263="352x288" ; if (bild <= $2) h263="176x144" ; if (bild <= $1) h263="128x96" ; print h263}')"
+	"
+	echo "scale => 12288 25344 101376 405504 1622016 ${IN_BREIT} ${IN_HOCH}"
+	SOLL_SCALE="scale=$(echo "12288 25344 101376 405504 1622016 ${IN_BREIT} ${IN_HOCH}" | awk '{bild=$6*$7 ; h263="1408x1152" ; if (bild <= $5) h263="1408x1152" ; if (bild <= $4) h263="704x576" ; if (bild <= $3) h263="352x288" ; if (bild <= $2) h263="176x144" ; if (bild <= $1) h263="128x96" ; print h263}')"
 else
+	echo "
 	### manuelle Auswahl mit Bildauflösung
+	"
 	SOLL_SCALE="scale=${SOLL_XY}"
 fi
 
 #------------------------------------------------------------------------------#
+### Test
 
+echo "
+SOLL_SCALE='${SOLL_SCALE}'
+SOLL_XY='${SOLL_XY}'
+#------------------------------------------------------------------------#"
+
+#exit
 #==============================================================================#
 
 ### libfdk_aac
@@ -86,16 +111,29 @@ ENDUNG="3gp"
 FORMAT="3gp"
 
 # Audio
-AUDIO_QUALITAET_0="-vbr 1"		# 1 bis 5, 4 empfohlen
-AUDIO_QUALITAET_1="-vbr 2"		# 1 bis 5, 4 empfohlen
-AUDIO_QUALITAET_2="-vbr 3"		# 1 bis 5, 4 empfohlen
-AUDIO_QUALITAET_3="-vbr 4"		# 1 bis 5, 4 empfohlen
-AUDIO_QUALITAET_4="-vbr 4"		# 1 bis 5, 4 empfohlen
-AUDIO_QUALITAET_5="-vbr 4"		# 1 bis 5, 4 empfohlen
-AUDIO_QUALITAET_6="-vbr 5"		# 1 bis 5, 4 empfohlen
-AUDIO_QUALITAET_7="-vbr 5"		# 1 bis 5, 4 empfohlen
-AUDIO_QUALITAET_8="-vbr 5"		# 1 bis 5, 4 empfohlen
-AUDIO_QUALITAET_9="-vbr 5"		# 1 bis 5, 4 empfohlen
+if [ "${AUDIO_KANAELE}" -gt 2 ] ; then
+	AUDIO_QUALITAET_0="-b:a 128k"
+	AUDIO_QUALITAET_1="-b:a 160k"
+	AUDIO_QUALITAET_2="-b:a 176k"
+	AUDIO_QUALITAET_3="-b:a 224k"
+	AUDIO_QUALITAET_4="-b:a 256k"
+	AUDIO_QUALITAET_5="-b:a 512k"
+	AUDIO_QUALITAET_6="-b:a 368k"
+	AUDIO_QUALITAET_7="-b:a 448k"
+	AUDIO_QUALITAET_8="-b:a 528k"
+	AUDIO_QUALITAET_9="-b:a 640k"
+else
+	AUDIO_QUALITAET_0="-b:a 64k"
+	AUDIO_QUALITAET_1="-b:a 80k"
+	AUDIO_QUALITAET_2="-b:a 88k"
+	AUDIO_QUALITAET_3="-b:a 112k"
+	AUDIO_QUALITAET_4="-b:a 128k"
+	AUDIO_QUALITAET_5="-b:a 160k"
+	AUDIO_QUALITAET_6="-b:a 184k"
+	AUDIO_QUALITAET_7="-b:a 224k"
+	AUDIO_QUALITAET_8="-b:a 264k"
+	AUDIO_QUALITAET_9="-b:a 320k"
+fi
 
 # Video
 VIDEO_QUALITAET_0="-q:v 10"		# H.263 ASP
