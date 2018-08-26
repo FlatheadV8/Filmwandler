@@ -12,6 +12,10 @@
 #
 #==============================================================================#
 
+VERSION="v2018082600"
+
+#==============================================================================#
+
 ### https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio
 #
 #   Seit 2017 verfügt FFmpeg über einen eigenen, nativen Opus-Encoder
@@ -40,37 +44,21 @@
 #               empfohlen: 15-35
 
 #==============================================================================#
-# Betriebssystemabhängigkeiten
-
-#
-# Die internen (nativen) Codecs funktionieren immer (die sind ja fest drin),
-# die externen Bibliotheken sind oft besser,
-# müssen aber extra installiert werden.
-#
-# Weil die GPL-Lizenz, unter der Linux steht, nicht kompatiebel mit den Lizenzen
-# vieler Codec-Bibliotheken ist (z. B. solcher, die unter BSD-Lizenz stehen),
-# ist es auf den meisten Linux-Distributionen schwierig, diese Codec-Bibliotheken 
-# zu installieren.
-# Deshalb werden hier nur interne Codecs zur Verwendung vorgesehen.
-# (auch wenn sie schlechter oder sogar noch experimentell sind)
-#
-
-if [ "FreeBSD" = "$(uname -s)" ] ; then
-	AUDIOCODEC="libopus -ac 2"		# kann z.Z. nur Stereo
-	VIDEOCODEC="libvpx-vp9"
-else
-	AUDIOCODEC="opus -strict -2"		# ist noch experimentel
-	VIDEOCODEC="vp9"
-fi
-
-
-#==============================================================================#
 
 # Format
 ENDUNG="webm"
 FORMAT="webm"
 
+#==============================================================================#
+
 ### Audio
+AUDIOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep opus | head -n1)"
+if [ "x${AUDIOCODEC}" = "x" ] ; then
+	AUDIOCODEC="${AUDIOCODEC} -ac 2"	# libopus kann z.Z. (August 2018) nur Stereo
+else
+	AUDIOCODEC="opus -strict -2"		# interner Codec (FF) opus ist z.Z. (August 2018) noch experimentel
+fi
+
 ## -vbr on -b:a 128k
 ## -vbr 0 (fest 96k)
 ## -vbr 1 (fest 96k)
@@ -87,7 +75,13 @@ AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 320k"
 AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 408k"
 AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 512k"
 
+
 # Video
+VIDEOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep vp9 | head -n1)"
+if [ "x${VIDEOCODEC}" = "x" ] ; then
+	VIDEOCODEC="vp9"
+fi
+
 # bei "-b:v 0" ergibt das eine "konstante Qualität" => bestes Ergebnis, wenn die Dateigröße egal ist
 # bei "-b:v 2000k" ergibt das eine "begrente Qualität" => konstante Qualität mit einer Bit-Raten-Obergrenze
 VIDEO_OPTION=""
