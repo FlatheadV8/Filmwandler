@@ -30,84 +30,38 @@ VERSION="v2018082600"
 # FDK AAC kann im Modus "VBR" keine beliebige Kombination von Tonkanäle, Bit-Rate und Saple-Rate verarbeiten!
 # Will man "VBR" verwenden, dann muss man explizit alle drei Parameter in erlaubter Größe angeben.
 #
-
 #==============================================================================#
-# Video
-
-#------------------------------------------------------------------------------#
-### Bluray-kompatibele Werte errechnen
-
-. ${AVERZ}/Filmwandler_-_Blu-ray-Disc_-_AVC.txt
-
-#==============================================================================#
-### Qualität
 
 # Format
 ENDUNG="mp4"
 FORMAT="mp4"
 
 #==============================================================================#
-# Betriebssystemabhängigkeiten
 
-#
-# Die internen (nativen) Codecs funktionieren immer (die sind ja fest drin),
-# die externen Bibliotheken sind oft besser,
-# müssen aber extra installiert werden.
-#
-# Weil die GPL-Lizenz, unter der Linux steht, nicht kompatiebel mit den Lizenzen
-# vieler Codec-Bibliotheken ist (z. B. solcher, die unter BSD-Lizenz stehen),
-# ist es auf den meisten Linux-Distributionen schwierig, diese Codec-Bibliotheken 
-# zu installieren.
-# Deshalb werden hier nur interne Codecs zur Verwendung vorgesehen.
-# (auch wenn sie schlechter oder sogar noch experimentell sind)
-#
+# Audio
+AUDIOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep aac | head -n1)"
+if [ "x${AUDIOCODEC}" = "x" ] ; then
+	AUDIOCODEC="aac"
+fi
 
-if [ "FreeBSD" = "$(uname -s)" ] ; then
-	# Audio
-	AUDIOCODEC="libfdk_aac"
-
+if [ "${AUDIOCODEC}" = "libfdk_aac" ] ; then
 	### 2018-07-15: [libfdk_aac @ 0x813af3900] Note, the VBR setting is unsupported and only works with some parameter combinations
 	### https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio
 	### http://wiki.hydrogenaud.io/index.php?title=Fraunhofer_FDK_AAC#Audio_Object_Types
-	#AUDIO_QUALITAET_0="-profile:a aac_he_v2 -vbr 1"		# -vbr 1 bis 5, 4 empfohlen
-	#AUDIO_QUALITAET_1="-profile:a aac_he_v2 -vbr 2"		# -vbr 1 bis 5, 4 empfohlen
-	#AUDIO_QUALITAET_2="-profile:a aac_he_v2 -vbr 3"		# -vbr 1 bis 5, 4 empfohlen
-	#AUDIO_QUALITAET_3="-profile:a aac_he -vbr 4"			# -vbr 1 bis 5, 4 empfohlen
-	#AUDIO_QUALITAET_4="-profile:a aac_he -vbr 4"			# -vbr 1 bis 5, 4 empfohlen
-	#AUDIO_QUALITAET_5="-profile:a aac_he -vbr 4"			# -vbr 1 bis 5, 4 empfohlen
-	#AUDIO_QUALITAET_6="-profile:a aac_he -vbr 5"			# -vbr 1 bis 5, 4 empfohlen
-	#AUDIO_QUALITAET_7="-profile:a aac_he -vbr 5"			# -vbr 1 bis 5, 4 empfohlen
-	#AUDIO_QUALITAET_8="-profile:a aac_he -vbr 5"			# -vbr 1 bis 5, 4 empfohlen
-	#AUDIO_QUALITAET_9="-profile:a aac_he -vbr 5"			# -vbr 1 bis 5, 4 empfohlen
-
 	### http://wiki.hydrogenaud.io/index.php?title=Fraunhofer_FDK_AAC#Usage.2FExamples
 	#AUDIO_OPTION="-profile:a aac_he"
-	#AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 56k"			# CBR
-	#AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 64k"			# CBR
-	#AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 80k"			# CBR
-	#AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 96k"			# CBR
-	#AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 112k"			# CBR
-	#AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 128k"			# CBR
-	#AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 152k"			# CBR
-	#AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 184k"			# CBR
-	#AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 216k"			# CBR
-	#AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 256k"			# CBR
-
-	AUDIO_QUALITAET_0="-vbr 1"					# 1 bis 5, 4 empfohlen
-	AUDIO_QUALITAET_1="-vbr 2"					# 1 bis 5, 4 empfohlen
-	AUDIO_QUALITAET_2="-vbr 3"					# 1 bis 5, 4 empfohlen
-	AUDIO_QUALITAET_3="-vbr 4"					# 1 bis 5, 4 empfohlen
-	AUDIO_QUALITAET_4="-vbr 4"					# 1 bis 5, 4 empfohlen
-	AUDIO_QUALITAET_5="-vbr 4"					# 1 bis 5, 4 empfohlen
-	AUDIO_QUALITAET_6="-vbr 5"					# 1 bis 5, 4 empfohlen
-	AUDIO_QUALITAET_7="-vbr 5"					# 1 bis 5, 4 empfohlen
-	AUDIO_QUALITAET_8="-vbr 5"					# 1 bis 5, 4 empfohlen
-	AUDIO_QUALITAET_9="-vbr 5"					# 1 bis 5, 4 empfohlen
-
-	VIDEOCODEC="libx264"
+	#AUDIO_OPTION="-profile:a aac_he_v2"
+	AUDIO_QUALITAET_0="-vbr 1"					# 1 bis 5, 4 empfohlen / Constant (CBR): ~ 184 kb/s
+	AUDIO_QUALITAET_1="-vbr 2"					# 1 bis 5, 4 empfohlen / Constant (CBR): ~ 201 kb/s
+	AUDIO_QUALITAET_2="-vbr 3"					# 1 bis 5, 4 empfohlen / Constant (CBR): ~ 235 kb/s
+	AUDIO_QUALITAET_3="-vbr 4"					# 1 bis 5, 4 empfohlen / Constant (CBR): ~ 288 kb/s
+	AUDIO_QUALITAET_4="-vbr 4"					# 1 bis 5, 4 empfohlen / Constant (CBR): ~ 288 kb/s
+	AUDIO_QUALITAET_5="-vbr 4"					# 1 bis 5, 4 empfohlen / Constant (CBR): ~ 288 kb/s
+	AUDIO_QUALITAET_6="-vbr 5"					# 1 bis 5, 4 empfohlen / Constant (CBR): ~ 427 kb/s
+	AUDIO_QUALITAET_7="-vbr 5"					# 1 bis 5, 4 empfohlen / Constant (CBR): ~ 427 kb/s
+	AUDIO_QUALITAET_8="-vbr 5"					# 1 bis 5, 4 empfohlen / Constant (CBR): ~ 427 kb/s
+	AUDIO_QUALITAET_9="-vbr 5"					# 1 bis 5, 4 empfohlen / Constant (CBR): ~ 427 kb/s
 else
-	# Audio
-	AUDIOCODEC="aac"
 	if [ "${AUDIO_KANAELE}" -gt 2 ] ; then
 		AUDIO_QUALITAET_0="-b:a 160k"
 		AUDIO_QUALITAET_1="-b:a 184k"
@@ -131,9 +85,17 @@ else
 		AUDIO_QUALITAET_8="-b:a 264k"
 		AUDIO_QUALITAET_9="-b:a 320k"
 	fi
+fi
 
+
+# Video
+VIDEOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep 264 | head -n1)"
+if [ "x${VIDEOCODEC}" = "x" ] ; then
 	VIDEOCODEC="h264"
 fi
+
+### Bluray-kompatibele Werte errechnen
+. ${AVERZ}/Filmwandler_-_Blu-ray-Disc_-_AVC.txt
 
 #==============================================================================#
 
