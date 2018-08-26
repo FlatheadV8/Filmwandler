@@ -5,7 +5,7 @@
 #
 #==============================================================================#
 
-VERSION="v2018080500"
+VERSION="v2018082500"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -76,18 +76,30 @@ if [ "FreeBSD" = "$(uname -s)" ] ; then
 	VIDEOCODEC="libx265"
 else
 	# Audio
-	# https://slhck.info/video/2017/02/24/vbr-settings.html
 	AUDIOCODEC="aac"
-	AUDIO_QUALITAET_0="-q:a 0.10"			# undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_1="-q:a 0.11"			# undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_2="-q:a 0.12"			# undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_3="-q:a 0.13"			# undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_4="-q:a 0.14"			# undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_5="-q:a 0.15"			# undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_6="-q:a 0.16"			# undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_7="-q:a 0.17"			# undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_8="-q:a 0.18"			# undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_9="-q:a 0.19"			# undokumentiert (0.1-?) / 0.12 ~ 128k
+	if [ "${AUDIO_KANAELE}" -gt 2 ] ; then
+		AUDIO_QUALITAET_0="-b:a 128k"
+		AUDIO_QUALITAET_1="-b:a 160k"
+		AUDIO_QUALITAET_2="-b:a 176k"
+		AUDIO_QUALITAET_3="-b:a 224k"
+		AUDIO_QUALITAET_4="-b:a 256k"
+		AUDIO_QUALITAET_5="-b:a 512k"
+		AUDIO_QUALITAET_6="-b:a 368k"
+		AUDIO_QUALITAET_7="-b:a 448k"
+		AUDIO_QUALITAET_8="-b:a 528k"
+		AUDIO_QUALITAET_9="-b:a 640k"
+	else
+		AUDIO_QUALITAET_0="-b:a 64k"
+		AUDIO_QUALITAET_1="-b:a 80k"
+		AUDIO_QUALITAET_2="-b:a 88k"
+		AUDIO_QUALITAET_3="-b:a 112k"
+		AUDIO_QUALITAET_4="-b:a 128k"
+		AUDIO_QUALITAET_5="-b:a 160k"
+		AUDIO_QUALITAET_6="-b:a 184k"
+		AUDIO_QUALITAET_7="-b:a 224k"
+		AUDIO_QUALITAET_8="-b:a 264k"
+		AUDIO_QUALITAET_9="-b:a 320k"
+	fi
 
 	VIDEOCODEC="hevc"
 fi
