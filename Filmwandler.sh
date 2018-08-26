@@ -28,7 +28,7 @@
 
 
 #VERSION="v2017102900"
-VERSION="v2018082300"
+VERSION="v2018082600"
 
 
 BILDQUALIT="auto"
@@ -345,6 +345,7 @@ fi
 #echo "--------------------------------------------------------------------------------"
 #probe "${FILMDATEI}" 2>&1 | fgrep Video:
 #echo "--------------------------------------------------------------------------------"
+AUDIO_KANAELE="$(ffprobe -show_data -show_streams "${FILMDATEI}" 2>/dev/null | sed -e '1,/^codec_type=audio/ d' | awk -F'=' '/^channels=/{print $2}' | sort -nr | head -n1)"	# max. Anzahl der vorhandenen Audio-Kanäle
 FFPROBE="$(ffprobe "${FILMDATEI}" 2>&1 | fgrep Video: | sed 's/.* Video:/Video:/' | tr -s '[\[,\]]' '\n' | egrep '[0-9]x[0-9]|SAR |DAR | fps' | grep -Fv 'Stream #' | grep -Fv 'Video:' | tr -s '\n' ' ')"
 # tbn (FPS vom Container)= the time base in AVStream that has come from the container
 # tbc (FPS vom Codec) = the time base in AVCodecContext for the codec used for a particular stream
@@ -739,29 +740,32 @@ else
 	FORMAT="mp4"
 
 	# https://slhck.info/video/2017/02/24/vbr-settings.html
+	# undokumentiert (0.1-?) -> "-q:a 0.12" ~ 128k
+	# August 2018: viel zu schlechte Qualität!
+	# er bei "-q:a" nimmt immer: "Stream #0:1(und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, 5.1, fltp, 341 kb/s (default)"
 	AUDIOCODEC="aac"
-	AUDIO_QUALITAET_0="-q:a 0.10"					# undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_1="-q:a 0.11"					# undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_2="-q:a 0.12"					# undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_3="-q:a 0.13"					# undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_4="-q:a 0.14"					# undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_5="-q:a 0.15"					# undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_6="-q:a 0.16"					# undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_7="-q:a 0.17"					# undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_8="-q:a 0.18"					# undokumentiert (0.1-?) / 0.12 ~ 128k
-	AUDIO_QUALITAET_9="-q:a 0.19"					# undokumentiert (0.1-?) / 0.12 ~ 128k
+	AUDIO_QUALITAET_0="-b:a 64k -ac 2"
+	AUDIO_QUALITAET_1="-b:a 80k -ac 2"
+	AUDIO_QUALITAET_2="-b:a 88k -ac 2"
+	AUDIO_QUALITAET_3="-b:a 112k -ac 2"
+	AUDIO_QUALITAET_4="-b:a 128k -ac 2"
+	AUDIO_QUALITAET_5="-b:a 160k -ac 2"
+	AUDIO_QUALITAET_6="-b:a 184k -ac 2"
+	AUDIO_QUALITAET_7="-b:a 224k -ac 2"
+	AUDIO_QUALITAET_8="-b:a 264k -ac 2"
+	AUDIO_QUALITAET_9="-b:a 320k -ac 2"
 
 	VIDEOCODEC="h264"
-	VIDEO_QUALITAET_0="-preset ultrafast -crf 34"			# von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_1="-preset superfast -crf 32"			# von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_2="-preset veryfast  -crf 30"			# von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_3="-preset faster    -crf 28"			# von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_4="-preset fast      -crf 26"			# von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_5="-preset medium    -crf 24"			# von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_6="-preset slow      -crf 22"			# von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_7="-preset slower    -crf 20"			# von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_8="-preset veryslow  -crf 18"			# von "0" (verlustfrei) bis "51"
-	VIDEO_QUALITAET_9="-preset veryslow  -tune film -crf 16"	# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_0="-preset veryslow -crf 30 -tune film"		# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_1="-preset veryslow -crf 28 -tune film"		# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_2="-preset veryslow -crf 26 -tune film"		# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_3="-preset veryslow -crf 24 -tune film"		# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_4="-preset veryslow -crf 22 -tune film"		# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_5="-preset veryslow -crf 20 -tune film"		# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_6="-preset veryslow -crf 19 -tune film"		# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_7="-preset veryslow -crf 18 -tune film"		# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_8="-preset veryslow -crf 17 -tune film"		# von "0" (verlustfrei) bis "51"
+	VIDEO_QUALITAET_9="-preset veryslow -crf 16 -tune film"		# von "0" (verlustfrei) bis "51"
 	IFRAME="-keyint_min 2-8"
 
 FORMAT_BESCHREIBUNG="
@@ -927,7 +931,7 @@ START_ZIEL_FORMAT=${START_ZIEL_FORMAT}
 if [ -z "${SCHNITTZEITEN}" ] ; then
 
 	echo
-	echo "1: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${START_ZIEL_FORMAT} ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+	echo "1: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 	echo
 #>
 	${PROGRAMM} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} 2>&1
@@ -957,9 +961,9 @@ else
 	mkvmerge -o ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv ${FILM_TEILE}
 
 	# den vertigen Film aus dem MKV-Format in das MP$-Format umwandeln
-	echo "4: ${PROGRAMM} ${REPARATUR_PARAMETER} -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv -c:v copy ${AUDIO_VERARBEITUNG_02} ${U_TITEL_MKV} ${START_ZIEL_FORMAT} ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}"
+	echo "4: ${PROGRAMM} ${REPARATUR_PARAMETER} -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv -c:v copy ${AUDIO_VERARBEITUNG_02} ${U_TITEL_MKV} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}"
 #>
-	${PROGRAMM} ${REPARATUR_PARAMETER} -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv -c:v copy ${AUDIO_VERARBEITUNG_02} ${U_TITEL_MKV} ${START_ZIEL_FORMAT} ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
+	${PROGRAMM} ${REPARATUR_PARAMETER} -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv -c:v copy ${AUDIO_VERARBEITUNG_02} ${U_TITEL_MKV} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
 
 	#ls -lh ${ZIELVERZ}/${ZUFALL}_*_${ZIELNAME}.mkv ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv
 	#echo "rm -f ${ZIELVERZ}/${ZUFALL}_*_${ZIELNAME}.mkv ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv"
@@ -969,7 +973,7 @@ fi
 #------------------------------------------------------------------------------#
 
 echo "
-5: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} -map 0:a:${TSNAME} -c:a ${AUDIOCODEC} ${UNTERTITEL} ${START_ZIEL_FORMAT} ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
+5: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} -map 0:a:${TSNAME} -c:a ${AUDIOCODEC} ${UNTERTITEL} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
 "
 #------------------------------------------------------------------------------#
 
