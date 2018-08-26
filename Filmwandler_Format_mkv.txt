@@ -44,24 +44,21 @@ VERSION="v2018082600"
 #
 
 #==============================================================================#
-# Betriebssystemabhängigkeiten
 
-#
-# Die internen (nativen) Codecs funktionieren immer (die sind ja fest drin),
-# die externen Bibliotheken sind oft besser,
-# müssen aber extra installiert werden.
-#
-# Weil die GPL-Lizenz, unter der Linux steht, nicht kompatiebel mit den Lizenzen
-# vieler Codec-Bibliotheken ist (z. B. solcher, die unter BSD-Lizenz stehen),
-# ist es auf den meisten Linux-Distributionen schwierig, diese Codec-Bibliotheken 
-# zu installieren.
-# Deshalb werden hier nur interne Codecs zur Verwendung vorgesehen.
-# (auch wenn sie schlechter oder sogar noch experimentell sind)
-#
+# Format
+ENDUNG="mkv"
+FORMAT="matroska"
 
-if [ "FreeBSD" = "$(uname -s)" ] ; then
+#==============================================================================#
+
+# Audio
+AUDIOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep aac | head -n1)"
+if [ "x${AUDIOCODEC}" = "x" ] ; then
+	AUDIOCODEC="aac"
+fi
+
+if [ "${AUDIOCODEC}" = "libfdk_aac" ] ; then
 	# Audio
-	AUDIOCODEC="libfdk_aac"
 	AUDIO_QUALITAET_0="-vbr 1"			# 1 bis 5, 4 empfohlen
 	AUDIO_QUALITAET_1="-vbr 2"			# 1 bis 5, 4 empfohlen
 	AUDIO_QUALITAET_2="-vbr 3"			# 1 bis 5, 4 empfohlen
@@ -75,8 +72,6 @@ if [ "FreeBSD" = "$(uname -s)" ] ; then
 
 	VIDEOCODEC="libx265"
 else
-	# Audio
-	AUDIOCODEC="aac"
 	if [ "${AUDIO_KANAELE}" -gt 2 ] ; then
 		AUDIO_QUALITAET_0="-b:a 160k"
 		AUDIO_QUALITAET_1="-b:a 184k"
@@ -100,30 +95,28 @@ else
 		AUDIO_QUALITAET_8="-b:a 264k"
 		AUDIO_QUALITAET_9="-b:a 320k"
 	fi
-
-	VIDEOCODEC="hevc"
 fi
 
-#==============================================================================#
-# Video
 
-# Format
-ENDUNG="mkv"
-FORMAT="matroska"
+# Video
+VIDEOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep 265 | head -n1)"
+if [ "x${VIDEOCODEC}" = "x" ] ; then
+	VIDEOCODEC="hevc"
+fi
 
 # 2018-07-06: [libx265 @ 0x813618d00] Possible presets: ultrafast superfast veryfast faster fast medium slow slower veryslow placebo
 # 2018-07-06: [libx265 @ 0x813618d00] Possible tunes: psnr ssim grain zerolatency fastdecode
 # 2018-07-06: [libx265 @ 0x813618d00] Possible profiles: main main10 mainstillpicture msp main-intra main10-intra main444-8 main444-intra main444-stillpicture main422-10 main422-10-intra main444-10 main444-10-intra main12 main12-intra main422-12 main422-12-intra main444-12 main444-12-intra main444-16-intra main444-16-stillpicture
 PROFILE="main10"
 VIDEO_OPTION="-profile:v ${PROFILE}"
-VIDEO_QUALITAET_0="-preset faster   ${VIDEO_OPTION} -crf 30 -tune zerolatency"	# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_1="-preset fast     ${VIDEO_OPTION} -crf 28 -tune fastdecode"	# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_2="-preset medium   ${VIDEO_OPTION} -crf 26"			# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_3="-preset medium   ${VIDEO_OPTION} -crf 24"			# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_4="-preset slow     ${VIDEO_OPTION} -crf 22"			# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_5="-preset slow     ${VIDEO_OPTION} -crf 20"			# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_6="-preset slower   ${VIDEO_OPTION} -crf 19"			# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_7="-preset slower   ${VIDEO_OPTION} -crf 18"			# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_0="-preset veryslow ${VIDEO_OPTION} -crf 30"			# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_1="-preset veryslow ${VIDEO_OPTION} -crf 28"			# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_2="-preset veryslow ${VIDEO_OPTION} -crf 26"			# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_3="-preset veryslow ${VIDEO_OPTION} -crf 24"			# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_4="-preset veryslow ${VIDEO_OPTION} -crf 22"			# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_5="-preset veryslow ${VIDEO_OPTION} -crf 20"			# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_6="-preset veryslow ${VIDEO_OPTION} -crf 19"			# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_7="-preset veryslow ${VIDEO_OPTION} -crf 18"			# von "0" (verlustfrei) bis "51"
 VIDEO_QUALITAET_8="-preset veryslow ${VIDEO_OPTION} -crf 17"			# von "0" (verlustfrei) bis "51"
 VIDEO_QUALITAET_9="-preset veryslow ${VIDEO_OPTION} -crf 16"			# von "0" (verlustfrei) bis "51"
 IFRAME="-keyint_min 2-8"
