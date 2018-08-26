@@ -5,62 +5,57 @@
 #
 #==============================================================================#
 
-VERSION="v2018080500"
+VERSION="v2018082600"
 
+### Qualität
 . ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
 #==============================================================================#
-### Video
-
-#------------------------------------------------------------------------------#
-### Bluray-kompatibele Werte errechnen
-
-. ${AVERZ}/Filmwandler_-_Blu-ray-Disc_-_AVC.txt
-
-# MPEG-4 Part 10 (AVC) / x264
-# Kompatibilität mit Blu-ray Disk funktioniert erst mit dem x264 ab Version vom 2010-04-25 (Bluray-kompatibel: --nal-hrd vbr)
-
-#------------------------------------------------------------------------------#
-# Betriebssystemabhängigkeiten
-
-#
-# Die internen (nativen) Codecs funktionieren immer (die sind ja fest drin),
-# die externen Bibliotheken sind oft besser,
-# müssen aber extra installiert werden.
-#
-# Weil die GPL-Lizenz, unter der Linux steht, nicht kompatiebel mit den Lizenzen
-# vieler Codec-Bibliotheken ist (z. B. solcher, die unter BSD-Lizenz stehen),
-# ist es auf den meisten Linux-Distributionen schwierig, diese Codec-Bibliotheken 
-# zu installieren.
-# Deshalb werden hier nur interne Codecs zur Verwendung vorgesehen.
-# (auch wenn sie schlechter oder sogar noch experimentell sind)
-#
-
-if [ "FreeBSD" = "$(uname -s)" ] ; then
-	VIDEOCODEC="libx264"
-else
-	VIDEOCODEC="h264"
-fi
-
-#==============================================================================#
-### Qualität
 
 ### Format
 ENDUNG="mts"
 FORMAT="mpegts"
 
+#==============================================================================#
+
 ### Audio
 AUDIOCODEC="ac3"				# a52
-AUDIO_QUALITAET_0="-b:a 128k"
-AUDIO_QUALITAET_1="-b:a 144k"
-AUDIO_QUALITAET_2="-b:a 168k"
-AUDIO_QUALITAET_3="-b:a 192k"
-AUDIO_QUALITAET_4="-b:a 224k"
-AUDIO_QUALITAET_5="-b:a 256k"
-AUDIO_QUALITAET_6="-b:a 296k"
-AUDIO_QUALITAET_7="-b:a 336k"
-AUDIO_QUALITAET_8="-b:a 392k"
-AUDIO_QUALITAET_9="-b:a 448k"
+
+if [ "${AUDIO_KANAELE}" -gt 2 ] ; then
+	AUDIO_QUALITAET_0="-b:a 160k"
+	AUDIO_QUALITAET_1="-b:a 184k"
+	AUDIO_QUALITAET_2="-b:a 216k"
+	AUDIO_QUALITAET_3="-b:a 256k"
+	AUDIO_QUALITAET_4="-b:a 296k"
+	AUDIO_QUALITAET_5="-b:a 344k"
+	AUDIO_QUALITAET_6="-b:a 400k"
+	AUDIO_QUALITAET_7="-b:a 472k"
+	AUDIO_QUALITAET_8="-b:a 552k"
+	AUDIO_QUALITAET_9="-b:a 640k"
+else
+	AUDIO_QUALITAET_0="-b:a 64k"
+	AUDIO_QUALITAET_1="-b:a 80k"
+	AUDIO_QUALITAET_2="-b:a 88k"
+	AUDIO_QUALITAET_3="-b:a 112k"
+	AUDIO_QUALITAET_4="-b:a 128k"
+	AUDIO_QUALITAET_5="-b:a 160k"
+	AUDIO_QUALITAET_6="-b:a 184k"
+	AUDIO_QUALITAET_7="-b:a 224k"
+	AUDIO_QUALITAET_8="-b:a 264k"
+	AUDIO_QUALITAET_9="-b:a 320k"
+fi
+
+
+# Video
+VIDEOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep 264 | head -n1)"
+if [ "x${VIDEOCODEC}" = "x" ] ; then
+	VIDEOCODEC="h264"
+fi
+
+### Bluray-kompatibele Werte errechnen
+# MPEG-4 Part 10 (AVC) / x264
+# Kompatibilität mit Blu-ray Disk funktioniert erst mit dem x264 ab Version vom 2010-04-25 (Bluray-kompatibel: --nal-hrd vbr)
+. ${AVERZ}/Filmwandler_-_Blu-ray-Disc_-_AVC.txt
 
 #==============================================================================#
 
