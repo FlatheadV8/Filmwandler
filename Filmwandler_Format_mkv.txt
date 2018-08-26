@@ -5,7 +5,7 @@
 #
 #==============================================================================#
 
-VERSION="v2018082500"
+VERSION="v2018082600"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -78,15 +78,15 @@ else
 	# Audio
 	AUDIOCODEC="aac"
 	if [ "${AUDIO_KANAELE}" -gt 2 ] ; then
-		AUDIO_QUALITAET_0="-b:a 128k"
-		AUDIO_QUALITAET_1="-b:a 160k"
-		AUDIO_QUALITAET_2="-b:a 176k"
-		AUDIO_QUALITAET_3="-b:a 224k"
-		AUDIO_QUALITAET_4="-b:a 256k"
-		AUDIO_QUALITAET_5="-b:a 512k"
-		AUDIO_QUALITAET_6="-b:a 368k"
-		AUDIO_QUALITAET_7="-b:a 448k"
-		AUDIO_QUALITAET_8="-b:a 528k"
+		AUDIO_QUALITAET_0="-b:a 160k"
+		AUDIO_QUALITAET_1="-b:a 184k"
+		AUDIO_QUALITAET_2="-b:a 216k"
+		AUDIO_QUALITAET_3="-b:a 256k"
+		AUDIO_QUALITAET_4="-b:a 296k"
+		AUDIO_QUALITAET_5="-b:a 344k"
+		AUDIO_QUALITAET_6="-b:a 400k"
+		AUDIO_QUALITAET_7="-b:a 472k"
+		AUDIO_QUALITAET_8="-b:a 552k"
 		AUDIO_QUALITAET_9="-b:a 640k"
 	else
 		AUDIO_QUALITAET_0="-b:a 64k"
