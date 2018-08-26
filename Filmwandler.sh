@@ -138,6 +138,10 @@ while [ "${#}" -ne "0" ]; do
                         TONSPUR="${2}"		# Tonspur (1, 2, 3, 4)
                         shift
                         ;;
+                -stereo)
+                        STEREO="-ac 2"		# Stereo-Ausgabe erzwingen
+                        shift
+                        ;;
                 -schnitt)
                         SCHNITTZEITEN="${2}"	# zum Beispiel zum Werbung entfernen (in Sekunden, Dezimaltrennzeichen ist der Punkt): -schnitt "10-432 520-833 1050-1280"
                         shift
@@ -180,6 +184,10 @@ while [ "${#}" -ne "0" ]; do
         # und nicht die erste verwendet werden soll,
         # dann wird so die 3. Tonspur angegeben (die Zaehlweise beginnt mit 0)
         -ton 2
+
+	# Stereo-Ausgabe erzwingen
+	# egal wieviele Audio-Kanäle der Originalfilm hat, der neue Film wird Stereo haben
+	-stereo
 
         # wenn die Bildaufloesung des Originalfilmes nicht automatisch ermittelt
         # werden kann, dann muss sie manuell als Parameter uebergeben werden
@@ -345,7 +353,6 @@ fi
 #echo "--------------------------------------------------------------------------------"
 #probe "${FILMDATEI}" 2>&1 | fgrep Video:
 #echo "--------------------------------------------------------------------------------"
-AUDIO_KANAELE="$(ffprobe -show_data -show_streams "${FILMDATEI}" 2>/dev/null | sed -e '1,/^codec_type=audio/ d' | awk -F'=' '/^channels=/{print $2}' | sort -nr | head -n1)"	# max. Anzahl der vorhandenen Audio-Kanäle
 FFPROBE="$(ffprobe "${FILMDATEI}" 2>&1 | fgrep Video: | sed 's/.* Video:/Video:/' | tr -s '[\[,\]]' '\n' | egrep '[0-9]x[0-9]|SAR |DAR | fps' | grep -Fv 'Stream #' | grep -Fv 'Video:' | tr -s '\n' ' ')"
 # tbn (FPS vom Container)= the time base in AVStream that has come from the container
 # tbc (FPS vom Codec) = the time base in AVCodecContext for the codec used for a particular stream
@@ -727,11 +734,21 @@ PAR_FAKTOR='${PAR_FAKTOR}'
 
 #------------------------------------------------------------------------------#
 
+AUDIO_KANAELE="$(ffprobe -show_data -show_streams "${FILMDATEI}" 2>/dev/null | sed -e '1,/^codec_type=audio/ d' | awk -F'=' '/^channels=/{print $2}' | sort -nr | head -n1)"	# max. Anzahl der vorhandenen Audio-Kanäle
+if [ "x${STEREO}" != "x" ] ; then
+	AUDIO_KANAELE="2"
+fi
+
+#------------------------------------------------------------------------------#
+
 if [ -r ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt ] ; then
+
 	OP_QUELLE="1"
+
 #echo "IN_FPS='${IN_FPS}'"
 #exit 24
 . ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt
+
 else
 	OP_QUELLE="2"
 
@@ -938,7 +955,18 @@ STREAM_AUDIO="$(ffprobe "${FILMDATEI}" 2>&1 | fgrep ' Stream ' | fgrep Audio:)"
 STREAMAUDIO="$(echo "${STREAM_AUDIO}" | wc -w | awk '{print $1}')"
 
 if [ "${STREAMAUDIO}" -gt 0 ] ; then
-	AUDIO_VERARBEITUNG_01="-map 0:a:${TSNAME} -c:a ${AUDIOCODEC} ${AUDIOQUALITAET}"
+	# soll Stereo-Ausgabe erzwungen werden?
+	if [ "x${STEREO}" = x ] ; then
+		AUDIO_VERARBEITUNG_01="-map 0:a:${TSNAME} -c:a ${AUDIOCODEC} ${AUDIOQUALITAET}"
+	else
+		# wurde die Ausgabe bereits durch die Codec-Optionen auf Stereo gesetzt?
+		BEREITS_AC2="$(echo "${AUDIOCODEC} ${AUDIOQUALITAET}" | fgrep "ac 2")"
+		if [ "x${BEREITS_AC2}" = x ] ; then
+			AUDIO_VERARBEITUNG_01="-map 0:a:${TSNAME} -c:a ${AUDIOCODEC} ${AUDIOQUALITAET} ${STEREO}"
+		else
+			AUDIO_VERARBEITUNG_01="-map 0:a:${TSNAME} -c:a ${AUDIOCODEC} ${AUDIOQUALITAET}"
+		fi
+	fi
 	AUDIO_VERARBEITUNG_02="-c:a copy"
 else
 	AUDIO_VERARBEITUNG_01="-an"
