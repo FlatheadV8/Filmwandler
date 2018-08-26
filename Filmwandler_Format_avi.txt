@@ -5,32 +5,26 @@
 #
 #==============================================================================#
 
-VERSION="v2018082300"
+VERSION="v2018082600"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
 #==============================================================================#
-# Betriebssystemabhängigkeiten
 
-#
-# Die internen (nativen) Codecs funktionieren immer (die sind ja fest drin),
-# die externen Bibliotheken sind oft besser,
-# müssen aber extra installiert werden.
-#
-# Weil die GPL-Lizenz, unter der Linux steht, nicht kompatiebel mit den Lizenzen
-# vieler Codec-Bibliotheken ist (z. B. solcher, die unter BSD-Lizenz stehen),
-# ist es auf den meisten Linux-Distributionen schwierig, diese Codec-Bibliotheken 
-# zu installieren.
-# Deshalb werden hier nur interne Codecs zur Verwendung vorgesehen.
-# (auch wenn sie schlechter oder sogar noch experimentell sind)
-#
+# Format
+ENDUNG="avi"
+FORMAT="avi"
+
+#==============================================================================#
 
 # Audio
+AUDIOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep mp3 | head -n1)"
+if [ "x${AUDIOCODEC}" = "x" ] ; then
+	AUDIOCODEC="mp3"			# MPEG-1 Layer 3
+fi
 
 # https://trac.ffmpeg.org/wiki/Encode/MP3
-
-if [ "FreeBSD" = "$(uname -s)" ] ; then
-	AUDIOCODEC="libmp3lame"			# MPEG-1 Layer 3
+if [ "${AUDIOCODEC}" = "libmp3lame" ] ; then
 	AUDIO_QUALITAET_0="-q:a 9 -ac 2"
 	AUDIO_QUALITAET_1="-q:a 8 -ac 2"
 	AUDIO_QUALITAET_2="-q:a 7 -ac 2"
@@ -42,7 +36,6 @@ if [ "FreeBSD" = "$(uname -s)" ] ; then
 	AUDIO_QUALITAET_8="-q:a 1 -ac 2"
 	AUDIO_QUALITAET_9="-q:a 1 -ac 2"
 else
-	AUDIOCODEC="mp3"			# MPEG-1 Layer 3
 	AUDIO_QUALITAET_0="-b:a 64k -ac 2"
 	AUDIO_QUALITAET_1="-b:a 80k -ac 2"
 	AUDIO_QUALITAET_2="-b:a 88k -ac 2"
@@ -55,12 +48,6 @@ else
 	AUDIO_QUALITAET_9="-b:a 320k -ac 2"
 fi
 
-
-#==============================================================================#
-
-# Format
-ENDUNG="avi"
-FORMAT="avi"
 
 # Video
 VIDEOCODEC="mpeg4"				# H.263+ ASP (https://trac.ffmpeg.org/wiki/Encode/MPEG-4)
