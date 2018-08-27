@@ -758,7 +758,7 @@ else
 
 
 	# Audio
-	AUDIOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep aac | head -n1)"
+	AUDIOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep aac | tr -s '-' '_' | head -n1)"
 	if [ "x${AUDIOCODEC}" = "x" ] ; then
 		AUDIOCODEC="aac"
 	fi
@@ -812,7 +812,7 @@ else
 
 
 	# Video
-	VIDEOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep 264 | head -n1)"
+	VIDEOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep 264 | tr -s '-' '_' | head -n1)"
 	if [ "x${VIDEOCODEC}" = "x" ] ; then
 		VIDEOCODEC="h264"
 	fi
