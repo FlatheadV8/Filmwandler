@@ -16,7 +16,7 @@ FORMAT="ogg"
 #==============================================================================#
 
 # Audio
-AUDIOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep vorbis | head -n1)"
+AUDIOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep vorbis | tr -s '-' '_' | head -n1)"
 if [ "x${AUDIOCODEC}" = "x" ] ; then
 	AUDIOCODEC="vorbis"
 fi
@@ -34,7 +34,7 @@ AUDIO_QUALITAET_8="-q:a 9"			# 0-10, 10 ist am besten
 AUDIO_QUALITAET_9="-q:a 10"			# 0-10, 10 ist am besten
 
 # Video
-VIDEOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep theora | head -n1)"
+VIDEOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep theora | tr -s '-' '_' | head -n1)"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
 	VIDEOCODEC="theora"
 fi
