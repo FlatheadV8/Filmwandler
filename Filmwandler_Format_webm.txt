@@ -52,7 +52,7 @@ FORMAT="webm"
 #==============================================================================#
 
 ### Audio
-AUDIOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep opus | head -n1)"
+AUDIOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep opus | tr -s '[-]' '_' | head -n1)"
 if [ "x${AUDIOCODEC}" = "x" ] ; then
 	AUDIOCODEC="${AUDIOCODEC} -ac 2"	# libopus kann z.Z. (August 2018) nur Stereo
 else
@@ -77,7 +77,7 @@ AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 512k"
 
 
 # Video
-VIDEOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep vp9 | head -n1)"
+VIDEOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep vp9 | tr -s '[-]' '_' | head -n1)"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
 	VIDEOCODEC="vp9"
 fi
