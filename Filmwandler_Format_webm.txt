@@ -16,89 +16,21 @@ VERSION="v2018082600"
 
 #==============================================================================#
 
-### https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio
-#
-#   Seit 2017 verfügt FFmpeg über einen eigenen, nativen Opus-Encoder
-#   und -Decoder.
-#   Die Mobil-Plattform Android unterstützt ab Version 5 (Lollipop)
-#   Opus eingebettet in das Matroska-Containerformat nativ.
-#
-
-#------------------------------------------------------------------------------#
-### VP9
-#
-### konstante Qualität
-# https://trac.ffmpeg.org/wiki/Encode/VP9#variableb -> Constant Quality
-# To trigger this mode, you must use a combination of "-crf" and "-b:v 0".
-# "-b:v" MUST be 0!
-#
-# https://developers.google.com/media/vp9/settings/vod/
-# Der Wert für "CRF" ist abhängig von der Bildhöhe:
-#        240 Pixel:   -crf 37
-#        360 Pixel:   -crf 36
-#        480 Pixel:   -crf 33
-#        720 Pixel:   -crf 32
-#       1080 Pixel:   -crf 31
-#       1440 Pixel:   -crf 24
-#       2160 Pixel:   -crf 15
-#               empfohlen: 15-35
-
-#==============================================================================#
-
 # Format
 ENDUNG="webm"
 FORMAT="webm"
 
 #==============================================================================#
 
-### Audio
-AUDIOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep opus | tr -s '[-]' '_' | head -n1)"
-if [ "x${AUDIOCODEC}" = "x" ] ; then
-	AUDIOCODEC="${AUDIOCODEC} -ac 2"	# libopus kann z.Z. (August 2018) nur Stereo
-else
-	AUDIOCODEC="opus -strict -2"		# interner Codec (FF) opus ist z.Z. (August 2018) noch experimentel
-fi
-
-## -vbr on -b:a 128k
-## -vbr 0 (fest 96k)
-## -vbr 1 (fest 96k)
-## -vbr 2 (fest 96k)
-AUDIO_OPTION="-vbr on -compression_level 10"
-AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 64k"
-AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 80k"
-AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 104k"
-AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 128k"
-AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 160k"
-AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 200k"
-AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 256k"
-AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 320k"
-AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 408k"
-AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 512k"
+# Audio
+. $(dirname ${0})/Filmwandler_Codec_Audio_opus.txt
 
 
 # Video
-VIDEOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep vp9 | tr -s '[-]' '_' | head -n1)"
-if [ "x${VIDEOCODEC}" = "x" ] ; then
-	VIDEOCODEC="vp9"
-fi
-
-# bei "-b:v 0" ergibt das eine "konstante Qualität" => bestes Ergebnis, wenn die Dateigröße egal ist
-# bei "-b:v 2000k" ergibt das eine "begrente Qualität" => konstante Qualität mit einer Bit-Raten-Obergrenze
-VIDEO_OPTION=""
-VIDEO_QUALITAET_0="-crf 25 -b:v $(echo "0.3 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"	# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_1="-crf 24 -b:v $(echo "0.5 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"	# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_2="-crf 23 -b:v $(echo "0.7 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"	# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_3="-crf 22 -b:v $(echo "1.1 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"	# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_4="-crf 21 -b:v $(echo "1.6 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"	# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_5="-crf 20 -b:v $(echo "2.4 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"	# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_6="-crf 19 -b:v $(echo "3.7 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"	# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_7="-crf 18 -b:v $(echo "5.7 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"	# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_8="-crf 17 -b:v $(echo "8.6 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"	# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_9="-crf 16 -b:v 0 ${VIDEO_OPTION}"	# von "0" (verlustfrei) bis "63"
+. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
 IFRAME="-keyint_min 2-8"
 
 #==============================================================================#
-# Funktionen
 
 FORMAT_BESCHREIBUNG="
 ********************************************************************************
