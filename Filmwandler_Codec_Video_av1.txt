@@ -1,0 +1,7 @@
+#
+# AV1
+#
+
+VERSION="v2018082800"
+
+AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | fgrep av1 | head -n1)"
