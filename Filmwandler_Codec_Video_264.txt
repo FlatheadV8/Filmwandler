@@ -4,9 +4,17 @@
 
 VERSION="v2018082800"
 
-AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | fgrep 264 | head -n1)"
+CODEC_PATTERN="h264"		# Beispiel: "h265|hevc"
+VIDEOCODEC="$(echo "${FFMPEG_LIB}" | fgrep "${CODEC_PATTERN}" | head -n1)"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
-	VIDEOCODEC="h264"
+	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | fgrep "${CODEC_PATTERN}" | head -n1)"
+	if [ "x${VIDEOCODEC}" = "x" ] ; then
+		echo ""
+		echo "Leider wird dieser Codec von der aktuell installierten Version"
+		echo "von FFmpeg nicht unterstützt!"
+		echo ""
+		exit 1
+	fi
 fi
 
 ### Bluray-kompatibele Werte errechnen
