@@ -5,7 +5,7 @@
 #
 #==============================================================================#
 
-VERSION="v2018082600"
+VERSION="v2018082800"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -22,59 +22,20 @@ FORMAT="flv"
 #==============================================================================#
 
 # Audio
-AUDIOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep mp3 | tr -s '-' '_' | head -n1)"
-if [ "x${AUDIOCODEC}" = "x" ] ; then
-	AUDIOCODEC="mp3"			# MPEG-1 Layer 3
-fi
-
-# https://trac.ffmpeg.org/wiki/Encode/MP3
-if [ "${AUDIOCODEC}" = "libmp3lame" ] ; then
-	AUDIO_QUALITAET_0="-q:a 9 -ac 2"
-	AUDIO_QUALITAET_1="-q:a 8 -ac 2"
-	AUDIO_QUALITAET_2="-q:a 7 -ac 2"
-	AUDIO_QUALITAET_3="-q:a 6 -ac 2"
-	AUDIO_QUALITAET_4="-q:a 5 -ac 2"
-	AUDIO_QUALITAET_5="-q:a 4 -ac 2"
-	AUDIO_QUALITAET_6="-q:a 3 -ac 2"
-	AUDIO_QUALITAET_7="-q:a 2 -ac 2"
-	AUDIO_QUALITAET_8="-q:a 1 -ac 2"
-	AUDIO_QUALITAET_9="-q:a 1 -ac 2"
-else
-	AUDIO_QUALITAET_0="-b:a 64k -ac 2"
-	AUDIO_QUALITAET_1="-b:a 80k -ac 2"
-	AUDIO_QUALITAET_2="-b:a 88k -ac 2"
-	AUDIO_QUALITAET_3="-b:a 112k -ac 2"
-	AUDIO_QUALITAET_4="-b:a 128k -ac 2"
-	AUDIO_QUALITAET_5="-b:a 160k -ac 2"
-	AUDIO_QUALITAET_6="-b:a 184k -ac 2"
-	AUDIO_QUALITAET_7="-b:a 224k -ac 2"
-	AUDIO_QUALITAET_8="-b:a 264k -ac 2"
-	AUDIO_QUALITAET_9="-b:a 320k -ac 2"
-fi
+. $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt
 
 
 # Video
-VIDEOCODEC="flv"				# H.263 ASP
-VIDEO_QUALITAET_0="-q:v 10"
-VIDEO_QUALITAET_1="-q:v 9"
-VIDEO_QUALITAET_2="-q:v 8"
-VIDEO_QUALITAET_3="-q:v 7"
-VIDEO_QUALITAET_4="-q:v 6"
-VIDEO_QUALITAET_5="-q:v 5"
-VIDEO_QUALITAET_6="-q:v 4"
-VIDEO_QUALITAET_7="-q:v 3"
-VIDEO_QUALITAET_8="-q:v 2"
-VIDEO_QUALITAET_9="-q:v 1"
+. $(dirname ${0})/Filmwandler_Codec_Video_flv.txt
 IFRAME="-keyint_min 2-8"
 
 #==============================================================================#
-# Funktionen
 
 FORMAT_BESCHREIBUNG="
 ********************************************************************************
 * Name:			FlashV                                                 *
 * ENDUNG:		.flv                                                   *
-* Video-Kodierung:	H.263 (MPEG-4 Part 2 / ASP / Sorenson Spark)           *
+* Video-Kodierung:	H.263+ (MPEG-4 Part 2 / ASP / Sorenson Spark)          *
 * Audio-Kodierung:	MP3                                                    *
 * Beschreibung:                                                                *
 *	- ab Adobe Flash Player Version 6 abspielbar                           *
