@@ -4,7 +4,18 @@
 
 VERSION="v2018082800"
 
-AUDIOCODEC="ac3"
+CODEC_PATTERN="ac3"		# Beispiel: "h265|hevc"
+AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
+if [ "x${AUDIOCODEC}" = "x" ] ; then
+	AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
+	if [ "x${AUDIOCODEC}" = "x" ] ; then
+		echo ""
+		echo "Leider wird dieser Codec von der aktuell installierten Version"
+		echo "von FFmpeg nicht unterstützt!"
+		echo ""
+		exit 1
+	fi
+fi
 
 if [ "${AUDIO_KANAELE}" -gt 2 ] ; then
         AUDIO_QUALITAET_0="-b:a 160k"
