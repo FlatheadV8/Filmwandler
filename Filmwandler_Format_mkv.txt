@@ -14,7 +14,33 @@ VERSION="v2018082800"
 # Format
 ENDUNG="mkv"
 FORMAT="matroska"
+IFRAME="-keyint_min 2-8"
 
+#==============================================================================#
+#==============================================================================#
+
+# Audio
+. $(dirname ${0})/Filmwandler_Codec_Audio_aac.txt
+
+
+# Video
+. $(dirname ${0})/Filmwandler_Codec_Video_265.txt
+
+#==============================================================================#
+
+FORMAT_BESCHREIBUNG="
+********************************************************************************
+* Name:			DivX10                                                 *
+* ENDUNG:		.mkv                                                   *
+* Video-Kodierung:	H.265/HEVC (entwickelt für 4K)                         *
+* Audio-Kodierung:	AAC        (mehrkanalfähiger Nachfolger von MP3)       *
+* Beschreibung:                                                                *
+*	- H.265/HEVC wird seit Android 5 'Lollipop' unterstützt                *
+*	- kodiert 5-10 mal langsamer als AVCHD/MP4                             *
+********************************************************************************
+"
+
+#==============================================================================#
 #==============================================================================#
 
 #
@@ -30,28 +56,16 @@ FORMAT="matroska"
 
 ### Video
 #. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
-#IFRAME="-keyint_min 2-8"
 
 #==============================================================================#
 
-# Audio
-. $(dirname ${0})/Filmwandler_Codec_Audio_aac.txt
-
-
-# Video
-. $(dirname ${0})/Filmwandler_Codec_Video_265.txt
-IFRAME="-keyint_min 2-8"
-
-#==============================================================================#
-
-FORMAT_BESCHREIBUNG="
-********************************************************************************
-* Name:			DivX10                                                 *
-* ENDUNG:		.mkv                                                   *
-* Video-Kodierung:	H.265/HEVC (entwickelt für 4K)                         *
-* Audio-Kodierung:	AAC        (mehrkanalfähiger Nachfolger von MP3)       *
-* Beschreibung:                                                                *
-*	- H.265/HEVC wird seit Android 5 'Lollipop' unterstützt                *
-*	- kodiert 5-10 mal langsamer als AVCHD/MP4                             *
-********************************************************************************
-"
+#FORMAT_BESCHREIBUNG="
+#********************************************************************************
+#* Name:                 free MKV                                               *
+#* ENDUNG:               .mkv                                                   *
+#* Video-Kodierung:      VP9                                                    *
+#* Audio-Kodierung:      MP3                                                    *
+#* Beschreibung:                                                                *
+#*       - einziges freies Format mit Unterstützung von LG (LG webOS TV)        *
+#********************************************************************************
+#"
