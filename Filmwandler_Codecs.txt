@@ -1,0 +1,79 @@
+#==============================================================================#
+#
+# 2018
+# ffmpeg version 4.0 Copyright (c) 2000-2018 the FFmpeg developers
+#   built with FreeBSD clang version 4.0.0
+#
+#==============================================================================#
+#
+# von FFmpeg unterstützte Codecs
+#       > ffmpeg -formats
+#
+#==============================================================================#
+# Lib
+        #----------------------------------------------------------------------#
+        # Video
+                libopenh264
+                libopenjpeg
+                libtheora
+                libvpx
+                libx264
+                libx265
+                libxvid
+        #----------------------------------------------------------------------#
+        # Audio
+                libopencore_amrnb
+                libfdk_aac
+                libmp3lame
+                libopus
+                libspeex
+                libvorbis
+
+#==============================================================================#
+# nativ
+        #----------------------------------------------------------------------#
+        # Video
+                alias_pix
+                apng
+                dirac
+                dnxhd
+                fits
+                flv
+                gif
+                h261
+                h263
+                h264
+                hevc
+                live_flv
+                mjpeg
+                mjpeg_2000
+                mpeg1video
+                mpeg2video
+                rawvideo
+                roq
+                smjpeg
+                v210
+                v210x
+        #----------------------------------------------------------------------#
+        # Audio
+                aac
+                ac3
+                adts
+                aptx
+                aptx_hd
+                dts
+                dtshd
+                eac3
+                flac
+                g722
+                g723_1
+                g726
+                g726le
+                mlp
+                mp2
+                mp3
+                opus
+                sbc
+                truehd
+                tta
+#==============================================================================#
