@@ -1,0 +1,7 @@
+#
+# VP8
+#
+
+VERSION="v2018082800"
+
+VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | fgrep vp8 | head -n1)"
