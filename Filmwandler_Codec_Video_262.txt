@@ -4,7 +4,18 @@
 
 VERSION="v2018082800"
 
-VIDEOCODEC="mpeg2video"
+CODEC_PATTERN="mpeg2video"		# Beispiel: "h265|hevc"
+VIDEOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
+if [ "x${VIDEOCODEC}" = "x" ] ; then
+	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
+	if [ "x${VIDEOCODEC}" = "x" ] ; then
+		echo ""
+		echo "Leider wird dieser Codec von der aktuell installierten Version"
+		echo "von FFmpeg nicht unterstützt!"
+		echo ""
+		exit 1
+	fi
+fi
 
 VIDEO_OPTION=""
 VIDEO_QUALITAET_0="-b:v $(echo "1 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
