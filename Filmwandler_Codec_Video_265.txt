@@ -12,9 +12,17 @@ VERSION="v2018082800"
 
 #------------------------------------------------------------------------------#
 
-AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | fgrep 265 | head -n1)"
+CODEC_PATTERN="h265|hevc"		# Beispiel: "h265|hevc"
+VIDEOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
-        VIDEOCODEC="hevc"
+	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
+	if [ "x${VIDEOCODEC}" = "x" ] ; then
+		echo ""
+		echo "Leider wird dieser Codec von der aktuell installierten Version"
+		echo "von FFmpeg nicht unterstützt!"
+		echo ""
+		exit 1
+	fi
 fi
 
 # 2018-07-06: [libx265 @ 0x813618d00] Possible presets: ultrafast superfast veryfast faster fast medium slow slower veryslow placebo
