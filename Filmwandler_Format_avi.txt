@@ -10,6 +10,53 @@ VERSION="v2018082800"
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
 #==============================================================================#
+#
+#  * Maximale Auflösung :
+#                        720 x 480 zu 30 B/s (NTSC)
+#                        720 x 576 zu 25 B/s (PAL)
+#  * Mindestauflösung : 16x16
+#  * Maximale Bildfrequenz bei progressiven Quellen : 30 Bilder pro Sekunde
+#  * Maximale Feldrate bei Interlace-Quellen : 60 Felder pro Sekunde
+#  * Es können keine Disks mit höheren Auflösungen als 720 x 576 Pixel wiedergegeben werden.
+#
+#    HGC        -  720x348 = 250560 Bildpunkte (Pixel)
+#    MDA        -  720x350 = 252000 Bildpunkte (Pixel)
+#    Apple_Lisa -  720x364 = 262080 Bildpunkte (Pixel)
+#    WGA        -  720x400 = 288000 Bildpunkte (Pixel)
+# => NTSC       -  720x480 = 345600 Bildpunkte (Pixel)
+#    WVGA2      -  720x540 = 388800 Bildpunkte (Pixel)
+# => PAL        -  720x576 = 414720 Bildpunkte (Pixel)
+#
+
+if [ "${IN_BREIT}" -gt 720 -o "${IN_HOCH}" -gt 480 ] ; then
+	if [ "${IN_FPS}" -gt 50 ] ; then
+		# NTSC i
+		if [ "${IN_HOCH}" -gt 480 ] ; then
+			SOLL_SCALE="scale=720x480"
+		fi
+	else
+		if [ "${IN_FPS}" -gt 30 ] ; then
+			# PAL i
+			if [ "${IN_HOCH}" -gt 576 ] ; then
+				SOLL_SCALE="scale=720x576"
+			fi
+		else
+			if [ "${IN_FPS}" -gt 25 ] ; then
+				# NTSC p
+				if [ "${IN_HOCH}" -gt 480 ] ; then
+					SOLL_SCALE="scale=720x480"
+				fi
+			else
+				# PAL p
+				if [ "${IN_HOCH}" -gt 576 ] ; then
+					SOLL_SCALE="scale=720x576"
+				fi
+			fi
+		fi
+	fi
+fi
+
+#==============================================================================#
 
 # Format
 ENDUNG="avi"
@@ -18,7 +65,11 @@ FORMAT="avi"
 #==============================================================================#
 
 # Audio
-. $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt
+if [ "${AUDIO_KANAELE}" -gt 2 ] ; then
+. $(dirname ${0})/Filmwandler_Codec_Audio_ac3.txt	# 5.1
+else
+. $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt	# Mono/Stereo
+fi
 
 
 # Video
@@ -41,30 +92,3 @@ FORMAT_BESCHREIBUNG="
 *	- hohe Kompatibilität mit Konsumerelektronik (DivX 5)                  *
 ********************************************************************************
 "
-
-#==============================================================================#
-# LG BD-P1580
-#==============================================================================#
-#==============================================================================#
-### To Do
-#==============================================================================#
-#==============================================================================#
-# DivX -> avi + mpeg4 + mp3 (Mono/Stereo)
-# DivX -> avi + mpeg4 + ac3 (5.1)
-#                        720 x 480 zu 30 B/s
-#                        720 x 576 zu 25 B/s
-#  * Mindestauflösung : 16x16
-#  * Maximale Bildfrequenz bei progressiven Quellen : 30 Bilder pro Sekunde
-#  * Maximale Feldrate bei Interlace-Quellen : 60 Felder pro Sekunde
-#  * Es können keine Disks mit höheren Auflösungen als 720 x 576 Pixel wiedergegeben werden.
-#------------------------------------------------------------------------------#
-#
-#FILMDATEI="/cifs/minidlna/Videos/Test/Format_avi/Test_avi.avi"
-#
-### 2997/125
-#R_FPS="$(ffprobe -show_data -show_streams "${FILMDATEI}" 2>/dev/null | egrep '^codec_type=|^r_frame_rate=' | egrep -A1 '^codec_type=video' | awk -F'=' '/^r_frame_rate=/{print $2}' | sed 's|/| |')"
-#
-#A_FPS="$(echo "${R_FPS}" | wc -w)"
-#if [ "${A_FPS}" -gt 1 ] ; then
-#	R_FPS="$(echo "${R_FPS}" | awk '{print $1 / $2}')"
-#fi
