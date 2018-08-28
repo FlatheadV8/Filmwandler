@@ -1,10 +1,21 @@
 #
-# MP2
+# MP2 - MPEG-1 Layer 2
 #
 
 VERSION="v2018082800"
 
-AUDIOCODEC="mp2"                                        # MPEG-1 Layer 2
+CODEC_PATTERN="mp2"		# Beispiel: "h265|hevc"
+AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
+if [ "x${AUDIOCODEC}" = "x" ] ; then
+	AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
+	if [ "x${AUDIOCODEC}" = "x" ] ; then
+		echo ""
+		echo "Leider wird dieser Codec von der aktuell installierten Version"
+		echo "von FFmpeg nicht unterstützt!"
+		echo ""
+		exit 1
+	fi
+fi
 
 AUDIO_OPTION="-ac 2"
 AUDIO_QUALITAET_0="-b:a 64k ${AUDIO_OPTION}"            # 96k
