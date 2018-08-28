@@ -15,11 +15,19 @@ VERSION="v2018082800"
 
 #------------------------------------------------------------------------------#
 
-AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | fgrep opus | head -n1)"
+CODEC_PATTERN="opus"		# Beispiel: "h265|hevc"
+AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
 if [ "x${AUDIOCODEC}" = "x" ] ; then
-        AUDIOCODEC="${AUDIOCODEC} -ac 2"        # libopus kann z.Z. (August 2018) nur Stereo
+	AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1) -strict -2"	# interner Codec (FF) opus ist z.Z. (August 2018) noch experimentel
+	if [ "x${AUDIOCODEC}" = "x" ] ; then
+		echo ""
+		echo "Leider wird dieser Codec von der aktuell installierten Version"
+		echo "von FFmpeg nicht unterstützt!"
+		echo ""
+		exit 1
+	fi
 else
-        AUDIOCODEC="opus -strict -2"            # interner Codec (FF) opus ist z.Z. (August 2018) noch experimentel
+	AUDIOCODEC="${AUDIOCODEC} -ac 2"        # libopus kann z.Z. (August 2018) nur Stereo
 fi
 
 ## -vbr on -b:a 128k
