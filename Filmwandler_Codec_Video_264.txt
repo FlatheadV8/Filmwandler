@@ -1,0 +1,13 @@
+#
+# H.264 / AVC / MPEG-4 Part 10
+#
+
+VERSION="v2018082800"
+
+AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | fgrep 264 | head -n1)"
+if [ "x${VIDEOCODEC}" = "x" ] ; then
+	VIDEOCODEC="h264"
+fi
+
+### Bluray-kompatibele Werte errechnen
+. ${AVERZ}/Filmwandler_-_Blu-ray-Disc_-_AVC.txt
