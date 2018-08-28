@@ -32,9 +32,17 @@ VERSION="v2018082800"
 # -q:a 0.12             # undokumentiert (0.1-?) / 0.12 ~ 128k
 #------------------------------------------------------------------------------#
 
-AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | fgrep aac | head -n1)"
+CODEC_PATTERN="aac"		# Beispiel: "h265|hevc"
+AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
 if [ "x${AUDIOCODEC}" = "x" ] ; then
-        AUDIOCODEC="aac"
+	AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
+	if [ "x${AUDIOCODEC}" = "x" ] ; then
+		echo ""
+		echo "Leider wird dieser Codec von der aktuell installierten Version"
+		echo "von FFmpeg nicht unterstützt!"
+		echo ""
+		exit 1
+	fi
 fi
 
 if [ "${AUDIOCODEC}" = "libfdk_aac" ] ; then
