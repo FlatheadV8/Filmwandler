@@ -11,7 +11,18 @@ VERSION="v2018082800"
 #
 #------------------------------------------------------------------------------#
 
-VIDEOCODEC="mpeg4"                              # MPEG-4 Teil 2
+CODEC_PATTERN="mpeg4"		# Beispiel: "h265|hevc"
+VIDEOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
+if [ "x${VIDEOCODEC}" = "x" ] ; then
+	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
+	if [ "x${VIDEOCODEC}" = "x" ] ; then
+		echo ""
+		echo "Leider wird dieser Codec von der aktuell installierten Version"
+		echo "von FFmpeg nicht unterstützt!"
+		echo ""
+		exit 1
+	fi
+fi
 
 #VIDEO_OPTION="-vtag DX50"                      # DivX 5 / unser Blu-ray-Player mag den vtag nicht
 VIDEO_QUALITAET_0="-q:v 7 ${VIDEO_OPTION}"      # qscale:v 1 - 31
