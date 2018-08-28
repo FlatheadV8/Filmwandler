@@ -16,45 +16,14 @@ FORMAT="ogg"
 #==============================================================================#
 
 # Audio
-AUDIOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep vorbis | tr -s '-' '_' | head -n1)"
-if [ "x${AUDIOCODEC}" = "x" ] ; then
-	AUDIOCODEC="vorbis"
-fi
+. $(dirname ${0})/Filmwandler_Codec_Audio_vorbis.txt
 
-# -q:a 3 (Standard)
-AUDIO_QUALITAET_0="-q:a 1"			# 0-10, 10 ist am besten
-AUDIO_QUALITAET_1="-q:a 2"			# 0-10, 10 ist am besten
-AUDIO_QUALITAET_2="-q:a 3"			# 0-10, 10 ist am besten
-AUDIO_QUALITAET_3="-q:a 4"			# 0-10, 10 ist am besten
-AUDIO_QUALITAET_4="-q:a 5"			# 0-10, 10 ist am besten
-AUDIO_QUALITAET_5="-q:a 6"			# 0-10, 10 ist am besten
-AUDIO_QUALITAET_6="-q:a 7"			# 0-10, 10 ist am besten
-AUDIO_QUALITAET_7="-q:a 8"			# 0-10, 10 ist am besten
-AUDIO_QUALITAET_8="-q:a 9"			# 0-10, 10 ist am besten
-AUDIO_QUALITAET_9="-q:a 10"			# 0-10, 10 ist am besten
 
 # Video
-VIDEOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep theora | tr -s '-' '_' | head -n1)"
-if [ "x${VIDEOCODEC}" = "x" ] ; then
-	VIDEOCODEC="theora"
-fi
-
-# -b:v 200k (Standard)
-VIDEO_OPTION=""
-VIDEO_QUALITAET_0="-q:v 1 ${VIDEO_OPTION}"	# 0-10, 10 ist am besten
-VIDEO_QUALITAET_1="-q:v 2 ${VIDEO_OPTION}"	# 0-10, 10 ist am besten
-VIDEO_QUALITAET_2="-q:v 3 ${VIDEO_OPTION}"	# 0-10, 10 ist am besten
-VIDEO_QUALITAET_3="-q:v 4 ${VIDEO_OPTION}"	# 0-10, 10 ist am besten
-VIDEO_QUALITAET_4="-q:v 5 ${VIDEO_OPTION}"	# 0-10, 10 ist am besten
-VIDEO_QUALITAET_5="-q:v 6 ${VIDEO_OPTION}"	# 0-10, 10 ist am besten
-VIDEO_QUALITAET_6="-q:v 7 ${VIDEO_OPTION}"	# 0-10, 10 ist am besten
-VIDEO_QUALITAET_7="-q:v 8 ${VIDEO_OPTION}"	# 0-10, 10 ist am besten
-VIDEO_QUALITAET_8="-q:v 9 ${VIDEO_OPTION}"	# 0-10, 10 ist am besten
-VIDEO_QUALITAET_9="-q:v 10 ${VIDEO_OPTION}"	# 0-10, 10 ist am besten
+. $(dirname ${0})/Filmwandler_Codec_Video_theora.txt
 IFRAME="-keyint_min 2-8"
 
 #==============================================================================#
-# Funktionen
 
 FORMAT_BESCHREIBUNG="
 ********************************************************************************
