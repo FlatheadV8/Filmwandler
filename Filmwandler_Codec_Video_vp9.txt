@@ -1,0 +1,45 @@
+#
+# VP9
+#
+
+VERSION="v2018082800"
+
+#------------------------------------------------------------------------------#
+
+### konstante Qualität
+# https://trac.ffmpeg.org/wiki/Encode/VP9#variableb -> Constant Quality
+# To trigger this mode, you must use a combination of "-crf" and "-b:v 0".
+# "-b:v" MUST be 0!
+#
+# https://developers.google.com/media/vp9/settings/vod/
+# Der Wert für "CRF" ist abhängig von der Bildhöhe:
+#        240 Pixel:   -crf 37
+#        360 Pixel:   -crf 36
+#        480 Pixel:   -crf 33
+#        720 Pixel:   -crf 32
+#       1080 Pixel:   -crf 31
+#       1440 Pixel:   -crf 24
+#       2160 Pixel:   -crf 15
+#               empfohlen: 15-35
+
+#------------------------------------------------------------------------------#
+
+VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | fgrep vp9 | head -n1)"
+if [ "x${VIDEOCODEC}" = "x" ] ; then
+        VIDEOCODEC="vp9"
+fi
+
+# bei "-b:v 0" ergibt das eine "konstante Qualität" => bestes Ergebnis, wenn die Dateigröße egal ist
+# bei "-b:v 2000k" ergibt das eine "begrente Qualität" => konstante Qualität mit einer Bit-Raten-Obergrenze
+
+VIDEO_OPTION=""
+VIDEO_QUALITAET_0="-crf 25 -b:v $(echo "0.3 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"     # von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_1="-crf 24 -b:v $(echo "0.5 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"     # von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_2="-crf 23 -b:v $(echo "0.7 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"     # von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_3="-crf 22 -b:v $(echo "1.1 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"     # von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_4="-crf 21 -b:v $(echo "1.6 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"     # von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_5="-crf 20 -b:v $(echo "2.4 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"     # von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_6="-crf 19 -b:v $(echo "3.7 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"     # von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_7="-crf 18 -b:v $(echo "5.7 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"     # von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_8="-crf 17 -b:v $(echo "8.6 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"     # von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_9="-crf 16 -b:v 0 ${VIDEO_OPTION}"      # von "0" (verlustfrei) bis "63"
