@@ -41,3 +41,30 @@ FORMAT_BESCHREIBUNG="
 *	- hohe Kompatibilität mit Konsumerelektronik (DivX 5)                  *
 ********************************************************************************
 "
+
+#==============================================================================#
+# LG BD-P1580
+#==============================================================================#
+#==============================================================================#
+### To Do
+#==============================================================================#
+#==============================================================================#
+# DivX -> avi + mpeg4 + mp3 (Mono/Stereo)
+# DivX -> avi + mpeg4 + ac3 (5.1)
+#                        720 x 480 zu 30 B/s
+#                        720 x 576 zu 25 B/s
+#  * Mindestauflösung : 16x16
+#  * Maximale Bildfrequenz bei progressiven Quellen : 30 Bilder pro Sekunde
+#  * Maximale Feldrate bei Interlace-Quellen : 60 Felder pro Sekunde
+#  * Es können keine Disks mit höheren Auflösungen als 720 x 576 Pixel wiedergegeben werden.
+#------------------------------------------------------------------------------#
+#
+#FILMDATEI="/cifs/minidlna/Videos/Test/Format_avi/Test_avi.avi"
+#
+### 2997/125
+#R_FPS="$(ffprobe -show_data -show_streams "${FILMDATEI}" 2>/dev/null | egrep '^codec_type=|^r_frame_rate=' | egrep -A1 '^codec_type=video' | awk -F'=' '/^r_frame_rate=/{print $2}' | sed 's|/| |')"
+#
+#A_FPS="$(echo "${R_FPS}" | wc -w)"
+#if [ "${A_FPS}" -gt 1 ] ; then
+#	R_FPS="$(echo "${R_FPS}" | awk '{print $1 / $2}')"
+#fi
