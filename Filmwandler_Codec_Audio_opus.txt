@@ -1,0 +1,39 @@
+#
+# Opus
+#
+
+VERSION="v2018082800"
+
+#------------------------------------------------------------------------------#
+
+### https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio
+#
+#   Seit 2017 verfügt FFmpeg über einen eigenen, nativen Opus-Encoder
+#   und -Decoder.
+#   Die Mobil-Plattform Android unterstützt ab Version 5 (Lollipop)
+#   Opus eingebettet in das Matroska-Containerformat nativ.
+
+#------------------------------------------------------------------------------#
+
+AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | fgrep opus | head -n1)"
+if [ "x${AUDIOCODEC}" = "x" ] ; then
+        AUDIOCODEC="${AUDIOCODEC} -ac 2"        # libopus kann z.Z. (August 2018) nur Stereo
+else
+        AUDIOCODEC="opus -strict -2"            # interner Codec (FF) opus ist z.Z. (August 2018) noch experimentel
+fi
+
+## -vbr on -b:a 128k
+## -vbr 0 (fest 96k)
+## -vbr 1 (fest 96k)
+## -vbr 2 (fest 96k)
+AUDIO_OPTION="-vbr on -compression_level 10"
+AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 64k"
+AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 80k"
+AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 104k"
+AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 128k"
+AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 160k"
+AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 200k"
+AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 256k"
+AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 320k"
+AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 408k"
+AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 512k"
