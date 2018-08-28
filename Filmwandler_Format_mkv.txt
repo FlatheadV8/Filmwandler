@@ -5,43 +5,9 @@
 #
 #==============================================================================#
 
-VERSION="v2018082600"
+VERSION="v2018082800"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
-
-#==============================================================================#
-# H.265
-
-# http://x265.org/
-# https://www.heise.de/newsticker/meldung/Videokodierung-HEVC-H-265-Encoder-haelt-Einzug-bei-FFmpeg-und-LibAV-2113223.html
-# https://github.com/OpenHEVC/openHEVC
-
-#------------------------------------------------------------------------------#
-# AAC
-#
-# https://trac.ffmpeg.org/wiki/Encode/AAC
-#
-#------------------------------------------------------------------------------#
-
-### https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio
-#
-#   Seit 2017 verfügt FFmpeg über einen eigenen, nativen Opus-Encoder
-#   und -Decoder.
-#   Die Mobil-Plattform Android unterstützt ab Version 5 (Lollipop)
-#   Opus eingebettet in das Matroska-Containerformat nativ.
-
-### libfdk_aac
-#
-# laut Debian ist libfdk_aac "non-free"-Licenc
-# laut FSF, Fedora, RedHat ist libfdk_aac "free"-Licenc
-#
-# http://wiki.hydrogenaud.io/index.php?title=Fraunhofer_FDK_AAC#Recommended_Sampling_Rate_and_Bitrate_Combinations
-#
-# libfdk_aac -> Note, the VBR setting is unsupported and only works with some parameter combinations.
-#
-# FDK AAC kann im Modus "VBR" keine beliebige Kombination von Tonkanäle, Bit-Rate und Saple-Rate verarbeiten!
-# Will man "VBR" verwenden, dann muss man explizit alle drei Parameter in erlaubter Größe angeben.
-#
 
 #==============================================================================#
 
@@ -52,77 +18,14 @@ FORMAT="matroska"
 #==============================================================================#
 
 # Audio
-AUDIOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep aac | tr -s '-' '_' | head -n1)"
-if [ "x${AUDIOCODEC}" = "x" ] ; then
-	AUDIOCODEC="aac"
-fi
-
-if [ "${AUDIOCODEC}" = "libfdk_aac" ] ; then
-	# Audio
-	AUDIO_QUALITAET_0="-vbr 1"			# 1 bis 5, 4 empfohlen
-	AUDIO_QUALITAET_1="-vbr 2"			# 1 bis 5, 4 empfohlen
-	AUDIO_QUALITAET_2="-vbr 3"			# 1 bis 5, 4 empfohlen
-	AUDIO_QUALITAET_3="-vbr 4"			# 1 bis 5, 4 empfohlen
-	AUDIO_QUALITAET_4="-vbr 4"			# 1 bis 5, 4 empfohlen
-	AUDIO_QUALITAET_5="-vbr 4"			# 1 bis 5, 4 empfohlen
-	AUDIO_QUALITAET_6="-vbr 5"			# 1 bis 5, 4 empfohlen
-	AUDIO_QUALITAET_7="-vbr 5"			# 1 bis 5, 4 empfohlen
-	AUDIO_QUALITAET_8="-vbr 5"			# 1 bis 5, 4 empfohlen
-	AUDIO_QUALITAET_9="-vbr 5"			# 1 bis 5, 4 empfohlen
-
-	VIDEOCODEC="libx265"
-else
-	if [ "${AUDIO_KANAELE}" -gt 2 ] ; then
-		AUDIO_QUALITAET_0="-b:a 160k"
-		AUDIO_QUALITAET_1="-b:a 184k"
-		AUDIO_QUALITAET_2="-b:a 216k"
-		AUDIO_QUALITAET_3="-b:a 256k"
-		AUDIO_QUALITAET_4="-b:a 296k"
-		AUDIO_QUALITAET_5="-b:a 344k"
-		AUDIO_QUALITAET_6="-b:a 400k"
-		AUDIO_QUALITAET_7="-b:a 472k"
-		AUDIO_QUALITAET_8="-b:a 552k"
-		AUDIO_QUALITAET_9="-b:a 640k"
-	else
-		AUDIO_QUALITAET_0="-b:a 64k"
-		AUDIO_QUALITAET_1="-b:a 80k"
-		AUDIO_QUALITAET_2="-b:a 88k"
-		AUDIO_QUALITAET_3="-b:a 112k"
-		AUDIO_QUALITAET_4="-b:a 128k"
-		AUDIO_QUALITAET_5="-b:a 160k"
-		AUDIO_QUALITAET_6="-b:a 184k"
-		AUDIO_QUALITAET_7="-b:a 224k"
-		AUDIO_QUALITAET_8="-b:a 264k"
-		AUDIO_QUALITAET_9="-b:a 320k"
-	fi
-fi
+. $(dirname ${0})/Filmwandler_Codec_Audio_aac.txt
 
 
 # Video
-VIDEOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep 265 | tr -s '-' '_' | head -n1)"
-if [ "x${VIDEOCODEC}" = "x" ] ; then
-	VIDEOCODEC="hevc"
-fi
-
-# 2018-07-06: [libx265 @ 0x813618d00] Possible presets: ultrafast superfast veryfast faster fast medium slow slower veryslow placebo
-# 2018-07-06: [libx265 @ 0x813618d00] Possible tunes: psnr ssim grain zerolatency fastdecode
-# 2018-07-06: [libx265 @ 0x813618d00] Possible profiles: main main10 mainstillpicture msp main-intra main10-intra main444-8 main444-intra main444-stillpicture main422-10 main422-10-intra main444-10 main444-10-intra main12 main12-intra main422-12 main422-12-intra main444-12 main444-12-intra main444-16-intra main444-16-stillpicture
-PROFILE="main10"
-VIDEO_OPTION="-profile:v ${PROFILE}"
-VIDEO_QUALITAET_0="-preset veryslow ${VIDEO_OPTION} -crf 30"			# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_1="-preset veryslow ${VIDEO_OPTION} -crf 28"			# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_2="-preset veryslow ${VIDEO_OPTION} -crf 26"			# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_3="-preset veryslow ${VIDEO_OPTION} -crf 24"			# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_4="-preset veryslow ${VIDEO_OPTION} -crf 22"			# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_5="-preset veryslow ${VIDEO_OPTION} -crf 20"			# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_6="-preset veryslow ${VIDEO_OPTION} -crf 19"			# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_7="-preset veryslow ${VIDEO_OPTION} -crf 18"			# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_8="-preset veryslow ${VIDEO_OPTION} -crf 17"			# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_9="-preset veryslow ${VIDEO_OPTION} -crf 16"			# von "0" (verlustfrei) bis "51"
+. $(dirname ${0})/Filmwandler_Codec_Video_265.txt
 IFRAME="-keyint_min 2-8"
 
 #==============================================================================#
-# Funktionen
 
 FORMAT_BESCHREIBUNG="
 ********************************************************************************
