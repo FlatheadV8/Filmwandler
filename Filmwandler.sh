@@ -28,7 +28,7 @@
 
 
 #VERSION="v2017102900"
-VERSION="v2018082600"
+VERSION="v2018082800"
 
 
 BILDQUALIT="auto"
@@ -347,9 +347,22 @@ fi
 #  720x576 SAR 64:45 DAR 16:9
 #  1920x816 SAR 1:1 DAR 40:17
 #------------------------------------------------------------------------------#
+### hier wird ermittelt, wieviele Audio-Kanäle max. um Film enthalten sind
 
+AUDIO_KANAELE="$(ffprobe -show_data -show_streams "${FILMDATEI}" 2>/dev/null | sed -e '1,/^codec_type=audio/ d' | awk -F'=' '/^channels=/{print $2}' | sort -nr | head -n1)"	# max. Anzahl der vorhandenen Audio-Kanäle
+if [ "x${STEREO}" != "x" ] ; then
+	AUDIO_KANAELE="2"
+fi
 
+#------------------------------------------------------------------------------#
+### hier wird eine Liste externer verfügbarer Codecs erstellt
+
+FFMPEG_LIB="$((ffmpeg -formats >/dev/null) 2>&1 | tr -s ' ' '\n' | egrep '^[-][-]enable[-]' | sed 's/^[-]*enable[-]*//;s/[-]/_/g' | egrep '^lib')"
+FFMPEG_FORMATS="$(ffmpeg -formats 2>/dev/null | awk '/^[ \t]*[ ][DE]+[ ]/{print $2}')"
+
+#------------------------------------------------------------------------------#
 ### hier wird ermittelt, ob der film progressiv oder im Zeilensprungverfahren vorliegt
+
 #echo "--------------------------------------------------------------------------------"
 #probe "${FILMDATEI}" 2>&1 | fgrep Video:
 #echo "--------------------------------------------------------------------------------"
@@ -358,7 +371,14 @@ FFPROBE="$(ffprobe "${FILMDATEI}" 2>&1 | fgrep Video: | sed 's/.* Video:/Video:/
 # tbc (FPS vom Codec) = the time base in AVCodecContext for the codec used for a particular stream
 # tbr (FPS vom Video-Stream geraten) = tbr is guessed from the video stream and is the value users want to see when they look for the video frame rate
 echo "FFPROBE='${FFPROBE}'"
-
+#------------------------------------------------------------------------------#
+### alternative Methode zur Ermittlung der FPS
+R_FPS="$(ffprobe -show_data -show_streams "${FILMDATEI}" 2>/dev/null | egrep '^codec_type=|^r_frame_rate=' | egrep -A1 '^codec_type=video' | awk -F'=' '/^r_frame_rate=/{print $2}' | sed 's|/| |')"
+A_FPS="$(echo "${R_FPS}" | wc -w)"
+if [ "${A_FPS}" -gt 1 ] ; then
+	R_FPS="$(echo "${R_FPS}" | awk '{print $1 / $2}')"
+fi
+#------------------------------------------------------------------------------#
 ### hier wird ermittelt, ob der film progressiv oder im Zeilensprungverfahren vorliegt
 #
 # leider kann das z.Z. nur mit "mediainfo" einfach und zuverlässig ermittelt werden
@@ -731,13 +751,6 @@ ${FORMAT_BESCHREIBUNG}
 echo "${M_INFOS}
 PAR_FAKTOR='${PAR_FAKTOR}'
 " | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
-
-#------------------------------------------------------------------------------#
-
-AUDIO_KANAELE="$(ffprobe -show_data -show_streams "${FILMDATEI}" 2>/dev/null | sed -e '1,/^codec_type=audio/ d' | awk -F'=' '/^channels=/{print $2}' | sort -nr | head -n1)"	# max. Anzahl der vorhandenen Audio-Kanäle
-if [ "x${STEREO}" != "x" ] ; then
-	AUDIO_KANAELE="2"
-fi
 
 #------------------------------------------------------------------------------#
 
