@@ -1,0 +1,22 @@
+#
+# Vorbis
+#
+
+VERSION="v2018082800"
+
+AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | fgrep vorbis | head -n1)"
+if [ "x${AUDIOCODEC}" = "x" ] ; then
+        AUDIOCODEC="vorbis"
+fi
+
+# -q:a 3 (Standard)
+AUDIO_QUALITAET_0="-q:a 1"                      # 0-10, 10 ist am besten
+AUDIO_QUALITAET_1="-q:a 2"                      # 0-10, 10 ist am besten
+AUDIO_QUALITAET_2="-q:a 3"                      # 0-10, 10 ist am besten
+AUDIO_QUALITAET_3="-q:a 4"                      # 0-10, 10 ist am besten
+AUDIO_QUALITAET_4="-q:a 5"                      # 0-10, 10 ist am besten
+AUDIO_QUALITAET_5="-q:a 6"                      # 0-10, 10 ist am besten
+AUDIO_QUALITAET_6="-q:a 7"                      # 0-10, 10 ist am besten       
+AUDIO_QUALITAET_7="-q:a 8"                      # 0-10, 10 ist am besten       
+AUDIO_QUALITAET_8="-q:a 9"                      # 0-10, 10 ist am besten       
+AUDIO_QUALITAET_9="-q:a 10"                     # 0-10, 10 ist am besten       
