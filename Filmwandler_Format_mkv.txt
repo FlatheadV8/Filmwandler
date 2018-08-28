@@ -17,6 +17,23 @@ FORMAT="matroska"
 
 #==============================================================================#
 
+#
+# 2018:
+# Dieses Format sollte (laut Doku) vom "LG webOS TV" abspielbar sein, wobei zu
+# beachten ist, dass der Codec VP9 in einigen Ländern nicht abspielbar ist.
+# In dem Fall muss man auf den Codec VP8 zurückgreifen.
+#
+
+### Audio
+#. $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt
+
+
+### Video
+#. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
+#IFRAME="-keyint_min 2-8"
+
+#==============================================================================#
+
 # Audio
 . $(dirname ${0})/Filmwandler_Codec_Audio_aac.txt
 
