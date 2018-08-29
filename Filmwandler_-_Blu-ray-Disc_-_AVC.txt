@@ -305,18 +305,18 @@ BLURAY_PARAMETER ${LEVEL} ${QUADR_MAKROBLOECKE} ${MaxFS}
 
 #------------------------------------------------------------------------------#
 
-VIDEO_OPTION="-profile:v ${PROFILE} -x264opts ref=4:b-pyramid=strict:bluray-compat=1:weightp=0:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=4:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:aud:subme=9"
+VIDEO_OPTION="-profile:v ${PROFILE} -preset veryslow -tune film -x264opts ref=4:b-pyramid=strict:bluray-compat=1:weightp=0:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=4:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:aud:subme=9"
 
-VIDEO_QUALITAET_0="-preset veryslow ${VIDEO_OPTION} -crf 30 -tune film"		# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_1="-preset veryslow ${VIDEO_OPTION} -crf 28 -tune film"		# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_2="-preset veryslow ${VIDEO_OPTION} -crf 26 -tune film"		# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_3="-preset veryslow ${VIDEO_OPTION} -crf 24 -tune film"		# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_4="-preset veryslow ${VIDEO_OPTION} -crf 22 -tune film"		# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_5="-preset veryslow ${VIDEO_OPTION} -crf 20 -tune film"		# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_6="-preset veryslow ${VIDEO_OPTION} -crf 19 -tune film"		# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_7="-preset veryslow ${VIDEO_OPTION} -crf 18 -tune film"		# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_8="-preset veryslow ${VIDEO_OPTION} -crf 17 -tune film"		# von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_9="-preset veryslow ${VIDEO_OPTION} -crf 16 -tune film"		# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 30"		# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_1="${VIDEO_OPTION} -crf 28"		# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_2="${VIDEO_OPTION} -crf 26"		# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_3="${VIDEO_OPTION} -crf 24"		# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_4="${VIDEO_OPTION} -crf 22"		# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_5="${VIDEO_OPTION} -crf 20"		# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_6="${VIDEO_OPTION} -crf 19"		# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_7="${VIDEO_OPTION} -crf 18"		# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_8="${VIDEO_OPTION} -crf 17"		# von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_9="${VIDEO_OPTION} -crf 16m"		# von "0" (verlustfrei) bis "51"
 
 IFRAME="-keyint_min 2-8"
 
