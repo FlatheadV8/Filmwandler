@@ -250,6 +250,8 @@ BLURAY_PARAMETER()
 #----------------------------------------------------------------------#
 ### NTSC-, PAL- oder Blu-ray-Farbraum
 
+FARBCOD="bt709"
+
 if [ "${IN_FPS}" = "10" -o "${IN_FPS}" = "15" -o "${IN_FPS}" = "20" -o "${IN_FPS}" = "24" ] ; then
 	# HDTV-Standard
 	FARBCOD="bt470"
