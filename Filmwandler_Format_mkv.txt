@@ -5,7 +5,7 @@
 #
 #==============================================================================#
 
-VERSION="v2018082800"
+VERSION="v2018082900"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -19,30 +19,6 @@ IFRAME="-keyint_min 2-8"
 #==============================================================================#
 #==============================================================================#
 
-# Audio
-. $(dirname ${0})/Filmwandler_Codec_Audio_aac.txt
-
-
-# Video
-. $(dirname ${0})/Filmwandler_Codec_Video_265.txt
-
-#==============================================================================#
-
-FORMAT_BESCHREIBUNG="
-********************************************************************************
-* Name:			DivX10                                                 *
-* ENDUNG:		.mkv                                                   *
-* Video-Kodierung:	H.265/HEVC (entwickelt für 4K)                         *
-* Audio-Kodierung:	AAC        (mehrkanalfähiger Nachfolger von MP3)       *
-* Beschreibung:                                                                *
-*	- H.265/HEVC wird seit Android 5 'Lollipop' unterstützt                *
-*	- kodiert 5-10 mal langsamer als AVCHD/MP4                             *
-********************************************************************************
-"
-
-#==============================================================================#
-#==============================================================================#
-
 #
 # 2018:
 # Dieses Format sollte (laut Doku) vom "LG webOS TV" abspielbar sein, wobei zu
@@ -51,11 +27,11 @@ FORMAT_BESCHREIBUNG="
 #
 
 ### Audio
-#. $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt
+. $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt
 
 
 ### Video
-#. $(dirname ${0})/Filmwandler_Codec_Video_vp8.txt
+. $(dirname ${0})/Filmwandler_Codec_Video_vp8.txt
 #. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
 
 #==============================================================================#
@@ -64,7 +40,7 @@ FORMAT_BESCHREIBUNG="
 #********************************************************************************
 #* Name:                 free MKV                                               *
 #* ENDUNG:               .mkv                                                   *
-#* Video-Kodierung:      VP9                                                    *
+#* Video-Kodierung:      VP8                                                    *
 #* Audio-Kodierung:      MP3                                                    *
 #* Beschreibung:                                                                *
 #*       - einziges freies Format mit Unterstützung von LG (LG webOS TV)        *
