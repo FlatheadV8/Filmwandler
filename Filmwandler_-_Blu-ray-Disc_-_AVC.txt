@@ -3,11 +3,10 @@
 #
 # AVC - optimiert auf Kompatibilität zur Blu-ray Disk
 #
-# -x264opts
-# preset=veryslow
-# no-psy
-# bluray-compat => http://www.x264bluray.com/
-# b-pyramid=strict
+# x264opts
+#           bluray-compat=1   =>   http://www.x264bluray.com/
+#           b-pyramid=strict
+#           nal-hrd=vbr
 #
 #==============================================================================#
 ### Video
