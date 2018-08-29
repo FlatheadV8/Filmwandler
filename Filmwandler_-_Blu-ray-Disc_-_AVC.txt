@@ -250,18 +250,32 @@ BLURAY_PARAMETER()
 #----------------------------------------------------------------------#
 ### NTSC-, PAL- oder Blu-ray-Farbraum
 
-FARBCOD="bt709"
+# Beginnt HD bereits bei eine Bildbreite von 1280 Bildpunkten
+# oder ist bereits schon alles HD, was breiter als 720 Bildpunkte ist?
+# Möglicherweise unterscheidet sich SD und HD durch die Bildhöhe?
+#if [ "${QUADR_BREIT}" -gt "720" ] ; then
+#if [ "${QUADR_BREIT}" -ge "1280" ] ; then
+#	FARBCOD="bt709"        # HD: bt.709 (Bildbreiter >= 1280 Pixel)
+#else
+#	FARBCOD="bt601"        # SD: bt.601 (Bildbreiter < 1280 Pixel)
+#fi
 
-if [ "${IN_FPS}" = "10" -o "${IN_FPS}" = "15" -o "${IN_FPS}" = "20" -o "${IN_FPS}" = "24" ] ; then
-	# HDTV-Standard
-	FARBCOD="bt470"
-elif [ "${IN_FPS}" = "25" -o "${IN_FPS}" = "50" ] ; then
-	# DVD (PAL): 4/3 - 720x576
-	FARBCOD="bt470bg"
-else
-	# DVD (NTSC): 4/3 - 720x480
-	FARBCOD="smpte170m"
-fi
+#if [ "${IN_FPS}" = "10" -o "${IN_FPS}" = "15" -o "${IN_FPS}" = "20" -o "${IN_FPS}" = "24" ] ; then
+#	# HDTV-Standard
+#	FARBCOD="bt470"
+#elif [ "${IN_FPS}" = "25" -o "${IN_FPS}" = "50" ] ; then
+#	# DVD (PAL): 4/3 - 720x576
+#	FARBCOD="bt470bg"
+#else
+#	# DVD (NTSC): 4/3 - 720x480
+#	FARBCOD="smpte170m"        # SD: bt.601 (Bildbreiter < 1280 Pixel)
+#fi
+
+### work around
+# Weil FFmpeg nicht für jeden Farbraum einen entsprechenden Tag setzt,
+# setzen wir an dieser Stelle immer "bt.709", denn für diesen Farbraum
+# setzt FFmpeg immer den richtigen Tag.
+FARBCOD="bt709"
 
 #----------------------------------------------------------------------#
 
