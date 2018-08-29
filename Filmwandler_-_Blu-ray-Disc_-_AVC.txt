@@ -255,9 +255,9 @@ BLURAY_PARAMETER()
 # Möglicherweise unterscheidet sich SD und HD durch die Bildhöhe?
 #if [ "${QUADR_BREIT}" -gt "720" ] ; then
 #if [ "${QUADR_BREIT}" -ge "1280" ] ; then
-#	FARBCOD="bt709"        # HD: bt.709 (Bildbreiter >= 1280 Pixel)
+#	FARBCOD="bt709"            # HD: bt.709 (Bildbreiter >= 1280 Pixel)
 #else
-#	FARBCOD="bt601"        # SD: bt.601 (Bildbreiter < 1280 Pixel)
+#	FARBCOD="smpte170m"        # SD: bt.601 (Bildbreiter < 1280 Pixel)
 #fi
 
 #if [ "${IN_FPS}" = "10" -o "${IN_FPS}" = "15" -o "${IN_FPS}" = "20" -o "${IN_FPS}" = "24" ] ; then
