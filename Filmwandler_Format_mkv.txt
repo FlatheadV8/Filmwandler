@@ -36,13 +36,13 @@ IFRAME="-keyint_min 2-8"
 
 #==============================================================================#
 
-#FORMAT_BESCHREIBUNG="
-#********************************************************************************
-#* Name:                 free MKV                                               *
-#* ENDUNG:               .mkv                                                   *
-#* Video-Kodierung:      VP8                                                    *
-#* Audio-Kodierung:      MP3                                                    *
-#* Beschreibung:                                                                *
-#*       - einziges freies Format mit Unterstützung von LG (LG webOS TV)        *
-#********************************************************************************
-#"
+FORMAT_BESCHREIBUNG="
+********************************************************************************
+* Name:                 free MKV                                               *
+* ENDUNG:               .mkv                                                   *
+* Video-Kodierung:      VP8                                                    *
+* Audio-Kodierung:      MP3                                                    *
+* Beschreibung:                                                                *
+*       - einziges freies Format mit Unterstützung von LG (LG webOS TV)        *
+********************************************************************************
+"
