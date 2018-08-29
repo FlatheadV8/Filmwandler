@@ -272,9 +272,9 @@ BLURAY_PARAMETER()
 #fi
 
 ### work around
-# Weil FFmpeg nicht für jeden Farbraum einen entsprechenden Tag setzt,
+# Weil FFmpeg/libx264 nicht für jeden Farbraum einen entsprechenden Tag setzt,
 # setzen wir an dieser Stelle immer "bt.709", denn für diesen Farbraum
-# setzt FFmpeg immer den richtigen Tag.
+# setzt FFmpeg/libx264 immer den richtigen Tag.
 FARBCOD="bt709"
 
 #----------------------------------------------------------------------#
