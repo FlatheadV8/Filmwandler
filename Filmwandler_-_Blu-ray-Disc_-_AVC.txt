@@ -299,33 +299,13 @@ BLURAY_PARAMETER ${LEVEL} ${QUADR_MAKROBLOECKE} ${MaxFS}
 
 ### diese Option verbessert die Qualität
 ### und vergrößert die kodierte Datei um ca. 15-20%
+# -tune zerolatency
+# -tune fastdecode
 # -tune film
 
 #------------------------------------------------------------------------------#
 
 VIDEO_OPTION="-profile:v ${PROFILE} -x264opts ref=4:b-pyramid=strict:bluray-compat=1:weightp=0:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=4:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:aud"
-
-#VIDEO_QUALITAET_0="-preset faster   ${VIDEO_OPTION}:subme=2:no-psy -crf 34 -tune zerolatency"	# von "0" (verlustfrei) bis "51"
-#VIDEO_QUALITAET_1="-preset fast     ${VIDEO_OPTION}:subme=3:no-psy -crf 32 -tune fastdecode"	# von "0" (verlustfrei) bis "51"
-#VIDEO_QUALITAET_2="-preset medium   ${VIDEO_OPTION}:subme=4 -crf 30"				# von "0" (verlustfrei) bis "51"
-#VIDEO_QUALITAET_3="-preset medium   ${VIDEO_OPTION}:subme=5 -crf 28"				# von "0" (verlustfrei) bis "51"
-#VIDEO_QUALITAET_4="-preset slow     ${VIDEO_OPTION}:subme=6 -crf 26"				# von "0" (verlustfrei) bis "51"
-#VIDEO_QUALITAET_5="-preset slow     ${VIDEO_OPTION}:subme=7 -crf 24 -tune film" 		# von "0" (verlustfrei) bis "51"
-#VIDEO_QUALITAET_6="-preset slower   ${VIDEO_OPTION}:subme=8 -crf 22 -tune film" 		# von "0" (verlustfrei) bis "51"
-#VIDEO_QUALITAET_7="-preset slower   ${VIDEO_OPTION}:subme=9 -crf 20 -tune film" 		# von "0" (verlustfrei) bis "51"
-#VIDEO_QUALITAET_8="-preset veryslow ${VIDEO_OPTION}:subme=10-crf 18 -tune film" 		# von "0" (verlustfrei) bis "51"
-#VIDEO_QUALITAET_9="-preset veryslow ${VIDEO_OPTION}:subme=11:threads=1 -crf 16 -tune film"	# von "0" (verlustfrei) bis "51"
-
-#VIDEO_QUALITAET_0="-preset fast     ${VIDEO_OPTION}:subme=2  -crf 34 -tune film"		# von "0" (verlustfrei) bis "51"
-#VIDEO_QUALITAET_1="-preset fast     ${VIDEO_OPTION}:subme=3  -crf 32 -tune film"		# von "0" (verlustfrei) bis "51"
-#VIDEO_QUALITAET_2="-preset medium   ${VIDEO_OPTION}:subme=4  -crf 30 -tune film"		# von "0" (verlustfrei) bis "51"
-#VIDEO_QUALITAET_3="-preset medium   ${VIDEO_OPTION}:subme=5  -crf 28 -tune film"		# von "0" (verlustfrei) bis "51"
-#VIDEO_QUALITAET_4="-preset slow     ${VIDEO_OPTION}:subme=6  -crf 26 -tune film"		# von "0" (verlustfrei) bis "51"
-#VIDEO_QUALITAET_5="-preset slow     ${VIDEO_OPTION}:subme=7  -crf 24 -tune film"		# von "0" (verlustfrei) bis "51"
-#VIDEO_QUALITAET_6="-preset slower   ${VIDEO_OPTION}:subme=8  -crf 22 -tune film"		# von "0" (verlustfrei) bis "51"
-#VIDEO_QUALITAET_7="-preset slower   ${VIDEO_OPTION}:subme=9  -crf 20 -tune film"		# von "0" (verlustfrei) bis "51"
-#VIDEO_QUALITAET_8="-preset veryslow ${VIDEO_OPTION}:subme=10 -crf 18 -tune film"		# von "0" (verlustfrei) bis "51"
-#VIDEO_QUALITAET_9="-preset veryslow ${VIDEO_OPTION}:subme=11 -crf 16 -tune film"		# von "0" (verlustfrei) bis "51"
 
 VIDEO_QUALITAET_0="-preset veryslow ${VIDEO_OPTION}:subme=2  -crf 30 -tune film"		# von "0" (verlustfrei) bis "51"
 VIDEO_QUALITAET_1="-preset veryslow ${VIDEO_OPTION}:subme=3  -crf 28 -tune film"		# von "0" (verlustfrei) bis "51"
