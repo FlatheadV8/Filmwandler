@@ -3,11 +3,10 @@
 #
 # 3GPP -> weltweite Kooperation von Standardisierungsgremien für die Standardisierung im Mobilfunk (GSM, UMTS)
 #	1998: 3GPP  (3GP) - 3G UMTS
-#       2008: 3GPP2 (3G2) - 3G CDMA2000
 #
 #==============================================================================#
 
-VERSION="v2018082900"
+VERSION="v2018083000"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -26,6 +25,13 @@ FORMAT="3gp"
 # Video
 . $(dirname ${0})/Filmwandler_Codec_Video_263.txt
 IFRAME="-keyint_min 2-8"
+
+#------------------------------------------------------------------------------#
+### die meisten dieser Abspielgeräte können nur 15 FPS
+
+if [ "x${SOLL_FPS}" = "x" ] ; then
+	SOLL_FPS="15"
+fi
 
 #------------------------------------------------------------------------------#
 ### 3GPP kann nicht zwingend quadratische Bildpunkte haben
