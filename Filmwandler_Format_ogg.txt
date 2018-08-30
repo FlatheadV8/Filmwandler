@@ -1,0 +1,42 @@
+
+#==============================================================================#
+#
+# OGG -> eine freie und von Softwarepatenten unbeschränkte Alternative zu proprietären Formaten, kann ohne zusätzliche Anpassungen gestreamt werden
+#
+#==============================================================================#
+
+VERSION="v2018082900"
+
+#==============================================================================#
+
+# Format
+ENDUNG="ogg"
+FORMAT="ogg"
+
+#==============================================================================#
+
+# Audio
+. $(dirname ${0})/Filmwandler_Codec_Audio_vorbis.txt
+
+
+# Video
+. $(dirname ${0})/Filmwandler_Codec_Video_theora.txt
+IFRAME="-keyint_min 2-8"
+
+#==============================================================================#
+
+FORMAT_BESCHREIBUNG="
+********************************************************************************
+* Name:			OGG                                                    *
+* ENDUNG:		.ogg                                                   *
+* Video-Kodierung:	Theora (freie Alternative zu DivX5)                    *
+* Audio-Kodierung:	Vorbis (freie Alternative zu MP3)                      *
+* Beschreibung:                                                                *
+*	- mit HTML5-Unterstützung                                              *
+*	- auch abspielbar auf Android                                          *
+*	- 'Royalty free' (komplett frei von patentierten Technologien)         *
+*	- der ogg-Container ist uneingeschränkt streaming-fähig                *
+*	- kodiert sehr schnell                                                 *
+*	- nicht so gut wie 'AVCHD/MP4'                                         *
+********************************************************************************
+"
