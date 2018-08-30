@@ -1,9 +1,8 @@
 #
 # H.263              -> H.263 1996
-#            H.263v2 -> H.263+  -> H.263 1998
 #
 
-VERSION="v2018082800"
+VERSION="v2018082900"
 
 #------------------------------------------------------------------------------#
 #
@@ -17,12 +16,40 @@ if [ "x${VIDEOCODEC}" = "x" ] ; then
 	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | fgrep "${CODEC_PATTERN}" | head -n1)"
 	if [ "x${VIDEOCODEC}" = "x" ] ; then
 		echo ""
+		echo "${CODEC_PATTERN}"
 		echo "Leider wird dieser Codec von der aktuell installierten Version"
 		echo "von FFmpeg nicht unterstützt!"
 		echo ""
 		exit 1
 	fi
 fi
+
+#==============================================================================#
+### H.263 kann nur diese 5 Formate
+
+# SQCIF -  128x96   =   12288 Bildpunkte (Pixel)
+# QCIF  -  176x144  =   25344 Bildpunkte (Pixel)
+# VCD   -  352x288  =  101376 Bildpunkte (Pixel)
+# 4CIF  -  704x576  =  405504 Bildpunkte (Pixel)
+# 16CIF - 1408x1152 = 1622016 Bildpunkte (Pixel)
+
+#------------------------------------------------------------------------------#
+
+if [ "x${SOLL_XY}" = "x" ] ; then
+        echo "
+        ### automatische auswahl der richtigen Bildauflösung
+        "
+        echo "scale => 12288 25344 101376 405504 1622016 ${IN_BREIT} ${IN_HOCH}"
+        SOLL_SCALE="scale=$(echo "12288 25344 101376 405504 1622016 ${IN_BREIT} ${IN_HOCH}" | awk '{bild=$6*$7 ; h263="1408x1152" ; if (bild <= $5) h263="1408x1152" ; if (bild <= $4) h263="704x576" ; if (bild <=
+ $3) h263="352x288" ; if (bild <= $2) h263="176x144" ; if (bild <= $1) h263="128x96" ; print h263}')"
+else
+        echo "
+        ### manuelle Auswahl mit Bildauflösung
+        "
+        SOLL_SCALE="scale=${SOLL_XY}"
+fi
+
+#==============================================================================#
 
 VIDEO_QUALITAET_0="-q:v 10"             # H.263 ASP
 VIDEO_QUALITAET_1="-q:v 9"              # H.263 ASP
