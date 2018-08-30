@@ -1,8 +1,37 @@
+#------------------------------------------------------------------------------#
 #
 # H.262 / MPEG-2 / DVD
 #
+#------------------------------------------------------------------------------#
+# bei kleinen Datenraten ist MPEG-1 besser
+#
+# https://de.wikipedia.org/wiki/MPEG-2
+#
+# SP@LL   - mobile Anwendungen
+#         - 176x144@15
+#
+# SP@ML   - PDAs
+#         - 352x288@15     96 kbit/s
+#         - 320x240@24    384 kbit/s
+#
+# MP@LL   - Set-Top-Boxen (STB)
+#         - 352x288@30      4 Mbit/s
+#
+# MP@ML   - DVD, SD-DVB
+#         - 720x480@30     15 Mbit/s
+#         - 720x576@25     15 Mbit/s
+#
+# MP@H-14 - HDV
+#         - 1440x1080@30   60 Mbit/s
+#         - 1280x720@30    60 Mbit/s
+#
+# MP@HL   - HD-DVB (HDTV)
+#         - 1920x1080@30   80 Mbit/s
+#         - 1280x720@60    80 Mbit/s
+#
+#------------------------------------------------------------------------------#
 
-VERSION="v2018082800"
+VERSION="v2018083000"
 
 CODEC_PATTERN="mpeg2video"		# Beispiel: "h265|hevc"
 VIDEOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
