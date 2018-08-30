@@ -11,6 +11,7 @@ if [ "x${VIDEOCODEC}" = "x" ] ; then
 	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
 	if [ "x${VIDEOCODEC}" = "x" ] ; then
 		echo ""
+		echo "${CODEC_PATTERN}"
 		echo "Leider wird dieser Codec von der aktuell installierten Version"
 		echo "von FFmpeg nicht unterstützt!"
 		echo ""
