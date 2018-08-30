@@ -490,18 +490,6 @@ fi
 
 
 #------------------------------------------------------------------------------#
-### gewünschtes Rasterformat der Bildgröße (Auflösung)
-
-if [ "${ORIGINAL_PIXEL}" = Ja ] ; then
-	unset SOLL_SCALE
-else
-	if [ -n "${SOLL_XY}" ] ; then
-		SOLL_SCALE="scale=${SOLL_XY},"
-	fi
-fi
-
-
-#------------------------------------------------------------------------------#
 ### Seitenverhältnis des Bildes (DAR)
 
 if [ -n "${IST_DAR}" ] ; then
@@ -616,6 +604,9 @@ if [ -n "${CROP}" ] ; then
 fi
 
 
+#------------------------------------------------------------------------------#
+### Seitenverhältnis des Bildes (DAR) muss hier bekannt sein!
+
 if [ -z "${DAR_FAKTOR}" ] ; then
 	echo "Es konnte das Display-Format nicht ermittelt werden."
 	echo "versuchen Sie es mit diesem Parameter nocheinmal:"
@@ -626,7 +617,8 @@ if [ -z "${DAR_FAKTOR}" ] ; then
 fi
 
 
-### wenn die Pixel bereits quadratisch sind
+#------------------------------------------------------------------------------#
+### ob die Pixel bereits quadratisch sind
 if [ "${PAR_FAKTOR}" -ne "100000" ] ; then
 
 	### Umrechnung in quadratische Pixel - Version 1
@@ -651,6 +643,7 @@ if [ "${PAR_FAKTOR}" -ne "100000" ] ; then
 	QUADR_BREIT="$(echo "${QUADR_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $1}')"
 	QUADR_HOCH="$(echo "${QUADR_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $2}')"
 else
+	### wenn die Pixel bereits quadratisch sind
 	QUADR_BREIT="${IN_BREIT}"
 	QUADR_HOCH="${IN_HOCH}"
 fi
@@ -671,6 +664,7 @@ else
 fi
 
 
+#------------------------------------------------------------------------------#
 ### PAD
 # https://ffmpeg.org/ffmpeg-filters.html#pad-1
 # pad=640:480:0:40:violet
@@ -684,6 +678,17 @@ if [ "${ORIGINAL_PIXEL}" = Ja ] ; then
 else
 	PAD="pad='max(iw\\,ih*(${HOEHE}/${BREITE})):ow/(${HOEHE}/${BREITE}):(ow-iw)/2:(oh-ih)/2',"
 fi
+
+
+#------------------------------------------------------------------------------#
+### gewünschtes Rasterformat der Bildgröße (Auflösung)
+
+if [ "${ORIGINAL_PIXEL}" = Ja ] ; then
+	unset SOLL_SCALE
+else
+	SOLL_SCALE="scale=${SOLL_XY},"
+fi
+
 
 #------------------------------------------------------------------------------#
 ### Übersetzung von Bildauflösungsnamen zu Bildauflösungen
@@ -705,13 +710,25 @@ if [ "x${SOLL_XY}" != "x" ] ; then
 	fi
 fi
 
+
 #------------------------------------------------------------------------------#
+### hier wird ausgerechnen wieviele Pixel der neue Film pro Bild haben wird
+### und die gewünschte Breite und Höhe wird festgelegt, damit in anderen
+### Funktionen weitere Berechningen für Modus, Bitrate u.a. errechnet werden
+### kann
 
 if [ "x${SOLL_XY}" = "x" ] ; then
 	PIXELZAHL="$(echo "${IN_BREIT} ${IN_HOCH}" | awk '{print $1 * $2}')"
+	VERGLEICH_BREIT="${IN_BREIT}"
+	VERGLEICH_HOCH="${IN_HOCH}"
 else
-	PIXELZAHL="$(echo "${SOLL_XY}" | awk -F'x' '{print $1 * $2}')"
+	P_BREIT="$(echo "${SOLL_XY}" | awk -F'x' '{print $1}')"
+	P_HOCH="$(echo "${SOLL_XY}" | awk -F'x' '{print $2}')"
+	PIXELZAHL="$(echo "${P_BREIT} ${P_HOCH}" | awk '{print $1 * $2}')"
+	VERGLEICH_BREIT="${P_BREIT}"
+	VERGLEICH_HOCH="${P_HOCH}"
 fi
+
 
 #------------------------------------------------------------------------------#
 
@@ -725,7 +742,7 @@ PIXELZAHL           =${PIXELZAHL}
 #------------------------------------------------------------------------------#
 ### quadratische Bildpunkte sind der Standard
 
-FORMAT_ANPASSUNG="setsar='1/1'"
+FORMAT_ANPASSUNG="setsar='1/1',"
 
 
 #==============================================================================#
@@ -1016,7 +1033,8 @@ fi
 # für quadratische Pixel ist (QUADR_SCALE);
 # hinter PAD muss dann die endgültig gewünschte Auflösung für quadratische
 # Pixel (SOLL_SCALE)
-VIDEOOPTION="${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${QUADR_SCALE}${PAD}${SOLL_SCALE}${FORMAT_ANPASSUNG}"
+#VIDEOOPTION="${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${QUADR_SCALE}${PAD}${SOLL_SCALE}${FORMAT_ANPASSUNG}"
+VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${QUADR_SCALE}${PAD}${FORMAT_ANPASSUNG}${SOLL_SCALE}" | sed 's/[,]$//')"
 
 if [ "x${SOLL_FPS}" = x ] ; then
 	unset FPS
@@ -1084,7 +1102,10 @@ else
 #>
 		         ${PROGRAMM} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} -ss ${VON} -to ${BIS} ${FPS} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} 2>&1
 
-		ffmpeg -i ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} -c:v copy -c:a copy ${U_TITEL_MKV} -f matroska -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.mkv && rm -f ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}
+		### das ist nicht nötig, wenn das End-Container-Format bereits MKV ist
+		if [ "${ENDUNG}" != "mkv" ] ; then
+			ffmpeg -i ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} -c:v copy -c:a copy ${U_TITEL_MKV} -f matroska -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.mkv && rm -f ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}
+		fi
 
 		echo "---------------------------------------------------------"
 	done
