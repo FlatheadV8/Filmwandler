@@ -39,7 +39,7 @@ fi
 
 VIDEO_TAG="-vtag DX50"					# DivX 5
 
-T="13"
+T="3"
 VIDEO_OPTION="${VIDEO_TAG}"
 VIDEO_QUALITAET_0="-b:v $(echo "11 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
 VIDEO_QUALITAET_1="-b:v $(echo "12 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
