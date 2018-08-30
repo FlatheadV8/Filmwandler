@@ -1,40 +1,70 @@
 
 #==============================================================================#
 #
-# MPEG-1 -> VCD
+# MPEG-1 -> VCD (besser bei kleinen Bitraten)
+# MPEG-2 -> DVD (besser bei großen Bitraten)
 #
 #==============================================================================#
 
-VERSION="v2018080500"
+VERSION="v2018083000"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
 #------------------------------------------------------------------------------#
+#
+# Ob MPEG-1 oder MPEG-2 verwendet wird, hängt hierbei von der Bildgröße ab,
+# MPEG-1 ist bei geringen Bitraten besser und wird hier bis zur VCD-Auflösung
+# eingesetzt.
+# MPEG-2 ist bei hohen Bitraten besser ist als MPEG-1 und wird deshalb hier
+# bei Bildformaten eingesetzt, die größer als VCD 352x288 sind.
+#
+#------------------------------------------------------------------------------#
 
 # Format
 ENDUNG="mpg"
-FORMAT="vcd"
 
 #==============================================================================#
+### Video
 
-# Audio
-. $(dirname ${0})/Filmwandler_Codec_Audio_mp2.txt
+#
+# bei einer höheren Auflösung als VCD wird MPEG-2 eingesetzt
+#
+if [ "${VERGLEICH_BREIT}" -gt 352 -o "${VERGLEICH_HOCH}" -gt 288 ] ; then
 
+	### Video
+	FORMAT="dvd"
+. $(dirname ${0})/Filmwandler_Codec_Video_262.txt
 
-# Video
+	### Audio
+	#
+	# bei mehr als 2 Audio-Kanälen wird AC3 eingesetzt
+	#
+	if [ "${AUDIO_KANAELE}" -gt 2 ] ; then
+. $(dirname ${0})/Filmwandler_Codec_Audio_ac3.txt	# 5.1 (Dolby Digital)
+	else
+. $(dirname ${0})/Filmwandler_Codec_Audio_mp2.txt	# Mono / Stereo
+	fi
+
+else
+
+	### Video
+	FORMAT="vcd"
 . $(dirname ${0})/Filmwandler_Codec_Video_261.txt
-IFRAME="-keyint_min 2-8"
+
+	### Audio
+. $(dirname ${0})/Filmwandler_Codec_Audio_mp2.txt	# Mono / Stereo
+fi
 
 #==============================================================================#
 
 FORMAT_BESCHREIBUNG="
 ********************************************************************************
-* Name:			VCD                                                    *
+* Name:			VCD / DVD                                              *
 * ENDUNG:		.mpg                                                   *
-* Video-Kodierung:	MPEG-1                                                 *
-* Audio-Kodierung:	MP2                                                    *
+* Video-Kodierung:	MPEG-1 / MPEG-2                                        *
+* Audio-Kodierung:	MP2 / AC3                                              *
 * Beschreibung:                                                                *
 *	- hohe Kompatibilität mit Konsumerelektronik                           *
-*	- ähnlich dem VCD-Format                                               *
+*	- ähnlich dem VCD-/DVD-Format                                          *
 ********************************************************************************
 "
