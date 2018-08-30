@@ -2,7 +2,7 @@
 # VP9
 #
 
-VERSION="v2018082800"
+VERSION="v2018082900"
 
 #------------------------------------------------------------------------------#
 
@@ -25,17 +25,23 @@ VERSION="v2018082800"
 #------------------------------------------------------------------------------#
 
 CODEC_PATTERN="vp9"		# Beispiel: "h265|hevc"
-VIDEOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
-if [ "x${VIDEOCODEC}" = "x" ] ; then
-	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
-	if [ "x${VIDEOCODEC}" = "x" ] ; then
-		echo ""
-		echo "Leider wird dieser Codec von der aktuell installierten Version"
-		echo "von FFmpeg nicht unterstützt!"
-		echo ""
-		exit 1
-	fi
-fi
+#VIDEOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
+#if [ "x${VIDEOCODEC}" = "x" ] ; then
+#	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
+#	if [ "x${VIDEOCODEC}" = "x" ] ; then
+#		echo ""
+#		echo "${CODEC_PATTERN}"
+#		echo "Leider wird dieser Codec von der aktuell installierten Version"
+#		echo "von FFmpeg nicht unterstützt!"
+#		echo ""
+#		exit 1
+#	fi
+#fi
+
+### dieser Codec wird leider mit "-formats" nicht ausgegeben
+### deshalb muss er fest eingetragen werden
+VIDEOCODEC="${CODEC_PATTERN}"
+
 
 # bei "-b:v 0" ergibt das eine "konstante Qualität" => bestes Ergebnis, wenn die Dateigröße egal ist
 # bei "-b:v 2000k" ergibt das eine "begrente Qualität" => konstante Qualität mit einer Bit-Raten-Obergrenze
