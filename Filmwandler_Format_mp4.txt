@@ -1,11 +1,11 @@
 
 #==============================================================================#
 #
-# MP4 -> HTML5
+# MP4
 #
 #==============================================================================#
 
-VERSION="v2018082600"
+VERSION="v2018083000"
 
 . ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -26,7 +26,8 @@ FORMAT="mp4"
 
 
 # Video
-. $(dirname ${0})/Filmwandler_Codec_Video_264.txt
+. $(dirname ${0})/Filmwandler_Codec_Video_264.txt	# -> HTML5
+#. $(dirname ${0})/Filmwandler_Codec_Video_265.txt
 IFRAME="-keyint_min 2-8"
 
 #==============================================================================#
