@@ -4,12 +4,13 @@
 
 VERSION="v2018082800"
 
-CODEC_PATTERN="vp8"		# Beispiel: "h265|hevc"
+CODEC_PATTERN="vp8|vpx"		# Beispiel: "h265|hevc"
 VIDEOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
 	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
 	if [ "x${VIDEOCODEC}" = "x" ] ; then
 		echo ""
+		echo "${CODEC_PATTERN}"
 		echo "Leider wird dieser Codec von der aktuell installierten Version"
 		echo "von FFmpeg nicht unterstützt!"
 		echo ""
@@ -17,6 +18,14 @@ if [ "x${VIDEOCODEC}" = "x" ] ; then
 	fi
 fi
 
-#
-# dieser Codec wird vermutlich nicht von FFmpeg unterstützt
-#
+VIDEO_OPTION=""
+VIDEO_QUALITAET_0="-crf 25 -b:v $(echo "0.3 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_1="-crf 24 -b:v $(echo "0.5 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_2="-crf 23 -b:v $(echo "0.7 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_3="-crf 22 -b:v $(echo "1.1 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_4="-crf 21 -b:v $(echo "1.6 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_5="-crf 20 -b:v $(echo "2.4 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_6="-crf 19 -b:v $(echo "3.7 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_7="-crf 18 -b:v $(echo "5.7 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_8="-crf 17 -b:v $(echo "8.6 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_9="-crf 16 -b:v 0 ${VIDEO_OPTION}"
