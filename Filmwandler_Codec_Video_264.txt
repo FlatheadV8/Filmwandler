@@ -2,14 +2,15 @@
 # H.264 / AVC / MPEG-4 Part 10
 #
 
-VERSION="v2018082800"
+VERSION="v2018082900"
 
-CODEC_PATTERN="h264"		# Beispiel: "h265|hevc"
+CODEC_PATTERN="x264"		# Beispiel: "h264|x264" (libopenh264, libx264)
 VIDEOCODEC="$(echo "${FFMPEG_LIB}" | fgrep "${CODEC_PATTERN}" | head -n1)"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
 	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | fgrep "${CODEC_PATTERN}" | head -n1)"
 	if [ "x${VIDEOCODEC}" = "x" ] ; then
 		echo ""
+		echo "${CODEC_PATTERN}"
 		echo "Leider wird dieser Codec von der aktuell installierten Version"
 		echo "von FFmpeg nicht unterstützt!"
 		echo ""
