@@ -112,6 +112,10 @@ while [ "${#}" -ne "0" ]; do
                         IST_DAR="${2}"		# Display-Format
                         shift
                         ;;
+                -fps|-soll_fps)
+                        SOLL_FPS="${2}"		# FPS (Bilder pro Sekunde) für den neuen Film festlegen
+                        shift
+                        ;;
                 -par|-ist_par)
                         IST_PAR="${2}"		# Pixel-Format
                         shift
@@ -187,6 +191,11 @@ while [ "${#}" -ne "0" ]; do
 	# egal wieviele Audio-Kanäle der Originalfilm hat, der neue Film wird Stereo haben
 	-stereo
 
+        # Bildwiederholrate für den neuen Film festlegen,
+        # manche Geräte können nur eine begrenzte Zahl an Bildern pro Sekunde (FPS)
+        -soll_fps 15
+        -fps 20
+
         # wenn die Bildaufloesung des Originalfilmes nicht automatisch ermittelt
         # werden kann, dann muss sie manuell als Parameter uebergeben werden
         -ist_xmaly 480x270
@@ -232,6 +241,7 @@ while [ "${#}" -ne "0" ]; do
         -soll_xmaly 720x576		# deutscher Parametername
         -out_xmaly 720x480		# englischer Parametername
         -soll_xmaly 965x543		# frei wählbares Bildformat kann angegeben werden
+        -soll_xmaly VCD			# Name eines Bildformates kann angegeben werden
 	${BILD_FORMATNAMEN_AUFLOESUNGEN}
                         "
                         exit 12
@@ -402,7 +412,7 @@ IN_BREIT="$(echo "${IN_XY}" | awk -F'x' '{print $1}')"
 IN_HOCH="$(echo  "${IN_XY}" | awk -F'x' '{print $2}')"
 IN_PAR="$(echo "${FFPROBE}" | fgrep ' DAR ' | awk '{print $3}')"
 IN_DAR="$(echo "${FFPROBE}" | fgrep ' DAR ' | awk '{print $5}')"
-IN_FPS="$(echo "${FFPROBE}" | fgrep ' DAR ' | awk '{print $6}')"	# wird benötigt um den Farbraum für BluRay zu ermitteln
+IN_FPS="$(echo "${FFPROBE}" | fgrep ' DAR ' | awk '{print $6}')"		# wird benötigt um den Farbraum für BluRay zu ermitteln
 IN_FPS_RUND="$(echo "${IN_FPS}" | awk '{printf "%.0f\n", $1}')"			# für Vergleiche, "if" erwartet einen Integerwert
 IN_BITRATE="$(echo "${MEDIAINFO}" | sed -ne '/^Video$/,/^$/ p' | egrep '^Bit rate' | awk -F':' '{print $2}' | sed 's/[ ]*//g;s/[a-zA-Z/][a-zA-Z/]*$/ &/' | tail -n1)"
 IN_BIT_EINH="$(echo "${IN_BITRATE}" | awk '{print $2}')"
@@ -1007,7 +1017,12 @@ fi
 # hinter PAD muss dann die endgültig gewünschte Auflösung für quadratische
 # Pixel (SOLL_SCALE)
 VIDEOOPTION="${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${QUADR_SCALE}${PAD}${SOLL_SCALE}${FORMAT_ANPASSUNG}"
-#VIDEOOPTION="${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${PAD}${QUADR_SCALE}${SOLL_SCALE}${FORMAT_ANPASSUNG}"
+
+if [ "x${SOLL_FPS}" = x ] ; then
+	unset FPS
+else
+	FPS="-r ${SOLL_FPS}"
+fi
 
 START_ZIEL_FORMAT="-f ${FORMAT}"
 
@@ -1029,11 +1044,14 @@ START_ZIEL_FORMAT=${START_ZIEL_FORMAT}
 #------------------------------------------------------------------------------#
 if [ -z "${SCHNITTZEITEN}" ] ; then
 
+	###------------------------------------------------------------------###
+	### hier der Film transkodiert                                       ###
+	###------------------------------------------------------------------###
 	echo
-	echo "1: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+	echo "1: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${FPS} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 	echo
 #>
-	         ${PROGRAMM} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} 2>&1
+	         ${PROGRAMM} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${FPS} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} 2>&1
 
 else
 
@@ -1057,11 +1075,14 @@ else
 		# Matroska überführt.
 		#
 
+		###----------------------------------------------------------###
+		### hier werden die Teile zwischen der Werbung transkodiert  ###
+		###----------------------------------------------------------###
 		echo
-		echo "2: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} -ss ${VON} -to ${BIS} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+		echo "2: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} -ss ${VON} -to ${BIS} ${FPS} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 		echo
 #>
-		         ${PROGRAMM} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} -ss ${VON} -to ${BIS} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} 2>&1
+		         ${PROGRAMM} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} -ss ${VON} -to ${BIS} ${FPS} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} 2>&1
 
 		ffmpeg -i ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} -c:v copy -c:a copy ${U_TITEL_MKV} -f matroska -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.mkv && rm -f ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}
 
