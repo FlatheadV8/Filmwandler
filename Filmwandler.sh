@@ -5,14 +5,14 @@
 # Dieses Skript verändert NICHT die Bildwiederholrate!
 #
 # Das Ergebnis besteht aus folgenden Formaten:
-#  - DivX10: mkv  + H.265/HEVC + AAC
+#  - MKV:    mkv  + VP8        + MP3
 #  - WebM:   webm + VP9        + Opus
 #  - MP4:    mp4  + H.264/AVC  + AAC
 #  - AVCHD:  mts  + H.264/AVC  + AC3
 #  - AVI:    avi  + DivX5      + MP3
 #  - FLV:    flv  + FLV        + MP3  (Sorenson Spark: H.263)
 #  - 3GPP:   3gp  + H.263      + AAC  (128x96 176x144 352x288 704x576 1408x1152)
-#  - OGG:    ogv  + Theora     + Vorbis
+#  - OGG:    ogg  + Theora     + Vorbis
 #  - MPEG:   mpeg + MPEG-2     + AC3
 #  - MPG:    mpg  + MPEG-1     + MP2
 #
@@ -28,7 +28,7 @@
 
 
 #VERSION="v2017102900"
-VERSION="v2018082800"
+VERSION="v2018083000"
 
 
 BILDQUALIT="auto"
@@ -75,15 +75,13 @@ echo "
 # Geben sie bitte die richtige Dateiendung für den neuen Film an!              #
 >>> ${ZIELDATEI} <<<
 #                                                                              #
-# Es werden die folgenden Formate unterstützt:                                 #
-"
+# Es werden die folgenden Formate unterstützt:                                 #"
 for INC in $(ls ${AVERZ}/Filmwandler_Format_*.txt)
 do
 	. ${INC}
 	echo "${FORMAT_BESCHREIBUNG}"
 done
-echo "
-#                                                                              #
+echo "#                                                                              #
 #==============================================================================#
 "
 }
@@ -405,6 +403,7 @@ IN_HOCH="$(echo  "${IN_XY}" | awk -F'x' '{print $2}')"
 IN_PAR="$(echo "${FFPROBE}" | fgrep ' DAR ' | awk '{print $3}')"
 IN_DAR="$(echo "${FFPROBE}" | fgrep ' DAR ' | awk '{print $5}')"
 IN_FPS="$(echo "${FFPROBE}" | fgrep ' DAR ' | awk '{print $6}')"	# wird benötigt um den Farbraum für BluRay zu ermitteln
+IN_FPS_RUND="$(echo "${IN_FPS}" | awk '{printf "%.0f\n", $1}')"			# für Vergleiche, "if" erwartet einen Integerwert
 IN_BITRATE="$(echo "${MEDIAINFO}" | sed -ne '/^Video$/,/^$/ p' | egrep '^Bit rate' | awk -F':' '{print $2}' | sed 's/[ ]*//g;s/[a-zA-Z/][a-zA-Z/]*$/ &/' | tail -n1)"
 IN_BIT_EINH="$(echo "${IN_BITRATE}" | awk '{print $2}')"
 
@@ -427,6 +426,7 @@ IN_HOCH='${IN_HOCH}'
 IN_PAR='${IN_PAR}'
 IN_DAR='${IN_DAR}'
 IN_FPS='${IN_FPS}'
+IN_FPS_RUND='${IN_FPS_RUND}'
 IN_BITRATE='${IN_BITRATE}'
 IN_BIT_RATE='${IN_BIT_RATE}'
 IN_BIT_EINH='${IN_BIT_EINH}'
@@ -825,10 +825,20 @@ else
 
 
 	# Video
-	VIDEOCODEC="$(ffmpeg -formats 2>&1 | tr -s ' ' '\n' | egrep -v '[A-Z]' | egrep '[-][-]enable[-]' | sed 's/^[-]*enable[-]*//' | fgrep 264 | tr -s '-' '_' | head -n1)"
+	CODEC_PATTERN="x264"		# Beispiel: "h264|x264" (libopenh264, libx264)
+	VIDEOCODEC="$(echo "${FFMPEG_LIB}" | fgrep "${CODEC_PATTERN}" | head -n1)"
 	if [ "x${VIDEOCODEC}" = "x" ] ; then
-		VIDEOCODEC="h264"
+		VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | fgrep "${CODEC_PATTERN}" | head -n1)"
+		if [ "x${VIDEOCODEC}" = "x" ] ; then
+			echo ""
+			echo "${CODEC_PATTERN}"
+			echo "Leider wird dieser Codec von der aktuell installierten Version"
+			echo "von FFmpeg nicht unterstützt!"
+			echo ""
+			exit 1
+		fi
 	fi
+
 
 	VIDEO_QUALITAET_0="-preset veryslow -crf 30 -tune film"		# von "0" (verlustfrei) bis "51"
 	VIDEO_QUALITAET_1="-preset veryslow -crf 28 -tune film"		# von "0" (verlustfrei) bis "51"
@@ -841,6 +851,9 @@ else
 	VIDEO_QUALITAET_8="-preset veryslow -crf 17 -tune film"		# von "0" (verlustfrei) bis "51"
 	VIDEO_QUALITAET_9="-preset veryslow -crf 16 -tune film"		# von "0" (verlustfrei) bis "51"
 	IFRAME="-keyint_min 2-8"
+
+	### Bluray-kompatibele Werte errechnen
+	. ${AVERZ}/Filmwandler_-_Blu-ray-Disc_-_AVC.txt
 
 
 FORMAT_BESCHREIBUNG="
@@ -1017,10 +1030,10 @@ START_ZIEL_FORMAT=${START_ZIEL_FORMAT}
 if [ -z "${SCHNITTZEITEN}" ] ; then
 
 	echo
-	echo "1: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+	echo "1: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 	echo
 #>
-	${PROGRAMM} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} 2>&1
+	         ${PROGRAMM} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} 2>&1
 
 else
 
@@ -1033,11 +1046,25 @@ else
 		VON="$(echo "${_SCHNITT}" | tr -d '"' | awk -F'-' '{print $1}')"
 		BIS="$(echo "${_SCHNITT}" | tr -d '"' | awk -F'-' '{print $2}')"
 
+		#
+		# Leider können hier die einzelnen Filmteile nicht direkt in das
+		# Container-Format Matroska überführt werden.
+		#
+		# FFmpeg füllt 'Video Format profile' für AVI aus aber für Matroska nicht.
+		#
+		# Deshalb wird direkt in das Ziel-Container-Format (ggf. AVI) transkodiert
+		# und zum zusammenbauen wird es zwischenzeitlich in das Container-Format
+		# Matroska überführt.
+		#
+
 		echo
-		echo "2: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} -ss ${VON} -to ${BIS} -f matroska -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.mkv" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+		echo "2: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} -ss ${VON} -to ${BIS} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 		echo
 #>
-		${PROGRAMM} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} -ss ${VON} -to ${BIS} -f matroska -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.mkv 2>&1
+		         ${PROGRAMM} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} -ss ${VON} -to ${BIS} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} 2>&1
+
+		ffmpeg -i ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} -c:v copy -c:a copy ${U_TITEL_MKV} -f matroska -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.mkv && rm -f ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}
+
 		echo "---------------------------------------------------------"
 	done
 
@@ -1047,9 +1074,9 @@ else
 	mkvmerge -o ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv ${FILM_TEILE}
 
 	# den vertigen Film aus dem MKV-Format in das MP$-Format umwandeln
-	echo "4: ${PROGRAMM} ${REPARATUR_PARAMETER} -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv -c:v copy ${AUDIO_VERARBEITUNG_02} ${U_TITEL_MKV} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}"
+	echo "4: ${PROGRAMM} ${REPARATUR_PARAMETER} -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv ${VIDEO_TAG} -c:v copy ${AUDIO_VERARBEITUNG_02} ${U_TITEL_MKV} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}"
 #>
-	${PROGRAMM} ${REPARATUR_PARAMETER} -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv -c:v copy ${AUDIO_VERARBEITUNG_02} ${U_TITEL_MKV} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
+	         ${PROGRAMM} ${REPARATUR_PARAMETER} -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv ${VIDEO_TAG} -c:v copy ${AUDIO_VERARBEITUNG_02} ${U_TITEL_MKV} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
 
 	#ls -lh ${ZIELVERZ}/${ZUFALL}_*_${ZIELNAME}.mkv ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv
 	#echo "rm -f ${ZIELVERZ}/${ZUFALL}_*_${ZIELNAME}.mkv ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv"
@@ -1059,7 +1086,7 @@ fi
 #------------------------------------------------------------------------------#
 
 echo "
-5: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} -map 0:a:${TSNAME} -c:a ${AUDIOCODEC} ${UNTERTITEL} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
+5: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} -map 0:a:${TSNAME} -c:a ${AUDIOCODEC} ${AUDIOQUALITAET} ${STEREO} ${UNTERTITEL} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
 "
 #------------------------------------------------------------------------------#
 
