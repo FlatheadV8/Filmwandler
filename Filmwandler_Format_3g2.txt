@@ -1,0 +1,49 @@
+
+#==============================================================================#
+#
+# 3GP2 -> weltweite Kooperation von Standardisierungsgremien für die Standardisierung im Mobilfunk
+#       2008: 3GPP2 (3G2) - 3G CDMA2000
+#
+#==============================================================================#
+
+VERSION="v2018083000"
+
+#. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
+
+#==============================================================================#
+
+# Format
+ENDUNG="3g2"
+FORMAT="3g2"
+
+#==============================================================================#
+
+# Audio
+. $(dirname ${0})/Filmwandler_Codec_Audio_aac.txt
+
+
+# Video
+. $(dirname ${0})/Filmwandler_Codec_Video_263.txt
+IFRAME="-keyint_min 2-8"
+
+#------------------------------------------------------------------------------#
+### 3GPP2 kann nicht zwingend quadratische Bildpunkte haben
+unset FORMAT_ANPASSUNG
+
+#==============================================================================#
+
+FORMAT_BESCHREIBUNG="
+********************************************************************************
+* Name:			3GPP2                                                  *
+* ENDUNG:		.3g2                                                   *
+* Video-Kodierung:	H.263 (MPEG-4 Part 2 / ASP)                            *
+* Audio-Kodierung:	AAC                                                    *
+* Beschreibung:                                                                *
+*	- H.263 kann aber leider nur diese Formate beherbergen:                *
+*           * 128x96                                                           *
+*           * 176x144                                                          *
+*           * 352x288                                                          *
+*           * 704x576                                                          *
+*           * 1408x1152                                                        *
+********************************************************************************
+"
