@@ -6,7 +6,7 @@
 #
 #==============================================================================#
 
-VERSION="v2018083000"
+VERSION="v2018083100"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -34,8 +34,9 @@ if [ "x${SOLL_FPS}" = "x" ] ; then
 fi
 
 #------------------------------------------------------------------------------#
-### 3GPP kann nicht zwingend quadratische Bildpunkte haben
-unset FORMAT_ANPASSUNG
+### 3GPP ignoriert in einigen Fällen das DAR
+HOEHE="${VERGLEICH_BREIT}"
+BREITE="${VERGLEICH_HOCH}"
 
 #==============================================================================#
 
