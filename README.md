@@ -14,10 +14,10 @@ abspielbar sind:
 Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
 
     ********************************************************************************
-    * Name:             AVCHD                                                      *
-    * ENDUNG:           .mp4                                                       *
-    * Video-Kodierung:  H.264 (MPEG-4 Part 10 / AVC / Blu Ray)                     *
-    * Audio-Kodierung:  AAC   (mehrkanalfähiger Nachfolger von MP3)                *
+    * Name:                 AVCHD                                                  *
+    * ENDUNG:               .mp4                                                   *
+    * Video-Kodierung:      H.264 (MPEG-4 Part 10 / AVC / Blu Ray)                 *
+    * Audio-Kodierung:      AAC   (mehrkanalfähiger Nachfolger von MP3)            *
     * Beschreibung:                                                                *
     *   - höchste Kompatibilität mit Konsumerelektronik                            *
     *   - HTML5-Unterstützung                                                      *
@@ -26,51 +26,50 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
 
 
     ********************************************************************************
-    * Name:             DivX10                                                     *
-    * ENDUNG:           .mkv                                                       *
-    * Video-Kodierung:  H.265/HEVC (entwickelt für 4K)                             *
-    * Audio-Kodierung:  AAC        (mehrkanalfähiger Nachfolger von MP3)           *
+    * Name:                 free MKV                                               *
+    * ENDUNG:               .mkv                                                   *
+    * Video-Kodierung:      VP8                                                    *
+    * Audio-Kodierung:      MP3                                                    *
     * Beschreibung:                                                                *
-    *   - (noch) keine HTML5-Unterstützung                                         *
-    *   - abspielbar auf Android                                                   *
+    *   - einziges freies Format mit Unterstützung von LG (LG webOS TV)            *
     ********************************************************************************
 
 
     ********************************************************************************
-    * Name:             OGG                                                        *
-    * ENDUNG:           .ogv                                                       *
-    * Video-Kodierung:  Theora (freie Alternative zu DivX5)                        *
-    * Audio-Kodierung:  Vorbis (freie Alternative zu MP3)                          *
+    * Name:                 OGG                                                    *
+    * ENDUNG:               .ogg                                                   *
+    * Video-Kodierung:      Theora (freie Alternative zu DivX5)                    *
+    * Audio-Kodierung:      Vorbis (freie Alternative zu MP3)                      *
     * Beschreibung:                                                                *
-    *   - 'Royalty free' (komplett frei von patentierten Technologien)             *
-    *   - mit HTML5-Unterstützung                                                  *
-    *   - der ogv-Container ist uneingeschränkt streaming-fähig                    *
-    *   - abspielbar auf Android                                                   *
-    *   - kodiert sehr schnell                                                     *
-    *   - nicht so gut wie 'AVCHD'                                                 *
+    *       - mit HTML5-Unterstützung                                              *
+    *       - auch abspielbar auf Android                                          *
+    *       - 'Royalty free' (komplett frei von patentierten Technologien)         *
+    *       - der ogg-Container ist uneingeschränkt streaming-fähig                *
+    *       - kodiert sehr schnell                                                 *
+    *       - nicht so gut wie 'AVCHD/MP4'                                         *
     ********************************************************************************
 
 
     ********************************************************************************
-    * Name:             WebM                                                       *
-    * ENDUNG:           .webm                                                      *
-    * Video-Kodierung:  VP9  (freie Alternative zu H.265 für 4K)                   *
-    * Audio-Kodierung:  Opus (freie Alternative zu AAC)                            *
+    * Name:                 WebM                                                   *
+    * ENDUNG:               .webm                                                  *
+    * Video-Kodierung:      VP9  (freie Alternative zu H.265 für 4K)               *
+    * Audio-Kodierung:      Opus (freie Alternative zu AAC)                        *
     * Beschreibung:                                                                *
-    *   - 'Royalty free' (komplett frei von patentierten Technologien)             *
-    *   - mit HTML5-Unterstützung                                                  *
-    *   - abspielbar auf Android                                                   *
-    *   - Unterstützung ab Android 5 'Lollipop'                                    *
-    *   - beste Qualität                                                           *
-    *   - kodiert 5-10 mal langsamer als AVCHD                                     *
+    *       - mit HTML5-Unterstützung                                              *
+    *       - 'Royalty free' (komplett frei von patentierten Technologien)         *
+    *       - WebM wird seit Android  2.3 'Gingerbread' unterstützt                *
+    *       - VP9 wird seit Android 4.4 'KitKat' unterstützt                       *
+    *       - Opus wird seit Android 5 'Lollipop' unterstützt                      *
+    *       - kodiert 5-10 mal langsamer als AVCHD/MP4                             *
     ********************************************************************************
 
 
     ********************************************************************************
-    * Name:             DivX5                                                      *
-    * ENDUNG:           .avi                                                       *
-    * Video-Kodierung:  H.263+                                                     *
-    * Audio-Kodierung:  MP3                                                        *
+    * Name:                 DivX5                                                  *
+    * ENDUNG:               .avi                                                   *
+    * Video-Kodierung:      H.263+                                                 *
+    * Audio-Kodierung:      MP3                                                    *
     * Beschreibung:                                                                *
     *   - abspielbar auf vielen größeren Konsumergeräten                           *
     *   - Advanced Simple Profile (ASP)                                            *
@@ -82,10 +81,20 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
 
 
     ********************************************************************************
-    * Name:             3GPP                                                       *
-    * ENDUNG:           .3gp                                                       *
-    * Video-Kodierung:  H.263                                                      *
-    * Audio-Kodierung:  AAC                                                        *
+    * Name:                 XviD                                                   *
+    * ENDUNG:               .avi                                                   *
+    * Video-Kodierung:      H.263++ (MPEG-4 Part 2 / ASP / DivX Version 5)         *
+    * Audio-Kodierung:      MP3                                                    *
+    * Beschreibung:                                                                *
+    *       - hohe Kompatibilität mit Konsumerelektronik (DivX 5 / XviD)           *
+    ********************************************************************************
+
+
+    ********************************************************************************
+    * Name:                 3GPP                                                   *
+    * ENDUNG:               .3gp                                                   *
+    * Video-Kodierung:      H.263                                                  *
+    * Audio-Kodierung:      AAC                                                    *
     * Beschreibung:                                                                *
     *   - abspielbar auf vielen kleineren Konsumergeräten                          *
     *       * die meisten dieser Abspielgeräte können nur 15 FPS                   *
@@ -96,6 +105,32 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     *       * 352x288                                                              *
     *       * 704x576                                                              *
     *       * 1408x1152                                                            *
+    ********************************************************************************
+
+
+    ********************************************************************************
+    * Name:                 3GPP2                                                  *
+    * ENDUNG:               .3g2                                                   *
+    * Video-Kodierung:      H.263 (MPEG-4 Part 2 / ASP)                            *
+    * Audio-Kodierung:      AAC                                                    *
+    * Beschreibung:                                                                *
+    *       - H.263 kann aber leider nur diese Formate beherbergen:                *
+    *           * 128x96                                                           *
+    *           * 176x144                                                          *
+    *           * 352x288                                                          *
+    *           * 704x576                                                          *
+    *           * 1408x1152                                                        *
+    ********************************************************************************
+
+
+    ********************************************************************************
+    * Name:                 VCD / DVD                                              *
+    * ENDUNG:               .mpg                                                   *
+    * Video-Kodierung:      MPEG-1 / MPEG-2                                        *
+    * Audio-Kodierung:      MP2 / AC3                                              *
+    * Beschreibung:                                                                *
+    *       - hohe Kompatibilität mit Konsumerelektronik                           *
+    *       - ähnlich dem VCD-/DVD-Format                                          *
     ********************************************************************************
 
 ---
