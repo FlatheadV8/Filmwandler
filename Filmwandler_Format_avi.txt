@@ -5,7 +5,7 @@
 #
 #==============================================================================#
 
-VERSION="v2018083000"
+VERSION="v2018083100"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -85,18 +85,18 @@ FORMAT="avi"
 IFRAME="-keyint_min 2-8"
 
 #------------------------------------------------------------------------------#
-### AVI kann nicht zwingend quadratische Bildpunkte haben
+### AVI hat nicht zwingend quadratische Bildpunkte
 FORMAT_ANPASSUNG="setdar=${HOEHE}/${BREITE},"
 
 #==============================================================================#
 
 FORMAT_BESCHREIBUNG="
 ********************************************************************************
-* Name:			XviD                                                   *
-* ENDUNG:		.avi                                                   *
-* Video-Kodierung:	H.263++ (MPEG-4 Part 2 / ASP / DivX Version 5)         *
-* Audio-Kodierung:	MP3                                                    *
+* Name:                 XviD                                                   *
+* ENDUNG:               .avi                                                   *
+* Video-Kodierung:      H.263++ (MPEG-4 Part 2 / ASP / DivX Version 5)         *
+* Audio-Kodierung:      MP3                                                    *
 * Beschreibung:                                                                *
-*	- hohe Kompatibilität mit Konsumerelektronik (DivX 5 / XviD)           *
+*       - hohe Kompatibilität mit Konsumerelektronik (DivX 5 / XviD)           *
 ********************************************************************************
 "
