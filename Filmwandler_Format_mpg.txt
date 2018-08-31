@@ -6,7 +6,7 @@
 #
 #==============================================================================#
 
-VERSION="v2018083000"
+VERSION="v2018083100"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -51,8 +51,9 @@ ENDUNG="mpg"
 # bei einer höheren Auflösung als VCD wird MPEG-2 eingesetzt
 #
 if [ "${VERGLEICH_BREIT}" -gt 352 -o "${VERGLEICH_HOCH}" -gt 288 ] ; then
-
-	### Video
+	###
+	### Video -> MPEG-2
+	###
 	FORMAT="mpegts"		# MPEG-TS (MPEG-2 Transport Stream)
 	#FORMAT="dvd"		# MPEG-2 PS (DVD VOB)
 	#FORMAT="vob"		# MPEG-2 PS (VOB)
@@ -69,14 +70,21 @@ if [ "${VERGLEICH_BREIT}" -gt 352 -o "${VERGLEICH_HOCH}" -gt 288 ] ; then
 	fi
 
 else
-
-	### Video
+	###
+	### Video -> MPEG-1
+	###
 	FORMAT="mpeg"		# MPEG-1 Systems / MPEG program stream
 	#FORMAT="vcd"		# MPEG-1 Systems / MPEG program stream (VCD)
 	. $(dirname ${0})/Filmwandler_Codec_Video_261.txt
 
 	### Audio
 	. $(dirname ${0})/Filmwandler_Codec_Audio_mp2.txt		# Mono / Stereo
+
+	#----------------------------------------------------------------------#
+	### VCD ignoriert in einigen Fällen das DAR
+	HOEHE="${VERGLEICH_BREIT}"
+	BREITE="${VERGLEICH_HOCH}"
+
 fi
 
 
