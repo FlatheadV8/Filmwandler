@@ -81,7 +81,7 @@ FORMAT="avi"
 
 
 # Video
-. $(dirname ${0})/Filmwandler_Codec_Video_mpeg4.txt
+. $(dirname ${0})/Filmwandler_Codec_Video_divx.txt
 IFRAME="-keyint_min 2-8"
 
 #------------------------------------------------------------------------------#
