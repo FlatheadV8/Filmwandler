@@ -5,7 +5,7 @@
 #
 #==============================================================================#
 
-VERSION="v2018082800"
+VERSION="v2018083100"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -29,17 +29,22 @@ FORMAT="flv"
 . $(dirname ${0})/Filmwandler_Codec_Video_flv.txt
 IFRAME="-keyint_min 2-8"
 
+#------------------------------------------------------------------------------#
+### Flash Video ignoriert im Normalfall das DAR
+HOEHE="${VERGLEICH_BREIT}"
+BREITE="${VERGLEICH_HOCH}"
+
 #==============================================================================#
 
 FORMAT_BESCHREIBUNG="
 ********************************************************************************
-* Name:			FlashV                                                 *
-* ENDUNG:		.flv                                                   *
-* Video-Kodierung:	H.263+ (MPEG-4 Part 2 / ASP / Sorenson Spark)          *
-* Audio-Kodierung:	MP3                                                    *
+* Name:                 Flash Video                                            *
+* ENDUNG:               .flv                                                   *
+* Video-Kodierung:      Sorenson Spark (MPEG-4 Part 2 / ASP)                   *
+* Audio-Kodierung:      MP3                                                    *
 * Beschreibung:                                                                *
-*	- ab Adobe Flash Player Version 6 abspielbar                           *
-*	- Flash Video Version 1                                                *
-*	- FourCC: FLV1                                                         *
+*       - ab Adobe Flash Player Version 6 abspielbar                           *
+*       - Flash Video Version 1                                                *
+*       - FourCC: FLV1                                                         *
 ********************************************************************************
 "
