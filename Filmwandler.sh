@@ -28,7 +28,7 @@
 
 
 #VERSION="v2017102900"
-VERSION="v2018083000"
+VERSION="v2018083100"
 
 
 BILDQUALIT="auto"
@@ -555,13 +555,13 @@ fi
 ### Seitenverhältnis des Bildes - Arbeitswerte berechnen (DAR)
 
 DAR="$(echo "${IN_DAR}" | egrep '[:/]')"
-if [ -n "${DAR}" ] ; then
-	DAR_KOMMA="$(echo "${DAR}" | egrep '[:/]' | awk -F'[:/]' '{print $1/$2}')"
-	DAR_FAKTOR="$(echo "${DAR}" | egrep '[:/]' | awk -F'[:/]' '{printf "%u\n", ($1*100000)/$2}')"
-else
+if [ "x${DAR}" = x ] ; then
 	DAR="$(echo "${IN_DAR}" | fgrep '.')"
 	DAR_KOMMA="${DAR}"
 	DAR_FAKTOR="$(echo "${DAR}" | fgrep '.' | awk '{printf "%u\n", $1*100000}')"
+else
+	DAR_KOMMA="$(echo "${DAR}" | egrep '[:/]' | awk -F'[:/]' '{print $1/$2}')"
+	DAR_FAKTOR="$(echo "${DAR}" | egrep '[:/]' | awk -F'[:/]' '{printf "%u\n", ($1*100000)/$2}')"
 fi
 
 
@@ -661,22 +661,6 @@ if [ "${DAR_FAKTOR}" -lt "149333" ] ; then
 else
 	HOEHE="16"
 	BREITE="9"
-fi
-
-
-#------------------------------------------------------------------------------#
-### PAD
-# https://ffmpeg.org/ffmpeg-filters.html#pad-1
-# pad=640:480:0:40:violet
-# pad=width=640:height=480:x=0:y=40:color=violet
-#
-# SCHWARZ="$(echo "${HOEHE} ${BREITE} ${QUADR_BREIT} ${QUADR_HOCH}" | awk '{sw="oben"; if (($1/$2) < ($3/$4)) sw="oben"; print sw}')"
-# SCHWARZ="$(echo "${HOEHE} ${BREITE} ${QUADR_BREIT} ${QUADR_HOCH}" | awk '{sw="oben"; if (($1/$2) > ($3/$4)) sw="links"; print sw}')"
-#
-if [ "${ORIGINAL_PIXEL}" = Ja ] ; then
-	unset PAD
-else
-	PAD="pad='max(iw\\,ih*(${HOEHE}/${BREITE})):ow/(${HOEHE}/${BREITE}):(ow-iw)/2:(oh-ih)/2',"
 fi
 
 
@@ -1029,6 +1013,22 @@ fi
 #==============================================================================#
 # Video
 
+#------------------------------------------------------------------------------#
+### PAD
+# https://ffmpeg.org/ffmpeg-filters.html#pad-1
+# pad=640:480:0:40:violet
+# pad=width=640:height=480:x=0:y=40:color=violet
+#
+# SCHWARZ="$(echo "${HOEHE} ${BREITE} ${QUADR_BREIT} ${QUADR_HOCH}" | awk '{sw="oben"; if (($1/$2) < ($3/$4)) sw="oben"; print sw}')"
+# SCHWARZ="$(echo "${HOEHE} ${BREITE} ${QUADR_BREIT} ${QUADR_HOCH}" | awk '{sw="oben"; if (($1/$2) > ($3/$4)) sw="links"; print sw}')"
+#
+if [ "${ORIGINAL_PIXEL}" = Ja ] ; then
+	unset PAD
+else
+	PAD="pad='max(iw\\,ih*(${HOEHE}/${BREITE})):ow/(${HOEHE}/${BREITE}):(ow-iw)/2:(oh-ih)/2',"
+fi
+
+#------------------------------------------------------------------------------#
 # vor PAD muss eine Auflösung, die der Originalauflösung entspricht, die aber
 # für quadratische Pixel ist (QUADR_SCALE);
 # hinter PAD muss dann die endgültig gewünschte Auflösung für quadratische
