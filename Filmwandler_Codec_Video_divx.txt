@@ -1,0 +1,55 @@
+#------------------------------------------------------------------------------#
+#
+# MPEG-4 Teil 2 (H.263v3 -> H.263++ -> H.263 2000)
+#               (H.263v2 -> H.263+  -> H.263 1998)
+#
+#------------------------------------------------------------------------------#
+
+VERSION="v2018083000"
+
+#==============================================================================#
+# getestet auf LG BP420 Blu-ray Player (kann keine variable Bitrate bei DivX)
+#              [DivX HD, MKV, WMV, AVI, XviD, MP3, WMA, WAV, M4A, JPEG]
+#------------------------------------------------------------------------------#
+#
+# https://codecs.multimedia.cx/2017/11/h-263-and-mpeg-4-asp-the-root-of-some-evil/
+#
+#------------------------------------------------------------------------------#
+
+CODEC_PATTERN="mpeg4"			# Beispiel: "h265|hevc"
+#CODEC_PATTERN="divx|xvid"		# Beispiel: "h265|hevc"
+echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1
+VIDEOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
+if [ "x${VIDEOCODEC}" = "x" ] ; then
+	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
+	if [ "x${VIDEOCODEC}" = "x" ] ; then
+		echo ""
+		echo "${CODEC_PATTERN}"
+		echo "Leider wird dieser Codec von der aktuell installierten Version"
+		echo "von FFmpeg nicht unterstützt!"
+		echo ""
+#		exit 1
+
+		### dieser Codec wird leider mit "-formats" nicht ausgegeben
+		### deshalb muss er fest eingetragen werden
+		VIDEOCODEC="mpeg4"
+	fi
+fi
+
+### der LG BP420 Blu-ray Player kann keine AVI/DivX mit variabler Bitrate abspielen
+#VIDEO_QUALITAET_5="-q:v 2 ${VIDEO_OPTION}"		# qscale:v 1 - 31
+
+VIDEO_TAG="-vtag DX50"					# DivX 5
+
+T="3"
+VIDEO_OPTION="${VIDEO_TAG}"
+VIDEO_QUALITAET_0="-b:v $(echo "11 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_1="-b:v $(echo "12 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_2="-b:v $(echo "13 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_3="-b:v $(echo "14 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_4="-b:v $(echo "15 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_5="-b:v $(echo "16 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_6="-b:v $(echo "17 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_7="-b:v $(echo "18 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_8="-b:v $(echo "19 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_9="-b:v $(echo "20 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
