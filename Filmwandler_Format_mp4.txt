@@ -34,12 +34,12 @@ IFRAME="-keyint_min 2-8"
 
 FORMAT_BESCHREIBUNG="
 ********************************************************************************
-* Name:			MP4                                                    *
-* ENDUNG:		.mp4                                                   *
-* Video-Kodierung:	H.264 (MPEG-4 Part 10 / AVC)                           *
-* Audio-Kodierung:	AAC   (mehrkanalfähiger Nachfolger von MP3)            *
+* Name:                 MP4                                                    *
+* ENDUNG:               .mp4                                                   *
+* Video-Kodierung:      H.264 (MPEG-4 Part 10 / AVC)                           *
+* Audio-Kodierung:      AAC   (mehrkanalfähiger Nachfolger von MP3)            *
 * Beschreibung:                                                                *
-*	- HTML5-Unterstützung                                                  *
-*	- auch abspielbar auf Android                                          *
+*       - HTML5-Unterstützung                                                  *
+*       - auch abspielbar auf Android                                          *
 ********************************************************************************
 "
