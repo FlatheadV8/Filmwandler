@@ -27,16 +27,16 @@ IFRAME="-keyint_min 2-8"
 
 FORMAT_BESCHREIBUNG="
 ********************************************************************************
-* Name:			OGG                                                    *
-* ENDUNG:		.ogg                                                   *
-* Video-Kodierung:	Theora (freie Alternative zu DivX5)                    *
-* Audio-Kodierung:	Vorbis (freie Alternative zu MP3)                      *
+* Name:                 OGG                                                    *
+* ENDUNG:               .ogg                                                   *
+* Video-Kodierung:      Theora (freie Alternative zu DivX5)                    *
+* Audio-Kodierung:      Vorbis (freie Alternative zu MP3)                      *
 * Beschreibung:                                                                *
-*	- mit HTML5-Unterstützung                                              *
-*	- auch abspielbar auf Android                                          *
-*	- 'Royalty free' (komplett frei von patentierten Technologien)         *
-*	- der ogg-Container ist uneingeschränkt streaming-fähig                *
-*	- kodiert sehr schnell                                                 *
-*	- nicht so gut wie 'AVCHD/MP4'                                         *
+*       - mit HTML5-Unterstützung                                              *
+*       - auch abspielbar auf Android                                          *
+*       - 'Royalty free' (komplett frei von patentierten Technologien)         *
+*       - der ogg-Container ist uneingeschränkt streaming-fähig                *
+*       - kodiert sehr schnell                                                 *
+*       - nicht so gut wie 'AVCHD/MP4'                                         *
 ********************************************************************************
 "
