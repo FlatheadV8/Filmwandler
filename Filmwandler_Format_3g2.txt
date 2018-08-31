@@ -6,7 +6,7 @@
 #
 #==============================================================================#
 
-VERSION="v2018083000"
+VERSION="v2018083100"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -27,8 +27,9 @@ FORMAT="3g2"
 IFRAME="-keyint_min 2-8"
 
 #------------------------------------------------------------------------------#
-### 3GPP2 kann nicht zwingend quadratische Bildpunkte haben
-unset FORMAT_ANPASSUNG
+### 3GPP2 ignoriert in einigen Fällen das DAR
+HOEHE="${VERGLEICH_BREIT}"
+BREITE="${VERGLEICH_HOCH}"
 
 #==============================================================================#
 
