@@ -669,9 +669,20 @@ fi
 
 if [ "${ORIGINAL_PIXEL}" = Ja ] ; then
 	unset SOLL_SCALE
+	unset SOLL_XY
 else
-	SOLL_SCALE="scale=${SOLL_XY},"
+	if [ "x${SOLL_XY}" = x ] ; then
+		unset SOLL_SCALE
+		unset SOLL_XY
+	else
+		SOLL_SCALE="scale=${SOLL_XY},"
+	fi
 fi
+
+echo "
+#1 SOLL_XY="${SOLL_XY}"
+#2 SOLL_SCALE="${SOLL_SCALE}"
+"
 
 
 #------------------------------------------------------------------------------#
@@ -693,6 +704,11 @@ if [ "x${SOLL_XY}" != "x" ] ; then
 		fi
 	fi
 fi
+
+echo "
+#3 SOLL_XY="${SOLL_XY}"
+#4 SOLL_SCALE="${SOLL_SCALE}"
+"
 
 
 #------------------------------------------------------------------------------#
