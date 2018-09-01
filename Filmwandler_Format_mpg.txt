@@ -6,7 +6,7 @@
 #
 #==============================================================================#
 
-VERSION="v2018083100"
+VERSION="v2018090100"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -99,5 +99,7 @@ FORMAT_BESCHREIBUNG="
 * Beschreibung:                                                                *
 *       - hohe Kompatibilität mit Konsumerelektronik                           *
 *       - ähnlich dem VCD-/DVD-Format                                          *
+*       - bis        352x288 -> MPEG-1                                         *
+*       - größer als 352x288 -> MPEG-2                                         *
 ********************************************************************************
 "
