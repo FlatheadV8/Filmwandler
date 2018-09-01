@@ -28,7 +28,7 @@
 
 
 #VERSION="v2017102900"
-VERSION="v2018083100"
+VERSION="v2018090100"
 
 
 BILDQUALIT="auto"
@@ -69,19 +69,9 @@ ausgabe_hilfe()
 {
 echo "
 #==============================================================================#
-#                                                                              #
-# HILFE                                                                        #
-#                                                                              #
-# Geben sie bitte die richtige Dateiendung für den neuen Film an!              #
->>> ${ZIELDATEI} <<<
-#                                                                              #
-# Es werden die folgenden Formate unterstützt:                                 #"
-for INC in $(ls ${AVERZ}/Filmwandler_Format_*.txt)
-do
-	. ${INC}
-	echo "${FORMAT_BESCHREIBUNG}"
-done
-echo "#                                                                              #
+"
+egrep -h '^[*][* ]' ${AVERZ}/Filmwandler_Format_*.txt
+echo "
 #==============================================================================#
 "
 }
@@ -155,6 +145,10 @@ while [ "${#}" -ne "0" ]; do
                 -u)
                         UNTERTITEL="-map 0:s:${2} -scodec copy"		# "0" für die erste Untertitelspur
                         shift
+                        ;;
+                -g)
+			echo "${BILD_FORMATNAMEN_AUFLOESUNGEN}"
+                        exit 11
                         ;;
                 -h)
 			ausgabe_hilfe
@@ -242,7 +236,9 @@ while [ "${#}" -ne "0" ]; do
         -out_xmaly 720x480		# englischer Parametername
         -soll_xmaly 965x543		# frei wählbares Bildformat kann angegeben werden
         -soll_xmaly VCD			# Name eines Bildformates kann angegeben werden
-	${BILD_FORMATNAMEN_AUFLOESUNGEN}
+
+	mögliche Namen von Grafikauflösungen anzeigen
+	=> ${0} -g
                         "
                         exit 12
                         ;;
