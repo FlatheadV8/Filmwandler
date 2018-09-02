@@ -435,7 +435,9 @@ IN_HOCH='${IN_HOCH}'
 IN_PAR='${IN_PAR}'
 IN_DAR='${IN_DAR}'
 IN_FPS='${IN_FPS}'
+SOLL_FPS_RUND='${SOLL_FPS_RUND}'
 IN_FPS_RUND='${IN_FPS_RUND}'
+R_FPS_RUND='${R_FPS_RUND}'
 IN_BITRATE='${IN_BITRATE}'
 IN_BIT_RATE='${IN_BIT_RATE}'
 IN_BIT_EINH='${IN_BIT_EINH}'
@@ -443,6 +445,21 @@ BILDQUALIT='${BILDQUALIT}'
 TONQUALIT='${TONQUALIT}'
 "
 echo "${M_INFOS}"
+
+
+if [ "${SOLL_FPS_RUND}" -gt 0 ] ; then
+	VERGLEICH_FPS_RUND="${SOLL_FPS_RUND}"
+else
+	if [ "${IN_FPS_RUND}" -gt 0 ] ; then
+		VERGLEICH_FPS_RUND="${IN_FPS_RUND}"
+	else
+		if [ "${R_FPS_RUND}" -gt 0 ] ; then
+			VERGLEICH_FPS_RUND="${R_FPS_RUND}"
+		else
+			VERGLEICH_FPS_RUND="25"
+		fi
+	fi
+fi
 
 
 #==============================================================================#
