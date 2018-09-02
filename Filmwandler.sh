@@ -5,16 +5,16 @@
 # Dieses Skript verändert NICHT die Bildwiederholrate!
 #
 # Das Ergebnis besteht aus folgenden Formaten:
-#  - MKV:    mkv  + VP8        + MP3
-#  - WebM:   webm + VP9        + Opus
-#  - MP4:    mp4  + H.264/AVC  + AAC
-#  - AVCHD:  mts  + H.264/AVC  + AC3
-#  - AVI:    avi  + DivX5      + MP3
-#  - FLV:    flv  + FLV        + MP3  (Sorenson Spark: H.263)
-#  - 3GPP:   3gp  + H.263      + AAC  (128x96 176x144 352x288 704x576 1408x1152)
-#  - OGG:    ogg  + Theora     + Vorbis
-#  - MPEG:   mpeg + MPEG-2     + AC3
-#  - MPG:    mpg  + MPEG-1     + MP2
+#  - MKV:     mkv  + VP8        + MP3
+#  - WebM:    webm + VP9        + Opus
+#  - MP4:     mp4  + H.264/AVC  + AAC
+#  - AVCHD:   m2ts + H.264/AVC  + AC3
+#  - AVI:     avi  + DivX5      + MP3
+#  - FLV:     flv  + FLV        + MP3  (Sorenson Spark: H.263)
+#  - 3GPP:    3gp  + H.263      + AAC  (128x96 176x144 352x288 704x576 1408x1152)
+#  - OGG:     ogg  + Theora     + Vorbis
+#  - MPEG-TS: ts   + MPEG-2     + AC3  (bei großen Bitraten besser als MPEG-1)
+#  - MPEG:    mpg  + MPEG-1     + MP2  (bei kleinen Bitraten besser als MPEG-2)
 #
 # https://de.wikipedia.org/wiki/Containerformat
 #
@@ -28,7 +28,7 @@
 
 
 #VERSION="v2017102900"
-VERSION="v2018090100"
+VERSION="v2018090200"
 
 
 BILDQUALIT="auto"
@@ -52,17 +52,17 @@ Film2Standardformat_OPTIONEN="${@}"
 ORIGINAL_PIXEL="Nein"
 STOP="Nein"
 
+AVERZ="$(dirname ${0})"		# Arbeitsverzeichnis, hier liegen diese Dateien
+
 #==============================================================================#
 ### Funktionen
 
 # einbinden der Namen von vielen Bildauflösungen
-BILDAUFLOESUNGEN_NAMEN="$(dirname ${0})/Filmwandler_grafik.txt"
+BILDAUFLOESUNGEN_NAMEN="${AVERZ}/Filmwandler_grafik.txt"
 if [ -r "${BILDAUFLOESUNGEN_NAMEN}" ] ; then
-. ${BILDAUFLOESUNGEN_NAMEN}
-BILD_FORMATNAMEN_AUFLOESUNGEN="$(bildaufloesungen_namen)"
+	. ${BILDAUFLOESUNGEN_NAMEN}
+	BILD_FORMATNAMEN_AUFLOESUNGEN="$(bildaufloesungen_namen)"
 fi
-
-AVERZ="$(dirname ${0})"		# Arbeitsverzeichnis, hier liegen diese Dateien
 
 
 ausgabe_hilfe()
@@ -376,11 +376,14 @@ FFPROBE="$(ffprobe "${FILMDATEI}" 2>&1 | fgrep Video: | sed 's/.* Video:/Video:/
 # tbr (FPS vom Video-Stream geraten) = tbr is guessed from the video stream and is the value users want to see when they look for the video frame rate
 echo "FFPROBE='${FFPROBE}'"
 #------------------------------------------------------------------------------#
+SOLL_FPS_RUND="$(echo "${SOLL_FPS}" | awk '{printf "%.0f\n", $1}')"			# für Vergleiche, "if" erwartet einen Integerwert
+#------------------------------------------------------------------------------#
 ### alternative Methode zur Ermittlung der FPS
 R_FPS="$(ffprobe -show_data -show_streams "${FILMDATEI}" 2>/dev/null | egrep '^codec_type=|^r_frame_rate=' | egrep -A1 '^codec_type=video' | awk -F'=' '/^r_frame_rate=/{print $2}' | sed 's|/| |')"
 A_FPS="$(echo "${R_FPS}" | wc -w)"
 if [ "${A_FPS}" -gt 1 ] ; then
 	R_FPS="$(echo "${R_FPS}" | awk '{print $1 / $2}')"
+	R_FPS_RUND="$(echo "${R_FPS}" | awk '{printf "%.0f\n", $1}')"			# für Vergleiche, "if" erwartet einen Integerwert
 fi
 #------------------------------------------------------------------------------#
 ### hier wird ermittelt, ob der film progressiv oder im Zeilensprungverfahren vorliegt
@@ -647,9 +650,9 @@ fi
 
 #------------------------------------------------------------------------------#
 ### universelle Variante
-# iPad : VIDEOOPTION="-vf ${ZEILENSPRUNG}pad='max(iw\\,ih*(16/9)):ow/(16/9):(ow-iw)/2:(oh-ih)/2',scale='1024:576',setsar='1/1'"
-# iPad : VIDEOOPTION="-vf ${ZEILENSPRUNG}scale='1024:576',setsar='1/1'"
-# HTML5: VIDEOOPTION="-vf ${ZEILENSPRUNG}setsar='1/1'"
+# iPad : VIDEO_FILTER="-vf ${ZEILENSPRUNG}pad='max(iw\\,ih*(16/9)):ow/(16/9):(ow-iw)/2:(oh-ih)/2',scale='1024:576',setsar='1/1'"
+# iPad : VIDEO_FILTER="-vf ${ZEILENSPRUNG}scale='1024:576',setsar='1/1'"
+# HTML5: VIDEO_FILTER="-vf ${ZEILENSPRUNG}setsar='1/1'"
 #
 if [ "${DAR_FAKTOR}" -lt "149333" ] ; then
 	HOEHE="4"
@@ -780,6 +783,7 @@ PAR_FAKTOR='${PAR_FAKTOR}'
 if [ -r ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt ] ; then
 
 	OP_QUELLE="1"
+	unset FFMPEG_TARGET
 
 #echo "IN_FPS='${IN_FPS}'"
 #exit 24
@@ -884,7 +888,7 @@ FORMAT_BESCHREIBUNG="
 * Name:			MP4                                                    *
 * ENDUNG:		.mp4                                                   *
 * Video-Kodierung:	H.264 (MPEG-4 Part 10 / AVC)                           *
-* Audio-Kodierung:	AAC       (mehrkanalfähiger Nachfolger von MP3)        *
+* Audio-Kodierung:	AAC   (mehrkanalfähiger Nachfolger von MP3)            *
 * Beschreibung:                                                                *
 *	- HTML5-Unterstützung                                                  *
 *	- hohe Kompatibilität mit Konsumerelektronik                           *
@@ -892,6 +896,17 @@ FORMAT_BESCHREIBUNG="
 ********************************************************************************
 "
 fi
+
+#==============================================================================#
+#==============================================================================#
+#==============================================================================#
+### http://www.ffmpeg.org/ffmpeg.html#Video-Options
+# FFMPEG_TARGET: vcd, svcd, dvd, dv, dv50
+# TARGET_PREFIX: film- (24 fps), pal- (25/50 fps), ntsc- (30/60 fps)
+if [ "x${FF_TARGET}" = x ] ; then
+
+
+#------------------------------------------------------------------------------#
 
 echo "
 OP_QUELLE='${OP_QUELLE}'
@@ -997,6 +1012,12 @@ VIDEOQUALITAET=${VIDEOQUALITAET}
 " | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 #exit 26
 
+fi
+#==============================================================================#
+#==============================================================================#
+#==============================================================================#
+
+
 #==============================================================================#
 # Audio
 
@@ -1004,16 +1025,18 @@ STREAM_AUDIO="$(ffprobe "${FILMDATEI}" 2>&1 | fgrep ' Stream ' | fgrep Audio:)"
 STREAMAUDIO="$(echo "${STREAM_AUDIO}" | wc -w | awk '{print $1}')"
 
 if [ "${STREAMAUDIO}" -gt 0 ] ; then
+	AUDIO_VERARBEITUNG_01_TARGET="-map 0:a:${TSNAME}"
+
 	# soll Stereo-Ausgabe erzwungen werden?
 	if [ "x${STEREO}" = x ] ; then
-		AUDIO_VERARBEITUNG_01="-map 0:a:${TSNAME} -c:a ${AUDIOCODEC} ${AUDIOQUALITAET}"
+		AUDIO_VERARBEITUNG_01="${AUDIO_VERARBEITUNG_01_TARGET} -c:a ${AUDIOCODEC} ${AUDIOQUALITAET}"
 	else
 		# wurde die Ausgabe bereits durch die Codec-Optionen auf Stereo gesetzt?
 		BEREITS_AC2="$(echo "${AUDIOCODEC} ${AUDIOQUALITAET}" | fgrep "ac 2")"
 		if [ "x${BEREITS_AC2}" = x ] ; then
-			AUDIO_VERARBEITUNG_01="-map 0:a:${TSNAME} -c:a ${AUDIOCODEC} ${AUDIOQUALITAET} ${STEREO}"
+			AUDIO_VERARBEITUNG_01="${AUDIO_VERARBEITUNG_01_TARGET} -c:a ${AUDIOCODEC} ${AUDIOQUALITAET} ${STEREO}"
 		else
-			AUDIO_VERARBEITUNG_01="-map 0:a:${TSNAME} -c:a ${AUDIOCODEC} ${AUDIOQUALITAET}"
+			AUDIO_VERARBEITUNG_01="${AUDIO_VERARBEITUNG_01_TARGET} -c:a ${AUDIOCODEC} ${AUDIOQUALITAET}"
 		fi
 	fi
 	AUDIO_VERARBEITUNG_02="-c:a copy"
@@ -1021,6 +1044,7 @@ else
 	AUDIO_VERARBEITUNG_01="-an"
 	AUDIO_VERARBEITUNG_02="-an"
 fi
+
 
 #==============================================================================#
 # Video
@@ -1045,8 +1069,10 @@ fi
 # für quadratische Pixel ist (QUADR_SCALE);
 # hinter PAD muss dann die endgültig gewünschte Auflösung für quadratische
 # Pixel (SOLL_SCALE)
-#VIDEOOPTION="${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${QUADR_SCALE}${PAD}${SOLL_SCALE}${FORMAT_ANPASSUNG}"
-VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${QUADR_SCALE}${PAD}${FORMAT_ANPASSUNG}${SOLL_SCALE}" | sed 's/[,]$//')"
+#VIDEO_FILTER="-vf ${ZEILENSPRUNG}${CROP}${QUADR_SCALE}${PAD}${SOLL_SCALE}${FORMAT_ANPASSUNG}"
+VIDEO_FILTER="$(echo "-vf ${ZEILENSPRUNG}${CROP}${QUADR_SCALE}${PAD}${FORMAT_ANPASSUNG}${SOLL_SCALE}" | sed 's/[,]$//')"
+
+#------------------------------------------------------------------------------#
 
 if [ "x${SOLL_FPS}" = x ] ; then
 	unset FPS
@@ -1054,34 +1080,60 @@ else
 	FPS="-r ${SOLL_FPS}"
 fi
 
-START_ZIEL_FORMAT="-f ${FORMAT}"
+if [ "x${FORMAT}" = x ] ; then
+	unset START_ZIEL_FORMAT
+else
+	START_ZIEL_FORMAT="-f ${FORMAT}"
+fi
 
 #==============================================================================#
 
 echo "
+PAD=${PAD}
+
 STREAM_AUDIO=${STREAM_AUDIO}
 STREAMAUDIO=${STREAMAUDIO}
 
 AUDIO_VERARBEITUNG_01=${AUDIO_VERARBEITUNG_01}
 AUDIO_VERARBEITUNG_02=${AUDIO_VERARBEITUNG_02}
 
-VIDEOOPTION=${VIDEOOPTION}
+VIDEO_FILTER=${VIDEO_FILTER}
 START_ZIEL_FORMAT=${START_ZIEL_FORMAT}
 " | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 #exit 27
 
 
 #------------------------------------------------------------------------------#
+
+#==============================================================================#
+#==============================================================================#
+#==============================================================================#
+if [ "x${FF_TARGET}" = x ] ; then
+
+	FF_SCHNITT_START="${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOQUALITAET} ${VIDEO_FILTER} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${FPS} ${START_ZIEL_FORMAT}"
+	FF_START="${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOQUALITAET} ${VIDEO_FILTER} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${FPS} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}"
+
+else
+
+	FF_SCHNITT_START="${VIDEO_TAG} -map 0:v ${VIDEO_FILTER} ${UNTERTITEL} ${AUDIO_VERARBEITUNG_01_TARGET} ${FF_TARGET}"
+	FF_START="${VIDEO_TAG} -map 0:v ${VIDEO_FILTER} ${AUDIO_VERARBEITUNG_01_TARGET} ${FF_TARGET} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}"
+
+fi
+#==============================================================================#
+#==============================================================================#
+#==============================================================================#
+
+#------------------------------------------------------------------------------#
 if [ -z "${SCHNITTZEITEN}" ] ; then
 
 	###------------------------------------------------------------------###
-	### hier der Film transkodiert                                       ###
+	### hier wird der Film transkodiert                                  ###
 	###------------------------------------------------------------------###
 	echo
-	echo "1: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${FPS} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+	echo "1: ${PROGRAMM} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${FF_START}" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 	echo
 #>
-	         ${PROGRAMM} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} ${FPS} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} 2>&1
+	         ${PROGRAMM} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${FF_START} 2>&1
 
 else
 
@@ -1109,10 +1161,10 @@ else
 		### hier werden die Teile zwischen der Werbung transkodiert  ###
 		###----------------------------------------------------------###
 		echo
-		echo "2: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} -ss ${VON} -to ${BIS} ${FPS} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+		echo "2: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -ss ${VON} -to ${BIS} ${FF_SCHNITT_START} -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 		echo
 #>
-		         ${PROGRAMM} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${UNTERTITEL} -ss ${VON} -to ${BIS} ${FPS} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} 2>&1
+		         ${PROGRAMM} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  -ss ${VON} -to ${BIS} ${FF_SCHNITT_START} -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} 2>&1
 
 		### das ist nicht nötig, wenn das End-Container-Format bereits MKV ist
 		if [ "${ENDUNG}" != "mkv" ] ; then
@@ -1125,9 +1177,9 @@ else
 	FILM_TEILE="$(ls -1 ${ZIELVERZ}/${ZUFALL}_*_${ZIELNAME}.mkv | tr -s '\n' '|' | sed 's/|/ + /g;s/ + $//')"
 	echo "3: mkvmerge -o '${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv' '${FILM_TEILE}'"
 #>
-	mkvmerge -o ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv ${FILM_TEILE}
+	         mkvmerge -o  ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv   ${FILM_TEILE}
 
-	# den vertigen Film aus dem MKV-Format in das MP$-Format umwandeln
+	# den vertigen Film aus dem MKV-Format in das MP4-Format umwandeln
 	echo "4: ${PROGRAMM} ${REPARATUR_PARAMETER} -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv ${VIDEO_TAG} -c:v copy ${AUDIO_VERARBEITUNG_02} ${U_TITEL_MKV} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}"
 #>
 	         ${PROGRAMM} ${REPARATUR_PARAMETER} -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv ${VIDEO_TAG} -c:v copy ${AUDIO_VERARBEITUNG_02} ${U_TITEL_MKV} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
@@ -1137,11 +1189,6 @@ else
 	rm -f ${ZIELVERZ}/${ZUFALL}_*_${ZIELNAME}.mkv ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv
 
 fi
-#------------------------------------------------------------------------------#
-
-echo "
-5: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} -map 0:a:${TSNAME} -c:a ${AUDIOCODEC} ${AUDIOQUALITAET} ${STEREO} ${UNTERTITEL} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
-"
 #------------------------------------------------------------------------------#
 
 ls -lh ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
