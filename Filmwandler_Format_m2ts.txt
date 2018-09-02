@@ -1,0 +1,41 @@
+
+#==============================================================================#
+#
+# MTS -> AVCHD
+#
+#==============================================================================#
+
+VERSION="v2018090200"
+
+### Qualität
+. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
+
+#==============================================================================#
+
+# Format
+ENDUNG="m2ts"
+FORMAT=""
+
+#==============================================================================#
+
+# Audio
+. $(dirname ${0})/Filmwandler_Codec_Audio_ac3.txt
+
+
+# Video
+. $(dirname ${0})/Filmwandler_Codec_Video_264.txt
+IFRAME="-keyint_min 2-8"
+
+#==============================================================================#
+
+FORMAT_BESCHREIBUNG="
+********************************************************************************
+* Name:                 AVCHD                                                  *
+* ENDUNG:               .m2ts                                                  *
+* Video-Kodierung:      H.264 (MPEG-4 Part 10 / AVC / Blu Ray / MP4)           *
+* Audio-Kodierung:      AC3                                                    *
+* Beschreibung:                                                                *
+*       - hohe Kompatibilität mit Konsumerelektronik                           *
+*       - auch abspielbar auf Android                                          *
+********************************************************************************
+"
