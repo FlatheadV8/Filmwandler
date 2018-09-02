@@ -14,7 +14,7 @@
 #
 #------------------------------------------------------------------------------#
 
-VERSION="v2018083000"
+VERSION="v2018090200"
 
 CODEC_PATTERN="mpeg1video"		# Beispiel: "h265|hevc"
 #CODEC_PATTERN="mpeg1video|h261"
@@ -32,13 +32,17 @@ if [ "x${VIDEOCODEC}" = "x" ] ; then
 fi
 
 VIDEO_OPTION=""         
-VIDEO_QUALITAET_0="-b:v $(echo "1 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_1="-b:v $(echo "2 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_2="-b:v $(echo "3 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_3="-b:v $(echo "4 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_4="-b:v $(echo "5 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_5="-b:v $(echo "6 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_6="-b:v $(echo "7 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_7="-b:v $(echo "8 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_8="-b:v $(echo "9 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_9="-b:v $(echo "10 ${PIXELZAHL}" | awk '{print $1 * $2}') ${VIDEO_OPTION}"
+
+#T="3.7"
+T="3"
+VIDEO_QUALITAET_0="-b:v $(echo "12 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_1="-b:v $(echo "14 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_2="-b:v $(echo "16 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_3="-b:v $(echo "18 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_4="-b:v $(echo "20 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_5="-b:v $(echo "22 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_6="-b:v $(echo "24 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_7="-b:v $(echo "26 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_8="-b:v $(echo "28 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_9="-b:v $(echo "30 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
+
