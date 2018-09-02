@@ -1,8 +1,10 @@
+#------------------------------------------------------------------------------#
 #
 # MPEG-4 Teil 2 (XviD)
 #
+#------------------------------------------------------------------------------#
 
-VERSION="v2018083000"
+VERSION="v2018090200"
 
 #==============================================================================#
 
@@ -21,20 +23,21 @@ if [ "x${VIDEOCODEC}" = "x" ] ; then
 	fi
 fi
 
-### der LG BP420 Blu-ray Player kann keine AVI/DivX mit variabler Bitrate abspielen
+VIDEO_TAG="-vtag xvid"					# XviD
+VIDEO_OPTION="${VIDEO_TAG}"
+
+### alternativ gibt es auch eine Angabe in "gleichbleibender Qualität"
 #VIDEO_QUALITAET_5="-q:v 2 ${VIDEO_OPTION}"		# qscale:v 1 - 31
 
-VIDEO_TAG="-vtag xvid"					# XviD
-
-T="5"
-VIDEO_OPTION="${VIDEO_TAG}"
-VIDEO_QUALITAET_0="-b:v $(echo  "1 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_1="-b:v $(echo  "2 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_2="-b:v $(echo  "3 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_3="-b:v $(echo  "4 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_4="-b:v $(echo  "5 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_5="-b:v $(echo  "6 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_6="-b:v $(echo  "7 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_7="-b:v $(echo  "8 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_8="-b:v $(echo  "9 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_9="-b:v $(echo "10 ${PIXELZAHL} ${T}" | awk '{print $1 * $2 / $3}') ${VIDEO_OPTION}"
+#T="3.7"
+T="3"
+VIDEO_QUALITAET_0="-b:v $(echo "12 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_1="-b:v $(echo "14 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_2="-b:v $(echo "16 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_3="-b:v $(echo "18 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_4="-b:v $(echo "20 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_5="-b:v $(echo "22 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_6="-b:v $(echo "24 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_7="-b:v $(echo "26 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_8="-b:v $(echo "28 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_9="-b:v $(echo "30 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
