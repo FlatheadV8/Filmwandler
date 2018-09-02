@@ -92,8 +92,6 @@ FORMAT_BESCHREIBUNG="
 * Audio-Kodierung:      AC3                                                    *
 * Beschreibung:                                                                *
 *       - hohe Kompatibilität mit Konsumerelektronik                           *
-*       - ähnlich dem VCD-/DVD-Format                                          *
-*       - bis        352x288 -> MPEG-1                                         *
-*       - größer als 352x288 -> MPEG-2                                         *
+*       - ähnlich dem DVD-Format                                               *
 ********************************************************************************
 "
