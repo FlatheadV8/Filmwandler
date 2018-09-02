@@ -2,91 +2,103 @@
 #==============================================================================#
 #
 # MPEG-1 -> VCD (besser bei kleinen Bitraten)
-# MPEG-2 -> DVD (besser bei großen Bitraten)
 #
 #==============================================================================#
 
-VERSION="v2018090100"
+VERSION="v2018090200"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
-#------------------------------------------------------------------------------#
-#
-# Ob MPEG-1 oder MPEG-2 verwendet wird, hängt hierbei von der Bildgröße ab,
-# MPEG-1 ist bei geringen Bitraten besser und wird hier bis zur VCD-Auflösung
-# eingesetzt.
-# MPEG-2 ist bei hohen Bitraten besser ist als MPEG-1 und wird deshalb hier
-# bei Bildformaten eingesetzt, die größer als VCD 352x288 sind.
-#
-#------------------------------------------------------------------------------#
-#
-# 2018-08-31
-# Dieser Fehler erscheint beim abspielen, wenn AC3 mit den Container-Formaten
-# - DVD
-# - VOB
-# gemuxt wird.
-#
-# A:   2.8 V:   2.8 A-V:  0.001 ct:  0.026  55/ 55  4%  6%  0.7% 0 0
-# [ac3 @ 0x7f6c6f6c3920]Got unexpected packet after EOF
-# A:   2.8 V:   2.8 A-V:  0.001 ct:  0.026  56/ 56  4%  6%  0.7% 0 0
-# [ac3 @ 0x7f6c6f6c3920]Got unexpected packet after EOF
-# A:   2.8 V:   2.8 A-V:  0.001 ct:  0.026  57/ 57  4%  6%  0.7% 0 0
-# [ac3 @ 0x7f6c6f6c3920]Got unexpected packet after EOF
-# A:   2.9 V:   2.9 A-V:  0.001 ct:  0.026  59/ 59  4%  6%  0.7% 0 0
-#
-# Deshalb muss mit MPEGTS gemuxt werden:
-#
-# Format                                   : MPEG-TS
-# FileExtension_Invalid                    : ts m2t m2s m4t m4s tmf ts tp trp ty
-#
-#------------------------------------------------------------------------------#
+#==============================================================================#
 
 # Format
 ENDUNG="mpg"
 
-#==============================================================================#
-### Video
+#------------------------------------------------------------------------------#
 
-#
-# bei einer höheren Auflösung als VCD wird MPEG-2 eingesetzt
-#
-if [ "${VERGLEICH_BREIT}" -gt 352 -o "${VERGLEICH_HOCH}" -gt 288 ] ; then
-	###
-	### Video -> MPEG-2
-	###
-	FORMAT="mpegts"		# MPEG-TS (MPEG-2 Transport Stream)
-	#FORMAT="dvd"		# MPEG-2 PS (DVD VOB)
-	#FORMAT="vob"		# MPEG-2 PS (VOB)
-	. $(dirname ${0})/Filmwandler_Codec_Video_262.txt
+###
+### Video -> VCD
+###
 
-	### Audio
-	#
-	# bei mehr als 2 Audio-Kanälen wird AC3 eingesetzt
-	#
-	if [ "${AUDIO_KANAELE}" -gt 2 ] ; then
-		. $(dirname ${0})/Filmwandler_Codec_Audio_ac3.txt	# 5.1 (Dolby Digital)
-	else
-		. $(dirname ${0})/Filmwandler_Codec_Audio_mp2.txt	# Mono / Stereo
-	fi
-
-else
-	###
-	### Video -> MPEG-1
-	###
-	FORMAT="mpeg"		# MPEG-1 Systems / MPEG program stream
-	#FORMAT="vcd"		# MPEG-1 Systems / MPEG program stream (VCD)
-	. $(dirname ${0})/Filmwandler_Codec_Video_261.txt
-
-	### Audio
-	. $(dirname ${0})/Filmwandler_Codec_Audio_mp2.txt		# Mono / Stereo
+### http://www.ffmpeg.org/ffmpeg.html#Video-Options
+# FFMPEG_TARGET: vcd, svcd, dvd, dv, dv50
+FFMPEG_TARGET="vcd"     # vcd, svcd, dvd, dv, dv50 (pal-, ntsc- oder film-)
 
 	#----------------------------------------------------------------------#
+
+        if [ "${SOLL_FPS_RUND}" -gt 0 ] ; then
+                TARGET_FPS="${SOLL_FPS_RUND}"
+        else
+                if [ "${IN_FPS_RUND}" -gt 0 ] ; then
+                        TARGET_FPS="${IN_FPS_RUND}"
+                else
+                        if [ "${R_FPS_RUND}" -gt 0 ] ; then
+                                TARGET_FPS="${R_FPS_RUND}"
+                        else
+                                TARGET_FPS="24"         # im Zweifelsfall den kleinsten Wert
+                        fi
+                fi
+        fi
+ 
+	# TARGET_PREFIX: film- (24 fps), pal- (25/50 fps), ntsc- (30/60 fps)
+        TARGET_PREFIX="pal"
+        if [ "${TARGET_FPS}" -eq 24 ] ; then
+                TARGET_PREFIX="film"
+	else
+                if [ "${TARGET_FPS}" -gt 24 ] ; then
+                        TARGET_PREFIX="pal"
+                        if [ "${TARGET_FPS}" -gt 25 ] ; then
+                                TARGET_PREFIX="ntsc"
+                                if [ "${TARGET_FPS}" -gt 30 ] ; then
+                                        TARGET_PREFIX="pal"
+                                        if [ "${TARGET_FPS}" -gt 50 ] ; then
+                                                TARGET_PREFIX="ntsc"
+                                        fi
+                                fi
+                        fi
+                fi
+        fi
+        FF_TARGET="-target ${TARGET_PREFIX}-${FFMPEG_TARGET}"
+
+        #----------------------------------------------------------------------#
+ 
 	### VCD ignoriert in einigen Fällen das DAR
-	HOEHE="${VERGLEICH_BREIT}"
-	BREITE="${VERGLEICH_HOCH}"
+        if [ "${TARGET_PREFIX}" = film ] ; then
+                HOEHE="352"
+                BREITE="240"
+        elif [ "${TARGET_PREFIX}" = ntsc ] ; then
+                HOEHE="352"
+                BREITE="240"
+        elif [ "${TARGET_PREFIX}" = pal ] ; then
+                HOEHE="352"
+                BREITE="288"
+        fi
 
-fi
+        #----------------------------------------------------------------------#
 
+	echo "
+	TARGET_PREFIX='${TARGET_PREFIX}'
+	FFMPEG_TARGET='${FFMPEG_TARGET}'
+	SOLL_FPS_RUND='${SOLL_FPS_RUND}'
+	IN_FPS_RUND='${IN_FPS_RUND}'
+	R_FPS_RUND='${R_FPS_RUND}'
+	TARGET_FPS='${TARGET_FPS}'
+	FF_TARGET='${FF_TARGET}'
+	HOEHE='${HOEHE}'
+	BREITE='${BREITE}'
+	"
+
+#==============================================================================#
+
+####
+#### Video -> MPEG-1
+####
+#FORMAT="mpeg"		# MPEG-1 Systems / MPEG program stream
+##FORMAT="vcd"		# MPEG-1 Systems / MPEG program stream (VCD)
+#. $(dirname ${0})/Filmwandler_Codec_Video_261.txt
+#
+#### Audio
+#. $(dirname ${0})/Filmwandler_Codec_Audio_mp2.txt		# Mono / Stereo
 
 #==============================================================================#
 
