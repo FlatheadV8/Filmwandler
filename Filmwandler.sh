@@ -13,7 +13,6 @@
 #  - FLV:     flv  + FLV        + MP3  (Sorenson Spark: H.263)
 #  - 3GPP:    3gp  + H.263      + AAC  (128x96 176x144 352x288 704x576 1408x1152)
 #  - OGG:     ogg  + Theora     + Vorbis
-#  - MPEG-TS: ts   + MPEG-2     + AC3  (bei großen Bitraten besser als MPEG-1)
 #  - MPEG:    mpg  + MPEG-1     + MP2  (bei kleinen Bitraten besser als MPEG-2)
 #
 # https://de.wikipedia.org/wiki/Containerformat
