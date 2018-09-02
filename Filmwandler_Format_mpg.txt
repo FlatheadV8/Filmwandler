@@ -104,14 +104,12 @@ FFMPEG_TARGET="vcd"     # vcd, svcd, dvd, dv, dv50 (pal-, ntsc- oder film-)
 
 FORMAT_BESCHREIBUNG="
 ********************************************************************************
-* Name:                 VCD / DVD                                              *
+* Name:                 VCD                                                    *
 * ENDUNG:               .mpg                                                   *
-* Video-Kodierung:      MPEG-1 / MPEG-2                                        *
-* Audio-Kodierung:      MP2 / AC3                                              *
+* Video-Kodierung:      MPEG-1                                                 *
+* Audio-Kodierung:      MP2                                                    *
 * Beschreibung:                                                                *
 *       - hohe Kompatibilität mit Konsumerelektronik                           *
-*       - ähnlich dem VCD-/DVD-Format                                          *
-*       - bis        352x288 -> MPEG-1                                         *
-*       - größer als 352x288 -> MPEG-2                                         *
+*       - ähnlich dem VCD-Format                                               *
 ********************************************************************************
 "
