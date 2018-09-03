@@ -2,10 +2,11 @@
 #==============================================================================#
 #
 # MPEG-1 -> VCD (besser bei kleinen Bitraten)
+# MPEG-2 -> DVD (besser bei großen Bitraten)
 #
 #==============================================================================#
 
-VERSION="v2018090200"
+VERSION="v2018090300"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -15,90 +16,125 @@ VERSION="v2018090200"
 ENDUNG="mpg"
 
 #------------------------------------------------------------------------------#
-
-###
-### Video -> VCD
-###
+#
+# 2018-08-31
+# Dieser Fehler erscheint beim abspielen, wenn AC3 mit den Container-Formaten
+# - DVD
+# - VOB
+# gemuxt wird.
+#
+# A:   2.8 V:   2.8 A-V:  0.001 ct:  0.026  55/ 55  4%  6%  0.7% 0 0
+# [ac3 @ 0x7f6c6f6c3920]Got unexpected packet after EOF
+# A:   2.8 V:   2.8 A-V:  0.001 ct:  0.026  56/ 56  4%  6%  0.7% 0 0
+# [ac3 @ 0x7f6c6f6c3920]Got unexpected packet after EOF
+# A:   2.8 V:   2.8 A-V:  0.001 ct:  0.026  57/ 57  4%  6%  0.7% 0 0
+# [ac3 @ 0x7f6c6f6c3920]Got unexpected packet after EOF
+# A:   2.9 V:   2.9 A-V:  0.001 ct:  0.026  59/ 59  4%  6%  0.7% 0 0
+#
+# Deshalb muss mit MPEG-TS ("-f mpegts") gemuxt werden:
+#
+# Format                                   : MPEG-TS
+# FileExtension_Invalid                    : ts m2t m2s m4t m4s tmf ts tp trp ty
+#
+#------------------------------------------------------------------------------#
 
 ### http://www.ffmpeg.org/ffmpeg.html#Video-Options
 # FFMPEG_TARGET: vcd, svcd, dvd, dv, dv50
-FFMPEG_TARGET="vcd"     # vcd, svcd, dvd, dv, dv50 (pal-, ntsc- oder film-)
 
-	#----------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
+#
+# bei einer höheren Auflösung als VCD wird MPEG-2 eingesetzt
+#
 
-        if [ "${SOLL_FPS_RUND}" -gt 0 ] ; then
-                TARGET_FPS="${SOLL_FPS_RUND}"
+if [ "${VERGLEICH_BREIT}" -gt 352 -o "${VERGLEICH_HOCH}" -gt 288 ] ; then
+	###------------------------------------------------------------------###
+	###
+	### Video -> DVD
+	###
+	###------------------------------------------------------------------###
+	FFMPEG_TARGET="dvd"
+	#
+	POST_TARGET="-f mpegts"
+	ENDUNG="ts"
+else
+	###------------------------------------------------------------------###
+	###
+	### Video -> VCD
+	###
+	###------------------------------------------------------------------###
+	FFMPEG_TARGET="vcd"
+	#
+	if [ "x${SCHNITTZEITEN}" != x ] ; then
+		POST_TARGET="-f mpegts"
+		ENDUNG="ts"
+	fi
+fi
+
+#------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
+
+if [ "${SOLL_FPS_RUND}" -gt 0 ] ; then
+        TARGET_FPS="${SOLL_FPS_RUND}"
+else
+        if [ "${IN_FPS_RUND}" -gt 0 ] ; then
+                TARGET_FPS="${IN_FPS_RUND}"
         else
-                if [ "${IN_FPS_RUND}" -gt 0 ] ; then
-                        TARGET_FPS="${IN_FPS_RUND}"
+                if [ "${R_FPS_RUND}" -gt 0 ] ; then
+                        TARGET_FPS="${R_FPS_RUND}"
                 else
-                        if [ "${R_FPS_RUND}" -gt 0 ] ; then
-                                TARGET_FPS="${R_FPS_RUND}"
-                        else
-                                TARGET_FPS="24"         # im Zweifelsfall den kleinsten Wert
-                        fi
+                        TARGET_FPS="24"         # im Zweifelsfall den kleinsten Wert
                 fi
         fi
- 
-	# TARGET_PREFIX: film- (24 fps), pal- (25/50 fps), ntsc- (30/60 fps)
-        TARGET_PREFIX="pal"
-        if [ "${TARGET_FPS}" -eq 24 ] ; then
-                TARGET_PREFIX="film"
-	else
-                if [ "${TARGET_FPS}" -gt 24 ] ; then
-                        TARGET_PREFIX="pal"
-                        if [ "${TARGET_FPS}" -gt 25 ] ; then
-                                TARGET_PREFIX="ntsc"
-                                if [ "${TARGET_FPS}" -gt 30 ] ; then
-                                        TARGET_PREFIX="pal"
-                                        if [ "${TARGET_FPS}" -gt 50 ] ; then
-                                                TARGET_PREFIX="ntsc"
-                                        fi
+fi
+
+### TARGET_PREFIX: film- (24 fps), pal- (25/50 fps), ntsc- (30/60 fps)
+TARGET_PREFIX="pal"
+if [ "${TARGET_FPS}" -eq 24 ] ; then
+        TARGET_PREFIX="film"
+        if [ "${TARGET_FPS}" -gt 24 ] ; then
+                TARGET_PREFIX="pal"
+                if [ "${TARGET_FPS}" -gt 25 ] ; then
+                        TARGET_PREFIX="ntsc"
+                        if [ "${TARGET_FPS}" -gt 30 ] ; then
+                                TARGET_PREFIX="pal"
+                                if [ "${TARGET_FPS}" -gt 50 ] ; then
+                                        TARGET_PREFIX="ntsc"
                                 fi
                         fi
                 fi
         fi
-        FF_TARGET="-target ${TARGET_PREFIX}-${FFMPEG_TARGET}"
+fi
+FF_TARGET="-target ${TARGET_PREFIX}-${FFMPEG_TARGET}"
 
-        #----------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
  
-	### VCD ignoriert in einigen Fällen das DAR
-        if [ "${TARGET_PREFIX}" = film ] ; then
-                HOEHE="352"
-                BREITE="240"
-        elif [ "${TARGET_PREFIX}" = ntsc ] ; then
-                HOEHE="352"
-                BREITE="240"
-        elif [ "${TARGET_PREFIX}" = pal ] ; then
-                HOEHE="352"
-                BREITE="288"
-        fi
+### VCD ignoriert in einigen Fällen das DAR
+if [ "${FFMPEG_TARGET}" = vcd ] ; then
+	echo "##==-- VCD --==##"
+	BREITE="352"
+	HOEHE="240"
+	if [ "${TARGET_PREFIX}" = pal ] ; then
+		HOEHE="288"
+	fi
+else
+	echo "##==-- DVD --==##"
+fi
 
-        #----------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
 
-	echo "
-	TARGET_PREFIX='${TARGET_PREFIX}'
-	FFMPEG_TARGET='${FFMPEG_TARGET}'
-	SOLL_FPS_RUND='${SOLL_FPS_RUND}'
-	IN_FPS_RUND='${IN_FPS_RUND}'
-	R_FPS_RUND='${R_FPS_RUND}'
-	TARGET_FPS='${TARGET_FPS}'
-	FF_TARGET='${FF_TARGET}'
-	HOEHE='${HOEHE}'
-	BREITE='${BREITE}'
-	"
-
-#==============================================================================#
-
-####
-#### Video -> MPEG-1
-####
-#FORMAT="mpeg"		# MPEG-1 Systems / MPEG program stream
-##FORMAT="vcd"		# MPEG-1 Systems / MPEG program stream (VCD)
-#. $(dirname ${0})/Filmwandler_Codec_Video_261.txt
-#
-#### Audio
-#. $(dirname ${0})/Filmwandler_Codec_Audio_mp2.txt		# Mono / Stereo
+echo "
+SOLL_FPS_RUND='${SOLL_FPS_RUND}'
+IN_FPS_RUND='${IN_FPS_RUND}'
+R_FPS_RUND='${R_FPS_RUND}'
+TARGET_PREFIX='${TARGET_PREFIX}'
+FFMPEG_TARGET='${FFMPEG_TARGET}'
+TARGET_FPS='${TARGET_FPS}'
+FF_TARGET='${FF_TARGET}'
+POST_TARGET='${POST_TARGET}'
+BREITE='${BREITE}'
+HOEHE='${HOEHE}'
+"
 
 #==============================================================================#
 
@@ -111,5 +147,15 @@ FORMAT_BESCHREIBUNG="
 * Beschreibung:                                                                *
 *       - hohe Kompatibilität mit Konsumerelektronik                           *
 *       - ähnlich dem VCD-Format                                               *
+*       - Auflösung bis 352x288                                                *
+*------------------------------------------------------------------------------*
+* Name:                 DVD                                                    *
+* ENDUNG:               .mpg                                                   *
+* Video-Kodierung:      MPEG-2                                                 *
+* Audio-Kodierung:      AC3                                                    *
+* Beschreibung:                                                                *
+*       - hohe Kompatibilität mit Konsumerelektronik                           *
+*       - ähnlich dem DVD-Format                                               *
+*       - Auflösung größer als 352x288                                         *
 ********************************************************************************
 "
