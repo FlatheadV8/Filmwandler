@@ -6,7 +6,7 @@
 #
 #==============================================================================#
 
-VERSION="v2018083100"
+VERSION="v2018090300"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -28,8 +28,8 @@ IFRAME="-keyint_min 2-8"
 
 #------------------------------------------------------------------------------#
 ### 3GPP2 ignoriert in einigen Fällen das DAR
-HOEHE="${VERGLEICH_BREIT}"
-BREITE="${VERGLEICH_HOCH}"
+BREITE="${VERGLEICH_BREIT}"
+HOEHE="${VERGLEICH_HOCH}"
 
 #==============================================================================#
 
