@@ -1,47 +1,50 @@
-#
-# Sorenson Spark
-# Sorenson H.263
-# Flash Video ("Flash Player 6" und "Flash Player 7")
-#
 
-VERSION="v2018083100"
+#==============================================================================#
+#
+# FLV -> Flash Video von Adobe
+#
+#==============================================================================#
+
+VERSION="v2018090300"
+
+#. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
+
+#==============================================================================#
+#
+# https://trac.ffmpeg.org/wiki/Encode/MP3
+#
+#==============================================================================#
+
+# Format
+ENDUNG="flv"
+FORMAT="flv"
+
+#==============================================================================#
+
+# Audio
+. $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt
+
+
+# Video
+. $(dirname ${0})/Filmwandler_Codec_Video_flv.txt
+IFRAME="-keyint_min 2-8"
 
 #------------------------------------------------------------------------------#
-#
-# H.263 Sorenson Spark
-#                04. März 2002 - Macromedia Flash MX v6
-#                Laut dem Adobe-Ingenieur Tinic Uro ist Sorenson Spark eine
-#                unvollständige Implementierung von H.263
-#                Es unterscheidet sich hauptsächlich in der Kopfstruktur und
-#                den Bereichen der Koeffizienten.
-#
-#------------------------------------------------------------------------------#
-#
-# https://codecs.multimedia.cx/2017/11/h-263-and-mpeg-4-asp-the-root-of-some-evil/
-#
-#------------------------------------------------------------------------------#
+### Flash Video ignoriert im Normalfall das DAR
+HOEHE="${VERGLEICH_HOCH}"
+BREITE="${VERGLEICH_BREIT}"
 
-CODEC_PATTERN="flv"		# Beispiel: "h265|hevc"
-VIDEOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
-if [ "x${VIDEOCODEC}" = "x" ] ; then
-	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
-	if [ "x${VIDEOCODEC}" = "x" ] ; then
-		echo ""
-		echo "${CODEC_PATTERN}"
-		echo "Leider wird dieser Codec von der aktuell installierten Version"
-		echo "von FFmpeg nicht unterstützt!"
-		echo ""
-		exit 1
-	fi
-fi
+#==============================================================================#
 
-VIDEO_QUALITAET_0="-q:v 10"
-VIDEO_QUALITAET_1="-q:v 9"
-VIDEO_QUALITAET_2="-q:v 8"
-VIDEO_QUALITAET_3="-q:v 7"
-VIDEO_QUALITAET_4="-q:v 6"
-VIDEO_QUALITAET_5="-q:v 5"
-VIDEO_QUALITAET_6="-q:v 4"
-VIDEO_QUALITAET_7="-q:v 3"
-VIDEO_QUALITAET_8="-q:v 2"
-VIDEO_QUALITAET_9="-q:v 1"
+FORMAT_BESCHREIBUNG="
+********************************************************************************
+* Name:                 Flash Video                                            *
+* ENDUNG:               .flv                                                   *
+* Video-Kodierung:      Sorenson Spark (MPEG-4 Part 2 / ASP)                   *
+* Audio-Kodierung:      MP3                                                    *
+* Beschreibung:                                                                *
+*       - ab Adobe Flash Player Version 6 abspielbar                           *
+*       - Flash Video Version 1                                                *
+*       - FourCC: FLV1                                                         *
+********************************************************************************
+"
