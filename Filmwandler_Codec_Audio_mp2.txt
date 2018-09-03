@@ -1,8 +1,10 @@
+#------------------------------------------------------------------------------#
 #
 # MP2 - MPEG-1 Layer 2
 #
+#------------------------------------------------------------------------------#
 
-VERSION="v2018082800"
+VERSION="v2018090300"
 
 CODEC_PATTERN="mp2"		# Beispiel: "h265|hevc"
 AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
@@ -18,14 +20,18 @@ if [ "x${AUDIOCODEC}" = "x" ] ; then
 	fi
 fi
 
-AUDIO_OPTION="-ac 2"
-AUDIO_QUALITAET_0="-b:a 64k ${AUDIO_OPTION}"            # 96k
-AUDIO_QUALITAET_1="-b:a 80k ${AUDIO_OPTION}"            # 112k
-AUDIO_QUALITAET_2="-b:a 88k ${AUDIO_OPTION}"            # 128k
-AUDIO_QUALITAET_3="-b:a 112k ${AUDIO_OPTION}"           # 144k
-AUDIO_QUALITAET_4="-b:a 128k ${AUDIO_OPTION}"           # 160k
-AUDIO_QUALITAET_5="-b:a 160k ${AUDIO_OPTION}"           # 192k
-AUDIO_QUALITAET_6="-b:a 184k ${AUDIO_OPTION}"           # 224k
-AUDIO_QUALITAET_7="-b:a 224k ${AUDIO_OPTION}"           # 248k
-AUDIO_QUALITAET_8="-b:a 264k ${AUDIO_OPTION}"           # 280k
-AUDIO_QUALITAET_9="-b:a 320k ${AUDIO_OPTION}"           # 320k
+
+if [ "${AUDIO_KANAELE}" -gt 2 ] ; then
+	AUDIO_OPTION="-ac 2"
+fi
+
+AUDIO_QUALITAET_0="-b:a  96k ${AUDIO_OPTION}"
+AUDIO_QUALITAET_1="-b:a 112k ${AUDIO_OPTION}"
+AUDIO_QUALITAET_2="-b:a 130k ${AUDIO_OPTION}"
+AUDIO_QUALITAET_3="-b:a 152k ${AUDIO_OPTION}"
+AUDIO_QUALITAET_4="-b:a 178k ${AUDIO_OPTION}"
+AUDIO_QUALITAET_5="-b:a 208k ${AUDIO_OPTION}"
+AUDIO_QUALITAET_6="-b:a 242k ${AUDIO_OPTION}"
+AUDIO_QUALITAET_7="-b:a 282k ${AUDIO_OPTION}"
+AUDIO_QUALITAET_8="-b:a 330k ${AUDIO_OPTION}"
+AUDIO_QUALITAET_9="-b:a 384k ${AUDIO_OPTION}"
