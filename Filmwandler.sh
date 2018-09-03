@@ -5,16 +5,16 @@
 # Dieses Skript verändert NICHT die Bildwiederholrate!
 #
 # Das Ergebnis besteht aus folgenden Formaten:
-#  - MKV:     mkv  + VP8        + MP3
-#  - WebM:    webm + VP9        + Opus
-#  - MP4:     mp4  + H.264/AVC  + AAC
-#  - AVCHD:   m2ts + H.264/AVC  + AC3
-#  - AVI:     avi  + DivX5      + MP3
-#  - FLV:     flv  + FLV        + MP3  (Sorenson Spark: H.263)
-#  - 3GPP:    3gp  + H.263      + AAC  (128x96 176x144 352x288 704x576 1408x1152)
-#  - 3GPP2:   3g2  + H.263      + AAC
-#  - OGG:     ogg  + Theora     + Vorbis
-#  - MPEG:    mpg  + MPEG-1     + MP2  (bei kleinen Bitraten besser als MPEG-2)
+#  - MKV:     mkv    + VP8        + MP3
+#  - WebM:    webm   + VP9        + Opus
+#  - MP4:     mp4    + H.264/AVC  + AAC
+#  - AVCHD:   m2ts   + H.264/AVC  + AC3
+#  - AVI:     avi    + DivX5      + MP3
+#  - FLV:     flv    + FLV        + MP3     (Sorenson Spark: H.263)
+#  - 3GPP:    3gp    + H.263      + AAC     (128x96 176x144 352x288 704x576 1408x1152)
+#  - 3GPP2:   3g2    + H.263      + AAC
+#  - OGG:     ogg    + Theora     + Vorbis
+#  - MPEG:    mpg/ts + MPEG-1/2   + MP2/AC3 (bei kleinen Bitraten ist MPEG-1 besser)
 #
 # https://de.wikipedia.org/wiki/Containerformat
 #
@@ -28,7 +28,7 @@
 
 
 #VERSION="v2017102900"
-VERSION="v2018090200"
+VERSION="v2018090300"
 
 
 BILDQUALIT="auto"
@@ -672,11 +672,11 @@ fi
 # HTML5: VIDEO_FILTER="-vf ${ZEILENSPRUNG}setsar='1/1'"
 #
 if [ "${DAR_FAKTOR}" -lt "149333" ] ; then
-	HOEHE="4"
-	BREITE="3"
+	BREITE="4"
+	HOEHE="3"
 else
-	HOEHE="16"
-	BREITE="9"
+	BREITE="16"
+	HOEHE="9"
 fi
 
 
@@ -783,17 +783,19 @@ fi
 #------------------------------------------------------------------------------#
 ### ab hier kann in die Log-Datei geschrieben werden
 
-#rm -f ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+PROTOKOLLDATEI="${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt"
+
+#rm -f ${PROTOKOLLDATEI}
 echo "# $(date +'%F %T')
-${0} ${Film2Standardformat_OPTIONEN}" | tee ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+${0} ${Film2Standardformat_OPTIONEN}" | tee ${PROTOKOLLDATEI}
 
 echo "
 ${FORMAT_BESCHREIBUNG}
-" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+" | tee -a ${PROTOKOLLDATEI}
 
 echo "${M_INFOS}
 PAR_FAKTOR='${PAR_FAKTOR}'
-" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+" | tee -a ${PROTOKOLLDATEI}
 
 #------------------------------------------------------------------------------#
 
@@ -805,6 +807,19 @@ if [ -r ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt ] ; then
 #echo "IN_FPS='${IN_FPS}'"
 #exit 24
 . ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt
+
+### sich die Zielendung geändert hat
+### z.B. kann sich ".mpg" in ".ts" ändern
+if [ -e ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} ] ; then
+	echo ""
+	echo "Die Datei '${ZIELVERZ}/${ZIELNAME}.${ENDUNG}' existiert bereits..."
+	echo 'ABBRUCH!'
+	ls -l ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
+fi
+if [ ${PROTOKOLLDATEI} != ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt ] ; then
+	mv ${PROTOKOLLDATEI} ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+	PROTOKOLLDATEI="${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt"
+fi
 
 else
 	OP_QUELLE="2"
@@ -927,7 +942,7 @@ if [ "x${FF_TARGET}" = x ] ; then
 
 echo "
 OP_QUELLE='${OP_QUELLE}'
-" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+" | tee -a ${PROTOKOLLDATEI}
 #exit 25
 
 #==============================================================================#
@@ -1026,7 +1041,7 @@ AUDIOQUALITAET=${AUDIOQUALITAET}
 
 VIDEOCODEC=${VIDEOCODEC}
 VIDEOQUALITAET=${VIDEOQUALITAET}
-" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+" | tee -a ${PROTOKOLLDATEI}
 #exit 26
 
 fi
@@ -1078,7 +1093,7 @@ fi
 if [ "${ORIGINAL_PIXEL}" = Ja ] ; then
 	unset PAD
 else
-	PAD="pad='max(iw\\,ih*(${HOEHE}/${BREITE})):ow/(${HOEHE}/${BREITE}):(ow-iw)/2:(oh-ih)/2',"
+	PAD="pad='max(iw\\,ih*(${BREITE}/${HOEHE})):ow/(${BREITE}/${HOEHE}):(ow-iw)/2:(oh-ih)/2',"
 fi
 
 #------------------------------------------------------------------------------#
@@ -1116,7 +1131,7 @@ AUDIO_VERARBEITUNG_02=${AUDIO_VERARBEITUNG_02}
 
 VIDEO_FILTER=${VIDEO_FILTER}
 START_ZIEL_FORMAT=${START_ZIEL_FORMAT}
-" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+" | tee -a ${PROTOKOLLDATEI}
 #exit 27
 
 
@@ -1132,8 +1147,8 @@ if [ "x${FF_TARGET}" = x ] ; then
 
 else
 
-	FF_SCHNITT_START="${VIDEO_TAG} -map 0:v ${VIDEO_FILTER} ${UNTERTITEL} ${AUDIO_VERARBEITUNG_01_TARGET} ${FF_TARGET}"
-	FF_START="${VIDEO_TAG} -map 0:v ${VIDEO_FILTER} ${AUDIO_VERARBEITUNG_01_TARGET} ${FF_TARGET} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}"
+	FF_SCHNITT_START="${VIDEO_TAG} -map 0:v ${VIDEO_FILTER} ${UNTERTITEL} ${AUDIO_VERARBEITUNG_01_TARGET} ${FF_TARGET} ${POST_TARGET}"
+	FF_START="${VIDEO_TAG} -map 0:v ${VIDEO_FILTER} ${AUDIO_VERARBEITUNG_01_TARGET} ${FF_TARGET} ${POST_TARGET} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}"
 
 fi
 #==============================================================================#
@@ -1147,7 +1162,9 @@ if [ -z "${SCHNITTZEITEN}" ] ; then
 	### hier wird der Film transkodiert                                  ###
 	###------------------------------------------------------------------###
 	echo
-	echo "1: ${PROGRAMM} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${FF_START}" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+	echo "
+1: ${PROGRAMM} ${REPARATUR_PARAMETER} -i  \"${FILMDATEI}\" ${FF_START}
+" | tee -a ${PROTOKOLLDATEI}
 	echo
 #>
 	         ${PROGRAMM} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${FF_START} 2>&1
@@ -1178,13 +1195,18 @@ else
 		### hier werden die Teile zwischen der Werbung transkodiert  ###
 		###----------------------------------------------------------###
 		echo
-		echo "2: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -ss ${VON} -to ${BIS} ${FF_SCHNITT_START} -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+		echo "
+2: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${FF_TARGET} -ss ${VON} -to ${BIS} ${FF_SCHNITT_START} -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}
+" | tee -a ${PROTOKOLLDATEI}
 		echo
 #>
-		         ${PROGRAMM} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  -ss ${VON} -to ${BIS} ${FF_SCHNITT_START} -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} 2>&1
+		         ${PROGRAMM} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  ${FF_TARGET} -ss ${VON} -to ${BIS} ${FF_SCHNITT_START} -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} 2>&1
 
 		### das ist nicht nötig, wenn das End-Container-Format bereits MKV ist
 		if [ "${ENDUNG}" != "mkv" ] ; then
+			echo "
+3: ffmpeg -i ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} -c:v copy -c:a copy ${U_TITEL_MKV} -f matroska -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.mkv && rm -f ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}
+" | tee -a ${PROTOKOLLDATEI}
 			ffmpeg -i ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} -c:v copy -c:a copy ${U_TITEL_MKV} -f matroska -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.mkv && rm -f ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}
 		fi
 
@@ -1192,14 +1214,18 @@ else
 	done
 
 	FILM_TEILE="$(ls -1 ${ZIELVERZ}/${ZUFALL}_*_${ZIELNAME}.mkv | tr -s '\n' '|' | sed 's/|/ + /g;s/ + $//')"
-	echo "3: mkvmerge -o '${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv' '${FILM_TEILE}'"
+	echo "
+4: mkvmerge -o '${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv' '${FILM_TEILE}'
+" | tee -a ${PROTOKOLLDATEI}
 #>
 	         mkvmerge -o  ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv   ${FILM_TEILE}
 
 	# den vertigen Film aus dem MKV-Format in das MP4-Format umwandeln
-	echo "4: ${PROGRAMM} ${REPARATUR_PARAMETER} -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv ${VIDEO_TAG} -c:v copy ${AUDIO_VERARBEITUNG_02} ${U_TITEL_MKV} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}"
+	echo "
+5: ${PROGRAMM} ${REPARATUR_PARAMETER} -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv ${VIDEO_TAG} ${FF_TARGET} -c:v copy ${AUDIO_VERARBEITUNG_02} ${U_TITEL_MKV} ${START_ZIEL_FORMAT} ${POST_TARGET} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
+" | tee -a ${PROTOKOLLDATEI}
 #>
-	         ${PROGRAMM} ${REPARATUR_PARAMETER} -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv ${VIDEO_TAG} -c:v copy ${AUDIO_VERARBEITUNG_02} ${U_TITEL_MKV} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
+	         ${PROGRAMM} ${REPARATUR_PARAMETER} -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv ${VIDEO_TAG} ${FF_TARGET} -c:v copy ${AUDIO_VERARBEITUNG_02} ${U_TITEL_MKV} ${START_ZIEL_FORMAT} ${POST_TARGET} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
 
 	#ls -lh ${ZIELVERZ}/${ZUFALL}_*_${ZIELNAME}.mkv ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv
 	#echo "rm -f ${ZIELVERZ}/${ZUFALL}_*_${ZIELNAME}.mkv ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv"
@@ -1208,7 +1234,7 @@ else
 fi
 #------------------------------------------------------------------------------#
 
-ls -lh ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+ls -lh ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt | tee -a ${PROTOKOLLDATEI}
 LAUFZEIT="$(echo "${STARTZEITPUNKT} $(date +'%s')" | awk '{print $2 - $1}')"
-echo "# $(date +'%F %T') (${LAUFZEIT})" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+echo "# $(date +'%F %T') (${LAUFZEIT})" | tee -a ${PROTOKOLLDATEI}
 #exit 28
