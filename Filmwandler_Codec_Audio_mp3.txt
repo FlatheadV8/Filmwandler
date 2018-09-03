@@ -2,7 +2,7 @@
 # MP3 - MPEG-1 Layer 3
 #
 
-VERSION="v2018082800"
+VERSION="v2018090300"
 
 CODEC_PATTERN="mp3"		# Beispiel: "h265|hevc"
 AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
@@ -18,27 +18,31 @@ if [ "x${AUDIOCODEC}" = "x" ] ; then
 	fi
 fi
 
+if [ "${AUDIO_KANAELE}" -gt 2 ] ; then
+	AUDIO_OPTION="-ac 2"
+fi
+
 # https://trac.ffmpeg.org/wiki/Encode/MP3
 if [ "${AUDIOCODEC}" = "libmp3lame" ] ; then
-        AUDIO_QUALITAET_0="-q:a 9 -ac 2"
-        AUDIO_QUALITAET_1="-q:a 8 -ac 2"
-        AUDIO_QUALITAET_2="-q:a 7 -ac 2"
-        AUDIO_QUALITAET_3="-q:a 6 -ac 2"
-        AUDIO_QUALITAET_4="-q:a 5 -ac 2"
-        AUDIO_QUALITAET_5="-q:a 4 -ac 2"
-        AUDIO_QUALITAET_6="-q:a 3 -ac 2"
-        AUDIO_QUALITAET_7="-q:a 2 -ac 2"
-        AUDIO_QUALITAET_8="-q:a 1 -ac 2"
-        AUDIO_QUALITAET_9="-q:a 1 -ac 2"
+        AUDIO_QUALITAET_0="-q:a 9 ${AUDIO_OPTION}"
+        AUDIO_QUALITAET_1="-q:a 8 ${AUDIO_OPTION}"
+        AUDIO_QUALITAET_2="-q:a 7 ${AUDIO_OPTION}"
+        AUDIO_QUALITAET_3="-q:a 6 ${AUDIO_OPTION}"
+        AUDIO_QUALITAET_4="-q:a 5 ${AUDIO_OPTION}"
+        AUDIO_QUALITAET_5="-q:a 4 ${AUDIO_OPTION}"
+        AUDIO_QUALITAET_6="-q:a 3 ${AUDIO_OPTION}"
+        AUDIO_QUALITAET_7="-q:a 2 ${AUDIO_OPTION}"
+        AUDIO_QUALITAET_8="-q:a 1 ${AUDIO_OPTION}"
+        AUDIO_QUALITAET_9="-q:a 1 ${AUDIO_OPTION}"
 else
-        AUDIO_QUALITAET_0="-b:a 64k -ac 2"
-        AUDIO_QUALITAET_1="-b:a 80k -ac 2"
-        AUDIO_QUALITAET_2="-b:a 88k -ac 2"
-        AUDIO_QUALITAET_3="-b:a 112k -ac 2"
-        AUDIO_QUALITAET_4="-b:a 128k -ac 2"
-        AUDIO_QUALITAET_5="-b:a 160k -ac 2"
-        AUDIO_QUALITAET_6="-b:a 184k -ac 2"
-        AUDIO_QUALITAET_7="-b:a 224k -ac 2"
-        AUDIO_QUALITAET_8="-b:a 264k -ac 2"
-        AUDIO_QUALITAET_9="-b:a 320k -ac 2"
+        AUDIO_QUALITAET_0="-b:a 64k ${AUDIO_OPTION}"
+        AUDIO_QUALITAET_1="-b:a 80k ${AUDIO_OPTION}"
+        AUDIO_QUALITAET_2="-b:a 88k ${AUDIO_OPTION}"
+        AUDIO_QUALITAET_3="-b:a 112k ${AUDIO_OPTION}"
+        AUDIO_QUALITAET_4="-b:a 128k ${AUDIO_OPTION}"
+        AUDIO_QUALITAET_5="-b:a 160k ${AUDIO_OPTION}"
+        AUDIO_QUALITAET_6="-b:a 184k ${AUDIO_OPTION}"
+        AUDIO_QUALITAET_7="-b:a 224k ${AUDIO_OPTION}"
+        AUDIO_QUALITAET_8="-b:a 264k ${AUDIO_OPTION}"
+        AUDIO_QUALITAET_9="-b:a 320k ${AUDIO_OPTION}"
 fi
