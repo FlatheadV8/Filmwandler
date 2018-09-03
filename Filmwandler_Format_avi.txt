@@ -5,7 +5,7 @@
 #
 #==============================================================================#
 
-VERSION="v2018083100"
+VERSION="v2018090300"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -116,7 +116,7 @@ IFRAME="-keyint_min 2-8"
 
 #------------------------------------------------------------------------------#
 ### AVI hat nicht zwingend quadratische Bildpunkte
-FORMAT_ANPASSUNG="setdar=${HOEHE}/${BREITE},"
+FORMAT_ANPASSUNG="setdar=${BREITE}/${HOEHE},"
 
 #==============================================================================#
 
