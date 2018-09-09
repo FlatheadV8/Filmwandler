@@ -7,31 +7,31 @@
 #
 #==============================================================================#
 
-VERSION="v2018082300"
+VERSION="v2018090600"
 
 #------------------------------------------------------------------------------#
 
 # bei -c:v libx264 -profile:v high / FullHD - 1920×1080 = 2073600 Bildpunkte
 # crf 15 ~ 8350 kb/s
-# crf 16 ~ 7250 kb/s
+# crf 16 ~ 7250 kb/s - -vq 9
 # crf 17 ~ 6290 kb/s
-# crf 18 ~ 5460 kb/s
+# crf 18 ~ 5460 kb/s - -vq 8
 # crf 19 ~ 4740 kb/s
-# crf 20 ~ 4130 kb/s
+# crf 20 ~ 4130 kb/s - -vq 7
 # crf 21 ~ 3590 kb/s
-# crf 22 ~ 3130 kb/s
+# crf 22 ~ 3130 kb/s - -vq 6
 # crf 23 ~ 2720 kb/s
-# crf 24 ~ 2370 kb/s
+# crf 24 ~ 2370 kb/s - -vq 5
 # crf 25 ~ 2070 kb/s
-# crf 26 ~ 1810 kb/s
+# crf 26 ~ 1810 kb/s - -vq 4
 # crf 27 ~ 1590 kb/s
-# crf 28 ~ 1400 kb/s
+# crf 28 ~ 1400 kb/s - -vq 3
 # crf 29 ~ 1240 kb/s
-# crf 30 ~ 1100 kb/s
+# crf 30 ~ 1100 kb/s - -vq 2
 # crf 31 ~ 980 kb/s
-# crf 32 ~ 870 kb/s
+# crf 32 ~ 870 kb/s  - -vq 1
 # crf 33 ~ 780 kb/s
-# crf 34 ~ 700 kb/s
+# crf 34 ~ 700 kb/s  - -vq 0
 # crf 35 ~ 630 kb/s
 
 # CRF Bit/10Pixel BILDQUALIT
@@ -59,37 +59,64 @@ VERSION="v2018082300"
 
 #------------------------------------------------------------------------------#
 
-echo "1 BILDQUALIT='${BILDQUALIT}'" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
-echo "IN_BIT_RATE='${IN_BIT_RATE}'" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+echo "
+1 BILDQUALIT='${BILDQUALIT}'
+IN_BIT_RATE='${IN_BIT_RATE}'
+" | tee -a ${PROTOKOLLDATEI}
 
 if [ "${BILDQUALIT}" = "auto" ] ; then
 	if [ "x${IN_BIT_RATE}" != "x" ] ; then
-		IN_BIT_je_BP="$(echo "${IN_BIT_RATE} ${IN_BREIT} ${IN_HOCH}" | awk '{printf "%.0f\n", $1 * 10000 / $2 / $3}')"
-		echo "IN_BIT_je_BP='${IN_BIT_je_BP}'" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
 
-		if   [ "${IN_BIT_je_BP}" -gt "26" ] ; then
+		### Bitrate je Sekunde pro Pixel
+	#	IN_BIT_je_BP="$(echo "${IN_BIT_RATE} ${IN_BREIT} ${IN_HOCH}" | awk '{printf "%.0f\n", $1 * 10000 / $2 / $3}')"
+	#	echo "IN_BIT_je_BP='${IN_BIT_je_BP}'" | tee -a ${PROTOKOLLDATEI}
+	#	if   [ "${IN_BIT_je_BP}" -gt "26" ] ; then
+	#		BILDQUALIT="9"
+	#	elif [ "${IN_BIT_je_BP}" -gt "20" ] ; then
+	#		BILDQUALIT="8"
+	#	elif [ "${IN_BIT_je_BP}" -gt "15" ] ; then
+	#		BILDQUALIT="7"
+	#	elif [ "${IN_BIT_je_BP}" -gt "11" ] ; then
+	#		BILDQUALIT="6"
+	#	elif [ "${IN_BIT_je_BP}" -gt "9" ] ; then
+	#		BILDQUALIT="5"
+	#	elif [ "${IN_BIT_je_BP}" -gt "7" ] ; then
+	#		BILDQUALIT="4"
+	#	elif [ "${IN_BIT_je_BP}" -gt "5" ] ; then
+	#		BILDQUALIT="3"
+	#	elif [ "${IN_BIT_je_BP}" -gt "4" ] ; then
+	#		BILDQUALIT="2"
+	#	elif [ "${IN_BIT_je_BP}" -gt "3" ] ; then
+	#		BILDQUALIT="1"
+	#	else
+	#		BILDQUALIT="0"
+	#	fi
+
+		### Bitrate je Sekunde
+		if   [ "${IN_BIT_RATE}" -gt "5500" ] ; then
 			BILDQUALIT="9"
-		elif [ "${IN_BIT_je_BP}" -gt "20" ] ; then
+		elif [ "${IN_BIT_RATE}" -gt "4500" ] ; then
 			BILDQUALIT="8"
-		elif [ "${IN_BIT_je_BP}" -gt "15" ] ; then
+		elif [ "${IN_BIT_RATE}" -gt "3500" ] ; then
 			BILDQUALIT="7"
-		elif [ "${IN_BIT_je_BP}" -gt "11" ] ; then
+		elif [ "${IN_BIT_RATE}" -gt "2500" ] ; then
 			BILDQUALIT="6"
-		elif [ "${IN_BIT_je_BP}" -gt "9" ] ; then
+		elif [ "${IN_BIT_RATE}" -gt "2000" ] ; then
 			BILDQUALIT="5"
-		elif [ "${IN_BIT_je_BP}" -gt "7" ] ; then
+		elif [ "${IN_BIT_RATE}" -gt "1500" ] ; then
 			BILDQUALIT="4"
-		elif [ "${IN_BIT_je_BP}" -gt "5" ] ; then
+		elif [ "${IN_BIT_RATE}" -gt "1100" ] ; then
 			BILDQUALIT="3"
-		elif [ "${IN_BIT_je_BP}" -gt "4" ] ; then
+		elif [ "${IN_BIT_RATE}" -gt "870" ] ; then
 			BILDQUALIT="2"
-		elif [ "${IN_BIT_je_BP}" -gt "3" ] ; then
+		elif [ "${IN_BIT_RATE}" -gt "700" ] ; then
 			BILDQUALIT="1"
 		else
 			BILDQUALIT="0"
 		fi
 	fi
-	echo "2 BILDQUALIT='${BILDQUALIT}'" | tee -a ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt
+	echo "2 BILDQUALIT='${BILDQUALIT}'
+	" | tee -a ${PROTOKOLLDATEI}
 fi
 
 #------------------------------------------------------------------------------#
