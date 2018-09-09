@@ -28,7 +28,7 @@
 
 
 #VERSION="v2017102900"
-VERSION="v2018090300"
+VERSION="v2018090600"
 
 
 BILDQUALIT="auto"
@@ -1234,7 +1234,7 @@ else
 fi
 #------------------------------------------------------------------------------#
 
-ls -lh ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt | tee -a ${PROTOKOLLDATEI}
+ls -lh ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} ${PROTOKOLLDATEI} | tee -a ${PROTOKOLLDATEI}
 LAUFZEIT="$(echo "${STARTZEITPUNKT} $(date +'%s')" | awk '{print $2 - $1}')"
 echo "# $(date +'%F %T') (${LAUFZEIT})" | tee -a ${PROTOKOLLDATEI}
 #exit 28
