@@ -28,7 +28,7 @@
 
 
 #VERSION="v2017102900"
-VERSION="v2018090600"
+VERSION="v2018101200"
 
 
 BILDQUALIT="auto"
@@ -270,12 +270,12 @@ fi
 
 if [ -z "${TONSPUR}" ] ; then
         TONSPUR=0	# die erste Tonspur ist "0"
+fi
+
+if [ "${TONSPUR}" -gt 0 ] ; then
+	TSNAME="$(echo "${TONSPUR}" | awk '{print $1 - 1}')"
 else
-	if [ "${TONSPUR}" -gt 0 ] ; then
-		TSNAME="$(echo "${TONSPUR}" | awk '{print $1 - 1}')"
-	else
-		TSNAME="${TONSPUR}"
-	fi
+	TSNAME="${TONSPUR}"
 fi
 
 #------------------------------------------------------------------------------#
@@ -894,7 +894,7 @@ else
 			echo "Leider wird dieser Codec von der aktuell installierten Version"
 			echo "von FFmpeg nicht unterstützt!"
 			echo ""
-			exit 1
+			exit 25
 		fi
 	fi
 
@@ -943,7 +943,7 @@ if [ "x${FF_TARGET}" = x ] ; then
 echo "
 OP_QUELLE='${OP_QUELLE}'
 " | tee -a ${PROTOKOLLDATEI}
-#exit 25
+#exit 26
 
 #==============================================================================#
 ### Qualität
@@ -1042,7 +1042,7 @@ AUDIOQUALITAET=${AUDIOQUALITAET}
 VIDEOCODEC=${VIDEOCODEC}
 VIDEOQUALITAET=${VIDEOQUALITAET}
 " | tee -a ${PROTOKOLLDATEI}
-#exit 26
+#exit 27
 
 fi
 #==============================================================================#
@@ -1054,7 +1054,14 @@ fi
 # Audio
 
 STREAM_AUDIO="$(ffprobe "${FILMDATEI}" 2>&1 | fgrep ' Stream ' | fgrep Audio:)"
-STREAMAUDIO="$(echo "${STREAM_AUDIO}" | wc -w | awk '{print $1}')"
+STREAMAUDIO="$(echo "${STREAM_AUDIO}" | wc -l | awk '{print $1}')"
+
+echo "
+STREAM_AUDIO='${STREAM_AUDIO}'
+STREAMAUDIO='${STREAMAUDIO}'
+TSNAME='${TSNAME}'
+" | tee -a ${PROTOKOLLDATEI}
+#exit 28
 
 if [ "${STREAMAUDIO}" -gt 0 ] ; then
 	AUDIO_VERARBEITUNG_01_TARGET="-map 0:a:${TSNAME}"
@@ -1132,7 +1139,7 @@ AUDIO_VERARBEITUNG_02=${AUDIO_VERARBEITUNG_02}
 VIDEO_FILTER=${VIDEO_FILTER}
 START_ZIEL_FORMAT=${START_ZIEL_FORMAT}
 " | tee -a ${PROTOKOLLDATEI}
-#exit 27
+#exit 29
 
 
 #------------------------------------------------------------------------------#
@@ -1237,4 +1244,4 @@ fi
 ls -lh ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} ${PROTOKOLLDATEI} | tee -a ${PROTOKOLLDATEI}
 LAUFZEIT="$(echo "${STARTZEITPUNKT} $(date +'%s')" | awk '{print $2 - $1}')"
 echo "# $(date +'%F %T') (${LAUFZEIT})" | tee -a ${PROTOKOLLDATEI}
-#exit 28
+#exit 30
