@@ -804,7 +804,7 @@ if [ -r ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt ] ; then
 	OP_QUELLE="1"
 	unset FFMPEG_TARGET
 
-#echo "IN_FPS='${IN_FPS}'"
+echo "IN_FPS='${IN_FPS}'"
 #exit 24
 . ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt
 
@@ -1141,6 +1141,15 @@ START_ZIEL_FORMAT=${START_ZIEL_FORMAT}
 " | tee -a ${PROTOKOLLDATEI}
 #exit 29
 
+#------------------------------------------------------------------------------#
+### um den Fehler "Past duration 0.XXXXXX too large" zu vermeiden
+
+if [ "x${IN_FPS}" = x ] ; then
+	unset R_FRAME_RATE
+else
+	R_FRAME_RATE="-r ${IN_FPS}"
+fi
+
 
 #------------------------------------------------------------------------------#
 
@@ -1170,11 +1179,11 @@ if [ -z "${SCHNITTZEITEN}" ] ; then
 	###------------------------------------------------------------------###
 	echo
 	echo "
-1: ${PROGRAMM} ${REPARATUR_PARAMETER} -i  \"${FILMDATEI}\" ${FF_START}
+1: ${PROGRAMM} ${REPARATUR_PARAMETER} ${R_FRAME_RATE} -i  \"${FILMDATEI}\" ${FF_START}
 " | tee -a ${PROTOKOLLDATEI}
 	echo
 #>
-	         ${PROGRAMM} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${FF_START} 2>&1
+	         ${PROGRAMM} ${REPARATUR_PARAMETER} ${R_FRAME_RATE} -i  "${FILMDATEI}" ${FF_START} 2>&1
 
 else
 
@@ -1203,11 +1212,11 @@ else
 		###----------------------------------------------------------###
 		echo
 		echo "
-2: ${PROGRAMM} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${FF_TARGET} -ss ${VON} -to ${BIS} ${FF_SCHNITT_START} -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}
+2: ${PROGRAMM} ${REPARATUR_PARAMETER} ${R_FRAME_RATE} -i \"${FILMDATEI}\" ${FF_TARGET} -ss ${VON} -to ${BIS} ${FF_SCHNITT_START} -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}
 " | tee -a ${PROTOKOLLDATEI}
 		echo
 #>
-		         ${PROGRAMM} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  ${FF_TARGET} -ss ${VON} -to ${BIS} ${FF_SCHNITT_START} -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} 2>&1
+		         ${PROGRAMM} ${REPARATUR_PARAMETER} ${R_FRAME_RATE} -i  "${FILMDATEI}"  ${FF_TARGET} -ss ${VON} -to ${BIS} ${FF_SCHNITT_START} -y ${ZIELVERZ}/${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} 2>&1
 
 		### das ist nicht nötig, wenn das End-Container-Format bereits MKV ist
 		if [ "${ENDUNG}" != "mkv" ] ; then
@@ -1229,10 +1238,10 @@ else
 
 	# den vertigen Film aus dem MKV-Format in das MP4-Format umwandeln
 	echo "
-5: ${PROGRAMM} ${REPARATUR_PARAMETER} -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv ${VIDEO_TAG} ${FF_TARGET} -c:v copy ${AUDIO_VERARBEITUNG_02} ${U_TITEL_MKV} ${START_ZIEL_FORMAT} ${POST_TARGET} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
+5: ${PROGRAMM} ${REPARATUR_PARAMETER} ${R_FRAME_RATE} -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv ${VIDEO_TAG} ${FF_TARGET} -c:v copy ${AUDIO_VERARBEITUNG_02} ${U_TITEL_MKV} ${START_ZIEL_FORMAT} ${POST_TARGET} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
 " | tee -a ${PROTOKOLLDATEI}
 #>
-	         ${PROGRAMM} ${REPARATUR_PARAMETER} -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv ${VIDEO_TAG} ${FF_TARGET} -c:v copy ${AUDIO_VERARBEITUNG_02} ${U_TITEL_MKV} ${START_ZIEL_FORMAT} ${POST_TARGET} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
+	         ${PROGRAMM} ${REPARATUR_PARAMETER} ${R_FRAME_RATE} -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv ${VIDEO_TAG} ${FF_TARGET} -c:v copy ${AUDIO_VERARBEITUNG_02} ${U_TITEL_MKV} ${START_ZIEL_FORMAT} ${POST_TARGET} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
 
 	#ls -lh ${ZIELVERZ}/${ZUFALL}_*_${ZIELNAME}.mkv ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv
 	#echo "rm -f ${ZIELVERZ}/${ZUFALL}_*_${ZIELNAME}.mkv ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}.mkv"
