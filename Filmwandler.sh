@@ -288,12 +288,12 @@ ZIELDATEI="$(basename ${ZIELPFAD})"
 #------------------------------------------------------------------------------#
 # damit keine Leerzeichen im Dateinamen enthalten sind
 
-if [ -z "${TSNAME}" ] ; then
-        ZIELDATEI="$(echo "${ZIELDATEI}" | rev | sed 's/[.]/ /' | rev | awk '{print $1"."$2}')"
-else
-	# damit man erkennt welche Tonspur aus dem Original verwendet wurde
-        ZIELDATEI="$(echo "${ZIELDATEI} ${TONSPUR}" | rev | sed 's/[.]/ /' | rev | awk '{print $1"_-_Tonspur_"$3"."$2}')"
-fi
+#if [ -z "${TSNAME}" ] ; then
+#        ZIELDATEI="$(echo "${ZIELDATEI}" | rev | sed 's/[.]/ /' | rev | awk '{print $1"."$2}')"
+#else
+#	# damit man erkennt welche Tonspur aus dem Original verwendet wurde
+#        ZIELDATEI="$(echo "${ZIELDATEI} ${TONSPUR}" | rev | sed 's/[.]/ /' | rev | awk '{print $1"_-_Tonspur_"$3"."$2}')"
+#fi
 
 #==============================================================================#
 ### Programm
