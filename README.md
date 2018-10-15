@@ -1,6 +1,14 @@
 # Filmwandler
 Mit diesem Skript kann man einen beliebigen Film in eines von 10 sehr verbreiteten Formaten umwandeln.
 
+Download:
+
+https://github.com/FlatheadV8/Filmwandler
+
+https://github.com/FlatheadV8/Filmwandler/releases/
+
+https://github.com/FlatheadV8/Filmwandler/releases/latest
+
 Das Skript besitzt viele weitere nützliche Optionen, siehe:
 
     ~/bin/Filmwandler.sh -h
