@@ -28,7 +28,7 @@
 
 
 #VERSION="v2017102900"
-VERSION="v2018101200"
+VERSION="v2018101500"
 
 
 BILDQUALIT="auto"
@@ -308,7 +308,7 @@ if [ -z "${PROGRAMM}" ] ; then
 	exit 15
 fi
 
-REPARATUR_PARAMETER="-fflags +genpts"
+REPARATUR_PARAMETER="-nostdin -fflags +genpts"
 
 #==============================================================================#
 ### Untertitel
@@ -406,7 +406,8 @@ fi
 # FFPROBE=' 720x576 SAR 64:45 DAR 16:9 25 fps '
 # FFPROBE=" 852x480 SAR 1:1 DAR 71:40 25 fps "
 # FFPROBE=' 1920x800 SAR 1:1 DAR 12:5 23.98 fps '
-IN_XY="$(echo "${FFPROBE}" | fgrep ' DAR ' | awk '{print $1}')"
+#IN_XY="$(echo "${FFPROBE}" | fgrep ' DAR ' | awk '{print $1}')"
+IN_XY="$(echo "${FFPROBE}" | awk '{print $1}')"
 IN_BREIT="$(echo "${IN_XY}" | awk -F'x' '{print $1}')"
 IN_HOCH="$(echo  "${IN_XY}" | awk -F'x' '{print $2}')"
 IN_PAR="$(echo "${FFPROBE}" | fgrep ' DAR ' | awk '{print $3}')"
@@ -773,7 +774,7 @@ FORMAT_ANPASSUNG="setsar='1/1',"
 QUELL_BASIS_NAME="$(echo "${QUELL_DATEI}" | awk '{print tolower($0)}')"
 ZIEL_BASIS_NAME="$(echo "${ZIELDATEI}" | awk '{print tolower($0)}')"
 
-ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/.*[.]//' | rev)"
+ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | awk '{print $1}')"
 ENDUNG="$(echo "${ZIEL_BASIS_NAME}" | rev | sed 's/[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.]/&"/;s/[.]".*//' | rev)"
 
 if [ "${QUELL_BASIS_NAME}" = "${ZIEL_BASIS_NAME}" ] ; then
