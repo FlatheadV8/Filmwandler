@@ -28,7 +28,8 @@
 
 
 #VERSION="v2017102900"
-VERSION="v2018101500"
+#VERSION="v2018101500"
+VERSION="v2018111200"
 
 
 BILDQUALIT="auto"
@@ -375,11 +376,13 @@ FFPROBE="$(ffprobe "${FILMDATEI}" 2>&1 | fgrep Video: | sed 's/.* Video:/Video:/
 # tbc (FPS vom Codec) = the time base in AVCodecContext for the codec used for a particular stream
 # tbr (FPS vom Video-Stream geraten) = tbr is guessed from the video stream and is the value users want to see when they look for the video frame rate
 echo "FFPROBE='${FFPROBE}'"
+#exit 17
 #------------------------------------------------------------------------------#
 SOLL_FPS_RUND="$(echo "${SOLL_FPS}" | awk '{printf "%.0f\n", $1}')"			# für Vergleiche, "if" erwartet einen Integerwert
 #------------------------------------------------------------------------------#
 ### alternative Methode zur Ermittlung der FPS
-R_FPS="$(ffprobe -show_data -show_streams "${FILMDATEI}" 2>/dev/null | egrep '^codec_type=|^r_frame_rate=' | egrep -A1 '^codec_type=video' | awk -F'=' '/^r_frame_rate=/{print $2}' | sed 's|/| |')"
+FFPROBE_DATA_STREAMS="$(ffprobe -show_data -show_streams "${FILMDATEI}" 2>/dev/null)"
+R_FPS="$(echo "${FFPROBE_DATA_STREAMS}" 2>/dev/null | egrep '^codec_type=|^r_frame_rate=' | egrep -A1 '^codec_type=video' | awk -F'=' '/^r_frame_rate=/{print $2}' | sed 's|/| |')"
 A_FPS="$(echo "${R_FPS}" | wc -w)"
 if [ "${A_FPS}" -gt 1 ] ; then
 	R_FPS="$(echo "${R_FPS}" | awk '{print $1 / $2}')"
@@ -401,7 +404,7 @@ if [ "${SCAN_TYPE}" != "Progressive" ] ; then
         ZEILENSPRUNG="yadif,"
 fi
 
-#exit 17
+#exit 18
 
 # FFPROBE=' 720x576 SAR 64:45 DAR 16:9 25 fps '
 # FFPROBE=" 852x480 SAR 1:1 DAR 71:40 25 fps "
@@ -412,6 +415,12 @@ IN_BREIT="$(echo "${IN_XY}" | awk -F'x' '{print $1}')"
 IN_HOCH="$(echo  "${IN_XY}" | awk -F'x' '{print $2}')"
 IN_PAR="$(echo "${FFPROBE}" | fgrep ' DAR ' | awk '{print $3}')"
 IN_DAR="$(echo "${FFPROBE}" | fgrep ' DAR ' | awk '{print $5}')"
+if [ "x${IN_DAR}" = x ] ; then
+	IN_DAR="$(echo "${FFPROBE_DATA_STREAMS}" 2>/dev/null | awk -F'=' '/^display_aspect_ratio=/{print $2}' | sed 's|/| |' | egrep '[0-9]')"
+	if [ "x${IN_DAR}" = x ] ; then
+		IN_DAR="$(echo "${IN_BREIT} ${IN_HOCH}" | awk '{print $1"/"$2}')"
+	fi
+fi
 IN_FPS="$(echo "${FFPROBE}" | fgrep ' DAR ' | awk '{print $6}')"		# wird benötigt um den Farbraum für BluRay zu ermitteln
 IN_FPS_RUND="$(echo "${IN_FPS}" | awk '{printf "%.0f\n", $1}')"			# für Vergleiche, "if" erwartet einen Integerwert
 IN_BITRATE="$(echo "${MEDIAINFO}" | sed -ne '/^Video$/,/^$/ p' | egrep '^Bit rate' | awk -F':' '{print $2}' | sed 's/[ ]*//g;s/[a-zA-Z/][a-zA-Z/]*$/ &/' | tail -n1)"
@@ -620,6 +629,18 @@ if [ -n "${CROP}" ] ; then
 	CROP="crop=${CROP},"
 fi
 
+echo "
+CROP='${CROP}'
+
+PAR_FAKTOR='${PAR_FAKTOR}'
+IN_BREIT='${IN_BREIT}'
+IN_HOCH='${IN_HOCH}'
+
+DAR_FAKTOR='${DAR_FAKTOR}'
+DAR_KOMMA='${DAR_KOMMA}'
+"
+#exit 21
+
 
 #------------------------------------------------------------------------------#
 ### Seitenverhältnis des Bildes (DAR) muss hier bekannt sein!
@@ -630,7 +651,7 @@ if [ -z "${DAR_FAKTOR}" ] ; then
 	echo "-dar"
 	echo "z.B.: -dar 16:9"
 	echo "ABBRUCH!"
-	exit 21
+	exit 22
 fi
 
 
@@ -697,9 +718,20 @@ else
 fi
 
 echo "
-#1 SOLL_XY="${SOLL_XY}"
-#2 SOLL_SCALE="${SOLL_SCALE}"
+#1 SOLL_XY='${SOLL_XY}'
+#2 SOLL_SCALE='${SOLL_SCALE}'
+
+IN_BREIT='${IN_BREIT}'
+IN_HOCH='${IN_HOCH}'
+DAR_KOMMA='${DAR_KOMMA}'
+TEILER='${TEILER}'
+
+TEIL_HOEHE='${TEIL_HOEHE}'
+QUADR_SCALE='${QUADR_SCALE}'
+QUADR_BREIT='${QUADR_BREIT}'
+QUADR_HOCH='${QUADR_HOCH}'
 "
+#exit 23
 
 
 #------------------------------------------------------------------------------#
@@ -717,7 +749,7 @@ if [ "x${SOLL_XY}" != "x" ] ; then
 			echo "Die gewünschte Bildauflösung wurde als 'Name' angegeben: '${SOLL_XY}'"
 			echo "Für die Übersetzung wird die Datei 'Filmwandler_grafik.txt' benötigt."
 			echo "Leider konnte die Datei '$(dirname ${0})/Filmwandler_grafik.txt' nicht gelesen werden."
-			exit 22
+			exit 24
 		fi
 	fi
 fi
@@ -754,7 +786,7 @@ Originalauflösung   =${IN_BREIT}x${IN_HOCH}
 erwünschte Auflösung=${SOLL_XY}
 PIXELZAHL           =${PIXELZAHL}
 "
-#exit 23
+#exit 25
 
 #------------------------------------------------------------------------------#
 ### quadratische Bildpunkte sind der Standard
@@ -806,7 +838,7 @@ if [ -r ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt ] ; then
 	unset FFMPEG_TARGET
 
 echo "IN_FPS='${IN_FPS}'"
-#exit 24
+#exit 26
 . ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt
 
 ### sich die Zielendung geändert hat
@@ -895,7 +927,7 @@ else
 			echo "Leider wird dieser Codec von der aktuell installierten Version"
 			echo "von FFmpeg nicht unterstützt!"
 			echo ""
-			exit 25
+			exit 27
 		fi
 	fi
 
@@ -944,7 +976,7 @@ if [ "x${FF_TARGET}" = x ] ; then
 echo "
 OP_QUELLE='${OP_QUELLE}'
 " | tee -a ${PROTOKOLLDATEI}
-#exit 26
+#exit 28
 
 #==============================================================================#
 ### Qualität
@@ -1043,7 +1075,7 @@ AUDIOQUALITAET=${AUDIOQUALITAET}
 VIDEOCODEC=${VIDEOCODEC}
 VIDEOQUALITAET=${VIDEOQUALITAET}
 " | tee -a ${PROTOKOLLDATEI}
-#exit 27
+#exit 29
 
 fi
 #==============================================================================#
@@ -1062,7 +1094,7 @@ STREAM_AUDIO='${STREAM_AUDIO}'
 STREAMAUDIO='${STREAMAUDIO}'
 TSNAME='${TSNAME}'
 " | tee -a ${PROTOKOLLDATEI}
-#exit 28
+#exit 30
 
 if [ "${STREAMAUDIO}" -gt 0 ] ; then
 	AUDIO_VERARBEITUNG_01_TARGET="-map 0:a:${TSNAME}"
@@ -1129,18 +1161,22 @@ fi
 #==============================================================================#
 
 echo "
-PAD=${PAD}
+STREAM_AUDIO='${STREAM_AUDIO}'
+STREAMAUDIO='${STREAMAUDIO}'
 
-STREAM_AUDIO=${STREAM_AUDIO}
-STREAMAUDIO=${STREAMAUDIO}
+AUDIO_VERARBEITUNG_01='${AUDIO_VERARBEITUNG_01}'
+AUDIO_VERARBEITUNG_02='${AUDIO_VERARBEITUNG_02}'
 
-AUDIO_VERARBEITUNG_01=${AUDIO_VERARBEITUNG_01}
-AUDIO_VERARBEITUNG_02=${AUDIO_VERARBEITUNG_02}
-
-VIDEO_FILTER=${VIDEO_FILTER}
-START_ZIEL_FORMAT=${START_ZIEL_FORMAT}
+ZEILENSPRUNG='${ZEILENSPRUNG}'
+CROP='${CROP}'
+QUADR_SCALE='${QUADR_SCALE}'
+PAD='${PAD}'
+FORMAT_ANPASSUNG='${FORMAT_ANPASSUNG}'
+SOLL_SCALE='${SOLL_SCALE}'
+VIDEO_FILTER='${VIDEO_FILTER}'
+START_ZIEL_FORMAT='${START_ZIEL_FORMAT}'
 " | tee -a ${PROTOKOLLDATEI}
-#exit 29
+#exit 31
 
 #------------------------------------------------------------------------------#
 ### um den Fehler "Past duration 0.XXXXXX too large" zu vermeiden
@@ -1254,4 +1290,4 @@ fi
 ls -lh ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} ${PROTOKOLLDATEI} | tee -a ${PROTOKOLLDATEI}
 LAUFZEIT="$(echo "${STARTZEITPUNKT} $(date +'%s')" | awk '{print $2 - $1}')"
 echo "# $(date +'%F %T') (${LAUFZEIT})" | tee -a ${PROTOKOLLDATEI}
-#exit 30
+#exit 32
