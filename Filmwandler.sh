@@ -29,7 +29,7 @@
 
 #VERSION="v2017102900"
 #VERSION="v2018101500"
-VERSION="v2018111200"
+VERSION="v2018111900"
 
 
 BILDQUALIT="auto"
@@ -75,6 +75,34 @@ egrep -h '^[*][* ]' ${AVERZ}/Filmwandler_Format_*.txt
 echo "
 #==============================================================================#
 "
+}
+
+
+###
+###  4/3 -> QUADRATISCHES_BILD 720 576 8 4 3
+### 16/9 -> QUADRATISCHES_BILD 720 576 8 16 9
+###
+QUADRATISCHES_BILD()
+{
+	IN_PIXEL="$(echo "${1} ${2}" | awk '{print $1 * $2}')"
+	if [ "${5}" -gt "${4}" ] ; then
+		GR_SEITE="${5}"
+		KL_SEITE="${4}"
+	else
+		GR_SEITE="${4}"
+		KL_SEITE="${5}"
+	fi
+
+	#echo "${1} ${2} ${3} ${GR_SEITE} ${KL_SEITE}"
+	#echo "sqrt(${1} * ${2} * ${GR_SEITE} / ${KL_SEITE}) / ${3} / ${GR_SEITE}"
+
+	FAKTOR="$(echo "${1} ${2} ${3} ${GR_SEITE} ${KL_SEITE}" | awk '{printf "%.0f\n", (sqrt($1 * $2 * $4 / $5) / $3 / $4) + 1}')"
+	B="$(echo "${FAKTOR} ${3} ${4}" | awk '{print ($1 * $2 * $3)}')"
+	H="$(echo "${FAKTOR} ${3} ${5}" | awk '{print ($1 * $2 * $3)}')"
+	ZAHL="$(echo "${B} ${H}" | awk '{print $1 * $2}')"
+
+	#echo "${B} x ${H} = ${ZAHL} (${IN_PIXEL})"
+	echo "${B} ${H}"
 }
 
 
@@ -149,7 +177,7 @@ while [ "${#}" -ne "0" ]; do
                         ;;
                 -g)
 			echo "${BILD_FORMATNAMEN_AUFLOESUNGEN}"
-                        exit 11
+                        exit 20
                         ;;
                 -h)
 			ausgabe_hilfe
@@ -241,7 +269,7 @@ while [ "${#}" -ne "0" ]; do
 	mögliche Namen von Grafikauflösungen anzeigen
 	=> ${0} -g
                         "
-                        exit 12
+                        exit 30
                         ;;
                 *)
                         if [ "$(echo "${1}"|egrep '^-')" ] ; then
@@ -259,14 +287,14 @@ done
 
 if [ "${STOP}" = "Ja" ] ; then
         echo "Bitte korrigieren sie die falschen Parameter. Abbruch!"
-        exit 13
+        exit 40
 fi
 
 #------------------------------------------------------------------------------#
 
 if [ ! -r "${FILMDATEI}" ] ; then
         echo "Der Film '${FILMDATEI}' konnte nicht gefunden werden. Abbruch!"
-        exit 14
+        exit 50
 fi
 
 if [ -z "${TONSPUR}" ] ; then
@@ -306,7 +334,7 @@ fi
 
 if [ -z "${PROGRAMM}" ] ; then
 	echo "Weder avconv noch ffmpeg konnten gefunden werden. Abbruch!"
-	exit 15
+	exit 60
 fi
 
 REPARATUR_PARAMETER="-nostdin -fflags +genpts"
@@ -321,7 +349,7 @@ if [ -n "${UNTERTITEL}" ] ; then
 	if [ "${U_TITEL}" = "Fehler" ] ; then
 		echo "Für die Untertitelspur muss eine Zahl angegeben werden. Abbruch!"
 		echo "z.B.: ${0} -q Film.avi -u 0 -z Film.mp4"
-		exit 16
+		exit 70
 	fi
 fi
 
@@ -376,7 +404,7 @@ FFPROBE="$(ffprobe "${FILMDATEI}" 2>&1 | fgrep Video: | sed 's/.* Video:/Video:/
 # tbc (FPS vom Codec) = the time base in AVCodecContext for the codec used for a particular stream
 # tbr (FPS vom Video-Stream geraten) = tbr is guessed from the video stream and is the value users want to see when they look for the video frame rate
 echo "FFPROBE='${FFPROBE}'"
-#exit 17
+#exit 80
 #------------------------------------------------------------------------------#
 SOLL_FPS_RUND="$(echo "${SOLL_FPS}" | awk '{printf "%.0f\n", $1}')"			# für Vergleiche, "if" erwartet einen Integerwert
 #------------------------------------------------------------------------------#
@@ -404,7 +432,7 @@ if [ "${SCAN_TYPE}" != "Progressive" ] ; then
         ZEILENSPRUNG="yadif,"
 fi
 
-#exit 18
+#exit 90
 
 # FFPROBE=' 720x576 SAR 64:45 DAR 16:9 25 fps '
 # FFPROBE=" 852x480 SAR 1:1 DAR 71:40 25 fps "
@@ -511,7 +539,7 @@ if [ -z "${IN_XY}" ] ; then
 	echo "z.B. (HDTV)    : -in_xmaly 1280x720"
 	echo "z.B. (FullHD)  : -in_xmaly 1920x1080"
 	echo "ABBRUCH!"
-	exit 19
+	exit 100
 fi
 
 
@@ -573,7 +601,7 @@ if [ -z "${IN_DAR}" ] ; then
 	echo "z.B. (DVB/DVD) : -in_par 64:45"
 	echo "z.B. (BluRay)  : -in_par  1:1"
 	echo "ABBRUCH!"
-	exit 20
+	exit 110
 fi
 
 
@@ -639,7 +667,7 @@ IN_HOCH='${IN_HOCH}'
 DAR_FAKTOR='${DAR_FAKTOR}'
 DAR_KOMMA='${DAR_KOMMA}'
 "
-#exit 21
+#exit 120
 
 
 #------------------------------------------------------------------------------#
@@ -651,41 +679,48 @@ if [ -z "${DAR_FAKTOR}" ] ; then
 	echo "-dar"
 	echo "z.B.: -dar 16:9"
 	echo "ABBRUCH!"
-	exit 22
+	exit 130
 fi
 
 
 #------------------------------------------------------------------------------#
 ### ob die Pixel bereits quadratisch sind
 if [ "${PAR_FAKTOR}" -ne "100000" ] ; then
-
-	### Umrechnung in quadratische Pixel - Version 1
-	#QUADR_SCALE="scale=$(echo "${DAR_KOMMA} ${IN_BREIT} ${IN_HOCH}" | awk '{b=sqrt($1*$2*$3); printf "%.0f %.0f\n", b/2, b/$1/2}' | awk '{print $1*2"x"$2*2}'),"
-	#QUADR_SCALE="scale=$(echo "${IN_BREIT} ${IN_HOCH} ${DAR_KOMMA}" | awk '{b=sqrt($1*$2*$3); printf "%.0f %.0f\n", b/2, b/$3/2}' | awk '{print $1*2"x"$2*2}'),"
-
-	### Umrechnung in quadratische Pixel - Version 2
-	#HALBE_HOEHE="$(echo "${IN_BREIT} ${IN_HOCH} ${DAR_KOMMA}" | awk '{h=sqrt($1*$2/$3); printf "%.0f\n", h/2}')"
-	#QUADR_SCALE="scale=$(echo "${HALBE_HOEHE} ${DAR_KOMMA}" | awk '{printf "%.0f %.0f\n", $1*$2, $1}' | awk '{print $1*2"x"$2*2}'),"
-	#
-	### [swscaler @ 0x81520d000] Warning: data is not aligned! This can lead to a speed loss
-	### laut Googel müssen die Pixel durch 16 teilbar sein, beseitigt aber leider dieses Problem nicht
-	#
+	#======================================================================#
 	### die Pixel sollten wenigstens durch 2 teilbar sein! besser aber durch 8                          
 	#TEILER="2"
 	#TEILER="4"
 	TEILER="8"
 	#TEILER="16"
-	TEIL_HOEHE="$(echo "${IN_BREIT} ${IN_HOCH} ${DAR_KOMMA} ${TEILER}" | awk '{h=sqrt($1*$2/$3); printf "%.0f\n", h/$4}')"
-	QUADR_SCALE="scale=$(echo "${TEIL_HOEHE} ${DAR_KOMMA}" | awk '{printf "%.0f %.0f\n", $1*$2, $1}' | awk -v teiler="${TEILER}" '{print $1*teiler"x"$2*teiler}'),"
 
-	QUADR_BREIT="$(echo "${QUADR_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $1}')"
-	QUADR_HOCH="$(echo "${QUADR_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $2}')"
+	#======================================================================#
+	###
+	### Umrechnung in quadratische Pixel - Version 4
+	###
+	###  4/3 -> QUADRATISCHES_BILD 720 576 8 4 3
+	### 16/9 -> QUADRATISCHES_BILD 720 576 8 16 9
+	###
+	SEITENVERHAELTNIS="$(echo "${IN_DAR}" | sed 's/[:/]/ /')"
+	Q_BREITE_HOEHE="$(QUADRATISCHES_BILD ${IN_BREIT} ${IN_HOCH} ${TEILER} ${SEITENVERHAELTNIS})"
+	QUADR_BREIT="$(echo "${Q_BREITE_HOEHE}" | awk '{print $1}')"
+	QUADR_HOCH="$(echo "${Q_BREITE_HOEHE}" | awk '{print $2}')"
+	QUADR_SCALE="scale=${QUADR_BREIT}x${QUADR_HOCH},"
+
+	#----------------------------------------------------------------------#
 else
 	### wenn die Pixel bereits quadratisch sind
 	QUADR_BREIT="${IN_BREIT}"
 	QUADR_HOCH="${IN_HOCH}"
 fi
 
+echo "
+IN_BREIT='${IN_BREIT}'
+IN_HOCH='${IN_HOCH}'
+Q_BREITE_HOEHE='${Q_BREITE_HOEHE}'
+QUADR_BREIT='${QUADR_BREIT}'
+QUADR_HOCH='${QUADR_HOCH}'
+"
+#exit 140
 
 #------------------------------------------------------------------------------#
 ### universelle Variante
@@ -731,7 +766,7 @@ QUADR_SCALE='${QUADR_SCALE}'
 QUADR_BREIT='${QUADR_BREIT}'
 QUADR_HOCH='${QUADR_HOCH}'
 "
-#exit 23
+#exit 150
 
 
 #------------------------------------------------------------------------------#
@@ -749,7 +784,7 @@ if [ "x${SOLL_XY}" != "x" ] ; then
 			echo "Die gewünschte Bildauflösung wurde als 'Name' angegeben: '${SOLL_XY}'"
 			echo "Für die Übersetzung wird die Datei 'Filmwandler_grafik.txt' benötigt."
 			echo "Leider konnte die Datei '$(dirname ${0})/Filmwandler_grafik.txt' nicht gelesen werden."
-			exit 24
+			exit 160
 		fi
 	fi
 fi
@@ -786,7 +821,7 @@ Originalauflösung   =${IN_BREIT}x${IN_HOCH}
 erwünschte Auflösung=${SOLL_XY}
 PIXELZAHL           =${PIXELZAHL}
 "
-#exit 25
+#exit 170
 
 #------------------------------------------------------------------------------#
 ### quadratische Bildpunkte sind der Standard
@@ -827,8 +862,31 @@ ${FORMAT_BESCHREIBUNG}
 " | tee -a ${PROTOKOLLDATEI}
 
 echo "${M_INFOS}
+
+CROP='${CROP}'
+
 PAR_FAKTOR='${PAR_FAKTOR}'
+IN_BREIT='${IN_BREIT}'
+IN_HOCH='${IN_HOCH}'
+
+DAR_FAKTOR='${DAR_FAKTOR}'
+DAR_KOMMA='${DAR_KOMMA}'
+
+#1 SOLL_XY='${SOLL_XY}'
+#2 SOLL_SCALE='${SOLL_SCALE}'
+
+TEILER='${TEILER}'
+
+TEIL_HOEHE='${TEIL_HOEHE}'
+	QUADRATISCHES_BILD ${IN_BREIT} ${IN_HOCH} ${TEILER} ${SEITENVERHAELTNIS}
+SEITENVERHAELTNIS='${SEITENVERHAELTNIS}'
+Q_BREITE_HOEHE='${Q_BREITE_HOEHE}'
+
+QUADR_BREIT='${QUADR_BREIT}'
+QUADR_HOCH='${QUADR_HOCH}'
+QUADR_SCALE='${QUADR_SCALE}'
 " | tee -a ${PROTOKOLLDATEI}
+#exit 180
 
 #------------------------------------------------------------------------------#
 
@@ -838,7 +896,7 @@ if [ -r ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt ] ; then
 	unset FFMPEG_TARGET
 
 echo "IN_FPS='${IN_FPS}'"
-#exit 26
+#exit 190
 . ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt
 
 ### sich die Zielendung geändert hat
@@ -927,7 +985,7 @@ else
 			echo "Leider wird dieser Codec von der aktuell installierten Version"
 			echo "von FFmpeg nicht unterstützt!"
 			echo ""
-			exit 27
+			exit 200
 		fi
 	fi
 
@@ -976,7 +1034,7 @@ if [ "x${FF_TARGET}" = x ] ; then
 echo "
 OP_QUELLE='${OP_QUELLE}'
 " | tee -a ${PROTOKOLLDATEI}
-#exit 28
+#exit 210
 
 #==============================================================================#
 ### Qualität
@@ -1075,7 +1133,7 @@ AUDIOQUALITAET=${AUDIOQUALITAET}
 VIDEOCODEC=${VIDEOCODEC}
 VIDEOQUALITAET=${VIDEOQUALITAET}
 " | tee -a ${PROTOKOLLDATEI}
-#exit 29
+#exit 220
 
 fi
 #==============================================================================#
@@ -1094,7 +1152,7 @@ STREAM_AUDIO='${STREAM_AUDIO}'
 STREAMAUDIO='${STREAMAUDIO}'
 TSNAME='${TSNAME}'
 " | tee -a ${PROTOKOLLDATEI}
-#exit 30
+#exit 230
 
 if [ "${STREAMAUDIO}" -gt 0 ] ; then
 	AUDIO_VERARBEITUNG_01_TARGET="-map 0:a:${TSNAME}"
@@ -1176,7 +1234,7 @@ SOLL_SCALE='${SOLL_SCALE}'
 VIDEO_FILTER='${VIDEO_FILTER}'
 START_ZIEL_FORMAT='${START_ZIEL_FORMAT}'
 " | tee -a ${PROTOKOLLDATEI}
-#exit 31
+#exit 240
 
 #------------------------------------------------------------------------------#
 ### um den Fehler "Past duration 0.XXXXXX too large" zu vermeiden
@@ -1290,4 +1348,4 @@ fi
 ls -lh ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} ${PROTOKOLLDATEI} | tee -a ${PROTOKOLLDATEI}
 LAUFZEIT="$(echo "${STARTZEITPUNKT} $(date +'%s')" | awk '{print $2 - $1}')"
 echo "# $(date +'%F %T') (${LAUFZEIT})" | tee -a ${PROTOKOLLDATEI}
-#exit 32
+#exit 250
