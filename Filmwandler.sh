@@ -29,7 +29,7 @@
 
 #VERSION="v2017102900"
 #VERSION="v2018101500"
-VERSION="v2018111900"
+VERSION="v2018112000"
 
 
 BILDQUALIT="auto"
@@ -96,13 +96,60 @@ QUADRATISCHES_BILD()
 	#echo "${1} ${2} ${3} ${GR_SEITE} ${KL_SEITE}"
 	#echo "sqrt(${1} * ${2} * ${GR_SEITE} / ${KL_SEITE}) / ${3} / ${GR_SEITE}"
 
-	FAKTOR="$(echo "${1} ${2} ${3} ${GR_SEITE} ${KL_SEITE}" | awk '{printf "%.0f\n", (sqrt($1 * $2 * $4 / $5) / $3 / $4) + 1}')"
-	B="$(echo "${FAKTOR} ${3} ${4}" | awk '{print ($1 * $2 * $3)}')"
-	H="$(echo "${FAKTOR} ${3} ${5}" | awk '{print ($1 * $2 * $3)}')"
-	ZAHL="$(echo "${B} ${H}" | awk '{print $1 * $2}')"
+	FAKTOR="$(echo "${1} ${2} ${3} ${GR_SEITE} ${KL_SEITE}" | awk '{printf "%.0f\n", (sqrt($1 * $2 * $4 / $5) / $3 / $4)}')"
+	B1="$(echo "${FAKTOR} ${3} ${4}" | awk '{print (($1 - 1) * $2 * $3)}')"
+	H1="$(echo "${FAKTOR} ${3} ${5}" | awk '{print (($1 - 1) * $2 * $3)}')"
+	ZAHL1="$(echo "${B1} ${H1}" | awk '{print $1 * $2}')"
+	#echo "${FAKTOR}-1: ${B1} * ${H1} = ${ZAHL1}"
 
-	#echo "${B} x ${H} = ${ZAHL} (${IN_PIXEL})"
-	echo "${B} ${H}"
+	B2="$(echo "${FAKTOR} ${3} ${4}" | awk '{print ($1 * $2 * $3)}')"
+	H2="$(echo "${FAKTOR} ${3} ${5}" | awk '{print ($1 * $2 * $3)}')"
+	ZAHL2="$(echo "${B2} ${H2}" | awk '{print $1 * $2}')"
+	#echo "${FAKTOR}: ${B2} * ${H2} = ${ZAHL2}"
+
+	B3="$(echo "${FAKTOR} ${3} ${4}" | awk '{print (($1 + 1) * $2 * $3)}')"
+	H3="$(echo "${FAKTOR} ${3} ${5}" | awk '{print (($1 + 1) * $2 * $3)}')"
+	ZAHL3="$(echo "${B3} ${H3}" | awk '{print $1 * $2}')"
+	#echo "${FAKTOR}+1: ${B3} * ${H3} = ${ZAHL3}"
+
+	if [ "${IN_PIXEL}" -gt "${ZAHL1}" ] ; then
+		DIFF1="$(echo "${IN_PIXEL} ${ZAHL1}" | awk '{print $1 - $2}')"
+	else
+		DIFF1="$(echo "${IN_PIXEL} ${ZAHL1}" | awk '{print $2 - $1}')"
+	fi
+
+	if [ "${IN_PIXEL}" -gt "${ZAHL2}" ] ; then
+		DIFF2="$(echo "${IN_PIXEL} ${ZAHL2}" | awk '{print $1 - $2}')"
+	else
+		DIFF2="$(echo "${IN_PIXEL} ${ZAHL2}" | awk '{print $2 - $1}')"
+	fi
+
+	if [ "${IN_PIXEL}" -gt "${ZAHL3}" ] ; then
+		DIFF3="$(echo "${IN_PIXEL} ${ZAHL3}" | awk '{print $1 - $2}')"
+	else
+		DIFF3="$(echo "${IN_PIXEL} ${ZAHL3}" | awk '{print $2 - $1}')"
+	fi
+
+	# Die Auflösung mit der geringsten Abweichung zum Original wird verwendet
+	if [ "${DIFF1}" -gt "${DIFF2}" ] ; then
+		if [ "${DIFF2}" -gt "${DIFF3}" ] ; then
+			QB="${B3}"
+			QH="${H3}"
+		else
+			QB="${B2}"
+			QH="${H2}"
+		fi
+	else
+		if [ "${DIFF1}" -gt "${DIFF3}" ] ; then
+			QB="${B3}"
+			QH="${H3}"
+		else
+			QB="${B1}"
+			QH="${H1}"
+		fi
+	fi
+
+echo "${QB} ${QH}"
 }
 
 
