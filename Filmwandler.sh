@@ -29,7 +29,7 @@
 
 #VERSION="v2017102900"
 #VERSION="v2018101500"
-VERSION="v2018112000"
+VERSION="v2018112001"
 
 
 BILDQUALIT="auto"
@@ -131,25 +131,87 @@ QUADRATISCHES_BILD()
 	fi
 
 	# Die Auflösung mit der geringsten Abweichung zum Original wird verwendet
-	if [ "${DIFF1}" -gt "${DIFF2}" ] ; then
-		if [ "${DIFF2}" -gt "${DIFF3}" ] ; then
-			QB="${B3}"
-			QH="${H3}"
-		else
-			QB="${B2}"
-			QH="${H2}"
-		fi
-	else
-		if [ "${DIFF1}" -gt "${DIFF3}" ] ; then
-			QB="${B3}"
-			QH="${H3}"
-		else
-			QB="${B1}"
-			QH="${H1}"
-		fi
-	fi
 
-echo "${QB} ${QH}"
+        #echo "
+        #ZAHL1='${ZAHL1}'
+        #ZAHL2='${ZAHL2}'
+        #ZAHL3='${ZAHL3}'
+        #"
+
+        if [ "${ZAHL1}" -gt "0" ] ; then
+                if [ "${ZAHL2}" -gt "0" ] ; then
+                        if [ "${ZAHL3}" -gt "0" ] ; then
+                                if [ "${DIFF1}" -gt "${DIFF2}" ] ; then
+                                        if [ "${DIFF2}" -gt "${DIFF3}" ] ; then
+                                                QB="${B3}"
+                                                QH="${H3}"
+                                        else
+                                                QB="${B2}"
+                                                QH="${H2}"
+                                        fi
+                                else
+                                        if [ "${DIFF1}" -gt "${DIFF3}" ] ; then
+                                                QB="${B3}"
+                                                QH="${H3}"
+                                        else
+                                                QB="${B1}"
+                                                QH="${H1}"
+                                        fi
+                                fi
+                        else
+                                # ZAHL3 = 0
+                                if [ "${DIFF1}" -gt "${DIFF2}" ] ; then
+                                        QB="${B2}"
+                                        QH="${H2}"
+                                else
+                                        QB="${B1}"
+                                        QH="${H1}"
+                                fi
+                        fi
+                else
+                        # ZAHL2 = 0 / ZAHL3 = ?
+                        if [ "${ZAHL3}" -gt "0" ] ; then
+                                if [ "${DIFF1}" -gt "${DIFF3}" ] ; then
+                                        QB="${B3}"
+                                        QH="${H3}"
+                                else
+                                        QB="${B1}"
+                                        QH="${H1}"
+                                fi
+                        else
+                                QB="${B1}"
+                                QH="${H1}"
+                        fi
+                fi
+        else
+                # ZAHL1 = 0 / ZAHL2 = ? / ZAHL3 = ?
+                if [ "${ZAHL2}" -gt "0" ] ; then
+                        # ZAHL1 = 0 / ZAHL3 = ?
+                        if [ "${ZAHL3}" -gt "0" ] ; then
+                                if [ "${DIFF2}" -gt "${DIFF3}" ] ; then
+                                        QB="${B3}"
+                                        QH="${H3}"
+                                else
+                                        QB="${B2}"
+                                        QH="${H2}"
+                                fi
+                        else
+                                QB="${B2}"
+                                QH="${H2}"
+                        fi
+                else
+                        # ZAHL1 = 0 / ZAHL2 = 0 / ZAHL3 = ?
+                        if [ "${ZAHL3}" -gt "0" ] ; then
+                                QB="${B3}"
+                                QH="${H3}"
+                        else
+                                QB="$(echo "${3} ${4} ${5}" | awk '{print $1 * $2}')"
+                                QH="$(echo "${3} ${4} ${5}" | awk '{print $1 * $3}')"
+                        fi
+                fi
+        fi
+
+        echo "${QB} ${QH}"
 }
 
 
