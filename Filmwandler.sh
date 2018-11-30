@@ -29,7 +29,7 @@
 
 #VERSION="v2017102900"
 #VERSION="v2018101500"
-VERSION="v2018112001"
+VERSION="v2018113000"
 
 
 BILDQUALIT="auto"
@@ -78,6 +78,86 @@ echo "
 }
 
 
+###
+### Entzerrung des Bildes, wenn die Bildpunkte nicht quadratisch sind
+###
+ENTZERREN_BILD()
+{
+#
+# ENTZERREN_BILD 720 576 716 342 8 4 3
+# ENTZERREN_BILD IN_BREIT IN_HOCH BILD_BREIT BILD_HOCH TEILER SEITE_BREIT SEITE_HOCH
+#
+
+#------------------------------------------------------------------------------#
+### Definition der Ausgangswerte
+
+IN_BREIT=$1     # 720
+IN_HOCH=$2      # 720
+BILD_BREIT=$3   # 716
+BILD_HOCH=$4    # 342
+TEILER=$5       # 8
+SEITE_BREIT=$6  # 4, 16
+SEITE_HOCH=$7   # 3,  9
+
+SD_BREIT="4"    # Breite - SD
+SD_HOCH="3"     # Höhe   - SD
+HD_BREIT="16"   # Breite - HD
+HD_HOCH="9"     # Höhe   - HD
+
+#------------------------------------------------------------------------------#
+### Berechnung der Zwischenwerte
+
+IN_QUADRATISCH_BREIT="$(echo "${IN_HOCH} ${SEITE_BREIT} ${SEITE_HOCH}" | awk '{printf "%.0f\n", $1 * $2 / $3}')"                #    768 Punkte
+BILD_QUADRATISCH_BREIT="$(echo "${BILD_BREIT} ${IN_QUADRATISCH_BREIT} ${IN_BREIT}" | awk '{printf "%.0f\n", $1 * $2 / $3}')"    #    764 Punkte
+BILD_ANZAHL_PIXEL="$(echo "${BILD_BREIT} ${BILD_HOCH}" | awk '{print $1 * $2}')"                                                # 244872 Bildpunkte
+
+VIRTUAL_SD_GROSS_BREIT="${BILD_QUADRATISCH_BREIT}"                                                                              #    764
+VIRTUAL_SD_GROSS_HOCH="$(echo "${VIRTUAL_SD_GROSS_BREIT} ${SD_BREIT} ${SD_HOCH}" | awk '{printf "%.0f\n", $1 * $3 / $2}')"      #    573
+VIRTUAL_SD_GROSS_ANZAHL="$(echo "${VIRTUAL_SD_GROSS_BREIT} ${VIRTUAL_SD_GROSS_HOCH}" | awk '{print $1 * $2}')"                  # 437466
+#
+VIRTUAL_SD_KLEIN_HOCH="${BILD_HOCH}"                                                                                            #    342
+VIRTUAL_SD_KLEIN_BREIT="$(echo "${VIRTUAL_SD_KLEIN_HOCH} ${SD_BREIT} ${SD_HOCH}" | awk '{printf "%.0f\n", $1 * $2 / $3}')"      #    456
+VIRTUAL_SD_KLEIN_ANZAHL="$(echo "${VIRTUAL_SD_KLEIN_BREIT} ${VIRTUAL_SD_KLEIN_HOCH}" | awk '{print $1 * $2}')"                  # 155952
+#
+VIRTUAL_HD_GROSS_BREIT="${BILD_QUADRATISCH_BREIT}"                                                                              #    764
+VIRTUAL_HD_GROSS_HOCH="$(echo "${VIRTUAL_HD_GROSS_BREIT} ${HD_BREIT} ${HD_HOCH}" | awk '{printf "%.0f\n", $1 * $3 / $2}')"      #    429,6
+VIRTUAL_HD_GROSS_ANZAHL="$(echo "${VIRTUAL_HD_GROSS_BREIT} ${VIRTUAL_HD_GROSS_HOCH}" | awk '{print $1 * $2}')"                  # 328100
+#
+VIRTUAL_HD_KLEIN_HOCH="${BILD_HOCH}"                                                                                            #    342
+VIRTUAL_HD_KLEIN_BREIT="$(echo "${VIRTUAL_HD_KLEIN_HOCH} ${HD_BREIT} ${HD_HOCH}" | awk '{printf "%.0f\n", $1 * $2 / $3}')"      #    608
+VIRTUAL_HD_KLEIN_ANZAHL="$(echo "${VIRTUAL_HD_KLEIN_BREIT} ${VIRTUAL_HD_KLEIN_HOCH}" | awk '{print $1 * $2}')"                  # 207936
+
+#------------------------------------------------------------------------------#
+### Vergleich zum ermitteln des richtigen Formates
+### es wird der kleinste Wert gesucht, der größer als "0" ist
+
+### Ausgabe: "Breite in Pixel" "Höhe in Pixel" "Größe des Makros" "Format-Breite" "Format-Höhe"
+### 764 430 8 16 9
+(
+if [ "${VIRTUAL_SD_GROSS_ANZAHL}" -ge "${BILD_ANZAHL_PIXEL}" ] ; then
+        DIFF_SD_GROSS="$(echo "${VIRTUAL_SD_GROSS_ANZAHL} ${BILD_ANZAHL_PIXEL}" | awk '{print $1 - $2}')"
+        echo "${DIFF_SD_GROSS} ${VIRTUAL_SD_GROSS_BREIT} ${VIRTUAL_SD_GROSS_HOCH} ${TEILER} ${SD_BREIT} ${SD_HOCH}"
+fi
+
+if [ "${VIRTUAL_SD_KLEIN_ANZAHL}" -ge "${BILD_ANZAHL_PIXEL}" ] ; then
+        DIFF_SD_KLEIN="$(echo "${VIRTUAL_SD_KLEIN_ANZAHL} ${BILD_ANZAHL_PIXEL}" | awk '{print $1 - $2}')"
+        echo "${DIFF_SD_KLEIN} ${VIRTUAL_SD_KLEIN_BREIT} ${VIRTUAL_SD_KLEIN_HOCH} ${TEILER} ${SD_BREIT} ${SD_HOCH}"
+fi
+
+if [ "${VIRTUAL_HD_GROSS_ANZAHL}" -ge "${BILD_ANZAHL_PIXEL}" ] ; then
+        DIFF_HD_GROSS="$(echo "${VIRTUAL_HD_GROSS_ANZAHL} ${BILD_ANZAHL_PIXEL}" | awk '{print $1 - $2}')"
+        echo "${DIFF_HD_GROSS} ${VIRTUAL_HD_GROSS_BREIT} ${VIRTUAL_HD_GROSS_HOCH} ${TEILER} ${HD_BREIT} ${HD_HOCH}"
+fi
+
+if [ "${VIRTUAL_HD_KLEIN_ANZAHL}" -ge "${BILD_ANZAHL_PIXEL}" ] ; then
+        DIFF_HD_KLEIN="$(echo "${VIRTUAL_HD_KLEIN_ANZAHL} ${BILD_ANZAHL_PIXEL}" | awk '{print $1 - $2}')"
+        echo "${DIFF_HD_KLEIN} ${VIRTUAL_HD_KLEIN_BREIT} ${VIRTUAL_HD_KLEIN_HOCH} ${TEILER} ${HD_BREIT} ${HD_HOCH}"
+fi
+) | sort -n | head -n1 | awk '{print $2,$3,$4,$5,$6}'
+}
+
+
+#------------------------------------------------------------------------------#
 ###
 ###  4/3 -> QUADRATISCHES_BILD 720 576 8 4 3
 ### 16/9 -> QUADRATISCHES_BILD 720 576 8 16 9
@@ -754,8 +834,9 @@ if [ -n "${CROP}" ] ; then
 	### CROP-Seiten-Format
 	# -vf crop=width:height:x:y
 	# -vf crop=in_w-100:in_h-100:100:100
-	IN_BREIT="$(echo "${CROP}" | awk -F'[:/]' '{print $1}')"
-	IN_HOCH="$(echo "${CROP}" | awk -F'[:/]' '{print $2}')"
+
+	CROP_BREIT="$(echo "${CROP}" | awk -F'[:/]' '{print $1}')"
+	CROP_HOCH="$(echo "${CROP}" | awk -F'[:/]' '{print $2}')"
 	#X="$(echo "${CROP}" | awk -F'[:/]' '{print $3}')"
 	#Y="$(echo "${CROP}" | awk -F'[:/]' '{print $4}')"
 
@@ -764,14 +845,24 @@ if [ -n "${CROP}" ] ; then
 	DAR_KOMMA="$(echo "${DAR_FAKTOR}" | awk '{print $1/100000}')"
 
 	CROP="crop=${CROP},"
+	SEITENVERHAELTNIS="$(echo "${PAR_FAKTOR} ${IN_BREIT} ${IN_HOCH}" | awk '{printf "%u %u\n", ($1*$2),$3}')"
+else
+	CROP_BREIT="${IN_BREIT}"
+	CROP_HOCH="${IN_HOCH}"
+	SEITENVERHAELTNIS="$(echo "${IN_DAR}" | sed 's/[:/]/ /')"
 fi
 
 echo "
+IN_DAR='${IN_DAR}'
+SEITENVERHAELTNIS='${SEITENVERHAELTNIS}'
 CROP='${CROP}'
 
 PAR_FAKTOR='${PAR_FAKTOR}'
 IN_BREIT='${IN_BREIT}'
 IN_HOCH='${IN_HOCH}'
+
+CROP_BREIT='${IN_BREIT}'
+CROP_HOCH='${IN_HOCH}'
 
 DAR_FAKTOR='${DAR_FAKTOR}'
 DAR_KOMMA='${DAR_KOMMA}'
@@ -809,8 +900,9 @@ if [ "${PAR_FAKTOR}" -ne "100000" ] ; then
 	###  4/3 -> QUADRATISCHES_BILD 720 576 8 4 3
 	### 16/9 -> QUADRATISCHES_BILD 720 576 8 16 9
 	###
-	SEITENVERHAELTNIS="$(echo "${IN_DAR}" | sed 's/[:/]/ /')"
-	Q_BREITE_HOEHE="$(QUADRATISCHES_BILD ${IN_BREIT} ${IN_HOCH} ${TEILER} ${SEITENVERHAELTNIS})"
+	#	ENTZERREN_BILD  IN_BREIT  IN_HOCH  BILD_BREIT  BILD_HOCH  TEILER  SEITE_BREIT  SEITE_HOCH
+	ENTZERRUNG="$(ENTZERREN_BILD ${IN_BREIT} ${IN_HOCH} ${CROP_BREIT} ${CROP_HOCH} ${TEILER} ${SEITENVERHAELTNIS})"
+	Q_BREITE_HOEHE="$(QUADRATISCHES_BILD ${ENTZERRUNG})"
 	QUADR_BREIT="$(echo "${Q_BREITE_HOEHE}" | awk '{print $1}')"
 	QUADR_HOCH="$(echo "${Q_BREITE_HOEHE}" | awk '{print $2}')"
 	QUADR_SCALE="scale=${QUADR_BREIT}x${QUADR_HOCH},"
@@ -825,6 +917,9 @@ fi
 echo "
 IN_BREIT='${IN_BREIT}'
 IN_HOCH='${IN_HOCH}'
+CROP_BREIT='${IN_BREIT}'
+CROP_HOCH='${IN_HOCH}'
+ENTZERRUNG='${ENTZERRUNG}'
 Q_BREITE_HOEHE='${Q_BREITE_HOEHE}'
 QUADR_BREIT='${QUADR_BREIT}'
 QUADR_HOCH='${QUADR_HOCH}'
