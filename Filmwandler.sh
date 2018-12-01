@@ -29,7 +29,7 @@
 
 #VERSION="v2017102900"
 #VERSION="v2018101500"
-VERSION="v2018113000"
+VERSION="v2018120100"
 
 
 BILDQUALIT="auto"
@@ -914,7 +914,7 @@ else
 	QUADR_HOCH="${IN_HOCH}"
 fi
 
-echo "
+Z917="
 IN_BREIT='${IN_BREIT}'
 IN_HOCH='${IN_HOCH}'
 CROP_BREIT='${IN_BREIT}'
@@ -924,7 +924,11 @@ Q_BREITE_HOEHE='${Q_BREITE_HOEHE}'
 QUADR_BREIT='${QUADR_BREIT}'
 QUADR_HOCH='${QUADR_HOCH}'
 "
+echo "
+${Z917}
+"
 #exit 140
+
 
 #------------------------------------------------------------------------------#
 ### universelle Variante
@@ -932,13 +936,29 @@ QUADR_HOCH='${QUADR_HOCH}'
 # iPad : VIDEO_FILTER="-vf ${ZEILENSPRUNG}scale='1024:576',setsar='1/1'"
 # HTML5: VIDEO_FILTER="-vf ${ZEILENSPRUNG}setsar='1/1'"
 #
-if [ "${DAR_FAKTOR}" -lt "149333" ] ; then
+FAKTOR_SDoHD="$(echo "${QUADR_BREIT} ${QUADR_HOCH}" | awk '{printf "%u\n", ($1*$2)/$3}')"
+if [ "${FAKTOR_SDoHD}" -lt "149333" ] ; then
+	# SD
 	BREITE="4"
 	HOEHE="3"
 else
+	# HD
 	BREITE="16"
 	HOEHE="9"
 fi
+
+Z950="
+# Zeile 944
+DAR_FAKTOR='${DAR_FAKTOR}'
+ -lt '149333' -> 4/3
+ -ge '149333' -> 16/9
+BREITE='${BREITE}'
+HOEHE='${HOEHE}'
+"
+echo "
+${Z950}
+"
+#exit 141
 
 
 #------------------------------------------------------------------------------#
@@ -1063,6 +1083,8 @@ ${0} ${Film2Standardformat_OPTIONEN}" | tee ${PROTOKOLLDATEI}
 
 echo "
 ${FORMAT_BESCHREIBUNG}
+${Z917}
+${Z950}
 " | tee -a ${PROTOKOLLDATEI}
 
 echo "${M_INFOS}
