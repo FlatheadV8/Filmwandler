@@ -29,7 +29,7 @@
 
 #VERSION="v2017102900"
 #VERSION="v2018101500"
-VERSION="v2018120100"
+VERSION="v2018120600"
 
 
 BILDQUALIT="auto"
@@ -361,7 +361,7 @@ while [ "${#}" -ne "0" ]; do
                         shift
                         ;;
                 -u)
-                        UNTERTITEL="-map 0:s:${2} -scodec copy"		# "0" für die erste Untertitelspur
+                        UNTERTITEL="-map 0:s:${2} -c:s copy"		# "0" für die erste Untertitelspur
                         shift
                         ;;
                 -g)
@@ -391,12 +391,12 @@ while [ "${#}" -ne "0" ]; do
 
         # wenn der Film mehrer Tonspuren besitzt
         # und nicht die erste verwendet werden soll,
-        # dann wird so die 2. Tonspur angegeben (die Zaehlweise beginnt mit 0)
+        # dann wird so die 1. Tonspur angegeben (die Zaehlweise beginnt mit 1)
         -ton 1
 
         # wenn der Film mehrer Tonspuren besitzt
         # und nicht die erste verwendet werden soll,
-        # dann wird so die 3. Tonspur angegeben (die Zaehlweise beginnt mit 0)
+        # dann wird so die 2. Tonspur angegeben (die Zaehlweise beginnt mit 1)
         -ton 2
 
 	# Stereo-Ausgabe erzwingen
@@ -454,6 +454,10 @@ while [ "${#}" -ne "0" ]; do
         -out_xmaly 720x480		# englischer Parametername
         -soll_xmaly 965x543		# frei wählbares Bildformat kann angegeben werden
         -soll_xmaly VCD			# Name eines Bildformates kann angegeben werden
+
+        # "0" für die erste Untertitelspur
+        # "1" für die zweite Untertitelspur
+        -u 1
 
 	mögliche Namen von Grafikauflösungen anzeigen
 	=> ${0} -g
@@ -914,7 +918,7 @@ else
 	QUADR_HOCH="${IN_HOCH}"
 fi
 
-Z917="
+Z917=" Z917
 IN_BREIT='${IN_BREIT}'
 IN_HOCH='${IN_HOCH}'
 CROP_BREIT='${IN_BREIT}'
@@ -936,7 +940,7 @@ ${Z917}
 # iPad : VIDEO_FILTER="-vf ${ZEILENSPRUNG}scale='1024:576',setsar='1/1'"
 # HTML5: VIDEO_FILTER="-vf ${ZEILENSPRUNG}setsar='1/1'"
 #
-FAKTOR_SDoHD="$(echo "${QUADR_BREIT} ${QUADR_HOCH}" | awk '{printf "%u\n", ($1*$2)/$3}')"
+FAKTOR_SDoHD="$(echo "${PAR_FAKTOR} ${QUADR_BREIT} ${QUADR_HOCH}" | awk '{printf "%u\n", ($1*$2)/$3}')"
 if [ "${FAKTOR_SDoHD}" -lt "149333" ] ; then
 	# SD
 	BREITE="4"
@@ -947,8 +951,7 @@ else
 	HOEHE="9"
 fi
 
-Z950="
-# Zeile 944
+Z950=" Z950
 DAR_FAKTOR='${DAR_FAKTOR}'
  -lt '149333' -> 4/3
  -ge '149333' -> 16/9
