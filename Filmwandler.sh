@@ -29,7 +29,7 @@
 
 #VERSION="v2017102900"
 #VERSION="v2018101500"
-VERSION="v2018120600"
+VERSION="v2018121000"
 
 
 BILDQUALIT="auto"
@@ -381,7 +381,12 @@ while [ "${#}" -ne "0" ]; do
         # ein Beispiel mit minimaler Anzahl an Parametern
         ${0} -q Film.avi -z Film.mp4
 
+        # "0" für die erste Untertitelspur
+        # "1" für die zweite Untertitelspur
+        -u 1
         # ein Beispiel, bei dem auch die erste Untertitelspur (Zählweise beginnt mit '0'!) mit übernommen wird
+        # dieses Skript kann Untertitel nur dann fehlerfrei verwenden,
+	# wenn die Schnitt-Funktion nicht verwendet wird und als Ausgabeformat nur MP4 oder MKV verwendet wird
         ${0} -q Film.avi -u 0 -z Film.mp4
 
         # Es duerfen in den Dateinamen keine Leerzeichen, Sonderzeichen
@@ -454,10 +459,6 @@ while [ "${#}" -ne "0" ]; do
         -out_xmaly 720x480		# englischer Parametername
         -soll_xmaly 965x543		# frei wählbares Bildformat kann angegeben werden
         -soll_xmaly VCD			# Name eines Bildformates kann angegeben werden
-
-        # "0" für die erste Untertitelspur
-        # "1" für die zweite Untertitelspur
-        -u 1
 
 	mögliche Namen von Grafikauflösungen anzeigen
 	=> ${0} -g
@@ -538,7 +539,7 @@ REPARATUR_PARAMETER="-nostdin -fflags +genpts"
 unset U_TITEL_MKV
 if [ -n "${UNTERTITEL}" ] ; then
 	echo "${UNTERTITEL}" | egrep '0:s:[0-9]' >/dev/null || export U_TITEL=Fehler
-	U_TITEL_MKV="-map 0:s:0 -scodec copy"
+	U_TITEL_MKV="-c:s copy"
 	if [ "${U_TITEL}" = "Fehler" ] ; then
 		echo "Für die Untertitelspur muss eine Zahl angegeben werden. Abbruch!"
 		echo "z.B.: ${0} -q Film.avi -u 0 -z Film.mp4"
