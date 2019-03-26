@@ -46,6 +46,14 @@ if [ "x${AUDIOCODEC}" = "x" ] ; then
 	fi
 fi
 
+# libfdk_aac afterburner aktivieren für bessere audio qualität
+# https://wiki.hydrogenaud.io/index.php?title=Fraunhofer_FDK_AAC#Afterburner
+# Afterburner is "a type of analysis by synthesis algorithm which increases the audio quality but also the required processing power."
+# Fraunhofer recommends to always activate this feature.
+if [ "x${AUDIOCODEC}" = "xlibfdk_aac" ] ; then
+        AUDIOCODEC="${AUDIOCODEC} -afterburner 1"
+fi
+
 
 ### 2018-07-15: [libfdk_aac @ 0x813af3900] Note, the VBR setting is unsupported and only works with some parameter combinations
 ### https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio
