@@ -349,7 +349,19 @@ while [ "${#}" -ne "0" ]; do
                         shift
                         ;;
                 -stereo)
-                        STEREO="-ac 2"		# Stereo-Ausgabe erzwingen
+                        #STEREO="-ac 2"		# Stereo-Ausgabe erzwingen
+			# Stereo-Ausgabe erzwingen 
+                        # 5.1 mischen auf algorithmus von Dave_750 
+                        # hier werden die tiefbass spur (LFE) mit abgemischt
+                        # das trifft bei -ac 2 nicht zu (ATSC standards)
+                        # -ac 2 als filter:
+                        # -af "pan=stereo|FL < 1.0*FL + 0.707*FC + 0.707*BL|FR < 1.0*FR + 0.707*FC + 0.707*BR"
+                        # Quelle: https://superuser.com/questions/852400/properly-downmix-5-1-to-stereo-using-ffmpeg/1410620#1410620
+                        STEREO="-filter_complex pan='stereo|FL=0.5*FC+0.707*FL+0.707*BL+0.5*LFE|FR=0.5*FC+0.707*FR+0.707*BR+0.5*LFE',volume='1.562500'"
+                        # NighMode 
+                        # The Nightmode Dialogue formula, created by Robert Collier on the Doom9 forum and sourced by Shane Harrelson in his answer, 
+                        # results in a far better downmix than the ac -2 switch - instead of overly quiet dialogues, it brings them back to levels that are much closer to the source.
+                        #STEREO="-filter_complex pan='stereo|FL=FC+0.30*FL+0.30*BL|FR=FC+0.30*FR+0.30*BR'"
                         shift
                         ;;
                 -schnitt)
@@ -648,15 +660,17 @@ IN_FPS_RUND="$(echo "${IN_FPS}" | awk '{printf "%.0f\n", $1}')"			# für Verglei
 IN_BITRATE="$(echo "${MEDIAINFO}" | sed -ne '/^Video$/,/^$/ p' | egrep '^Bit rate' | awk -F':' '{print $2}' | sed 's/[ ]*//g;s/[a-zA-Z/][a-zA-Z/]*$/ &/' | tail -n1)"
 IN_BIT_EINH="$(echo "${IN_BITRATE}" | awk '{print $2}')"
 
-if [ "${IN_BIT_EINH}" = "kb/s" ] ; then
-	IN_BIT_RATE="$(echo "${IN_BITRATE}" | awk '{print $1}')"
-elif [ "${IN_BIT_EINH}" = "Mb/s" ] ; then
-	IN_BIT_RATE="$(echo "${IN_BITRATE}" | awk '{print $1 * 1024}')"
-else
-	unset IN_BIT_RATE
-	BILDQUALIT="5"
-	TONQUALIT="5"
-fi
+case "${IN_BIT_EINH}" in
+        [Kk]b[p/]s)
+                        IN_BIT_RATE="$(echo "${IN_BITRATE}" | awk '{print $1}')"
+                        ;;
+        [Mm]b[p/]s)
+                        IN_BIT_RATE="$(echo "${IN_BITRATE}" | awk '{print $1 * 1024}')"
+                        ;;
+        *)
+                        unset IN_BIT_RATE
+                        ;;
+esac
 unset IN_BITRATE
 unset IN_BIT_EINH
 
