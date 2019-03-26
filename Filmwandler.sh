@@ -29,7 +29,8 @@
 
 #VERSION="v2017102900"
 #VERSION="v2018101500"
-VERSION="v2018121000"
+#VERSION="v2018121000"
+VERSION="v2019032600"
 
 
 BILDQUALIT="auto"
@@ -1262,6 +1263,11 @@ FORMAT_BESCHREIBUNG="
 *	- auch abspielbar auf Android                                          *
 ********************************************************************************
 "
+fi
+
+# Stream funktion bei mp4 für SmartTV etc aktivieren
+if [ "x${ENDUNG}" = "xmp4" ]; then
+	VIDEO_OPTION="${VIDEO_OPTION} -movflags faststart"
 fi
 
 #==============================================================================#
