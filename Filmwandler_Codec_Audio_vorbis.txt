@@ -4,7 +4,11 @@
 
 VERSION="v2018082800"
 
-CODEC_PATTERN="vorbis"		# # Beispiel: "h265|hevc"
+CODEC_PATTERN="vorbis"			# Beispiel: "h265|hevc"
+Sound_ST=''				# Stereo (2.0)
+Sound_51=''				# 5.1
+Sound_71=''				# 7.1
+
 AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
 if [ "x${AUDIOCODEC}" = "x" ] ; then
 	AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
@@ -18,14 +22,16 @@ if [ "x${AUDIOCODEC}" = "x" ] ; then
 	fi
 fi
 
+AUDIO_OPTION=""
+
 # -q:a 3 (Standard)
-AUDIO_QUALITAET_0="-q:a 1"                      # 0-10, 10 ist am besten
-AUDIO_QUALITAET_1="-q:a 2"                      # 0-10, 10 ist am besten
-AUDIO_QUALITAET_2="-q:a 3"                      # 0-10, 10 ist am besten
-AUDIO_QUALITAET_3="-q:a 4"                      # 0-10, 10 ist am besten
-AUDIO_QUALITAET_4="-q:a 5"                      # 0-10, 10 ist am besten
-AUDIO_QUALITAET_5="-q:a 6"                      # 0-10, 10 ist am besten
-AUDIO_QUALITAET_6="-q:a 7"                      # 0-10, 10 ist am besten       
-AUDIO_QUALITAET_7="-q:a 8"                      # 0-10, 10 ist am besten       
-AUDIO_QUALITAET_8="-q:a 9"                      # 0-10, 10 ist am besten       
-AUDIO_QUALITAET_9="-q:a 10"                     # 0-10, 10 ist am besten       
+AUDIO_QUALITAET_0="${AUDIO_OPTION} -q:a 1"      # 0-10, 10 ist am besten
+AUDIO_QUALITAET_1="${AUDIO_OPTION} -q:a 2"      # 0-10, 10 ist am besten
+AUDIO_QUALITAET_2="${AUDIO_OPTION} -q:a 3"      # 0-10, 10 ist am besten
+AUDIO_QUALITAET_3="${AUDIO_OPTION} -q:a 4"      # 0-10, 10 ist am besten
+AUDIO_QUALITAET_4="${AUDIO_OPTION} -q:a 5"      # 0-10, 10 ist am besten
+AUDIO_QUALITAET_5="${AUDIO_OPTION} -q:a 6"      # 0-10, 10 ist am besten
+AUDIO_QUALITAET_6="${AUDIO_OPTION} -q:a 7"      # 0-10, 10 ist am besten
+AUDIO_QUALITAET_7="${AUDIO_OPTION} -q:a 8"      # 0-10, 10 ist am besten
+AUDIO_QUALITAET_8="${AUDIO_OPTION} -q:a 9"      # 0-10, 10 ist am besten
+AUDIO_QUALITAET_9="${AUDIO_OPTION} -q:a 10"     # 0-10, 10 ist am besten
