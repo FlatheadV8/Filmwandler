@@ -4,7 +4,11 @@
 
 VERSION="v2018090300"
 
-CODEC_PATTERN="mp3"		# Beispiel: "h265|hevc"
+CODEC_PATTERN="mp3"			# Beispiel: "h265|hevc"
+Sound_ST=''				# Stereo (2.0)
+Sound_51=''				# 5.1
+Sound_71=''				# 7.1
+
 AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
 if [ "x${AUDIOCODEC}" = "x" ] ; then
 	AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
@@ -18,9 +22,8 @@ if [ "x${AUDIOCODEC}" = "x" ] ; then
 	fi
 fi
 
-if [ "${AUDIO_KANAELE}" -gt 2 ] ; then
-	AUDIO_OPTION="-ac 2"
-fi
+# MP3 kann nur Stereo
+AUDIO_OPTION="-ac 2"
 
 # https://trac.ffmpeg.org/wiki/Encode/MP3
 if [ "${AUDIOCODEC}" = "libmp3lame" ] ; then
