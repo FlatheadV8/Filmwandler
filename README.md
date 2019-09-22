@@ -35,19 +35,19 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     * Video-Kodierung:      H.264 (MPEG-4 Part 10 / AVC / Blu Ray)                 *
     * Audio-Kodierung:      AAC   (mehrkanalfähiger Nachfolger von MP3)            *
     * Beschreibung:                                                                *
-    *   - höchste Kompatibilität mit Konsumerelektronik                            *
-    *   - HTML5-Unterstützung                                                      *
-    *   - abspielbar auf Android                                                   *
+    *       - hohe Kompatibilität mit Konsumerelektronik                           *
+    *       - HTML5-Unterstützung                                                  *
+    *       - abspielbar auf Android                                               *
     ********************************************************************************
 
 
     ********************************************************************************
     * Name:                 free MKV                                               *
     * ENDUNG:               .mkv                                                   *
-    * Video-Kodierung:      VP8                                                    *
-    * Audio-Kodierung:      MP3                                                    *
+    * Video-Kodierung:      VP9                                                    *
+    * Audio-Kodierung:      Opus                                                   *
     * Beschreibung:                                                                *
-    *   - einziges freies Format mit Unterstützung von LG (LG webOS TV)            *
+    *       - freies Format mit guter Unterstützung durch Android                  *
     ********************************************************************************
 
 
@@ -73,6 +73,7 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     * Audio-Kodierung:      Opus (freie Alternative zu AAC)                        *
     * Beschreibung:                                                                *
     *       - mit HTML5-Unterstützung                                              *
+    *       - WebM kann leider nur das eine Untertitelformat "WebVTT"              *
     *       - 'Royalty free' (komplett frei von patentierten Technologien)         *
     *       - WebM wird seit Android  2.3 'Gingerbread' unterstützt                *
     *       - VP9 wird seit Android 4.4 'KitKat' unterstützt                       *
