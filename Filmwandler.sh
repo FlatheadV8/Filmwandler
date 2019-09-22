@@ -343,7 +343,7 @@ fi
 #------------------------------------------------------------------------------#
 ### ab hier kann in die Log-Datei geschrieben werden
 
-PROTOKOLLDATEI="${ZIELVERZ}/${ZIELNAME}.${ENDUNG}.txt"
+PROTOKOLLDATEI="${ZIELVERZ}/${ZIELNAME}.${ENDUNG}"
 
 echo "# $(date +'%F %T')
 ${0} ${Film2Standardformat_OPTIONEN}" | tee ${PROTOKOLLDATEI}.txt
