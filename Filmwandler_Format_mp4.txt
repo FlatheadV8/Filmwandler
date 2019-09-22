@@ -5,13 +5,14 @@
 #
 #==============================================================================#
 
-VERSION="v2018083000"
+VERSION="v2019092100"
 
 . ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
 #------------------------------------------------------------------------------#
 #
 # Leider kann eine MP4-Datei keinen AC3 (a52) - Codec abspielen.
+# Deshalb gehen AVCHD-Filme auch nicht im MP4-Container
 #
 #==============================================================================#
 
