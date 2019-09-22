@@ -5,7 +5,8 @@
 #
 #==============================================================================#
 
-VERSION="v2018082900"
+#VERSION="v2018082900"
+VERSION="v2019092100"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -25,14 +26,21 @@ IFRAME="-keyint_min 2-8"
 # beachten ist, dass der Codec VP9 in einigen Ländern nicht abspielbar ist.
 # In dem Fall muss man auf den Codec VP8 zurückgreifen.
 #
+# MKV + VP8/VP9 + MP3
+#       - einziges freies Format mit Unterstützung durch LG (LG webOS TV)
+#
+# MKV + VP9/AV1 + Opus
+#       - freies Format mit guter Unterstützung durch Android
+#
 
 ### Audio
-. $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt
+#. $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt
+. $(dirname ${0})/Filmwandler_Codec_Audio_opus.txt
 
 
 ### Video
-. $(dirname ${0})/Filmwandler_Codec_Video_vp8.txt
-#. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
+#. $(dirname ${0})/Filmwandler_Codec_Video_vp8.txt
+. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
 
 #==============================================================================#
 
@@ -40,9 +48,9 @@ FORMAT_BESCHREIBUNG="
 ********************************************************************************
 * Name:                 free MKV                                               *
 * ENDUNG:               .mkv                                                   *
-* Video-Kodierung:      VP8                                                    *
-* Audio-Kodierung:      MP3                                                    *
+* Video-Kodierung:      VP9                                                    *
+* Audio-Kodierung:      Opus                                                   *
 * Beschreibung:                                                                *
-*       - einziges freies Format mit Unterstützung von LG (LG webOS TV)        *
+*       - freies Format mit guter Unterstützung durch Android                  *
 ********************************************************************************
 "
