@@ -10,6 +10,7 @@
 VERSION="v2018090600"
 
 #------------------------------------------------------------------------------#
+### Die Option -profile:v hat nur dann Wirkung, wenn auch die Option -level angegeben wird!
 
 # bei -c:v libx264 -profile:v high / FullHD - 1920×1080 = 2073600 Bildpunkte
 # crf 15 ~ 8350 kb/s
