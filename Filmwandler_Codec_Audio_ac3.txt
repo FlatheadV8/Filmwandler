@@ -5,6 +5,10 @@
 VERSION="v2018082800"
 
 CODEC_PATTERN="ac3"		# Beispiel: "h265|hevc"
+Sound_ST=''				# Stereo (2.0)
+Sound_51=''				# 5.1
+Sound_71=''				# 7.1
+
 AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
 if [ "x${AUDIOCODEC}" = "x" ] ; then
 	AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
