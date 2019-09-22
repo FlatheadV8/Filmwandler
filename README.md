@@ -1,5 +1,13 @@
 # Filmwandler
-Mit diesem Skript kann man einen beliebigen Film in eines von 10 sehr verbreiteten Formaten umwandeln.
+Mit diesem Skript kann man einen beliebigen Film in verschiedene Formaten umwandeln (transkodieren), die sehr verbreiteten sind.
+Am 10. Juli 2004 habe ich meine erste Digitalkamera (eine "KONICA MINOLTA DiMAGE Z1") bekommen, leider konnte ich die damit erzeugten Videos (AVI) nur am PC anschauen oder über die Kamera am Fernseher. Jedoch nicht mit unserem DVD-HDD-Recorder "Philips DVDR3460H", obwohl er "DivX 5"-Filme abspielen konnte.
+Daraus resultierten Ende 2004 die ersten Versuche, Filme in ein Format zu transkodieren, mit dem es auf handelsüblicher Consumer-Elektronik am Fernseher abspielbar wird -> damit begann die 1. Generation von diesem Skript (das arbeitete noch mit MPlayer/MEncoder).
+Ab 2005 begann ich mir über ein sinnvolles Ziel-Format Gedanken zu machen. Es sollte nicht nur auf diesem speziellen DVD-HDD-Recorder abspielbar sein, sondern auf allen Geräten, die einen bestimmten Standard unterstützen.
+Zu diesem Zeitpunkt gab es praktisch nur 3 Formate, die von der Indutrie breit unterstützt wurden: VCD, DVD und BD.
+In Internet erfreute sich allerdings noch das "DivX 5"-Format großer Beliebtheit. Leider wurde das aber kaum von Consumer-Elektronik unterstützt. DVD hatte eine viel zu schlechte Kompression und BD konnte man erst seit April 2010 mit freier Software erstellen. Also habe ich zuerst meine Filme in das "DivX 5"-Format transkodiert und ab Mitte 2010 habe ich mir dann über verschiedene Foren alle Informationen beschafft, um mit dem Encoder "x264" BD-kompatiblen Kode generieren zu können. Das hat bis 2012 gedauert. Danach ist das Skript dann mit den umfangreichen Berechnungen (die ich damals noch im Skript ausführte), der unübersichtlich geworden. Später konnte ich einen Teil dieser Berechnungen, zur Umwandlung der Bildauflösung (wobei die Kreise rund bleiben müssen, also keine Verzerrungen auftreten dürfen), von FFmpeg durchführen lassen.
+Leider habe ich bei den ersten 3 Generationen immer unlösbare Probleme bekommen, bei der Fehlerbehebung, wenn der Umfang die 5000 Kodezeilen überschritten hatte. Mit der 4. Genaration habe ich es stark modularisiert und hatte damit sehr gute Erfahrungen gemacht. Dann hatte ich nicht mehr soviel Zeit und hatte deshalb die letzten Fehler aus der 4. Generation nie behoben.
+Am 29. Oktober 2018 wurde die Entwicklung der 4. Generation eingestellt.
+Statt dessen habe ich aus der 4. Generation eine abgespeckte Version extrahiert, die nur MP4 im HTML-5-Standard erzeugen konnte (Film2MP4.sh). Diese wurde im Zeitraum von November 2018 bis September 2019 soweit erweitert, dass ich mit dem "Funktionsmantel" von diesem Skript problemlos den "Funktionsmantel" der 4. Generation ersetzen konnte und so wurde am 22. September 2019 die 5. Generation geboren.
 
 Download:
 
