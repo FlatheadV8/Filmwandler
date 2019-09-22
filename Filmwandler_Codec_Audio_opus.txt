@@ -2,7 +2,8 @@
 # Opus
 #
 
-VERSION="v2018082800"
+#VERSION="v2018082800"	# libopus ist noch experimentell
+VERSION="v2019092100"	# nicht mehr experimentell, kann jetzt auch 5.1 + 7.1
 
 #------------------------------------------------------------------------------#
 
@@ -15,10 +16,14 @@ VERSION="v2018082800"
 
 #------------------------------------------------------------------------------#
 
-CODEC_PATTERN="opus"		# Beispiel: "h265|hevc"
+CODEC_PATTERN="libopus"					# Beispiel: "h265|hevc"
+Sound_ST='-ac 2'					# Stereo (2.0)
+Sound_51='-af channelmap=channel_layout=5.1'		# 5.1
+Sound_71='-af channelmap=channel_layout=7.1'		# 7.1
+
 AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
 if [ "x${AUDIOCODEC}" = "x" ] ; then
-	AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1) -strict -2"	# interner Codec (FF) opus ist z.Z. (August 2018) noch experimentel
+	AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | fgrep "opus" | head -n1)"
 	if [ "x${AUDIOCODEC}" = "x" ] ; then
 		echo ""
 		echo "${CODEC_PATTERN}"
@@ -28,8 +33,19 @@ if [ "x${AUDIOCODEC}" = "x" ] ; then
 		exit 1
 	fi
 else
-	AUDIOCODEC="${AUDIOCODEC} -ac 2"        # libopus kann z.Z. (August 2018) nur Stereo
+	AUDIOCODEC="${AUDIOCODEC}"
 fi
+
+
+echo "# 1001
+TS_ANZAHL=${TS_ANZAHL}
+Sound_ST='${Sound_ST}'
+Sound_51='${Sound_51}'
+Sound_71='${Sound_71}'
+" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+#exit 1001
+
+#==============================================================================#
 
 ## -vbr on -b:a 128k
 ## -vbr 0 (fest 96k)
