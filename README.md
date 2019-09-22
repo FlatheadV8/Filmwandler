@@ -1,5 +1,6 @@
 # Filmwandler
 Mit diesem Skript kann man einen beliebigen Film in verschiedene Formaten umwandeln (transkodieren), die sehr verbreiteten sind.
+
 Am 10. Juli 2004 habe ich meine erste Digitalkamera (eine "KONICA MINOLTA DiMAGE Z1") bekommen, leider konnte ich die damit erzeugten Videos (AVI) nur am PC anschauen oder über die Kamera am Fernseher. Jedoch nicht mit unserem DVD-HDD-Recorder "Philips DVDR3460H", obwohl er "DivX 5"-Filme abspielen konnte.
 Daraus resultierten Ende 2004 die ersten Versuche, Filme in ein Format zu transkodieren, mit dem es auf handelsüblicher Consumer-Elektronik am Fernseher abspielbar wird -> damit begann die 1. Generation von diesem Skript (das arbeitete noch mit MPlayer/MEncoder).
 Ab 2005 begann ich mir über ein sinnvolles Ziel-Format Gedanken zu machen. Es sollte nicht nur auf diesem speziellen DVD-HDD-Recorder abspielbar sein, sondern auf allen Geräten, die einen bestimmten Standard unterstützen.
