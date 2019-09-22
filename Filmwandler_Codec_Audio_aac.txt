@@ -2,7 +2,8 @@
 # AAC
 #
 
-VERSION="v2018082900"
+#VERSION="v2018082900"
+VERSION="v2019082300"
 
 #------------------------------------------------------------------------------#
 # https://trac.ffmpeg.org/wiki/Encode/AAC
@@ -15,6 +16,11 @@ VERSION="v2018082900"
 #   Opus eingebettet in das Matroska-Containerformat nativ.
 
 ### libfdk_aac
+###
+### -b:a => funktioniert mit allen Encodern gut
+### -vbr => funktioniert mit libfdk_aac nicht uneingeschränkt
+### -q:a => funktioniert nur mit "aac" (libfdk_aac setzt es mit vbr gleich)
+###
 #
 # laut Debian ist libfdk_aac "non-free"-Licenc
 # laut FSF, Fedora, RedHat ist libfdk_aac "free"-Licenc
@@ -26,13 +32,37 @@ VERSION="v2018082900"
 # FDK AAC kann im Modus "VBR" keine beliebige Kombination von Tonkanäle, Bit-Rate und Saple-Rate verarbeiten!
 # Will man "VBR" verwenden, dann muss man explizit alle drei Parameter in erlaubter Größe angeben.
 
+### 2018-07-15: [libfdk_aac @ 0x813af3900] Note, the VBR setting is unsupported and only works with some parameter combinations
+### https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio
+### http://wiki.hydrogenaud.io/index.php?title=Fraunhofer_FDK_AAC#Audio_Object_Types
+### http://wiki.hydrogenaud.io/index.php?title=Fraunhofer_FDK_AAC#Usage.2FExamples
+#AUDIO_OPTION="-profile:a aac_he"
+#AUDIO_OPTION="-profile:a aac_he_v2"
+#AUDIO_QUALITAET_0="-vbr 1"                                      # 1 bis 5, 4 empfohlen / Constant (CBR): ~ 184 kb/s
+
+#AUDIO_QUALITAET_0="-vbr 1"
+#AUDIO_QUALITAET_1="-vbr 1"
+#AUDIO_QUALITAET_2="-vbr 2"
+#AUDIO_QUALITAET_3="-vbr 2"
+#AUDIO_QUALITAET_4="-vbr 3"
+#AUDIO_QUALITAET_5="-vbr 3"
+#AUDIO_QUALITAET_6="-vbr 4"
+#AUDIO_QUALITAET_7="-vbr 4"
+#AUDIO_QUALITAET_8="-vbr 5"
+#AUDIO_QUALITAET_9="-vbr 5"
+
+
 #--------------------------------------------------------------
 # FFmpeg-Option für "aac" (nativ/intern)
 # https://slhck.info/video/2017/02/24/vbr-settings.html
 # -q:a 0.12             # undokumentiert (0.1-?) / 0.12 ~ 128k
 #------------------------------------------------------------------------------#
 
-CODEC_PATTERN="aac"		# Beispiel: "h265|hevc"
+CODEC_PATTERN="aac"			# Beispiel: "h265|hevc"
+Sound_ST=''				# Stereo (2.0)
+Sound_51=''				# 5.1
+Sound_71=''				# 7.1
+
 AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
 if [ "x${AUDIOCODEC}" = "x" ] ; then
 	AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
@@ -51,17 +81,8 @@ fi
 # Afterburner is "a type of analysis by synthesis algorithm which increases the audio quality but also the required processing power."
 # Fraunhofer recommends to always activate this feature.
 if [ "x${AUDIOCODEC}" = "xlibfdk_aac" ] ; then
-        AUDIOCODEC="${AUDIOCODEC} -afterburner 1"
+        AUDIO_OPTION="-afterburner 1"
 fi
-
-
-### 2018-07-15: [libfdk_aac @ 0x813af3900] Note, the VBR setting is unsupported and only works with some parameter combinations
-### https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio
-### http://wiki.hydrogenaud.io/index.php?title=Fraunhofer_FDK_AAC#Audio_Object_Types
-### http://wiki.hydrogenaud.io/index.php?title=Fraunhofer_FDK_AAC#Usage.2FExamples
-#AUDIO_OPTION="-profile:a aac_he"
-#AUDIO_OPTION="-profile:a aac_he_v2"
-#AUDIO_QUALITAET_0="-vbr 1"                                      # 1 bis 5, 4 empfohlen / Constant (CBR): ~ 184 kb/s
 
 # https://slhck.info/video/2017/02/24/vbr-settings.html
 # undokumentiert (0.1-?) -> "-q:a 0.12" ~ 128k
@@ -70,25 +91,25 @@ fi
 
 
 if [ "${AUDIO_KANAELE}" -gt 2 ] ; then
-        AUDIO_QUALITAET_0="-b:a 160k"
-        AUDIO_QUALITAET_1="-b:a 184k"
-        AUDIO_QUALITAET_2="-b:a 216k"
-        AUDIO_QUALITAET_3="-b:a 256k"
-        AUDIO_QUALITAET_4="-b:a 296k"
-        AUDIO_QUALITAET_5="-b:a 344k"
-        AUDIO_QUALITAET_6="-b:a 400k"
-        AUDIO_QUALITAET_7="-b:a 472k"
-        AUDIO_QUALITAET_8="-b:a 552k"
-        AUDIO_QUALITAET_9="-b:a 640k"
+        AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 160k"
+        AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 184k"
+        AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 216k"
+        AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 256k"
+        AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 296k"
+        AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 344k"
+        AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 400k"
+        AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 472k"
+        AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 552k"
+        AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 640k"
 else
-        AUDIO_QUALITAET_0="-b:a 64k"
-        AUDIO_QUALITAET_1="-b:a 80k"
-        AUDIO_QUALITAET_2="-b:a 88k"
-        AUDIO_QUALITAET_3="-b:a 112k"
-        AUDIO_QUALITAET_4="-b:a 128k"
-        AUDIO_QUALITAET_5="-b:a 160k"
-        AUDIO_QUALITAET_6="-b:a 184k"
-        AUDIO_QUALITAET_7="-b:a 224k"
-        AUDIO_QUALITAET_8="-b:a 264k"
-        AUDIO_QUALITAET_9="-b:a 320k"
+        AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 64k"
+        AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 80k"
+        AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 88k"
+        AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 112k"
+        AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 128k"
+        AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 160k"
+        AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 184k"
+        AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 224k"
+        AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 264k"
+        AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 320k"
 fi
