@@ -158,14 +158,14 @@ BLURAY_PARAMETER()
 	MBREITE='${MBREITE}'
 	MHOEHE='${MHOEHE}'
 	MaxFS='${MaxFS}'
-        " | tee -a ${PROTOKOLLDATEI}
+        " | tee -a ${PROTOKOLLDATEI}.txt
         BHVERH="$(echo "${MBREITE} ${MHOEHE} ${MaxFS}" | awk '{verhaeltnis="gut"; if ($1 > (sqrt($3 * 8))) verhaeltnis="schlecht" ; if ($2 > (sqrt($3 * 8))) verhaeltnis="schlecht" ; print verhaeltnis}')"
 
         if [ "${BHVERH}" != "gut" ] ; then
                 echo "# BLURAY_PARAMETER:
                 Seitenverhaeltnis wird von AVC nicht unterstuetzt!
                 ABBRUCH
-                " | tee -a ${PROTOKOLLDATEI}
+                " | tee -a ${PROTOKOLLDATEI}.txt
                 exit 1
         fi
 
@@ -347,6 +347,6 @@ colormatrix='${FARBCOD}'
 
 IN_FPS='${IN_FPS}'
 VIDEO_OPTION='${VIDEO_OPTION}'
-" | tee -a ${PROTOKOLLDATEI}
+" | tee -a ${PROTOKOLLDATEI}.txt
 
 #==============================================================================#
