@@ -31,6 +31,10 @@ FORMAT="mp4"
 #. $(dirname ${0})/Filmwandler_Codec_Video_265.txt
 IFRAME="-keyint_min 2-8"
 
+# verschiebt den Index an den Anfang
+# das dauert eine Weile und funktioniert nicht bei Fragmenten
+SCHNELLSTART="-movflags faststart"
+
 #==============================================================================#
 
 FORMAT_BESCHREIBUNG="
