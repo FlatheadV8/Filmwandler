@@ -53,7 +53,7 @@ while [ "${#}" -ne "0" ]; do
                         ;;
                 -u)
                         # Wirddiese Option nicht verwendet, dann werden ALLE Untertitelspuren eingebettet
-                        # "-1" für keinen Untertitel
+                        # "=0" für keinen Untertitel
                         # "0" für die erste Untertitelspur
                         # "1" für die zweite Untertitelspur
                         # "0,1" für die erste und die zweite Untertitelspur
@@ -72,6 +72,12 @@ done
 
 
 #==============================================================================#
+# Wenn kein Untertitel angegeben wurde, dann werden alle vorhandenen genommen.
+# Die Frage lautet: "Sind Untertitel vorhanden?".
+
+SIND_UNTERTITEL_VORHANDEN="$(ffprobe -probesize 9223372036G -analyzeduration 9223372036G -i "${FILMDATEI}" 2>&1 | sed -ne '/^Input /,/STREAM/p' | fgrep ' Subtitle: ')"
+
+#------------------------------------------------------------------------------#
 ### Endung anpassen
 
 # dieses Format immer
@@ -81,10 +87,13 @@ ENDUNG_1="mp4"
 ENDUNG_2="webm"
 
 ### Untertitel
-if [ "${UNTERTITEL}" != "-1" ] ; then
-        # alternatives Format, wenn Untertitel vorhanden sind und nicht abgewählt wurden
-        ENDUNG_2="mkv"
+if [ "x${SIND_UNTERTITEL_VORHANDEN}" != x ] ; then
+        if [ "${UNTERTITEL}" != "=0" ] ; then
+                # alternatives Format, wenn Untertitel vorhanden sind und nicht abgewählt wurden
+                ENDUNG_2="mkv"
+        fi
 fi
+
 
 #------------------------------------------------------------------------------#
 # damit die Endung austauschbar wird
@@ -112,7 +121,8 @@ fi
 #set -x
 for _E in ${ENDUNG_1} ${ENDUNG_2}
 do
-        echo "${AVERZ}/Filmwandler.sh ${ALLE_OPTIONEN} ; -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${_E}\" ${SCHNITT_OPTION}"
+        echo "${AVERZ}/Filmwandler.sh ${ALLE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${_E}\" ${SCHNITT_OPTION}"
+        ${AVERZ}/Filmwandler.sh ${ALLE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${_E}" ${SCHNITT_OPTION}
 done
 
 #------------------------------------------------------------------------------#
