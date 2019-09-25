@@ -165,7 +165,7 @@ while [ "${#}" -ne "0" ]; do
                         ;;
                 -u)
                         # Wirddiese Option nicht verwendet, dann werden ALLE Untertitelspuren eingebettet
-                        # "-1" für keinen Untertitel
+                        # "=0" für keinen Untertitel
                         # "0" für die erste Untertitelspur
                         # "1" für die zweite Untertitelspur
                         # "0,1" für die erste und die zweite Untertitelspur
