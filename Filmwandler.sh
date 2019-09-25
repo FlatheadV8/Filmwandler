@@ -30,7 +30,8 @@
 #VERSION="v2017102900"			# 4. Generation gestartet
 #VERSION="v2019082800"			# Entwicklung an der 4. Generation eingestellt
 #VERSION="v2019092100"			# 5. Generation gestartet
-VERSION="v2019092300"			# erstmals funktioniert jetzt die Formatumrechnung mit nicht quadratischen Bildpunkten
+#VERSION="v2019092300"			# erstmals funktioniert jetzt die Formatumrechnung mit nicht quadratischen Bildpunkten
+VERSION="v2019092500"                   # Dateinamen mit Leerzeichen (eine Unsitte) werden jetzt richtig behandelt
 
 
 BILDQUALIT="auto"
@@ -313,9 +314,9 @@ fi
 #------------------------------------------------------------------------------#
 # damit die Zieldatei mit Verzeichnis angegeben werden kann
 
-QUELL_DATEI="$(basename ${FILMDATEI})"
-ZIELVERZ="$(dirname ${ZIELPFAD})"
-ZIELDATEI="$(basename ${ZIELPFAD})"
+QUELL_DATEI="$(basename "${FILMDATEI}")"
+ZIELVERZ="$(dirname "${ZIELPFAD}")"
+ZIELDATEI="$(basename "${ZIELPFAD}")"
 
 #------------------------------------------------------------------------------#
 # damit keine Leerzeichen im Dateinamen enthalten sind
