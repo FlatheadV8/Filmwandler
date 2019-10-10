@@ -37,6 +37,7 @@ FORMAT_BESCHREIBUNG="
 *       - 'Royalty free' (komplett frei von patentierten Technologien)         *
 *       - der ogg-Container ist uneingeschränkt streaming-fähig                *
 *       - kodiert sehr schnell                                                 *
-*       - nicht so gut wie 'AVCHD/MP4'                                         *
+*       - nicht so gut wie 'AVC'                                               *
+*       - kann nur Untertitel im SRT-Format                                    *
 ********************************************************************************
 "
