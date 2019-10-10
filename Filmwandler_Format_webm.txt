@@ -23,14 +23,14 @@ FORMAT="webm"
 
 #==============================================================================#
 
-if [ "${UNTERTITEL}" != "-1" ] ; then
+if [ "${UNTERTITEL}" != "=0" ] ; then
 	if [ "x${UNTERTITEL}" != "x" ] ; then
 		echo "
 		Mit diesem Container werden keine Untertitel verarbeitet.
 		ABBRUCH!" | tee -a ${PROTOKOLLDATEI}.txt
 		exit 1000
 	else
-		UNTERTITEL="-1"
+		UNTERTITEL="=0"
 	fi
 fi
 
@@ -59,6 +59,5 @@ FORMAT_BESCHREIBUNG="
 *       - WebM wird seit Android  2.3 'Gingerbread' unterstützt                *
 *       - VP9 wird seit Android 4.4 'KitKat' unterstützt                       *
 *       - Opus wird seit Android 5 'Lollipop' unterstützt                      *
-*       - kodiert 5-10 mal langsamer als AVCHD/MP4                             *
 ********************************************************************************
 "
