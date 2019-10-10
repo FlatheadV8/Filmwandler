@@ -3,59 +3,47 @@
 #
 
 #VERSION="v2018082900"
-VERSION="v2019082300"
+#VERSION="v2019082300"
+VERSION="v2019092500"
 
 #------------------------------------------------------------------------------#
-# https://trac.ffmpeg.org/wiki/Encode/AAC
-
-### https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio
 #
-#   Seit 2017 verfügt FFmpeg über einen eigenen, nativen Opus-Encoder
-#   und -Decoder.
-#   Die Mobil-Plattform Android unterstützt ab Version 5 (Lollipop)
-#   Opus eingebettet in das Matroska-Containerformat nativ.
-
-### libfdk_aac
-###
-### -b:a => funktioniert mit allen Encodern gut
-### -vbr => funktioniert mit libfdk_aac nicht uneingeschränkt
-### -q:a => funktioniert nur mit "aac" (libfdk_aac setzt es mit vbr gleich)
-###
+# Der AAC-Encoder vom Fraunhofer Institut, ist der einzige AAC-Encoder
+# im FFmpeg, der das Profil HE-AAC unterstützt.
+# Aber das auch nur mit konstanter Bit-Rate.
 #
-# laut Debian ist libfdk_aac "non-free"-Licenc
-# laut FSF, Fedora, RedHat ist libfdk_aac "free"-Licenc
+#------------------------------------------------------------------------------#
+#
+# Sowohl der native AAC-Encoder als auch der vom Fraunhofer Institut,
+# unterstützen VBR nur für das Profil AAC-LC.
 # 
 # http://wiki.hydrogenaud.io/index.php?title=Fraunhofer_FDK_AAC#Recommended_Sampling_Rate_and_Bitrate_Combinations
-# 
 # libfdk_aac -> Note, the VBR setting is unsupported and only works with some parameter combinations.
 # 
 # FDK AAC kann im Modus "VBR" keine beliebige Kombination von Tonkanäle, Bit-Rate und Saple-Rate verarbeiten!
 # Will man "VBR" verwenden, dann muss man explizit alle drei Parameter in erlaubter Größe angeben.
-
-### 2018-07-15: [libfdk_aac @ 0x813af3900] Note, the VBR setting is unsupported and only works with some parameter combinations
-### https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio
-### http://wiki.hydrogenaud.io/index.php?title=Fraunhofer_FDK_AAC#Audio_Object_Types
-### http://wiki.hydrogenaud.io/index.php?title=Fraunhofer_FDK_AAC#Usage.2FExamples
-#AUDIO_OPTION="-profile:a aac_he"
-#AUDIO_OPTION="-profile:a aac_he_v2"
-#AUDIO_QUALITAET_0="-vbr 1"                                      # 1 bis 5, 4 empfohlen / Constant (CBR): ~ 184 kb/s
-
-#AUDIO_QUALITAET_0="-vbr 1"
-#AUDIO_QUALITAET_1="-vbr 1"
-#AUDIO_QUALITAET_2="-vbr 2"
-#AUDIO_QUALITAET_3="-vbr 2"
-#AUDIO_QUALITAET_4="-vbr 3"
-#AUDIO_QUALITAET_5="-vbr 3"
-#AUDIO_QUALITAET_6="-vbr 4"
-#AUDIO_QUALITAET_7="-vbr 4"
-#AUDIO_QUALITAET_8="-vbr 5"
-#AUDIO_QUALITAET_9="-vbr 5"
-
-
-#--------------------------------------------------------------
+#
+#------------------------------------------------------------------------------#
+# "aac"
+# https://www.ffmpeg.org/ffmpeg-codecs.html#aac
+# https://trac.ffmpeg.org/wiki/Encode/AAC#NativeFFmpegAACEncoder
+#
 # FFmpeg-Option für "aac" (nativ/intern)
 # https://slhck.info/video/2017/02/24/vbr-settings.html
-# -q:a 0.12             # undokumentiert (0.1-?) / 0.12 ~ 128k
+# https://superuser.com/questions/1415028/vbr-encoding-with-ffmpeg-native-aac-codec
+#
+# erlaubte Werte:
+#       minimum : -q:a 0.1
+#       ca. 128k: -q:a 0.12
+#       maximum : -q:a 2
+#
+#------------------------------------------------------------------------------#
+# "libfdk_aac"
+# https://trac.ffmpeg.org/wiki/Encode/AAC#fdk_aac
+#
+# laut Debian ist libfdk_aac "non-free"-Licenc
+# laut FSF, Fedora, RedHat ist libfdk_aac "free"-Licenc
+# 
 #------------------------------------------------------------------------------#
 
 CODEC_PATTERN="aac"			# Beispiel: "h265|hevc"
@@ -84,32 +72,40 @@ if [ "x${AUDIOCODEC}" = "xlibfdk_aac" ] ; then
         AUDIO_OPTION="-afterburner 1"
 fi
 
-# https://slhck.info/video/2017/02/24/vbr-settings.html
-# undokumentiert (0.1-?) -> "-q:a 0.12" ~ 128k
-#   August 2018: viel zu schlechte Qualität!
-#   bei "-q:a" nimmt er immer "341 kb/s"
-
-
-if [ "${AUDIO_KANAELE}" -gt 2 ] ; then
-        AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 160k"
-        AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 184k"
-        AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 216k"
-        AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 256k"
-        AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 296k"
-        AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 344k"
-        AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 400k"
-        AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 472k"
-        AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 552k"
-        AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 640k"
-else
-        AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 64k"
-        AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 80k"
-        AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 88k"
-        AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 112k"
-        AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 128k"
-        AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 160k"
-        AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 184k"
-        AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 224k"
-        AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 264k"
-        AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 320k"
+F_AUDIO_QUALITAET()
+{
+if [ "${AUDIO_KANAELE}" -le 2 ] ; then		# Mono + Stereo
+        AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 52k"	# 26k x 2
+        AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 64k"	# 32k x 2
+        AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 76k"	# 38k x 2
+        AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 88k"	# 44k x 2
+        AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 100k"	# 50k x 2
+        AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 112k"	# 56k x 2
+        AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 124k"	# 62k x 2
+        AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 136k"	# 68k x 2
+        AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 148k"	# 74k x 2
+        AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 160k"	# 80k x 2
+elif [ "${AUDIO_KANAELE}" -le 6 ] ; then	# DolbyDigital (5.1)
+        AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 156k"	# 26k x 6
+        AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 192k"	# 32k x 6
+        AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 228k"	# 38k x 6
+        AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 264k"	# 44k x 6
+        AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 300k"	# 50k x 6
+        AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 336k"	# 56k x 6
+        AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 372k"	# 62k x 6
+        AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 408k"	# 68k x 6
+        AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 444k"	# 74k x 6
+        AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 480k"	# 80k x 6
+else						# 7.1
+        AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 208k"	# 26k x 8
+        AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 256k"	# 32k x 8
+        AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 304k"	# 38k x 8
+        AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 352k"	# 44k x 8
+        AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 400k"	# 50k x 8
+        AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 448k"	# 56k x 8
+        AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 496k"	# 62k x 8
+        AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 544k"	# 68k x 8
+        AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 592k"	# 74k x 8
+        AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 640k"	# 80k x 8
 fi
+}
