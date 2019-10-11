@@ -26,6 +26,8 @@ fi
 AUDIO_OPTION="-ac 2"
 
 # https://trac.ffmpeg.org/wiki/Encode/MP3
+F_AUDIO_QUALITAET()
+{
 if [ "${AUDIOCODEC}" = "libmp3lame" ] ; then
         AUDIO_QUALITAET_0="-q:a 9 ${AUDIO_OPTION}"
         AUDIO_QUALITAET_1="-q:a 8 ${AUDIO_OPTION}"
@@ -49,3 +51,4 @@ else
         AUDIO_QUALITAET_8="-b:a 264k ${AUDIO_OPTION}"
         AUDIO_QUALITAET_9="-b:a 320k ${AUDIO_OPTION}"
 fi
+}
