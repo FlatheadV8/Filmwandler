@@ -25,6 +25,8 @@ fi
 AUDIO_OPTION=""
 
 # -q:a 3 (Standard)
+F_AUDIO_QUALITAET()
+{
 AUDIO_QUALITAET_0="${AUDIO_OPTION} -q:a 1"      # 0-10, 10 ist am besten
 AUDIO_QUALITAET_1="${AUDIO_OPTION} -q:a 2"      # 0-10, 10 ist am besten
 AUDIO_QUALITAET_2="${AUDIO_OPTION} -q:a 3"      # 0-10, 10 ist am besten
@@ -35,3 +37,4 @@ AUDIO_QUALITAET_6="${AUDIO_OPTION} -q:a 7"      # 0-10, 10 ist am besten
 AUDIO_QUALITAET_7="${AUDIO_OPTION} -q:a 8"      # 0-10, 10 ist am besten
 AUDIO_QUALITAET_8="${AUDIO_OPTION} -q:a 9"      # 0-10, 10 ist am besten
 AUDIO_QUALITAET_9="${AUDIO_OPTION} -q:a 10"     # 0-10, 10 ist am besten
+}
