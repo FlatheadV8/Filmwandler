@@ -3,8 +3,14 @@
 #
 
 #VERSION="v2018082800"	# libopus ist noch experimentell
-VERSION="v2019092100"	# nicht mehr experimentell, kann jetzt auch 5.1 + 7.1
+#VERSION="v2019092100"	# nicht mehr experimentell, kann jetzt auch 5.1 + 7.1
+VERSION="v2019101000"	# wenn "-af channelmap=channel_layout=", dann kein "-ac 2"
 
+#------------------------------------------------------------------------------#
+#
+# Der native Opus-Encoder ist noch im experimentellen Stadium (2019).
+# Der externe Opus-Encoder ist nicht mehr im experimentellen Stadium (2019).
+#
 #------------------------------------------------------------------------------#
 
 ### https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio
@@ -17,7 +23,7 @@ VERSION="v2019092100"	# nicht mehr experimentell, kann jetzt auch 5.1 + 7.1
 #------------------------------------------------------------------------------#
 
 CODEC_PATTERN="libopus"					# Beispiel: "h265|hevc"
-Sound_ST='-ac 2'					# Stereo (2.0)
+Sound_ST='-af channelmap=channel_layout=stereo'		# Stereo (2.0)
 Sound_51='-af channelmap=channel_layout=5.1'		# 5.1
 Sound_71='-af channelmap=channel_layout=7.1'		# 7.1
 
@@ -42,7 +48,8 @@ TS_ANZAHL=${TS_ANZAHL}
 Sound_ST='${Sound_ST}'
 Sound_51='${Sound_51}'
 Sound_71='${Sound_71}'
-" | tee -a ${ZIELVERZ}/${ZIELNAME}.txt
+" | tee -a ${PROTOKOLLDATEI}.txt
+
 #exit 1001
 
 #==============================================================================#
@@ -52,6 +59,9 @@ Sound_71='${Sound_71}'
 ## -vbr 1 (fest 96k)
 ## -vbr 2 (fest 96k)
 AUDIO_OPTION="-vbr on -compression_level 10"
+
+F_AUDIO_QUALITAET()
+{
 AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 64k"
 AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 80k"
 AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 104k"
@@ -62,3 +72,4 @@ AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 256k"
 AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 320k"
 AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 408k"
 AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 512k"
+}
