@@ -3,8 +3,8 @@
 #
 
 #VERSION="v2018082800"	# libopus ist noch experimentell
-#VERSION="v2019092100"	# nicht mehr experimentell, kann jetzt auch 5.1 + 7.1
-VERSION="v2019101000"	# wenn "-af channelmap=channel_layout=", dann kein "-ac 2"
+#VERSION="v2019092100"	# libopus ist nicht mehr experimentell, kann jetzt auch 5.1 + 7.1
+VERSION="v2019101400"	# ich hatte die Hoffnung, das jetzt mehr als Stereo geht
 
 #------------------------------------------------------------------------------#
 #
@@ -22,25 +22,34 @@ VERSION="v2019101000"	# wenn "-af channelmap=channel_layout=", dann kein "-ac 2"
 
 #------------------------------------------------------------------------------#
 
-CODEC_PATTERN="libopus"					# Beispiel: "h265|hevc"
-Sound_ST='-af channelmap=channel_layout=stereo'		# Stereo (2.0)
-Sound_51='-af channelmap=channel_layout=5.1'		# 5.1
-Sound_71='-af channelmap=channel_layout=7.1'		# 7.1
+#CODEC_PATTERN="libopus"					# Beispiel: "h265|hevc"
+#Sound_ST='-af channelmap=channel_layout=stereo'		# Stereo (2.0)
+#Sound_51='-af channelmap=channel_layout=5.1'		# 5.1
+#Sound_71='-af channelmap=channel_layout=7.1'		# 7.1
+#
+#AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
+#if [ "x${AUDIOCODEC}" = "x" ] ; then
+#	AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | fgrep "opus" | head -n1)"
+#	if [ "x${AUDIOCODEC}" = "x" ] ; then
+#		echo ""
+#		echo "${CODEC_PATTERN}"
+#		echo "Leider wird dieser Codec von der aktuell installierten Version"
+#		echo "von FFmpeg nicht unterstützt!"
+#		echo ""
+#		exit 1
+#	fi
+#else
+#	AUDIOCODEC="${AUDIOCODEC}"
+#fi
 
-AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
-if [ "x${AUDIOCODEC}" = "x" ] ; then
-	AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | fgrep "opus" | head -n1)"
-	if [ "x${AUDIOCODEC}" = "x" ] ; then
-		echo ""
-		echo "${CODEC_PATTERN}"
-		echo "Leider wird dieser Codec von der aktuell installierten Version"
-		echo "von FFmpeg nicht unterstützt!"
-		echo ""
-		exit 1
-	fi
-else
-	AUDIOCODEC="${AUDIOCODEC}"
-fi
+# Von FFmpeg wird (lib)opus immer noch schlecht unterstützt,
+# opus ist noch experimentell und kann nur Stereo und
+# auch im Okt. 2019 liefert libopus nur Stereo,
+# auch wenn an 5.1 oder 7.1 angibt, nur dann werden die anderen Kanäle entfernt!
+AUDIOCODEC="libopus"
+Sound_ST='-ac 2"
+Sound_51='-ac 2"
+Sound_71='-ac 2"
 
 
 echo "# 1001
