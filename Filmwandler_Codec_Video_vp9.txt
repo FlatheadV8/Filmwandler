@@ -4,7 +4,8 @@
 #
 #------------------------------------------------------------------------------#
 
-VERSION="v2018090600"
+#VERSION="v2018090600"
+VERSION="v2019101400"
 
 #------------------------------------------------------------------------------#
 
@@ -42,7 +43,8 @@ CODEC_PATTERN="vp9"		# Beispiel: "h265|hevc"
 
 ### dieser Codec wird leider mit "-formats" nicht ausgegeben
 ### deshalb muss er fest eingetragen werden
-VIDEOCODEC="${CODEC_PATTERN}"
+#   encoders: libsvt_vp9 libvpx-vp9
+VIDEOCODEC="libvpx-vp9"		# z.Z. (Okt. 2019) funktioniert libvpx-vp9 am besten
 
 
 # bei "-b:v 0" ergibt das eine "konstante Qualität" => bestes Ergebnis, wenn die Dateigröße egal ist
