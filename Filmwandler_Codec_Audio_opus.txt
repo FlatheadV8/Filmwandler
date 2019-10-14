@@ -47,9 +47,6 @@ VERSION="v2019101400"	# ich hatte die Hoffnung, das jetzt mehr als Stereo geht
 # auch im Okt. 2019 liefert libopus nur Stereo,
 # auch wenn an 5.1 oder 7.1 angibt, nur dann werden die anderen Kanäle entfernt!
 AUDIOCODEC="libopus"
-Sound_ST='-ac 2"
-Sound_51='-ac 2"
-Sound_71='-ac 2"
 
 
 echo "# 1001
@@ -67,7 +64,8 @@ Sound_71='${Sound_71}'
 ## -vbr 0 (fest 96k)
 ## -vbr 1 (fest 96k)
 ## -vbr 2 (fest 96k)
-AUDIO_OPTION="-vbr on -compression_level 10"
+#AUDIO_OPTION="-vbr on -compression_level 10"
+AUDIO_OPTION="-vbr on -compression_level 10 -ac 2"
 
 F_AUDIO_QUALITAET()
 {
