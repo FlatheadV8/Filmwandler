@@ -32,7 +32,7 @@
 #VERSION="v2019092100"			# 5. Generation gestartet
 #VERSION="v2019092300"			# erstmals funktioniert jetzt die Formatumrechnung mit nicht quadratischen Bildpunkten
 #VERSION="v2019092500"			# Dateinamen mit Leerzeichen (eine Unsitte) werden jetzt richtig behandelt
-VERSION="v2019100100"			# Bug bei Untertitelzählung behoben
+VERSION="v2019101400"
 
 
 BILDQUALIT="auto"
@@ -157,7 +157,7 @@ while [ "${#}" -ne "0" ]; do
                         shift
                         ;;
                 -schnitt)
-                        SCHNITTZEITEN="${2}"	# zum Beispiel zum Werbung entfernen (in Sekunden, Dezimaltrennzeichen ist der Punkt): -schnitt "10-432 520-833 1050-1280"
+                        SCHNITTZEITEN="$(echo "${2}" | sed 's/,/ /g')"	# zum Beispiel zum Werbung entfernen (in Sekunden, Dezimaltrennzeichen ist der Punkt): -schnitt "10-432 520-833 1050-1280"
                         shift
                         ;;
                 -test|-t)
@@ -255,12 +255,12 @@ while [ "${#}" -ne "0" ]; do
         # Hier werden zwei Teile (432-520 und 833.5-1050) aus dem vorliegenden
         # Film entfernt bzw. drei Teile (8.5-432 und 520-833.5 und 1050-1280)
         # aus dem vorliegenden Film zu einem neuen Film zusammengesetzt.
-        -schnitt '8.5-432 520-833.5 1050-1280'
+        -schnitt 8.5-432,520-833.5,1050-1280
 
         # will man z.B. von einem 4/3-Film, der als 16/9-Film (720x576)
         # mit schwarzen Balken an den Seiten, diese schwarzen Balken entfernen,
         # dann könnte das zum Beispiel so gemacht werden:
-        -crop '540:576:90:0'
+        -crop 540:576:90:0
 
         # die gewünschte Bildauflösung des neuen Filmes
         -soll_xmaly 720x576		# deutscher Parametername
