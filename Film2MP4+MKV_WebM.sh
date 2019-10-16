@@ -25,7 +25,7 @@
 
 
 #VERSION="v2019092500"
-VERSION="v2019101200"
+VERSION="v2019101600"
 
 
 ALLE_OPTIONEN="${@}"
@@ -58,18 +58,13 @@ while [ "${#}" -ne "0" ]; do
                         shift
                         shift
                         ;;
-                -schnitt)
-                        SCHNITTZEITEN="$(echo "${2}" | sed 's/"//g' | sed "s/'//g")"	# zum Beispiel zum Werbung entfernen (in Sekunden, Dezimaltrennzeichen ist der Punkt): -schnitt "10-432 520-833 1050-1280"
-                        shift
-                        shift
-                        ;;
                 -u)
                         # Wirddiese Option nicht verwendet, dann werden ALLE Untertitelspuren eingebettet
                         # "=0" für keinen Untertitel
                         # "0" für die erste Untertitelspur
                         # "1" für die zweite Untertitelspur
                         # "0,1" für die erste und die zweite Untertitelspur
-                        UNTERTITEL="${2}"	# -u 0,1,2,3,4
+                        UNTERTITEL="${1} ${2}"	# -u 0,1,2,3,4
                         shift
                         shift
                         ;;
@@ -140,8 +135,8 @@ SCHNITT_OPTION='${SCHNITT_OPTION}'
 #set -x
 for _E in ${ENDUNG_1} ${ENDUNG_2}
 do
-	echo "${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${_E}\" ${SCHNITT_OPTION}"
-	${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${_E}" ${SCHNITT_OPTION}
+	echo "${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${_E}\" ${UNTERTITEL}"
+	${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${_E}" ${UNTERTITEL}
 done
 
 #------------------------------------------------------------------------------#
