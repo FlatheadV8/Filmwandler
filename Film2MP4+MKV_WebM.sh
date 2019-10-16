@@ -135,8 +135,11 @@ SCHNITT_OPTION='${SCHNITT_OPTION}'
 #set -x
 for _E in ${ENDUNG_1} ${ENDUNG_2}
 do
-	echo "${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${_E}\" ${UNTERTITEL}"
-	${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${_E}" ${UNTERTITEL}
+	echo "${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${_E}\" ${SCHNITT_OPTION}"
+	${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${_E}" ${SCHNITT_OPTION}
 done
+
+
+ls -lha "${ZIELPFAD}"
 
 #------------------------------------------------------------------------------#
