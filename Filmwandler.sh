@@ -32,7 +32,7 @@
 #VERSION="v2019092100"			# 5. Generation gestartet
 #VERSION="v2019092300"			# erstmals funktioniert jetzt die Formatumrechnung mit nicht quadratischen Bildpunkten
 #VERSION="v2019092500"			# Dateinamen mit Leerzeichen (eine Unsitte) werden jetzt richtig behandelt
-VERSION="v2019101400"
+VERSION="v2019101600"
 
 
 BILDQUALIT="auto"
@@ -157,7 +157,7 @@ while [ "${#}" -ne "0" ]; do
                         shift
                         ;;
                 -schnitt)
-                        SCHNITTZEITEN="$(echo "${2}" | sed 's/,/ /g')"	# zum Beispiel zum Werbung entfernen (in Sekunden, Dezimaltrennzeichen ist der Punkt): -schnitt "10-432 520-833 1050-1280"
+			SCHNITTZEITEN="$(echo "${2}" | sed 's/,/ /g')"	# zum Beispiel zum Werbung entfernen (in Sekunden, Dezimaltrennzeichen ist der Punkt): -schnitt 10-432,520-833,1050-1280
                         shift
                         ;;
                 -test|-t)
@@ -1170,14 +1170,14 @@ else
 
 	U_TITEL_FF_01="$(for DER_UT in ${UT_LISTE}
 	do
-		echo -n " -map 0:s:${DER_UT} -c:s copy"
+		echo -n " -map 0:s:${DER_UT}? -c:s copy"
 	done)"
 
 	UT_ANZAHL="$(echo "${UT_LISTE}" | wc -w | awk '{print $1}')"
 	UT_KOPIE="$(seq 0 ${UT_ANZAHL} | head -n ${UT_ANZAHL})"
 	U_TITEL_FF_02="$(for DER_UT in ${UT_KOPIE}
 	do
-		echo -n " -map 0:s:${DER_UT} -c:s copy"
+		echo -n " -map 0:s:${DER_UT}? -c:s copy"
 	done)"
 fi
 
