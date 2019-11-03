@@ -154,12 +154,16 @@ BLURAY_PARAMETER()
 
         # --bluray-compat
 
+        BHVERH="$(echo "${MBREITE} ${MHOEHE} ${MaxFS}" | awk '{verhaeltnis="gut"; if ($1 > (sqrt($3 * 8))) verhaeltnis="schlecht" ; if ($2 > (sqrt($3 * 8))) verhaeltnis="schlecht" ; print verhaeltnis}')"
+
         echo "
+	FNKLEVEL='${FNKLEVEL}'
 	MBREITE='${MBREITE}'
 	MHOEHE='${MHOEHE}'
 	MaxFS='${MaxFS}'
         " | tee -a ${PROTOKOLLDATEI}.txt
-        BHVERH="$(echo "${MBREITE} ${MHOEHE} ${MaxFS}" | awk '{verhaeltnis="gut"; if ($1 > (sqrt($3 * 8))) verhaeltnis="schlecht" ; if ($2 > (sqrt($3 * 8))) verhaeltnis="schlecht" ; print verhaeltnis}')"
+
+	#exit
 
         if [ "${BHVERH}" != "gut" ] ; then
                 echo "# BLURAY_PARAMETER:
@@ -232,6 +236,10 @@ BLURAY_PARAMETER()
                 MaxVmvR="-512,511.75"           # max. Vertical MV component range
                 MinCR="2"
                 CRF="20"
+        else
+                MaxVmvR="-512,511.75"           # max. Vertical MV component range
+                MinCR="2"
+                CRF="20"
         fi
 
 }
@@ -278,6 +286,21 @@ LEVEL="$(AVC_LEVEL ${QUADR_MAKROBLOECKE} ${IN_FPS})"
 MaxFS="$(echo "${BILD_BREIT} ${BILD_HOCH}" | awk '{print $1 * $2}')"
 BLURAY_PARAMETER ${LEVEL} ${QUADR_MAKROBLOECKE} ${MaxFS}
 
+echo "
+KEYINT='${KEYINT}'
+QUADR_MAKROBLOECKE='${QUADR_MAKROBLOECKE}'
+LEVEL='${LEVEL}'
+MaxFS='${MaxFS}'
+
+MaxBR='${MaxBR}'
+MaxCPB='${MaxCPB}'
+MaxVmvR='${MaxVmvR}'
+MinCR='${MinCR}'
+CRF='${CRF}'
+" | tee -a ${PROTOKOLLDATEI}.txt
+
+#exit
+
 #==============================================================================#
 ### Qualität
 
@@ -317,8 +340,13 @@ BLURAY_PARAMETER ${LEVEL} ${QUADR_MAKROBLOECKE} ${MaxFS}
 
 #VIDEO_OPTION="-profile:v ${PROFILE} -preset veryslow -tune film -x264opts ref=4:b-pyramid=strict:bluray-compat=1:weightp=0:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=4:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:aud:subme=9"
 
-# für BluDisk-Kompatibilität ist "nal-hrd=vbr" zwingend nötig
-VIDEO_OPTION="-profile:v ${PROFILE} -preset veryslow -tune film -x264opts ref=4:b-pyramid=strict:bluray-compat=1:weightp=0:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=4:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:aud:subme=9:nal-hrd=vbr"
+if [ "x${MaxBR}" = "x" -o "x${MaxCPB}" = "x" ] ; then
+	# für BluDisk-Kompatibilität ist "nal-hrd=vbr" zwingend nötig
+	VIDEO_OPTION="-profile:v ${PROFILE} -preset veryslow -tune film -x264opts ref=4:b-pyramid=strict:bluray-compat=1:weightp=0:level=${LEVEL}:slices=4:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:aud:subme=9:nal-hrd=vbr"
+else
+	# für BluDisk-Kompatibilität ist "nal-hrd=vbr" zwingend nötig
+	VIDEO_OPTION="-profile:v ${PROFILE} -preset veryslow -tune film -x264opts ref=4:b-pyramid=strict:bluray-compat=1:weightp=0:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=4:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:aud:subme=9:nal-hrd=vbr"
+fi
 
 VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 30"		# von "0" (verlustfrei) bis "51"
 VIDEO_QUALITAET_1="${VIDEO_OPTION} -crf 28"		# von "0" (verlustfrei) bis "51"
@@ -350,3 +378,5 @@ VIDEO_OPTION='${VIDEO_OPTION}'
 " | tee -a ${PROTOKOLLDATEI}.txt
 
 #==============================================================================#
+
+#exit
