@@ -32,7 +32,7 @@
 #VERSION="v2019092100"			# 5. Generation gestartet
 #VERSION="v2019092300"			# erstmals funktioniert jetzt die Formatumrechnung mit nicht quadratischen Bildpunkten
 #VERSION="v2019092500"			# Dateinamen mit Leerzeichen (eine Unsitte) werden jetzt richtig behandelt
-VERSION="v2019101600"
+VERSION="v2019102900"
 
 
 BILDQUALIT="auto"
@@ -1156,6 +1156,7 @@ AUDIO_VERARBEITUNG_02='${AUDIO_VERARBEITUNG_02}'
 UNTERTITEL_AN="-c:s copy"				# für das zusammensetzen der Filmteile
 if [ "${UNTERTITEL}" == "=0" ] ; then
 	U_TITEL_FF_01=""
+	U_TITEL_FF_ALT=""
 	U_TITEL_FF_02=""
 	UNTERTITEL_AN=""				# für das zusammensetzen der Filmteile
 else
@@ -1173,6 +1174,25 @@ else
 		echo -n " -map 0:s:${DER_UT}? -c:s copy"
 	done)"
 
+	### Wenn der Untertitel in einem Text-Format vorliegt, dann muss er ggf. auch transkodiert werden.
+	if [ "${ENDUNG}" == mp4 ] ; then
+		UT_FORMAT="mov_text"
+	elif [ "${ENDUNG}" == webm ] ; then
+		UT_FORMAT="webvtt"
+	else
+		unset UT_FORMAT
+	fi
+
+	### wenn kein alternatives Untertitelformat vorgesehen ist, dann weiter ohne Untertitel als "Alternative bei Fehlschlag"
+	if [ "x${ENDUNG}" == x ] ; then
+		unset U_TITEL_FF_ALT
+	else
+		U_TITEL_FF_ALT="$(for DER_UT in ${UT_LISTE}
+		do
+			echo -n " -map 0:s:${DER_UT}? -c:s ${UT_FORMAT}"
+		done)"
+	fi
+
 	UT_ANZAHL="$(echo "${UT_LISTE}" | wc -w | awk '{print $1}')"
 	UT_KOPIE="$(seq 0 ${UT_ANZAHL} | head -n ${UT_ANZAHL})"
 	U_TITEL_FF_02="$(for DER_UT in ${UT_KOPIE}
@@ -1187,6 +1207,7 @@ UT_META_DATEN='${UT_META_DATEN}'
 UNTERTITEL='${UNTERTITEL}'
 UT_LISTE='${UT_LISTE}'
 U_TITEL_FF_01='${U_TITEL_FF_01}'
+U_TITEL_FF_ALT='${U_TITEL_FF_ALT}'
 U_TITEL_FF_02='${U_TITEL_FF_02}'
 " | tee -a ${PROTOKOLLDATEI}.txt
 
@@ -1285,10 +1306,16 @@ if [ ${SCHNITT_ANZAHL} -le 1 ] ; then
 	### hier der Film transkodiert                                       ###
 	###------------------------------------------------------------------###
 	echo
-	echo "1: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${SCHNELLSTART} ${U_TITEL_FF_01} ${VON} ${BIS} ${FPS} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
+	echo "1,1: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
 	echo
-#>
-	         ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${SCHNELLSTART} ${U_TITEL_FF_01} ${VON} ${BIS} ${FPS} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} 2>&1
+	         ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} 2>&1 && WEITER=OK || WEITER=ALT
+
+	if [ "${WEITER}" == ALT ] ; then
+		echo
+		echo "1,2: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
+		echo
+		${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} 2>&1
+	fi
 
 else
 
@@ -1308,9 +1335,16 @@ else
 		### hier werden die Teile zwischen der Werbung transkodiert  ###
 		###----------------------------------------------------------###
 		echo
-		echo "2: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} -ss ${VON} -to ${BIS} ${FPS} ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
+		echo "2,1: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} -ss ${VON} -to ${BIS} ${FPS} ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
 		echo
-		         ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} -ss ${VON} -to ${BIS} ${FPS} ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} 2>&1
+		         ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} -ss ${VON} -to ${BIS} ${FPS} ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} 2>&1 && WEITER=OK || WEITER=ALT
+
+		if [ "${WEITER}" == ALT ] ; then
+			echo
+			echo "2,2: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} -ss ${VON} -to ${BIS} ${FPS} ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
+			echo
+			${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} -ss ${VON} -to ${BIS} ${FPS} ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} 2>&1
+		fi
 
 		ffprobe -i ${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} 2>&1 | tee -a ${PROTOKOLLDATEI}.txt
 
