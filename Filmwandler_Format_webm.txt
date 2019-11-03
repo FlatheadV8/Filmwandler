@@ -13,7 +13,8 @@
 #==============================================================================#
 
 #VERSION="v2018082600"
-VERSION="v2019092100"
+#VERSION="v2019092100"
+VERSION="v2019102900"
 
 #==============================================================================#
 
@@ -22,19 +23,6 @@ ENDUNG="webm"
 FORMAT="webm"
 
 #==============================================================================#
-
-if [ "${UNTERTITEL}" != "=0" ] ; then
-	if [ "x${UNTERTITEL}" != "x" ] ; then
-		echo "
-		Mit diesem Container werden keine Untertitel verarbeitet.
-		ABBRUCH!" | tee -a ${PROTOKOLLDATEI}.txt
-		exit 1000
-	else
-		UNTERTITEL="=0"
-	fi
-fi
-
-#------------------------------------------------------------------------------#
 
 # Audio
 . $(dirname ${0})/Filmwandler_Codec_Audio_opus.txt
@@ -54,7 +42,7 @@ FORMAT_BESCHREIBUNG="
 * Audio-Kodierung:      Opus (freie Alternative zu AAC)                        *
 * Beschreibung:                                                                *
 *       - mit HTML5-Unterstützung                                              *
-*       - WebM kann leider nur das eine Untertitelformat "WebVTT"              *
+*       - WebM kann leider nur das eine Untertitelformat "WebVTT" (Text)       *
 *       - 'Royalty free' (komplett frei von patentierten Technologien)         *
 *       - WebM wird seit Android  2.3 'Gingerbread' unterstützt                *
 *       - VP9 wird seit Android 4.4 'KitKat' unterstützt                       *
