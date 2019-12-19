@@ -32,7 +32,8 @@
 #VERSION="v2019092100"			# 5. Generation gestartet
 #VERSION="v2019092300"			# erstmals funktioniert jetzt die Formatumrechnung mit nicht quadratischen Bildpunkten
 #VERSION="v2019092500"			# Dateinamen mit Leerzeichen (eine Unsitte) werden jetzt richtig behandelt
-VERSION="v2019102900"
+#VERSION="v2019102900"
+VERSION="v2019121900"			# Fehler nach Zeile 821 behoben
 
 
 BILDQUALIT="auto"
@@ -805,10 +806,6 @@ if [ "${ORIGINAL_PIXEL}" != Ja ] ; then
 				SOLL_XY="$(echo "${NAME_XY_DAR}" | awk '{print $2}')"
 				SOLL_DAR="$(echo "${NAME_XY_DAR}" | awk '{print $3}')"
 
-				BILD_SCALE="scale=${SOLL_XY},"
-				BILD_BREIT="$(echo "${BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $1}')"
-				BILD_HOCH="$(echo "${BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $2}')"
-
 				# https://ffmpeg.org/ffmpeg-filters.html#setdar_002c-setsar
 				FORMAT_ANPASSUNG="setdar='${SOLL_DAR}',"
 			else
@@ -817,9 +814,11 @@ if [ "${ORIGINAL_PIXEL}" != Ja ] ; then
 				echo "Leider konnte die Datei '$(dirname ${0})/Filmwandler_grafik.txt' nicht gelesen werden."
 				exit 370
 			fi
-		else
-			BILD_SCALE="scale=${SOLL_XY},"
 		fi
+
+		BILD_SCALE="scale=${SOLL_XY},"
+		BILD_BREIT="$(echo "${BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $1}')"
+		BILD_HOCH="$(echo "${BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $2}')"
 	else
 		unset BILD_SCALE
 		unset SOLL_XY
