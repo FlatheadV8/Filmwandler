@@ -33,7 +33,9 @@
 #VERSION="v2019092300"			# erstmals funktioniert jetzt die Formatumrechnung mit nicht quadratischen Bildpunkten
 #VERSION="v2019092500"			# Dateinamen mit Leerzeichen (eine Unsitte) werden jetzt richtig behandelt
 #VERSION="v2019102900"
-VERSION="v2019121900"			# Fehler nach Zeile 821 behoben
+#VERSION="v2019121900"			# Fehler ab Zeile 821 behoben
+#VERSION="v2020031300"			# Hilfe erweitert
+VERSION="v2020040800"			# jetzt wird beim X*Y-Format auch die Rotation berücksichtigt
 
 
 BILDQUALIT="auto"
@@ -208,10 +210,17 @@ while [ "${#}" -ne "0" ]; do
         # dann wird so die 2. Tonspur angegeben (die Zaehlweise beginnt mit 0)
         -ton 1
 
-        # wenn der Film mehrer Tonspuren besitzt
-        # und nicht die erste verwendet werden soll,
-        # dann wird so die 3. Tonspur angegeben (die Zaehlweise beginnt mit 0)
-        -ton 2
+        # so wird die 1. Tonspur angegeben (die Zaehlweise beginnt mit 0)
+        -ton 0
+
+        # so wird so die 3. und 4. Untertitelspur angegeben (die Zaehlweise beginnt mit 0)
+        -u 2,3
+
+        # so wird Untertitel komplett abgeschaltet
+        -u =0
+
+        # so wird so die 3. und 4. Untertitelspur angegeben (die Zaehlweise beginnt mit 0)
+        -u 2,3
 
 	# Stereo-Ausgabe erzwingen
 	# egal wieviele Audio-Kanäle der Originalfilm hat, der neue Film wird Stereo haben
@@ -406,6 +415,7 @@ REPARATUR_PARAMETER="-fflags +genpts"
 META_DATEN_KOMPLETT="$(ffprobe ${KOMPLETT_DURCHSUCHEN} -show_data -show_streams -i "${FILMDATEI}" 2>&1)"
 META_DATEN_INFO="$(echo   "${META_DATEN_KOMPLETT}" | sed -ne '/^Input /,/STREAM/p')"
 META_DATEN_STREAM="$(echo "${META_DATEN_KOMPLETT}" | sed -e  '1,/STREAM/d')"
+BILD_DREHUNG="$(echo "${META_DATEN_INFO}" | sed -ne '/Video: /,/Audio: / p' | awk '/ rotate /{print $NF}' | head -n1)"
 
 echo "${META_DATEN_INFO}"                                             | tee -a ${PROTOKOLLDATEI}.txt
 echo "${META_DATEN_STREAM}" | grep -E '^codec_(name|long_name|type)=' | tee -a ${PROTOKOLLDATEI}.txt
@@ -454,8 +464,6 @@ if [ "${IN_XY}" == "x" ] ; then
 	# META_DATEN_INFO=" 852x480 SAR 1:1 DAR 71:40 25 fps "
 	# META_DATEN_INFO=' 1920x800 SAR 1:1 DAR 12:5 23.98 fps '
 	IN_XY="$(echo "${META_DATEN_INFO}" | fgrep 'Video: ' | tr -s ',' '\n' | fgrep ' DAR ' | awk '{print $1}' | head -n1)"
-	IN_BREIT="$(echo "${IN_XY}" | awk -F'x' '{print $1}')"
-	IN_HOCH="$(echo  "${IN_XY}" | awk -F'x' '{print $2}')"
 	echo "# 110
 	2 IN_XY='${IN_XY}'
 	2 IN_BREIT='${IN_BREIT}'
@@ -473,6 +481,15 @@ if [ "${IN_XY}" == "x" ] ; then
 		3 IN_HOCH='${IN_HOCH}'
 		" | tee -a ${PROTOKOLLDATEI}.txt
 	fi
+	if [ "x${BILD_DREHUNG}" != x ] ; then
+		if [ "${BILD_DREHUNG}" = 90 ] ; then
+			IN_XY="$(echo "${IN_XY}" | awk -F'x' '{print $2"x"$1}')"
+		elif [ "${BILD_DREHUNG}" = 270 ] ; then
+			IN_XY="$(echo "${IN_XY}" | awk -F'x' '{print $2"x"$1}')"
+		fi
+	fi
+	IN_BREIT="$(echo "${IN_XY}" | awk -F'x' '{print $1}')"
+	IN_HOCH="$(echo  "${IN_XY}" | awk -F'x' '{print $2}')"
 fi
 
 IN_PAR="$(echo "${META_DATEN_STREAM}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^sample_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | head -n1)"
@@ -854,7 +871,6 @@ if [ "${ORIGINAL_PIXEL}" != Ja ] ; then
 	fi
 fi
 
-
 #------------------------------------------------------------------------------#
 ### Wenn die Bildpunkte vom Quell-Film und vom Ziel-Film quadratisch sind,
 ### dann ist es ganz einfach.
@@ -916,6 +932,55 @@ else
 fi
 
 #------------------------------------------------------------------------------#
+### wenn das Bild hochkannt steht, dann müssen die Seiten-Höhen-Parameter vertauscht werden
+### Breite, Höhe, PAD, SCALE
+
+echo "# 429
+BILD_BREIT		='${BILD_BREIT}'
+BILD_HOCH		='${BILD_HOCH}'
+BILD_SCALE		='${BILD_SCALE}'
+" | tee -a ${PROTOKOLLDATEI}.txt
+
+BILD_DREHEN()
+{
+	if [ "x${IN_XY}" != x ] ; then
+		IN_XY="$(echo "${IN_XY}" | awk -F'x' '{print $2"x"$1}')"
+	fi
+
+	unset ZWISCHENSPEICHER
+	ZWISCHENSPEICHER="${BREITE}"
+	BREITE="${HOEHE}"
+	HOEHE="${ZWISCHENSPEICHER}"
+	unset ZWISCHENSPEICHER
+
+	if [ "x${BILD_SCALE}" = x ] ; then
+		unset ZWISCHENSPEICHER
+		ZWISCHENSPEICHER="${BILD_BREIT}"
+		BILD_BREIT="${BILD_HOCH}"
+		BILD_HOCH="${ZWISCHENSPEICHER}"
+		unset ZWISCHENSPEICHER
+	else
+		BILD_BREIT="$(echo "${BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $2}')"
+		BILD_HOCH="$(echo "${BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $1}')"
+	fi
+	BILD_SCALE="scale=${BILD_BREIT}x${BILD_HOCH},"
+
+	if [ "x${SOLL_DAR}" = "x" ] ; then
+		FORMAT_ANPASSUNG="setdar='${BREITE}/${HOEHE}',"
+	fi
+}
+
+if [ "x${BILD_DREHUNG}" != x ] ; then
+	if [ "${BILD_DREHUNG}" = 90 ] ; then
+		BILD_DREHEN
+	elif [ "${BILD_DREHUNG}" = 270 ] ; then
+		BILD_DREHEN
+	fi
+fi
+IN_BREIT="$(echo "${IN_XY}" | awk -F'x' '{print $1}')"
+IN_HOCH="$(echo  "${IN_XY}" | awk -F'x' '{print $2}')"
+
+#------------------------------------------------------------------------------#
 
 echo "# 430
 FORMAT_ANPASSUNG    ='${FORMAT_ANPASSUNG}'
@@ -923,18 +988,19 @@ PIXELVERZERRUNG     ='${PIXELVERZERRUNG}'
 BREITE              ='${BREITE}'
 HOEHE               ='${HOEHE}'
 NAME_XY_DAR         ='${NAME_XY_DAR}'
-SOLL_XY             ='${SOLL_XY}'
 IN_DAR              ='${IN_DAR}'
 SOLL_DAR            ='${SOLL_DAR}'
 INBREITE_DAR        ='${INBREITE_DAR}'
 INHOEHE_DAR         ='${INHOEHE_DAR}'
+IN_XY               ='${IN_XY}'
+Originalauflösung   ='${IN_BREIT}x${IN_HOCH}'
+PIXELZAHL           ='${PIXELZAHL}'
+SOLL_XY             ='${SOLL_XY}'
+
 BILD_BREIT          ='${BILD_BREIT}'
 BILD_HOCH           ='${BILD_HOCH}'
 BILD_SCALE          ='${BILD_SCALE}'
-SOLL_XY             ='${SOLL_XY}'
-Originalauflösung   =${IN_BREIT}x${IN_HOCH}
-erwünschte Auflösung=${SOLL_XY}
-PIXELZAHL           =${PIXELZAHL}
+#==============================================================================#
 " | tee -a ${PROTOKOLLDATEI}.txt
 
 #exit 440
