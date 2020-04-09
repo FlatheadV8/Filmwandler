@@ -1,4 +1,5 @@
-VERSION="v2018071500"
+#VERSION="v2018071500"
+VERSION="v2019010600"
 
 bildaufloesungen_namen()
 {
@@ -29,7 +30,8 @@ echo "
 	-soll_xmaly MDA			# 720x350 4/3  
 	-soll_xmaly Apple_Lisa		# 720x364 4/3  
 	-soll_xmaly SVCD		# 480x576 4/3  
-	-soll_xmaly WGA			# 720x400 9/5  
+	-soll_xmaly WGA			# 720x400 9/5
+	-soll_xmaly MWH			# 768x432 16/9
 	-soll_xmaly VGA			# 640x480 4/3  
 	-soll_xmaly NTSC		# 720x480 4/3  
 	-soll_xmaly WVGA3		# 800x480 5/3  
