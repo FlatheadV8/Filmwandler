@@ -35,7 +35,8 @@
 #VERSION="v2019102900"
 #VERSION="v2019121900"			# Fehler ab Zeile 821 behoben
 #VERSION="v2020031300"			# Hilfe erweitert
-VERSION="v2020040800"			# jetzt wird beim X*Y-Format auch die Rotation berücksichtigt
+#VERSION="v2020040800"			# jetzt wird beim X*Y-Format auch die Rotation berücksichtigt
+VERSION="v2020050300"			# jetzt gibt es auch eine Option, durch die man das Normalisieren auf 4:3 bzw. 16:9 verhindern kann
 
 
 BILDQUALIT="auto"
@@ -108,6 +109,10 @@ while [ "${#}" -ne "0" ]; do
                         ;;
                 -dar|-ist_dar)
                         IST_DAR="${2}"		# Display-Format
+                        shift
+                        ;;
+                -orig_dar)
+			ORIGINAL_DAR="${2}"	# das originale Seitenverhältnis soll beibehalten werden
                         shift
                         ;;
                 -fps|-soll_fps)
@@ -240,6 +245,10 @@ while [ "${#}" -ne "0" ]; do
         # werden kann, dann muss es manuell als Parameter uebergeben werden
         -dar 16:9
         -ist_dar 16:9
+
+        # wenn diese Option einen beliebigen Wert (auch "nein") bekommt,
+	# dann wird das originale Seitenverhältnis beibehalten
+        -orig_dar ja
 
         # wenn die Pixelgeometrie des Originalfilmes nicht automatisch ermittelt
         # werden kann, dann muss sie manuell als Parameter uebergeben werden
@@ -876,59 +885,68 @@ fi
 ### dann ist es ganz einfach.
 ### Aber wenn nicht, dann sind diese Berechnungen nötig.
 
-if [ "x${SOLL_DAR}" != "x" ] ; then
-	# hier sind Modifikationen nötig, weil viele der auswählbaren Bildformate
-	# keine quadratischen Pixel vorsehen
-	INBREITE_DAR="$(echo "${IN_DAR}" | awk -F'[/:]' '{print $1}')"
-	INHOEHE_DAR="$(echo "${IN_DAR}" | awk -F'[/:]' '{print $2}')"
-	PIXELVERZERRUNG="$(echo "${SOLL_DAR} ${INBREITE_DAR} ${INHOEHE_DAR} ${BILD_BREIT} ${BILD_HOCH}" | awk '{gsub("[:/]"," ") ; pfmt=$1*$6/$2/$5 ; AUSGABE=1 ; if (pfmt < 1) AUSGABE=0 ; if (pfmt > 1) AUSGABE=2 ; print AUSGABE}')"
-	#
-	unset PIXELKORREKTUR
-
-	if [ "x${PIXELVERZERRUNG}" == x ] ; then
-		echo "# 380
-		# PIXELVERZERRUNG='${PIXELVERZERRUNG}'
-		" | tee -a ${PROTOKOLLDATEI}.txt
-		exit 390
-	elif [ "${PIXELVERZERRUNG}" -eq 1 ] ; then
-		echo "# 400
-		# quadratische Pixel
-		# PIXELVERZERRUNG = 1 : ${PIXELVERZERRUNG}
-		" | tee -a ${PROTOKOLLDATEI}.txt
-		BREITE="$(echo "${SOLL_DAR}" | awk '{gsub("/"," ");print $1}')"
-		HOEHE="$(echo "${SOLL_DAR}" | awk '{gsub("/"," ");print $2}')"
+if [ "x${ORIGINAL_DAR}" != "x" ] ; then
+	ORIG_DAR="$(echo "${META_DATEN_INFO}" | fgrep 'Video: ' | tr -s ',' '\n' | fgrep ' DAR ' | sed 's/.*DAR /DAR /;s/]//g' | awk '{print $2}' | head -n1)"
+	ORIG_DAR_BREITE="$(echo "${ORIG_DAR}" | awk -F':' '{print $1}')"
+	ORIG_DAR_HOEHE="$(echo "${ORIG_DAR}" | awk -F':' '{print $2}')"
+	BREITE="${ORIG_DAR_BREITE}"
+	HOEHE="${ORIG_DAR_HOEHE}"
+	FORMAT_ANPASSUNG="setdar='${BREITE}/${HOEHE}',"
+else
+	if [ "x${SOLL_DAR}" != "x" ] ; then
+		# hier sind Modifikationen nötig, weil viele der auswählbaren Bildformate
+		# keine quadratischen Pixel vorsehen
+		INBREITE_DAR="$(echo "${IN_DAR}" | awk -F'[/:]' '{print $1}')"
+		INHOEHE_DAR="$(echo "${IN_DAR}" | awk -F'[/:]' '{print $2}')"
+		PIXELVERZERRUNG="$(echo "${SOLL_DAR} ${INBREITE_DAR} ${INHOEHE_DAR} ${BILD_BREIT} ${BILD_HOCH}" | awk '{gsub("[:/]"," ") ; pfmt=$1*$6/$2/$5 ; AUSGABE=1 ; if (pfmt < 1) AUSGABE=0 ; if (pfmt > 1) AUSGABE=2 ; print AUSGABE}')"
 		#
 		unset PIXELKORREKTUR
-	elif [ "${PIXELVERZERRUNG}" -le 1 ] ; then
-		echo "# 410
-		# lange Pixel: breit ziehen
-		# 4CIF (Test 2)
-		# PIXELVERZERRUNG < 1 : ${PIXELVERZERRUNG}
-		" | tee -a ${PROTOKOLLDATEI}.txt
-		BREITE="$(echo "${SOLL_DAR} ${INBREITE_DAR} ${INHOEHE_DAR} ${BILD_BREIT} ${BILD_HOCH}" | awk '{gsub("/"," ");print $2 * $2 * $5 / $1 / $6}')"
-		HOEHE="$(echo "${SOLL_DAR}" | awk '{gsub("/"," ");print $2}')"
-		#
-		PIXELKORREKTUR="${BILD_SCALE}"
-	elif [ "${PIXELVERZERRUNG}" -ge 1 ] ; then
-		echo "# 420
-		# breite Pixel: lang ziehen
-		# 2CIF (Test 1)
-		# PIXELVERZERRUNG > 1 : ${PIXELVERZERRUNG}
-		" | tee -a ${PROTOKOLLDATEI}.txt
-		BREITE="$(echo "${SOLL_DAR}" | awk '{gsub("/"," ");print $1}')"
-		HOEHE="$(echo "${SOLL_DAR} ${INBREITE_DAR} ${INHOEHE_DAR} ${BILD_BREIT} ${BILD_HOCH}" | awk '{gsub("/"," ");print $1 * $1 * $6 / $2 / $5}')"
-		#
-		PIXELKORREKTUR="${BILD_SCALE}"
-	fi
-else
-	if [ "${DAR_FAKTOR}" -lt "149333" ] ; then
-		BREITE="4"
-		HOEHE="3"
+
+		if [ "x${PIXELVERZERRUNG}" == x ] ; then
+			echo "# 380
+			# PIXELVERZERRUNG='${PIXELVERZERRUNG}'
+			" | tee -a ${PROTOKOLLDATEI}.txt
+			exit 390
+		elif [ "${PIXELVERZERRUNG}" -eq 1 ] ; then
+			echo "# 400
+			# quadratische Pixel
+			# PIXELVERZERRUNG = 1 : ${PIXELVERZERRUNG}
+			" | tee -a ${PROTOKOLLDATEI}.txt
+			BREITE="$(echo "${SOLL_DAR}" | awk '{gsub("/"," ");print $1}')"
+			HOEHE="$(echo "${SOLL_DAR}" | awk '{gsub("/"," ");print $2}')"
+			#
+			unset PIXELKORREKTUR
+		elif [ "${PIXELVERZERRUNG}" -le 1 ] ; then
+			echo "# 410
+			# lange Pixel: breit ziehen
+			# 4CIF (Test 2)
+			# PIXELVERZERRUNG < 1 : ${PIXELVERZERRUNG}
+			" | tee -a ${PROTOKOLLDATEI}.txt
+			BREITE="$(echo "${SOLL_DAR} ${INBREITE_DAR} ${INHOEHE_DAR} ${BILD_BREIT} ${BILD_HOCH}" | awk '{gsub("/"," ");print $2 * $2 * $5 / $1 / $6}')"
+			HOEHE="$(echo "${SOLL_DAR}" | awk '{gsub("/"," ");print $2}')"
+			#
+			PIXELKORREKTUR="${BILD_SCALE}"
+		elif [ "${PIXELVERZERRUNG}" -ge 1 ] ; then
+			echo "# 420
+			# breite Pixel: lang ziehen
+			# 2CIF (Test 1)
+			# PIXELVERZERRUNG > 1 : ${PIXELVERZERRUNG}
+			" | tee -a ${PROTOKOLLDATEI}.txt
+			BREITE="$(echo "${SOLL_DAR}" | awk '{gsub("/"," ");print $1}')"
+			HOEHE="$(echo "${SOLL_DAR} ${INBREITE_DAR} ${INHOEHE_DAR} ${BILD_BREIT} ${BILD_HOCH}" | awk '{gsub("/"," ");print $1 * $1 * $6 / $2 / $5}')"
+			#
+			PIXELKORREKTUR="${BILD_SCALE}"
+		fi
 	else
-		BREITE="16"
-		HOEHE="9"
+		if [ "${DAR_FAKTOR}" -lt "149333" ] ; then
+			BREITE="4"
+			HOEHE="3"
+		else
+			BREITE="16"
+			HOEHE="9"
+		fi
+		FORMAT_ANPASSUNG="setdar='${BREITE}/${HOEHE}',"
 	fi
-	FORMAT_ANPASSUNG="setdar='${BREITE}/${HOEHE}',"
 fi
 
 #------------------------------------------------------------------------------#
