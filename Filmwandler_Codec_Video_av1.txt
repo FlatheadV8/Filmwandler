@@ -1,3 +1,4 @@
+
 #------------------------------------------------------------------------------#
 #
 # AV1
@@ -9,13 +10,14 @@
 #
 #------------------------------------------------------------------------------#
 
-
 VERSION="v2018082800"	# erste Unterstützung von AV1 eingebaut
 VERSION="v2020060200"	# erweitert um Beispiele
 
 CODEC_PATTERN="av1"		# Beispiel: "h265|hevc"
-#CODEC_PATTERN="libaom-av1"	# Beispiel: "h265|hevc"
-VIDEOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
+
+#VIDEOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
+VIDEOCODEC="libaom-av1 -strict -2"
+
 if [ "x${VIDEOCODEC}" = "x" ] ; then
 	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
 	if [ "x${VIDEOCODEC}" = "x" ] ; then
