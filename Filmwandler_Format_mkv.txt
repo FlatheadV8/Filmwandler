@@ -1,4 +1,3 @@
-
 #==============================================================================#
 #
 # MKV -> Matroska
@@ -6,7 +5,8 @@
 #==============================================================================#
 
 #VERSION="v2018082900"
-VERSION="v2019092100"
+#VERSION="v2019092100"          # VP9
+VERSION="v2019092100"           # AV1
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -40,7 +40,8 @@ IFRAME="-keyint_min 2-8"
 
 ### Video
 #. $(dirname ${0})/Filmwandler_Codec_Video_vp8.txt
-. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
+#. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
+. $(dirname ${0})/Filmwandler_Codec_Video_av1.txt
 
 #==============================================================================#
 
@@ -48,7 +49,7 @@ FORMAT_BESCHREIBUNG="
 ********************************************************************************
 * Name:                 free MKV                                               *
 * ENDUNG:               .mkv                                                   *
-* Video-Kodierung:      VP9                                                    *
+* Video-Kodierung:      AV1                                                    *
 * Audio-Kodierung:      Opus                                                   *
 * Beschreibung:                                                                *
 *       - freies Format mit guter Unterstützung durch Android                  *
