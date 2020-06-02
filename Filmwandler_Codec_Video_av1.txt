@@ -1,10 +1,20 @@
 #
 # AV1
 #
+# https://trac.ffmpeg.org/wiki/Encode/AV1
+#
+# Constant Quality
+#   ffmpeg -i input.mp4 -c:v libaom-av1 -crf 30 -b:v 0 -strict experimental av1_test.mkv
+#
+# Constrained Quality
+#   ffmpeg -i input.mp4 -c:v libaom-av1 -crf 30 -b:v 2000k -strict experimental output.mkv
+#
 
-VERSION="v2018082800"
+VERSION="v2018082800"	# erste Unterstützung von AV1 eingebaut
+VERSION="v2020060200"	# erweitert um Beispiele
 
 CODEC_PATTERN="av1"		# Beispiel: "h265|hevc"
+#CODEC_PATTERN="libaom-av1"	# Beispiel: "h265|hevc"
 VIDEOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
 	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
