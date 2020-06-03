@@ -5,7 +5,7 @@
 #
 #==============================================================================#
 
-#VERSION="v2018082900"    # VP8
+#VERSION="v2018082900" 		# VP8
 #VERSION="v2019092100" 		# VP9
 VERSION="v2020060200" 		# AV1 (deaktiviert, weil noch experimentell)
 
