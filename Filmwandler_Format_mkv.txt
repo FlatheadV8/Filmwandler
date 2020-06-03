@@ -1,58 +1,59 @@
 
-#==============================================================================#
+#------------------------------------------------------------------------------#
 #
-# MKV -> Matroska
+# AV1
 #
-#==============================================================================#
-
-#VERSION="v2018082900"    # VP8
-#VERSION="v2019092100" 		# VP9
-VERSION="v2020060200" 		# AV1 (deaktiviert, weil noch experimentell)
-
-#. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
-
-#==============================================================================#
-
-# Format
-ENDUNG="mkv"
-FORMAT="matroska"
-IFRAME="-keyint_min 2-8"
-
-#==============================================================================#
-#==============================================================================#
-
+# https://trac.ffmpeg.org/wiki/Encode/AV1
 #
-# 2018:
-# Dieses Format sollte (laut Doku) vom "LG webOS TV" abspielbar sein, wobei zu
-# beachten ist, dass der Codec VP9 in einigen Ländern nicht abspielbar ist.
-# In dem Fall muss man auf den Codec VP8 zurückgreifen.
+# Constant Quality
+#   ffmpeg -i input.mp4 -c:v libaom-av1 -crf 30 -b:v 0 -strict experimental av1_test.mkv
 #
-# MKV + VP8/VP9 + MP3
-#       - einziges freies Format mit Unterstützung durch LG (LG webOS TV)
+#   ffmpeg -h encoder=libaom-av1
 #
-# MKV + VP9/AV1 + Opus
-#       - freies Format mit guter Unterstützung durch Android
-#
+#------------------------------------------------------------------------------#
 
-### Audio
-#. $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt
-. $(dirname ${0})/Filmwandler_Codec_Audio_opus.txt
+#VERSION="v2018082800"	# erste Unterstützung von AV1 eingebaut
+#VERSION="v2020060200"	# erweitert um Beispiele
+VERSION="v2020060300" 	# VIDEO_OPTION definiert, Anpassungen für FFmpeg 4.2.2
 
 
-### Video
-#. $(dirname ${0})/Filmwandler_Codec_Video_vp8.txt
-. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
-#. $(dirname ${0})/Filmwandler_Codec_Video_av1.txt	# ist noch experimentell
+CODEC_PATTERN="av1"		# Beispiel: "h265|hevc"
 
-#==============================================================================#
+#VIDEOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
+VIDEOCODEC="libaom-av1 -strict -2"
 
-FORMAT_BESCHREIBUNG="
-********************************************************************************
-* Name:                 free MKV                                               *
-* ENDUNG:               .mkv                                                   *
-* Video-Kodierung:      VP9                                                    *
-* Audio-Kodierung:      Opus                                                   *
-* Beschreibung:                                                                *
-*       - freies Format mit guter Unterstützung durch Android                  *
-********************************************************************************
-"
+if [ "x${VIDEOCODEC}" = "x" ] ; then
+	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
+	if [ "x${VIDEOCODEC}" = "x" ] ; then
+		echo ""
+		echo "${CODEC_PATTERN}"
+		echo "Leider wird dieser Codec von der aktuell installierten Version"
+		echo "von FFmpeg nicht unterstützt!"
+		echo ""
+		exit 1
+	fi
+fi
+
+KERNE_ZUM_KODIEREN="$(
+if [ "$(uname -o)" = "FreeBSD" ] ; then
+        sysctl -n hw.ncpu
+elif [ "$(uname -o)" = "GNU/Linux" ] ; then
+        egrep '^core id' /proc/cpuinfo | sort -u | wc -l
+else
+        echo "1"
+fi)"
+
+AUF_KERNE_VERTEILEN="-cpu-used ${KERNE_ZUM_KODIEREN} -threads ${KERNE_ZUM_KODIEREN}"
+CONSTANT_QUALITY="-b:v 0 -row-mt 1 -tile-columns 1 -tile-rows 0"
+HDR_FARBRAUM="-colorspace bt2020nc -color_trc smpte2084 -color_primaries bt2020"	# diese verwendet YouTube
+VIDEO_OPTION="${CONSTANT_QUALITY} ${AUF_KERNE_VERTEILEN} ${HDR_FARBRAUM}"
+VIDEO_QUALITAET_0="-crf 52 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_1="-crf 48 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_2="-crf 44 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_3="-crf 40 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_4="-crf 36 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_5="-crf 32 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_6="-crf 28 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_7="-crf 24 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_8="-crf 20 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_9="-crf 16 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
