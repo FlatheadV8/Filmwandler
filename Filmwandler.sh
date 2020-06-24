@@ -37,7 +37,9 @@
 #VERSION="v2020031300"			# Hilfe erweitert
 #VERSION="v2020040800"			# jetzt wird beim X*Y-Format auch die Rotation berücksichtigt
 #VERSION="v2020050300"			# jetzt gibt es auch eine Option, durch die man das Normalisieren auf 4:3 bzw. 16:9 verhindern kann
-VERSION="v2020060200"			# Dateinamen können jetzt auch Punkte enthalten
+#VERSION="v2020060200"			# Dateinamen können jetzt auch Punkte enthalten
+#VERSION="v2020061000"			# VIDEO_TAG wurde doppelt verwendet
+VERSION="v2020061100"			# in Zeile 1117 einen Work-Around für Bit-Rate bei Tonspuren eingesetzt
 
 
 BILDQUALIT="auto"
@@ -1100,40 +1102,55 @@ echo "
 
 F_TON_QUALIT()
 {
-F_AUDIO_QUALITAET >> ${PROTOKOLLDATEI}.txt 2>&1
+	#----------------------------------------------------------------------#
+	# Work-Around
+	#
+	# Leider wird bei dieser Parameterangabe
+	# "-map 0:a:0 -c:a libfdk_aac  -afterburner 1 -b:a 336k  -map 0:a:1 -c:a libfdk_aac  -afterburner 1 -b:a 112k"
+	# für ALLE Tonspuren die Bit-Rate von "112k" verwendet!
+	# Aus diesem Grund werden hier die Kanalinfos überschrieben,
+	# damit für alle Tonspuren die max. Anzahl an Kanälen
+	# bzw. die max. Bit-Rate verwendet wird.
+	# Somit sollten beispielsweise diese Parameter nach diesem Work-Around so aussehen:
+	# "-map 0:a:0 -c:a libfdk_aac  -afterburner 1 -b:a 336k  -map 0:a:1 -c:a libfdk_aac  -afterburner 1 -b:a 336k"
+	#
+	AUDIO_KANAELE="$(echo "${AUDIO_KANAL_INFOS}" | tr -s ';' '\n' | egrep '^channels=' | awk -F'=' '{print $2}' | sort -nr | head -n1)"
+	#----------------------------------------------------------------------#
 
-case "${TONQUALIT}" in
-	0)
-		AUDIOQUALITAET="${AUDIO_QUALITAET_0}"
-		;;
-	1)
-		AUDIOQUALITAET="${AUDIO_QUALITAET_1}"
-		;;
-	2)
-		AUDIOQUALITAET="${AUDIO_QUALITAET_2}"
-		;;
-	3)
-		AUDIOQUALITAET="${AUDIO_QUALITAET_3}"
-		;;
-	4)
-		AUDIOQUALITAET="${AUDIO_QUALITAET_4}"
-		;;
-	5)
-		AUDIOQUALITAET="${AUDIO_QUALITAET_5}"
-		;;
-	6)
-		AUDIOQUALITAET="${AUDIO_QUALITAET_6}"
-		;;
-	7)
-		AUDIOQUALITAET="${AUDIO_QUALITAET_7}"
-		;;
-	8)
-		AUDIOQUALITAET="${AUDIO_QUALITAET_8}"
-		;;
-	9)
-		AUDIOQUALITAET="${AUDIO_QUALITAET_9}"
-		;;
-esac
+	F_AUDIO_QUALITAET >> ${PROTOKOLLDATEI}.txt 2>&1
+
+	case "${TONQUALIT}" in
+		0)
+			AUDIOQUALITAET="${AUDIO_QUALITAET_0}"
+			;;
+		1)
+			AUDIOQUALITAET="${AUDIO_QUALITAET_1}"
+			;;
+		2)
+			AUDIOQUALITAET="${AUDIO_QUALITAET_2}"
+			;;
+		3)
+			AUDIOQUALITAET="${AUDIO_QUALITAET_3}"
+			;;
+		4)
+			AUDIOQUALITAET="${AUDIO_QUALITAET_4}"
+			;;
+		5)
+			AUDIOQUALITAET="${AUDIO_QUALITAET_5}"
+			;;
+		6)
+			AUDIOQUALITAET="${AUDIO_QUALITAET_6}"
+			;;
+		7)
+			AUDIOQUALITAET="${AUDIO_QUALITAET_7}"
+			;;
+		8)
+			AUDIOQUALITAET="${AUDIO_QUALITAET_8}"
+			;;
+		9)
+			AUDIOQUALITAET="${AUDIO_QUALITAET_9}"
+			;;
+	esac
 }
 
 #exit 475
@@ -1392,15 +1409,15 @@ if [ ${SCHNITT_ANZAHL} -le 1 ] ; then
 	### hier der Film transkodiert                                       ###
 	###------------------------------------------------------------------###
 	echo
-	echo "1,1: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
+	echo "1,1: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
 	echo
-	         ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} 2>&1 && WEITER=OK || WEITER=ALT
+	         ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} 2>&1 && WEITER=OK || WEITER=ALT
 
 	if [ "${WEITER}" = ALT ] ; then
 		echo
-		echo "1,2: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
+		echo "1,2: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
 		echo
-		${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} 2>&1
+		${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} 2>&1
 	fi
 
 else
@@ -1421,15 +1438,15 @@ else
 		### hier werden die Teile zwischen der Werbung transkodiert  ###
 		###----------------------------------------------------------###
 		echo
-		echo "2,1: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} -ss ${VON} -to ${BIS} ${FPS} ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
+		echo "2,1: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} -ss ${VON} -to ${BIS} ${FPS} ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
 		echo
-		         ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} -ss ${VON} -to ${BIS} ${FPS} ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} 2>&1 && WEITER=OK || WEITER=ALT
+		         ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} -ss ${VON} -to ${BIS} ${FPS} ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} 2>&1 && WEITER=OK || WEITER=ALT
 
 		if [ "${WEITER}" = ALT ] ; then
 			echo
-			echo "2,2: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} -ss ${VON} -to ${BIS} ${FPS} ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
+			echo "2,2: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} -ss ${VON} -to ${BIS} ${FPS} ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
 			echo
-			${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}"  ${VIDEO_TAG} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} -ss ${VON} -to ${BIS} ${FPS} ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} 2>&1
+			${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} -ss ${VON} -to ${BIS} ${FPS} ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} 2>&1
 		fi
 
 		ffprobe -i ${ZUFALL}_${NUMMER}_${ZIELNAME}.${ENDUNG} 2>&1 | tee -a ${PROTOKOLLDATEI}.txt
