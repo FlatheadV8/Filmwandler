@@ -4,7 +4,8 @@
 
 #VERSION="v2018082900"
 #VERSION="v2019082300"
-VERSION="v2019092500"
+#VERSION="v2019092500"
+VERSION="v2020060900"		# Bit-Raten-Abstufung angepasst
 
 #------------------------------------------------------------------------------#
 #
@@ -51,6 +52,8 @@ Sound_ST=''				# Stereo (2.0)
 Sound_51=''				# 5.1
 Sound_71=''				# 7.1
 
+BIT_RATE="cbr"
+
 AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
 if [ "x${AUDIOCODEC}" = "x" ] ; then
 	AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
@@ -69,43 +72,72 @@ fi
 # Afterburner is "a type of analysis by synthesis algorithm which increases the audio quality but also the required processing power."
 # Fraunhofer recommends to always activate this feature.
 if [ "x${AUDIOCODEC}" = "xlibfdk_aac" ] ; then
+	# http://wiki.hydrogenaud.io/index.php?title=Fraunhofer_FDK_AAC#Bitrate_Modes
         AUDIO_OPTION="-afterburner 1"
+	VBR_PROFIL="-profile:a aac_low"		# nur mit Main und Low (LC) ist Transparenz möglich!
+	#
+	# Note, the VBR setting is unsupported and only works with some parameter combinations
+	# VBR für AAC ist noch experimentell (auch wenn es funktioniert)
+	#BIT_RATE="vbr"
 fi
 
 F_AUDIO_QUALITAET()
 {
-if [ "${AUDIO_KANAELE}" -le 2 ] ; then		# Mono + Stereo
-        AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 52k"	# 26k x 2
-        AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 64k"	# 32k x 2
-        AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 76k"	# 38k x 2
-        AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 88k"	# 44k x 2
-        AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 100k"	# 50k x 2
-        AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 112k"	# 56k x 2
-        AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 124k"	# 62k x 2
-        AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 136k"	# 68k x 2
-        AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 148k"	# 74k x 2
-        AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 160k"	# 80k x 2
-elif [ "${AUDIO_KANAELE}" -le 6 ] ; then	# DolbyDigital (5.1)
-        AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 156k"	# 26k x 6
-        AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 192k"	# 32k x 6
-        AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 228k"	# 38k x 6
-        AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 264k"	# 44k x 6
-        AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 300k"	# 50k x 6
-        AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 336k"	# 56k x 6
-        AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 372k"	# 62k x 6
-        AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 408k"	# 68k x 6
-        AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 444k"	# 74k x 6
-        AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 480k"	# 80k x 6
-else						# 7.1
-        AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 208k"	# 26k x 8
-        AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 256k"	# 32k x 8
-        AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 304k"	# 38k x 8
-        AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 352k"	# 44k x 8
-        AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 400k"	# 50k x 8
-        AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 448k"	# 56k x 8
-        AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 496k"	# 62k x 8
-        AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 544k"	# 68k x 8
-        AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 592k"	# 74k x 8
-        AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 640k"	# 80k x 8
+if [ "${BIT_RATE}" = "vbr" ] ; then
+	### Note, the VBR setting is unsupported and only works with some parameter combinations
+	### VBR kennt nur die qualitätsbestimmenden Parameter 1-5
+	# -vbr 1: 20k-32k pro Kanal (13050 Hz)
+	# -vbr 2: 32k-40k pro Kanal (13050 Hz)
+	# -vbr 3: 48k-56k pro Kanal (14260 Hz)
+	# -vbr 4: 64k-72k pro Kanal (15500 Hz)
+	# -vbr 5: 96k-112k pro Kanal (Full range, no filter)
+        AUDIO_QUALITAET_0="${AUDIO_OPTION} ${VBR_PROFIL} -vbr 1"
+        AUDIO_QUALITAET_1="${AUDIO_OPTION} ${VBR_PROFIL} -vbr 2"
+        AUDIO_QUALITAET_2="${AUDIO_OPTION} ${VBR_PROFIL} -vbr 3"
+        AUDIO_QUALITAET_3="${AUDIO_OPTION} ${VBR_PROFIL} -vbr 4"
+        AUDIO_QUALITAET_4="${AUDIO_OPTION} ${VBR_PROFIL} -vbr 5"
+        AUDIO_QUALITAET_5="${AUDIO_OPTION} ${VBR_PROFIL} -vbr 5"
+        AUDIO_QUALITAET_6="${AUDIO_OPTION} ${VBR_PROFIL} -vbr 5"
+        AUDIO_QUALITAET_7="${AUDIO_OPTION} ${VBR_PROFIL} -vbr 5"
+        AUDIO_QUALITAET_8="${AUDIO_OPTION} ${VBR_PROFIL} -vbr 5"
+        AUDIO_QUALITAET_9="${AUDIO_OPTION} ${VBR_PROFIL} -vbr 5"
+else
+    if [ "${AUDIO_KANAELE}" -le 2 ] ; then
+	### Mono + Stereo
+        AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 40k"	#  20k x 2
+        AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 56k"	#  28k x 2
+        AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 64k"	#  32k x 2
+        AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 80k"	#  40k x 2
+        AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 96k"	#  48k x 2
+        AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 112k"	#  56k x 2
+        AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 128k"	#  64k x 2
+        AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 144k"	#  72k x 2
+        AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 192k"	#  96k x 2
+        AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 224k"	# 112k x 2
+    elif [ "${AUDIO_KANAELE}" -le 6 ] ; then
+	### DolbyDigital (5.1)
+        AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 120k"	#  20k x 6
+        AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 168k"	#  28k x 6
+        AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 192k"	#  32k x 6
+        AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 240k"	#  40k x 6
+        AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 288k"	#  48k x 6
+        AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 336k"	#  56k x 6
+        AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 384k"	#  64k x 6
+        AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 432k"	#  72k x 6
+        AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 576k"	#  96k x 6
+        AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 672k"	# 112k x 6
+    else
+	### 7.1
+        AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 160k"	#  20k x 8
+        AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 224k"	#  28k x 8
+        AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 256k"	#  32k x 8
+        AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 320k"	#  40k x 8
+        AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 384k"	#  48k x 8
+        AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 448k"	#  56k x 8
+        AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 512k"	#  64k x 8
+        AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 576k"	#  72k x 8
+        AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 768k"	#  96k x 8
+        AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 896k"	# 112k x 8
+    fi
 fi
 }
