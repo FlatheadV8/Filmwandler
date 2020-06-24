@@ -21,7 +21,8 @@
 #
 #------------------------------------------------------------------------------#
 
-VERSION="v2018082800"
+#VERSION="v2018082800"
+VERSION="v2020060900"		# Abstufung geändert
 
 AUDIOCODEC="ac3"
 Sound_ST=''				# Stereo (2.0)
@@ -33,26 +34,26 @@ AUDIO_OPTION=""
 F_AUDIO_QUALITAET()
 {
 if [ "${AUDIO_KANAELE}" -gt 2 ] ; then
-        AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 160k"
-        AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 184k"
-        AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 216k"
-        AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 256k"
-        AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 296k"
-        AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 344k"
-        AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 400k"
-        AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 472k"
-        AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 552k"                                          
+        AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 192k"
+        AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 224k"
+        AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 256k"
+        AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 288k"
+        AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 320k"
+        AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 384k"
+        AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 448k"
+        AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 512k"
+        AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 576k"                                          
         AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 640k"                                          
 else
-        AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 64k"                                           
-        AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 80k"                                           
-        AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 88k"
-        AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 112k"                                          
-        AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 128k"
-        AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 160k"
-        AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 184k"
-        AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 224k"
-        AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 264k"
+        AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 96k"                                           
+        AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 112k"                                           
+        AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 128k"
+        AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 144k"                                          
+        AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 160k"
+        AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 192k"
+        AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 224k"
+        AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 256k"
+        AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 288k"
         AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 320k"
 fi
 }
