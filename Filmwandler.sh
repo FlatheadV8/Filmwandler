@@ -39,7 +39,8 @@
 #VERSION="v2020050300"			# jetzt gibt es auch eine Option, durch die man das Normalisieren auf 4:3 bzw. 16:9 verhindern kann
 #VERSION="v2020060200"			# Dateinamen können jetzt auch Punkte enthalten
 #VERSION="v2020061000"			# VIDEO_TAG wurde doppelt verwendet
-VERSION="v2020061100"			# in Zeile 1117 einen Work-Around für Bit-Rate bei Tonspuren eingesetzt
+#VERSION="v2020061100"			# in Zeile 1117 einen Work-Around für Bit-Rate bei Tonspuren eingesetzt
+VERSION="v2020070500"			# soll_xmaly wurde alsch behandelt
 
 
 BILDQUALIT="auto"
@@ -824,31 +825,7 @@ FORMAT_ANPASSUNG="setsar='1/1',"
 ### gewünschtes Rasterformat der Bildgröße (Auflösung)
 
 if [ "${ORIGINAL_PIXEL}" != Ja ] ; then
-	if [ "x${SOLL_XY}" != "x" ] ; then
-		### Übersetzung von Bildauflösungsnamen zu Bildauflösungen
-		### tritt nur bei manueller Auswahl der Bildauflösung in Kraft
-		AUFLOESUNG_ODER_NAME="$(echo "${SOLL_XY}" | egrep '[0-9][0-9][0-9][x][0-9][0-9]')"
-		if [ "x${AUFLOESUNG_ODER_NAME}" = "x" ] ; then
-			### manuelle Auswahl der Bildauflösung per Namen
-			if [ "x${BILD_FORMATNAMEN_AUFLOESUNGEN}" != "x" ] ; then
-				NAME_XY_DAR="$(echo "${BILD_FORMATNAMEN_AUFLOESUNGEN}" | egrep '[-]soll_xmaly ' | awk '{print $2,$4,$5}' | egrep -i "^${SOLL_XY} ")"
-				SOLL_XY="$(echo "${NAME_XY_DAR}" | awk '{print $2}')"
-				SOLL_DAR="$(echo "${NAME_XY_DAR}" | awk '{print $3}')"
-
-				# https://ffmpeg.org/ffmpeg-filters.html#setdar_002c-setsar
-				FORMAT_ANPASSUNG="setdar='${SOLL_DAR}',"
-			else
-				echo "Die gewünschte Bildauflösung wurde als 'Name' angegeben: '${SOLL_XY}'"
-				echo "Für die Übersetzung wird die Datei 'Filmwandler_grafik.txt' benötigt."
-				echo "Leider konnte die Datei '$(dirname ${0})/Filmwandler_grafik.txt' nicht gelesen werden."
-				exit 370
-			fi
-		fi
-
-		BILD_SCALE="scale=${SOLL_XY},"
-		BILD_BREIT="$(echo "${BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $1}')"
-		BILD_HOCH="$(echo "${BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $2}')"
-	else
+	if [ "x${SOLL_XY}" = "x" ] ; then
 		unset BILD_SCALE
 		unset SOLL_XY
 
@@ -880,6 +857,30 @@ if [ "${ORIGINAL_PIXEL}" != Ja ] ; then
 			BILD_BREIT="${IN_BREIT}"
 			BILD_HOCH="${IN_HOCH}"
 		fi
+	else
+		### Übersetzung von Bildauflösungsnamen zu Bildauflösungen
+		### tritt nur bei manueller Auswahl der Bildauflösung in Kraft
+		AUFLOESUNG_ODER_NAME="$(echo "${SOLL_XY}" | egrep '[0-9][0-9][0-9][x][0-9][0-9]')"
+		if [ "x${AUFLOESUNG_ODER_NAME}" = "x" ] ; then
+			### manuelle Auswahl der Bildauflösung per Namen
+			if [ "x${BILD_FORMATNAMEN_AUFLOESUNGEN}" != "x" ] ; then
+				NAME_XY_DAR="$(echo "${BILD_FORMATNAMEN_AUFLOESUNGEN}" | egrep '[-]soll_xmaly ' | awk '{print $2,$4,$5}' | egrep -i "^${SOLL_XY} ")"
+				SOLL_XY="$(echo "${NAME_XY_DAR}" | awk '{print $2}')"
+				SOLL_DAR="$(echo "${NAME_XY_DAR}" | awk '{print $3}')"
+
+				# https://ffmpeg.org/ffmpeg-filters.html#setdar_002c-setsar
+				FORMAT_ANPASSUNG="setdar='${SOLL_DAR}',"
+			else
+				echo "Die gewünschte Bildauflösung wurde als 'Name' angegeben: '${SOLL_XY}'"
+				echo "Für die Übersetzung wird die Datei 'Filmwandler_grafik.txt' benötigt."
+				echo "Leider konnte die Datei '$(dirname ${0})/Filmwandler_grafik.txt' nicht gelesen werden."
+				exit 370
+			fi
+		fi
+
+		SOLL_BILD_SCALE="scale=${SOLL_XY},"
+		BILD_BREIT="$(echo "${SOLL_BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $1}')"
+		BILD_HOCH="$(echo "${SOLL_BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $2}')"
 	fi
 fi
 
@@ -953,6 +954,13 @@ else
 fi
 
 #------------------------------------------------------------------------------#
+### wenn ein bestimmtes Format gewünscht ist, dann muss es am Ende auch rauskommen
+
+if [ "x${SOLL_XY}" != x ] ; then
+	PIXELKORREKTUR="${SOLL_BILD_SCALE}"
+fi
+
+#------------------------------------------------------------------------------#
 ### wenn das Bild hochkannt steht, dann müssen die Seiten-Höhen-Parameter vertauscht werden
 ### Breite, Höhe, PAD, SCALE
 
@@ -960,6 +968,7 @@ echo "# 429
 BILD_BREIT		='${BILD_BREIT}'
 BILD_HOCH		='${BILD_HOCH}'
 BILD_SCALE		='${BILD_SCALE}'
+SOLL_BILD_SCALE		='${SOLL_BILD_SCALE}'
 " | tee -a ${PROTOKOLLDATEI}.txt
 
 BILD_DREHEN()
