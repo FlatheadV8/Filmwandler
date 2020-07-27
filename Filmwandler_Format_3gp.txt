@@ -1,20 +1,21 @@
 
 #==============================================================================#
 #
-# 3GPP -> weltweite Kooperation von Standardisierungsgremien für die Standardisierung im Mobilfunk (GSM, UMTS)
-#	1998: 3GPP  (3GP) - 3G UMTS
+# 3GP2 -> weltweite Kooperation von Standardisierungsgremien für die Standardisierung im Mobilfunk
+#       2008: 3GPP2 (3G2) - 3G CDMA2000
 #
 #==============================================================================#
 
-VERSION="v2018090300"
+#VERSION="v2018090300"
+VERSION="v2020072700"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
 #==============================================================================#
 
 # Format
-ENDUNG="3gp"
-FORMAT="3gp"
+ENDUNG="3g2"
+FORMAT="3g2"
 
 #==============================================================================#
 
@@ -23,32 +24,25 @@ FORMAT="3gp"
 
 
 # Video
+if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 . $(dirname ${0})/Filmwandler_Codec_Video_263.txt
 IFRAME="-keyint_min 2-8"
 
 #------------------------------------------------------------------------------#
-### die meisten dieser Abspielgeräte können nur 15 FPS
-
-if [ "x${SOLL_FPS}" = "x" ] ; then
-	SOLL_FPS="15"
-fi
-
-#------------------------------------------------------------------------------#
-### 3GPP ignoriert in einigen Fällen das DAR
+### 3GPP2 ignoriert in einigen Fällen das DAR
 BREITE="${VERGLEICH_BREIT}"
 HOEHE="${VERGLEICH_HOCH}"
 
+fi
 #==============================================================================#
 
 FORMAT_BESCHREIBUNG="
 ********************************************************************************
-* Name:			3GPP                                                   *
-* ENDUNG:		.3gp                                                   *
+* Name:			3GPP2                                                  *
+* ENDUNG:		.3g2                                                   *
 * Video-Kodierung:	H.263 (MPEG-4 Part 2 / ASP)                            *
 * Audio-Kodierung:	AAC                                                    *
 * Beschreibung:                                                                *
-*	- abspielbar auf vielen kleineren Konsumergeräten                      *
-*           * die meisten dieser Abspielgeräte können nur 15 FPS               *
 *	- H.263 kann aber leider nur diese Formate beherbergen:                *
 *           * 128x96                                                           *
 *           * 176x144                                                          *
