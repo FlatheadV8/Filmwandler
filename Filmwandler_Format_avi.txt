@@ -5,8 +5,21 @@
 #
 #==============================================================================#
 
-VERSION="v2018090300"
+#VERSION="v2018090300"
+VERSION="v2020072700"
 
+#------------------------------------------------------------------------------#
+# Format
+ENDUNG="avi"
+FORMAT="avi"
+
+#==============================================================================#
+
+# Audio
+. $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt	# Mono/Stereo
+
+
+if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
 #==============================================================================#
@@ -100,16 +113,6 @@ SOLL_SCALE='${SOLL_SCALE}'
 
 #==============================================================================#
 
-# Format
-ENDUNG="avi"
-FORMAT="avi"
-
-#==============================================================================#
-
-# Audio
-. $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt	# Mono/Stereo
-
-
 # Video
 . $(dirname ${0})/Filmwandler_Codec_Video_divx.txt
 IFRAME="-keyint_min 2-8"
@@ -118,6 +121,7 @@ IFRAME="-keyint_min 2-8"
 ### AVI hat nicht zwingend quadratische Bildpunkte
 FORMAT_ANPASSUNG="setdar=${BREITE}/${HOEHE},"
 
+fi
 #==============================================================================#
 
 FORMAT_BESCHREIBUNG="
