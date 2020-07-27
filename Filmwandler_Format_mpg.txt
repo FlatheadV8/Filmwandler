@@ -8,8 +8,6 @@
 
 VERSION="v2018090300"
 
-#. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
-
 #==============================================================================#
 
 # Format
@@ -40,6 +38,8 @@ ENDUNG="mpg"
 
 ### http://www.ffmpeg.org/ffmpeg.html#Video-Options
 # FFMPEG_TARGET: vcd, svcd, dvd, dv, dv50
+
+#. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
