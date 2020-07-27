@@ -5,7 +5,8 @@
 #
 #==============================================================================#
 
-VERSION="v2018083100"
+#VERSION="v2018083100"
+VERSION="v2020072700"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -26,6 +27,7 @@ FORMAT="flv"
 
 
 # Video
+if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 . $(dirname ${0})/Filmwandler_Codec_Video_flv.txt
 IFRAME="-keyint_min 2-8"
 
@@ -34,6 +36,7 @@ IFRAME="-keyint_min 2-8"
 HOEHE="${VERGLEICH_BREIT}"
 BREITE="${VERGLEICH_HOCH}"
 
+fi
 #==============================================================================#
 
 FORMAT_BESCHREIBUNG="
