@@ -45,6 +45,8 @@ VERSION="v2020060900"		# Bit-Raten-Abstufung angepasst
 # laut Debian ist libfdk_aac "non-free"-Licenc
 # laut FSF, Fedora, RedHat ist libfdk_aac "free"-Licenc
 # 
+### apt install mediainfo ffmpeg mplayer x264 libfdk-aac1 fdkaac libdvdcss2
+#
 #------------------------------------------------------------------------------#
 
 CODEC_PATTERN="aac"			# Beispiel: "h265|hevc"
@@ -53,6 +55,11 @@ Sound_51=''				# 5.1
 Sound_71=''				# 7.1
 
 BIT_RATE="cbr"
+
+#echo "
+#CODEC_PATTERN='${CODEC_PATTERN}'
+#"
+#exit 1234
 
 AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
 if [ "x${AUDIOCODEC}" = "x" ] ; then
