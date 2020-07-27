@@ -374,7 +374,6 @@ echo "
 MLEVEL='${MLEVEL}'
 RLEVEL='${RLEVEL}'
 FNKLEVEL='${FNKLEVEL}'
-LEVEL='${LEVEL}'
 
 profile=${PROFILE}
 rate=${MaxBR}
