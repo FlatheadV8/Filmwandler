@@ -7,9 +7,8 @@
 
 #VERSION="v2018082900"		# VP8
 #VERSION="v2019092100" 		# VP9
-VERSION="v2020060200" 		# AV1 (deaktiviert, weil noch experimentell)
-
-#. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
+#VERSION="v2020060200" 		# AV1 (deaktiviert, weil noch experimentell)
+VERSION="v2020072700"
 
 #==============================================================================#
 
@@ -40,10 +39,13 @@ IFRAME="-keyint_min 2-8"
 
 
 ### Video
+if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
+#. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 #. $(dirname ${0})/Filmwandler_Codec_Video_vp8.txt
 . $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
 #. $(dirname ${0})/Filmwandler_Codec_Video_av1.txt	# ist noch experimentell
 
+fi
 #==============================================================================#
 
 FORMAT_BESCHREIBUNG="
