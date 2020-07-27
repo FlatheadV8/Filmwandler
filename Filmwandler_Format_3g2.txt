@@ -6,7 +6,8 @@
 #
 #==============================================================================#
 
-VERSION="v2018090300"
+#VERSION="v2018090300"
+VERSION="v2020072700"
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -23,6 +24,7 @@ FORMAT="3g2"
 
 
 # Video
+if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 . $(dirname ${0})/Filmwandler_Codec_Video_263.txt
 IFRAME="-keyint_min 2-8"
 
@@ -31,6 +33,7 @@ IFRAME="-keyint_min 2-8"
 BREITE="${VERGLEICH_BREIT}"
 HOEHE="${VERGLEICH_HOCH}"
 
+fi
 #==============================================================================#
 
 FORMAT_BESCHREIBUNG="
