@@ -5,10 +5,8 @@
 #
 #==============================================================================#
 
-VERSION="v2018090200"
-
-### Qualität
-. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
+#VERSION="v2018090200"
+VERSION="v2020072700"
 
 #==============================================================================#
 
@@ -23,9 +21,13 @@ FORMAT=""
 
 
 # Video
+if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
+  # Qualität
+. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 . $(dirname ${0})/Filmwandler_Codec_Video_264.txt
 IFRAME="-keyint_min 2-8"
 
+fi
 #==============================================================================#
 
 FORMAT_BESCHREIBUNG="
