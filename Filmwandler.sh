@@ -42,8 +42,12 @@
 #VERSION="v2020061100"			# in Zeile 1117 einen Work-Around für Bit-Rate bei Tonspuren eingesetzt
 #VERSION="v2020070500"			# soll_xmaly wurde alsch behandelt
 #VERSION="v2020072100"			# die erste Tonspur ist immer die "Default"-Tonspur: -disposition:a:0 default
-VERSION="v2020072600"			# Jetzt können auch Video-Dateien ohne Video-Spur erstellt werden
+#VERSION="v2020072600"			# Jetzt können auch Video-Dateien ohne Video-Spur erstellt werden
+VERSION="v2020072700"			# Fehler behoben
 
+#
+# e[cx][hi][ot]
+#
 #
 # Bild mit Tonspur
 # -shortest
@@ -58,6 +62,11 @@ VERSION="v2020072600"			# Jetzt können auch Video-Dateien ohne Video-Spur erste
 # https://stackoverflow.com/questions/44351606/ffmpeg-set-the-language-of-an-audio-stream
 # ISO 639-2: 3-Zeichen-Kode
 # -metadata:s:a:0 language=ger
+
+### https://ffmpeg.org/ffmpeg-all.html#Metadata-1
+#EIGENE_META_DATEN="-metadata Werkzeug_Name=https://github.com/FlatheadV8/Filmwandler -metadata Werkzeug_Version=${VERSION}"
+#EIGENE_META_DATEN="-metadata Werkzeug=https://github.com/FlatheadV8/Filmwandler:${VERSION}"
+EIGENE_META_DATEN="-metadata description=https://github.com/FlatheadV8/Filmwandler:${VERSION}"
 
 
 BILDQUALIT="auto"
@@ -86,6 +95,14 @@ AVERZ="$(dirname ${0})"			# Arbeitsverzeichnis, hier liegen diese Dateien
 
 #==============================================================================#
 ### Funktionen
+
+# einbinden der Namen von vielen Bildauflösungen
+BILDAUFLOESUNGEN_NAMEN="${AVERZ}/Filmwandler_grafik.txt"
+if [ -r "${BILDAUFLOESUNGEN_NAMEN}" ] ; then
+	. ${BILDAUFLOESUNGEN_NAMEN}
+	BILD_FORMATNAMEN_AUFLOESUNGEN="$(bildaufloesungen_namen)"
+fi
+
 
 ausgabe_hilfe()
 {
@@ -120,8 +137,8 @@ while [ "${#}" -ne "0" ]; do
                         CROP="${2}"		# zum entfernen der schwarzen Balken: -vf crop=width:height:x:y
                         shift
                         ;;
-                -dar|-ist_dar)
-                        IST_DAR="${2}"		# Display-Format
+                -dar)
+                        IST_DAR="${2}"		# Display-Format, wenn ein anderes gewünscht wird als automatisch erkannt wurde
                         shift
                         ;;
                 -orig_dar)
@@ -132,7 +149,7 @@ while [ "${#}" -ne "0" ]; do
                         SOLL_FPS="${2}"		# FPS (Bilder pro Sekunde) für den neuen Film festlegen
                         shift
                         ;;
-                -par|-ist_par)
+                -par)
                         IST_PAR="${2}"		# Pixel-Format
                         shift
                         ;;
@@ -258,33 +275,35 @@ while [ "${#}" -ne "0" ]; do
         -ist_xmaly 480x270
         -in_xmaly 480x270
 
-        # wenn das Bildformat des Originalfilmes nicht automatisch ermittelt
-        # werden kann, dann muss es manuell als Parameter uebergeben werden
-        -dar 16:9
-        -ist_dar 16:9
-
         # wenn diese Option einen beliebigen Wert (auch "nein") bekommt,
 	# dann wird das originale Seitenverhältnis beibehalten
         -orig_dar ja
 
+        # wenn das Bildformat des Originalfilmes nicht automatisch ermittelt
+        # werden kann oder falsch ermittelt wurde,
+        # dann muss es manuell als Parameter uebergeben werden;
+        # es wird nur einer der beiden Parameter DAR oder PAR benoetigt
+        -dar 16:9
+
         # wenn die Pixelgeometrie des Originalfilmes nicht automatisch ermittelt
-        # werden kann, dann muss sie manuell als Parameter uebergeben werden
+        # werden kann oder falsch ermittelt wurde,
+        # dann muss es manuell als Parameter uebergeben werden;
+        # es wird nur einer der beiden Parameter DAR oder PAR benoetigt
         -par 64:45
-        -ist_par 64:45
 
         # will man eine andere Video-Qualitaet, dann sie manuell als Parameter
         # uebergeben werden
         -vq 5
         -soll_vq 5
 
-        # Video nicht übertragen
-        # das Ergebnis soll keine Video-Spur enthalten
-        -vn
-
         # will man eine andere Audio-Qualitaet, dann sie manuell als Parameter
         # uebergeben werden
         -aq 3
         -soll_aq 3
+
+        # Video nicht übertragen
+        # das Ergebnis soll keine Video-Spur enthalten
+        -vn
 
         # Man kann aus dem Film einige Teile entfernen, zum Beispiel Werbung.
         # Angaben muessen in Sekunden erfolgen,
@@ -402,16 +421,6 @@ echo "# $(date +'%F %T')
 ${0} ${Film2Standardformat_OPTIONEN}" | tee ${PROTOKOLLDATEI}.txt
 
 #------------------------------------------------------------------------------#
-### FFmpeg verwendet drei verschiedene Zeitangaben:
-#
-# http://ffmpeg-users.933282.n4.nabble.com/What-does-the-output-of-ffmpeg-mean-tbr-tbn-tbc-etc-td941538.html
-# http://stackoverflow.com/questions/3199489/meaning-of-ffmpeg-output-tbc-tbn-tbr
-# tbn = the time base in AVStream that has come from the container
-# tbc = the time base in AVCodecContext for the codec used for a particular stream
-# tbr = tbr is guessed from the video stream and is the value users want to see when they look for the video frame rate
-#
-
-#------------------------------------------------------------------------------#
 ### diese Optionen sind für ffprobe und ffmpeg notwendeig,
 ### damit auch die Spuren gefunden werden, die später als 5 Sekunden nach
 ### Filmbeginn einsetzen
@@ -433,255 +442,46 @@ KOMPLETT_DURCHSUCHEN="-probesize 9223372036G -analyzeduration 9223372036G"
 
 REPARATUR_PARAMETER="-fflags +genpts"
 
+#==============================================================================#
+#==============================================================================#
+### Video
+#
+# IN-Daten (META-Daten) aus der Filmdatei lesen
+#
+
 #------------------------------------------------------------------------------#
-### hier wird eine Liste externer verfügbarer Codecs erstellt
-
-FFMPEG_LIB="$((ffmpeg -formats >/dev/null) 2>&1 | tr -s ' ' '\n' | egrep '^[-][-]enable[-]' | sed 's/^[-]*enable[-]*//;s/[-]/_/g' | egrep '^lib')"
-FFMPEG_FORMATS="$(ffmpeg -formats 2>/dev/null | awk '/^[ \t]*[ ][DE]+[ ]/{print $2}')"
-
+### FFmpeg verwendet drei verschiedene Zeitangaben:
+#
+# http://ffmpeg-users.933282.n4.nabble.com/What-does-the-output-of-ffmpeg-mean-tbr-tbn-tbc-etc-td941538.html
+# http://stackoverflow.com/questions/3199489/meaning-of-ffmpeg-output-tbc-tbn-tbr
+# tbn = the time base in AVStream that has come from the container
+# tbc = the time base in AVCodecContext for the codec used for a particular stream
+# tbr = tbr is guessed from the video stream and is the value users want to see when they look for the video frame rate
+#
 #------------------------------------------------------------------------------#
 ### Meta-Daten auslesen
 
 META_DATEN_KOMPLETT="$(ffprobe ${KOMPLETT_DURCHSUCHEN} -show_data -show_streams -i "${FILMDATEI}" 2>&1)"
 META_DATEN_INFO="$(echo   "${META_DATEN_KOMPLETT}" | sed -ne '/^Input /,/STREAM/p')"
 META_DATEN_STREAM="$(echo "${META_DATEN_KOMPLETT}" | sed -e  '1,/STREAM/d')"
-
-
-if [ -r ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt ] ; then
-
-        OP_QUELLE="1"
-        unset FFMPEG_TARGET
-        
-	echo "IN_FPS='${IN_FPS}'"
-	#exit 90
-
-	. ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt
-
-else
-	echo "Datei konnte nicht gefunden werden:"
-	echo "${AVERZ}/Filmwandler_Format_${ENDUNG}.txt"
-	exit 100
-fi
-
-
-#------------------------------------------------------------------------------#
-
-START_ZIEL_FORMAT="-f ${FORMAT}"
-
-SCHNITT_ANZAHL="$(echo "${SCHNITTZEITEN}" | wc -w | awk '{print $1}')"
-
-#==============================================================================#
-#==============================================================================#
-# Audio
-
-if [ "x${TONSPUR}" = "x" ] ; then
-        TSNAME="$(echo "${META_DATEN_STREAM}" | fgrep -i codec_type=audio | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
-else
-	TSNAME="${TONSPUR}"
-fi
-
-TS_LISTE="$(echo "${TSNAME}" | sed 's/,/ /g')"
-TS_ANZAHL="$(echo "${TSNAME}" | sed 's/,/ /g' | wc -w | awk '{print $1}')"
-
-AUDIO_KANAL_INFOS="$(echo "${META_DATEN_STREAM}" | tr -s '\n' ';' | sed 's/\[STREAM\]/§/g' | tr -s '§' '\n' | grep -E 'codec_type=audio|channel_layout=' | sed 's/^;//;s/;$//')"
-
-#==============================================================================#
-### Qualität
-#
-# Qualitäts-Parameter-Übersetzung
-# https://slhck.info/video/2017/02/24/vbr-settings.html
-#
-
-#------------------------------------------------------------------------------#
-#------------------------------------------------------------------------------#
-#------------------------------------------------------------------------------#
-### Audio-Qualität
-
-echo "
-# 1012 TONQUALIT='${TONQUALIT}'
-"
-
-F_TON_QUALIT()
-{
-	#----------------------------------------------------------------------#
-	# Work-Around
-	#
-	# Leider wird bei dieser Parameterangabe
-	# "-map 0:a:0 -c:a libfdk_aac  -afterburner 1 -b:a 336k  -map 0:a:1 -c:a libfdk_aac  -afterburner 1 -b:a 112k"
-	# für ALLE Tonspuren die Bit-Rate von "112k" verwendet!
-	# Aus diesem Grund werden hier die Kanalinfos überschrieben,
-	# damit für alle Tonspuren die max. Anzahl an Kanälen
-	# bzw. die max. Bit-Rate verwendet wird.
-	# Somit sollten beispielsweise diese Parameter nach diesem Work-Around so aussehen:
-	# "-map 0:a:0 -c:a libfdk_aac  -afterburner 1 -b:a 336k  -map 0:a:1 -c:a libfdk_aac  -afterburner 1 -b:a 336k"
-	#
-	AUDIO_KANAELE="$(echo "${AUDIO_KANAL_INFOS}" | tr -s ';' '\n' | egrep '^channels=' | awk -F'=' '{print $2}' | sort -nr | head -n1)"
-	#----------------------------------------------------------------------#
-
-	F_AUDIO_QUALITAET >> ${PROTOKOLLDATEI}.txt 2>&1
-
-	case "${TONQUALIT}" in
-		0)
-			AUDIOQUALITAET="${AUDIO_QUALITAET_0}"
-			;;
-		1)
-			AUDIOQUALITAET="${AUDIO_QUALITAET_1}"
-			;;
-		2)
-			AUDIOQUALITAET="${AUDIO_QUALITAET_2}"
-			;;
-		3)
-			AUDIOQUALITAET="${AUDIO_QUALITAET_3}"
-			;;
-		4)
-			AUDIOQUALITAET="${AUDIO_QUALITAET_4}"
-			;;
-		5)
-			AUDIOQUALITAET="${AUDIO_QUALITAET_5}"
-			;;
-		6)
-			AUDIOQUALITAET="${AUDIO_QUALITAET_6}"
-			;;
-		7)
-			AUDIOQUALITAET="${AUDIO_QUALITAET_7}"
-			;;
-		8)
-			AUDIOQUALITAET="${AUDIO_QUALITAET_8}"
-			;;
-		9)
-			AUDIOQUALITAET="${AUDIO_QUALITAET_9}"
-			;;
-	esac
-}
-
-#exit 110
-
-echo "# 120
-TONQUALIT='${TONQUALIT}'
-AUDIOCODEC='${AUDIOCODEC}'
-AUDIOQUALITAET='${AUDIOQUALITAET}'
-AUDIO_KANAL_INFOS='${AUDIO_KANAL_INFOS}'
-Sound_ST='${Sound_ST}'
-Sound_51='${Sound_51}'
-Sound_71='${Sound_71}'
-TS_ANZAHL='${TS_ANZAHL}'
-STEREO='${STEREO}'
-" | tee -a ${PROTOKOLLDATEI}.txt
-
-#exit 130
-
-if [ "${TS_ANZAHL}" -gt 0 ] ; then
-	# soll Stereo-Ausgabe erzwungen werden?
-	if [ "x${STEREO}" = "x" ] ; then
-		_ST=""
-	else
-		# wurde die Ausgabe bereits durch die Codec-Optionen auf Stereo gesetzt?
-		BEREITS_AK2="$(echo "${AUDIOCODEC} ${AUDIOQUALITAET}" | grep -E 'ac 2|stereo')"
-		if [ "x${BEREITS_AK2}" = "x" ] ; then
-			_ST="${STEREO}"
-		else
-			_ST=""
-		fi
-	fi
-
-	AUDIO_VERARBEITUNG_01="$(for DIE_TS in ${TS_LISTE}
-	do
-		if [ "x${STEREO}" = "x" ] ; then
-			AKN="$(echo "${DIE_TS}" | awk '{print $1 + 1}')"
-			AUDIO_KANAELE="$(echo "${AUDIO_KANAL_INFOS}" | head -n${AKN} | tail -n1 | tr -s ';' '\n' | egrep '^channels=' | awk -F'=' '{print $2}')"
-			echo "# 140
-			AUDIO_KANAELE='${AUDIO_KANAELE}'
-			" >> ${PROTOKOLLDATEI}.txt
-			AKL51="$(echo "${AUDIO_KANAL_INFOS}" | head -n${AKN} | tail -n1 | tr -s ';' '\n' | fgrep 'channel_layout=5.1')"
-			AKL71="$(echo "${AUDIO_KANAL_INFOS}" | head -n${AKN} | tail -n1 | tr -s ';' '\n' | fgrep 'channel_layout=7.1')"
-			if [ "x${AKL51}" != "x" ] ; then
-				if [ "x${AUDIO_KANAELE}" = x ] ; then
-					AUDIO_KANAELE=6
-				fi
-				F_TON_QUALIT
-				echo -n "  -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_51} ${AUDIOQUALITAET}"
-			elif [ "x${AKL71}" != "x" ] ; then
-				if [ "x${AUDIO_KANAELE}" = x ] ; then
-					AUDIO_KANAELE=8
-				fi
-				F_TON_QUALIT
-				echo -n "  -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_71} ${AUDIOQUALITAET}"
-			else
-				if [ "x${AUDIO_KANAELE}" = x ] ; then
-					AUDIO_KANAELE=2
-				fi
-				F_TON_QUALIT
-				echo -n "  -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_ST} ${AUDIOQUALITAET}"
-			fi
-		else
-			AUDIO_KANAELE="2"
-			echo "# 150
-			AUDIO_KANAELE='${AUDIO_KANAELE}'
-			" >> ${PROTOKOLLDATEI}.txt
-			F_TON_QUALIT
-			echo -n " -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${AUDIOQUALITAET} -ac 2"
-		fi
-	done) -disposition:a:0 default"
-
-	TS_KOPIE="$(seq 0 ${TS_ANZAHL} | head -n ${TS_ANZAHL})"
-	AUDIO_VERARBEITUNG_02="$(for DIE_TS in ${TS_KOPIE}
-	do
-		echo -n " -map 0:a:${DIE_TS} -c:a copy"
-	done)"
-
-else
-	AUDIO_VERARBEITUNG_01="-an"
-	AUDIO_VERARBEITUNG_02="-an"
-fi
-
-echo "" | tee -a ${PROTOKOLLDATEI}.txt
-echo "# 160
-BEREITS_AK2='${BEREITS_AK2}'
-TS_KOPIE='${TS_KOPIE}'
-AUDIO_VERARBEITUNG_01='${AUDIO_VERARBEITUNG_01}'
-AUDIO_VERARBEITUNG_02='${AUDIO_VERARBEITUNG_02}'
-" | tee -a ${PROTOKOLLDATEI}.txt
-
-#exit 170
-
-#==============================================================================#
-#==============================================================================#
-### Video
-
-#------------------------------------------------------------------------------#
-#------------------------------------------------------------------------------#
-#------------------------------------------------------------------------------#
-if [ "${VIDEO_NICHT_UEBERTRAGEN}" = "0" ] ; then
-	VIDEO_PARAMETER_TRANS="-vn"
-	VIDEO_PARAMETER_KOPIE="-vn"
-	U_TITEL_FF_01=""
-	U_TITEL_FF_ALT=""
-	U_TITEL_FF_02=""
-	UNTERTITEL_AN=""		# für das zusammensetzen der Filmteile
-else
-
-
-# einbinden der Namen von vielen Bildauflösungen
-BILDAUFLOESUNGEN_NAMEN="${AVERZ}/Filmwandler_grafik.txt"
-if [ -r "${BILDAUFLOESUNGEN_NAMEN}" ] ; then
-	. ${BILDAUFLOESUNGEN_NAMEN}
-	BILD_FORMATNAMEN_AUFLOESUNGEN="$(bildaufloesungen_namen)"
-fi
-
-#==============================================================================#
-#
-# IN-Daten (META-Daten) aus der Filmdatei lesen
-#
-
-VIDEO_SPUR="$(echo "${META_DATEN_INFO}" | awk '/Stream #.*: Video: /{print $1}' | head -n1)"
-	#----------------------------------------------------------------------#
-	#--- VIDEO_SPUR -------------------------------------------------------#
-	#----------------------------------------------------------------------#
-	if [ "${VIDEO_SPUR}" = Stream ] ; then
 BILD_DREHUNG="$(echo "${META_DATEN_INFO}" | sed -ne '/Video: /,/Audio: / p' | awk '/ rotate /{print $NF}' | head -n1)"
 
-echo "META_DATEN_INFO='${META_DATEN_INFO}'"                           | tee -a ${PROTOKOLLDATEI}.txt
+echo "${META_DATEN_INFO}"                                             | tee -a ${PROTOKOLLDATEI}.txt
 echo "${META_DATEN_STREAM}" | grep -E '^codec_(name|long_name|type)=' | tee -a ${PROTOKOLLDATEI}.txt
+
+#------------------------------------------------------------------------------#
+#--- VIDEO_SPUR ---------------------------------------------------------------#
+#------------------------------------------------------------------------------#
+VIDEO_SPUR="$(echo "${META_DATEN_INFO}" | awk '/Stream #.*: Video: /{print $1}' | head -n1)"
+if [ "${VIDEO_SPUR}" != Stream ] ; then
+	VIDEO_NICHT_UEBERTRAGEN=0
+fi
+
+#------------------------------------------------------------------------------#
+### hier wird eine Liste externer verfügbarer Codecs erstellt
+
+FFMPEG_LIB="$((ffmpeg -formats >/dev/null) 2>&1 | tr -s ' ' '\n' | egrep '^[-][-]enable[-]' | sed 's/^[-]*enable[-]*//;s/[-]/_/g' | egrep '^lib')"
+FFMPEG_FORMATS="$(ffmpeg -formats 2>/dev/null | awk '/^[ \t]*[ ][DE]+[ ]/{print $2}')"
 
 #------------------------------------------------------------------------------#
 ### alternative Methode zur Ermittlung der FPS
@@ -704,14 +504,14 @@ if [ "${SCAN_TYPE}" != "progressive" ] ; then
         ZEILENSPRUNG="yadif,"
 fi
 
-#exit 200
+#exit 90
 
 # META_DATEN_STREAM=" width=720 "
 # META_DATEN_STREAM=" height=576 "
 IN_BREIT="$(echo "${META_DATEN_STREAM}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^width=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 IN_HOCH="$(echo "${META_DATEN_STREAM}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^height=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 IN_XY="${IN_BREIT}x${IN_HOCH}"
-echo "# 210
+echo "# 100
 1 IN_XY='${IN_XY}'
 1 IN_BREIT='${IN_BREIT}'
 1 IN_HOCH='${IN_HOCH}'
@@ -721,7 +521,7 @@ if [ "${IN_XY}" = "x" ] ; then
 	# META_DATEN_INFO=" 852x480 SAR 1:1 DAR 71:40 25 fps "
 	# META_DATEN_INFO=' 1920x800 SAR 1:1 DAR 12:5 23.98 fps '
 	IN_XY="$(echo "${META_DATEN_INFO}" | fgrep 'Video: ' | tr -s ',' '\n' | fgrep ' DAR ' | awk '{print $1}' | head -n1)"
-	echo "# 220
+	echo "# 110
 	2 IN_XY='${IN_XY}'
 	2 IN_BREIT='${IN_BREIT}'
 	2 IN_HOCH='${IN_HOCH}'
@@ -732,7 +532,7 @@ if [ "${IN_XY}" = "x" ] ; then
 		IN_BREIT="$(echo "${META_DATEN_STREAM}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^coded_width=/{print $2}' | grep -Fv 'N/A' | grep -Ev '^0$' | head -n1)"
 		IN_HOCH="$(echo "${META_DATEN_STREAM}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^coded_height=/{print $2}' | grep -Fv 'N/A' | grep -Ev '^0$' | head -n1)"
 		IN_XY="${IN_BREIT}x${IN_HOCH}"
-		echo "# 230
+		echo "# 120
 		3 IN_XY='${IN_XY}'
 		3 IN_BREIT='${IN_BREIT}'
 		3 IN_HOCH='${IN_HOCH}'
@@ -750,23 +550,23 @@ if [ "${IN_XY}" = "x" ] ; then
 fi
 
 IN_PAR="$(echo "${META_DATEN_STREAM}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^sample_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | head -n1)"
-echo "# 240
+echo "# 130
 1 IN_PAR='${IN_PAR}'
 " | tee -a ${PROTOKOLLDATEI}.txt
 if [ "x${IN_PAR}" = "x" ] ; then
 	IN_PAR="$(echo "${META_DATEN_INFO}" | fgrep 'Video: ' | tr -s ',' '\n' | fgrep ' DAR ' | tr -s '[\[\]]' ' ' | awk '{print $3}')"
-	echo "# 250
+	echo "# 140
 	2 IN_PAR='${IN_PAR}'
 	" | tee -a ${PROTOKOLLDATEI}.txt
 fi
 
 IN_DAR="$(echo "${META_DATEN_STREAM}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^display_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | head -n1)"
-echo "# 260
+echo "# 150
 1 IN_DAR='${IN_DAR}'
 " | tee -a ${PROTOKOLLDATEI}.txt
 if [ "x${IN_DAR}" = "x" ] ; then
 	IN_DAR="$(echo "${META_DATEN_INFO}" | fgrep 'Video: ' | tr -s ',' '\n' | fgrep ' DAR ' | tr -s '[\[\]]' ' ' | awk '{print $5}')"
-	echo "# 270
+	echo "# 160
 	2 IN_DAR='${IN_DAR}'
 	" | tee -a ${PROTOKOLLDATEI}.txt
 fi
@@ -775,22 +575,22 @@ fi
 # META_DATEN_STREAM=" avg_frame_rate=25/1 "
 # META_DATEN_STREAM=" codec_time_base=1/25 "
 IN_FPS="$(echo "${META_DATEN_STREAM}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^r_frame_rate=/{print $2}' | grep -Fv 'N/A' | head -n1 | awk -F'/' '{print $1}')"
-echo "# 280
+echo "# 170
 1 IN_FPS='${IN_FPS}'
 " | tee -a ${PROTOKOLLDATEI}.txt
 if [ "x${IN_FPS}" = "x" ] ; then
 	IN_FPS="$(echo "${META_DATEN_STREAM}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^avg_frame_rate=/{print $2}' | grep -Fv 'N/A' | head -n1 | awk -F'/' '{print $1}')"
-	echo "# 290
+	echo "# 180
 	2 IN_FPS='${IN_FPS}'
 	" | tee -a ${PROTOKOLLDATEI}.txt
 	if [ "x${IN_FPS}" = "x" ] ; then
 		IN_FPS="$(echo "${META_DATEN_STREAM}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^codec_time_base=/{print $2}' | grep -Fv 'N/A' | head -n1 | awk -F'/' '{print $2}')"
-		echo "# 300
+		echo "# 190
 		3 IN_FPS='${IN_FPS}'
 		" | tee -a ${PROTOKOLLDATEI}.txt
 		if [ "x${IN_FPS}" = "x" ] ; then
 			IN_FPS="$(echo "${META_DATEN_INFO}" | fgrep 'Video: ' | tr -s ',' '\n' | fgrep ' fps' | awk '{print $1}')"			# wird benötigt um den Farbraum für BluRay zu ermitteln
-			echo "# 310
+			echo "# 200
 			4 IN_FPS='${IN_FPS}'
 			" | tee -a ${PROTOKOLLDATEI}.txt
 		fi
@@ -800,17 +600,17 @@ fi
 IN_FPS_RUND="$(echo "${IN_FPS}" | awk '{printf "%.0f\n", $1}')"			# für Vergleiche, "if" erwartet einen Integerwert
 
 IN_BIT_RATE="$(echo "${META_DATEN_STREAM}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^bit_rate=/{print $2}' | grep -Fv 'N/A' | head -n1)"
-echo "# 330
+echo "# 210
 1 IN_BIT_RATE='${IN_BIT_RATE}'
 " | tee -a ${PROTOKOLLDATEI}.txt
 if [ "x${IN_BIT_RATE}" = "x" ] ; then
 	IN_BIT_RATE="$(echo "${META_DATEN_INFO}" | grep -F 'Video: ' | tr -s ',' '\n' | awk -F':' '/bitrate: /{print $2}' | tail -n1)"
-	echo "# 340
+	echo "# 220
 	2 IN_BIT_RATE='${IN_BIT_RATE}'
 	" | tee -a ${PROTOKOLLDATEI}.txt
 	if [ "x${IN_BIT_RATE}" = "x" ] ; then
 		IN_BIT_RATE="$(echo "${META_DATEN_INFO}" | grep -F 'Duration: ' | tr -s ',' '\n' | awk -F':' '/bitrate: /{print $2}' | tail -n1)"
-		echo "# 350
+		echo "# 230
 		3 IN_BIT_RATE='${IN_BIT_RATE}'
 		" | tee -a ${PROTOKOLLDATEI}.txt
 	fi
@@ -826,7 +626,7 @@ case "${IN_BIT_EINH}" in
                         ;;
 esac
 
-echo "# 360
+echo "# 240
 IN_XY='${IN_XY}'
 IN_BREIT='${IN_BREIT}'
 IN_HOCH='${IN_HOCH}'
@@ -844,7 +644,23 @@ TONQUALIT='${TONQUALIT}'
 unset IN_BIT_RATE
 unset IN_BIT_EINH
 
-#exit 370
+#exit 250
+
+#==============================================================================#
+#==============================================================================#
+# Audio
+
+if [ "x${TONSPUR}" = "x" ] ; then
+        TSNAME="$(echo "${META_DATEN_STREAM}" | fgrep -i codec_type=audio | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
+else
+	TSNAME="${TONSPUR}"
+fi
+
+TS_LISTE="$(echo "${TSNAME}" | sed 's/,/ /g')"
+TS_ANZAHL="$(echo "${TSNAME}" | sed 's/,/ /g' | wc -w | awk '{print $1}')"
+
+AUDIO_KANAL_INFOS="$(echo "${META_DATEN_STREAM}" | tr -s '\n' ';' | sed 's/\[STREAM\]/§/g' | tr -s '§' '\n' | grep -E 'codec_type=audio|channel_layout=' | sed 's/^;//;s/;$//')"
+
 
 #==============================================================================#
 ### Korrektur: gelesene IN-Daten mit übergebenen IST-Daten überschreiben
@@ -886,10 +702,10 @@ if [ -z "${IN_XY}" ] ; then
 	echo "z.B. (HDTV)    : -in_xmaly 1280x720"
 	echo "z.B. (FullHD)  : -in_xmaly 1920x1080"
 	echo "ABBRUCH!"
-	exit 170
+	exit 270
 fi
 
-echo "# 380
+echo "# 280
 IST_XY='${IST_XY}'
 IN_DAR='${IN_DAR}'
 IN_PAR='${IST_PAR}'
@@ -897,7 +713,7 @@ IST_DAR='${IST_DAR}'
 IST_PAR='${IST_PAR}'
 " | tee -a ${PROTOKOLLDATEI}.txt
 
-#exit 390
+#exit 290
 
 #------------------------------------------------------------------------------#
 ### Seitenverhältnis des Bildes (DAR)
@@ -935,7 +751,7 @@ fi
 
 ARBEITSWERTE_PAR
 
-echo "# 400
+echo "# 300
 IN_XY='${IN_XY}'
 IN_PAR='${IST_PAR}'
 IST_DAR='${IST_DAR}'
@@ -943,9 +759,11 @@ IST_PAR='${IST_PAR}'
 PAR='${PAR}'
 PAR_KOMMA='${PAR_KOMMA}'
 PAR_FAKTOR='${PAR_FAKTOR}'
+VIDEO_SPUR='${VIDEO_SPUR}'
+VIDEO_NICHT_UEBERTRAGEN='${VIDEO_NICHT_UEBERTRAGEN}'
 " | tee -a ${PROTOKOLLDATEI}.txt
 
-#exit 410
+#exit 310
 
 #------------------------------------------------------------------------------#
 ### Kontrolle Seitenverhältnis des Bildes (DAR)
@@ -954,9 +772,9 @@ if [ "x${IN_DAR}" = "x" ] ; then
 	IN_DAR="$(echo "${IN_BREIT} ${IN_HOCH} ${PAR_KOMMA}" | awk '{printf("%.16f\n",$3/($2/$1))}')"
 fi
 
-
-if [ -z "${IN_DAR}" ] ; then
-	echo "# 420"
+if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
+  if [ -z "${IN_DAR}" ] ; then
+	echo "# 320"
 	echo "Es konnte das Seitenverhältnis des Bildes nicht ermittelt werden."
 	echo "versuchen Sie es mit einem dieser beiden Parameter nocheinmal:"
 	echo "-in_dar"
@@ -969,9 +787,9 @@ if [ -z "${IN_DAR}" ] ; then
 	echo "z.B. (DVB/DVD) : -in_par 64:45"
 	echo "z.B. (BluRay)  : -in_par  1:1"
 	echo "ABBRUCH!"
-	exit 440
+	exit 340
+  fi
 fi
-
 
 #----------------------------------------------------------------------#
 ### Seitenverhältnis des Bildes - Arbeitswerte berechnen (DAR)
@@ -1029,57 +847,52 @@ fi
 #------------------------------------------------------------------------------#
 ### Seitenverhältnis des Bildes (DAR) muss hier bekannt sein!
 
-if [ -z "${DAR_FAKTOR}" ] ; then
-	echo "# 450"
+if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
+  if [ -z "${DAR_FAKTOR}" ] ; then
+	echo "# 350"
 	echo "Es konnte das Display-Format nicht ermittelt werden."
 	echo "versuchen Sie es mit diesem Parameter nocheinmal:"
 	echo "-dar"
 	echo "z.B.: -dar 16:9"
 	echo "ABBRUCH!"
-	exit 460
-fi
+	exit 360
+  fi
 
 
-#------------------------------------------------------------------------------#
-#------------------------------------------------------------------------------#
-#------------------------------------------------------------------------------#
-### quadratische Bildpunkte sind der Standard
+  #------------------------------------------------------------------------------#
+  #------------------------------------------------------------------------------#
+  #------------------------------------------------------------------------------#
+  ### quadratische Bildpunkte sind der Standard
 
-# https://ffmpeg.org/ffmpeg-filters.html#setdar_002c-setsar
-FORMAT_ANPASSUNG="setsar='1/1',"
+  # https://ffmpeg.org/ffmpeg-filters.html#setdar_002c-setsar
+  FORMAT_ANPASSUNG="setsar='1/1',"
 
 
-#------------------------------------------------------------------------------#
-### gewünschtes Rasterformat der Bildgröße (Auflösung)
+  #------------------------------------------------------------------------------#
+  ### gewünschtes Rasterformat der Bildgröße (Auflösung)
 
-if [ "${ORIGINAL_PIXEL}" != Ja ] ; then
+  if [ "${ORIGINAL_PIXEL}" != Ja ] ; then
 	if [ "x${SOLL_XY}" = "x" ] ; then
 		unset BILD_SCALE
 		unset SOLL_XY
 
 		### ob die Pixel bereits quadratisch sind
 		if [ "${PAR_FAKTOR}" -ne "100000" ] ; then
-			### Umrechnung in quadratische Pixel - Version 1
-			#BILD_SCALE="scale=$(echo "${DAR_KOMMA} ${IN_BREIT} ${IN_HOCH}" | awk '{b=sqrt($1*$2*$3); printf "%.0f %.0f\n", b/2, b/$1/2}' | awk '{print $1*2"x"$2*2}'),"
-			#BILD_SCALE="scale=$(echo "${IN_BREIT} ${IN_HOCH} ${DAR_KOMMA}" | awk '{b=sqrt($1*$2*$3); printf "%.0f %.0f\n", b/2, b/$3/2}' | awk '{print $1*2"x"$2*2}'),"
-
-			### Umrechnung in quadratische Pixel - Version 2
-			#HALBE_HOEHE="$(echo "${IN_BREIT} ${IN_HOCH} ${DAR_KOMMA}" | awk '{h=sqrt($1*$2/$3); printf "%.0f\n", h/2}')"
-			#BILD_SCALE="scale=$(echo "${HALBE_HOEHE} ${DAR_KOMMA}" | awk '{printf "%.0f %.0f\n", $1*$2, $1}' | awk '{print $1*2"x"$2*2}'),"
+			### Umrechnung in quadratische Pixel
 			#
 			### [swscaler @ 0x81520d000] Warning: data is not aligned! This can lead to a speed loss
 			### laut Googel müssen die Pixel durch 16 teilbar sein, beseitigt aber leider dieses Problem nicht
 			#
 			### die Pixel sollten wenigstens durch 2 teilbar sein! besser aber durch 8                          
-			#TEILER="2"
-			#TEILER="4"
-			TEILER="8"
-			#TEILER="16"
-			TEIL_HOEHE="$(echo "${IN_BREIT} ${IN_HOCH} ${DAR_KOMMA} ${TEILER}" | awk '{h=sqrt($1*$2/$3); printf "%.0f\n", h/$4}')"
-			BILD_SCALE="scale=$(echo "${TEIL_HOEHE} ${DAR_KOMMA}" | awk '{printf "%.0f %.0f\n", $1*$2, $1}' | awk -v teiler="${TEILER}" '{print $1*teiler"x"$2*teiler}'),"
-
-			BILD_BREIT="$(echo "${BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $1}')"
-			BILD_HOCH="$(echo "${BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $2}')"
+			TEILER="2"
+			##TEILER="4"
+			#TEILER="8"
+			###TEILER="16"
+			#
+			TEIL_HOEHE="$(echo "${IN_BREIT} ${IN_HOCH} ${IN_DAR} ${TEILER}" | awk '{gsub(":"," ");printf "%.0f\n", sqrt($1 * $2 * $3 / $4) / $3 / $5}' | awk '{print $1 * 2}')"
+			BILD_BREIT="$(echo "${TEIL_HOEHE} ${IN_DAR}" | awk '{gsub(":"," ");print $1 * $2}')"
+			BILD_HOCH="$(echo "${TEIL_HOEHE} ${IN_DAR}" | awk '{gsub(":"," ");print $1 * $3}')"
+			BILD_SCALE="scale=${BILD_BREIT}x${BILD_HOCH},"
 		else
 			### wenn die Pixel bereits quadratisch sind
 			BILD_BREIT="${IN_BREIT}"
@@ -1102,7 +915,7 @@ if [ "${ORIGINAL_PIXEL}" != Ja ] ; then
 				echo "Die gewünschte Bildauflösung wurde als 'Name' angegeben: '${SOLL_XY}'"
 				echo "Für die Übersetzung wird die Datei 'Filmwandler_grafik.txt' benötigt."
 				echo "Leider konnte die Datei '$(dirname ${0})/Filmwandler_grafik.txt' nicht gelesen werden."
-				exit 470
+				exit 370
 			fi
 		fi
 
@@ -1110,21 +923,21 @@ if [ "${ORIGINAL_PIXEL}" != Ja ] ; then
 		BILD_BREIT="$(echo "${SOLL_BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $1}')"
 		BILD_HOCH="$(echo "${SOLL_BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $2}')"
 	fi
-fi
+  fi
 
-#------------------------------------------------------------------------------#
-### Wenn die Bildpunkte vom Quell-Film und vom Ziel-Film quadratisch sind,
-### dann ist es ganz einfach.
-### Aber wenn nicht, dann sind diese Berechnungen nötig.
+  #------------------------------------------------------------------------------#
+  ### Wenn die Bildpunkte vom Quell-Film und vom Ziel-Film quadratisch sind,
+  ### dann ist es ganz einfach.
+  ### Aber wenn nicht, dann sind diese Berechnungen nötig.
 
-if [ "x${ORIGINAL_DAR}" != "x" ] ; then
+  if [ "x${ORIGINAL_DAR}" != "x" ] ; then
 	ORIG_DAR="$(echo "${META_DATEN_INFO}" | fgrep 'Video: ' | tr -s ',' '\n' | fgrep ' DAR ' | sed 's/.*DAR /DAR /;s/]//g' | awk '{print $2}' | head -n1)"
 	ORIG_DAR_BREITE="$(echo "${ORIG_DAR}" | awk -F':' '{print $1}')"
 	ORIG_DAR_HOEHE="$(echo "${ORIG_DAR}" | awk -F':' '{print $2}')"
 	BREITE="${ORIG_DAR_BREITE}"
 	HOEHE="${ORIG_DAR_HOEHE}"
 	FORMAT_ANPASSUNG="setdar='${BREITE}/${HOEHE}',"
-else
+  else
 	if [ "x${SOLL_DAR}" != "x" ] ; then
 		# hier sind Modifikationen nötig, weil viele der auswählbaren Bildformate
 		# keine quadratischen Pixel vorsehen
@@ -1135,12 +948,12 @@ else
 		unset PIXELKORREKTUR
 
 		if [ "x${PIXELVERZERRUNG}" = x ] ; then
-			echo "# 480
+			echo "# 380
 			# PIXELVERZERRUNG='${PIXELVERZERRUNG}'
 			" | tee -a ${PROTOKOLLDATEI}.txt
-			exit 490
+			exit 390
 		elif [ "${PIXELVERZERRUNG}" -eq 1 ] ; then
-			echo "# 500
+			echo "# 400
 			# quadratische Pixel
 			# PIXELVERZERRUNG = 1 : ${PIXELVERZERRUNG}
 			" | tee -a ${PROTOKOLLDATEI}.txt
@@ -1149,7 +962,7 @@ else
 			#
 			unset PIXELKORREKTUR
 		elif [ "${PIXELVERZERRUNG}" -le 1 ] ; then
-			echo "# 510
+			echo "# 410
 			# lange Pixel: breit ziehen
 			# 4CIF (Test 2)
 			# PIXELVERZERRUNG < 1 : ${PIXELVERZERRUNG}
@@ -1159,7 +972,7 @@ else
 			#
 			PIXELKORREKTUR="${BILD_SCALE}"
 		elif [ "${PIXELVERZERRUNG}" -ge 1 ] ; then
-			echo "# 520
+			echo "# 420
 			# breite Pixel: lang ziehen
 			# 2CIF (Test 1)
 			# PIXELVERZERRUNG > 1 : ${PIXELVERZERRUNG}
@@ -1179,25 +992,27 @@ else
 		fi
 		FORMAT_ANPASSUNG="setdar='${BREITE}/${HOEHE}',"
 	fi
-fi
+  fi
 
-#------------------------------------------------------------------------------#
-### wenn ein bestimmtes Format gewünscht ist, dann muss es am Ende auch rauskommen
+  #------------------------------------------------------------------------------#
+  ### wenn ein bestimmtes Format gewünscht ist, dann muss es am Ende auch rauskommen
 
-if [ "x${SOLL_XY}" != x ] ; then
+  if [ "x${SOLL_XY}" != x ] ; then
 	PIXELKORREKTUR="${SOLL_BILD_SCALE}"
-fi
+  fi
 
-#------------------------------------------------------------------------------#
-### wenn das Bild hochkannt steht, dann müssen die Seiten-Höhen-Parameter vertauscht werden
-### Breite, Höhe, PAD, SCALE
+  #------------------------------------------------------------------------------#
+  ### wenn das Bild hochkannt steht, dann müssen die Seiten-Höhen-Parameter vertauscht werden
+  ### Breite, Höhe, PAD, SCALE
 
-echo "# 530
-BILD_BREIT		='${BILD_BREIT}'
-BILD_HOCH		='${BILD_HOCH}'
-BILD_SCALE		='${BILD_SCALE}'
-SOLL_BILD_SCALE		='${SOLL_BILD_SCALE}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+  echo "# 430
+  BILD_BREIT		='${BILD_BREIT}'
+  BILD_HOCH		='${BILD_HOCH}'
+  BILD_SCALE		='${BILD_SCALE}'
+  SOLL_BILD_SCALE		='${SOLL_BILD_SCALE}'
+  " | tee -a ${PROTOKOLLDATEI}.txt
+
+  #exit 440
 
 BILD_DREHEN()
 {
@@ -1228,81 +1043,262 @@ BILD_DREHEN()
 	fi
 }
 
-if [ "x${BILD_DREHUNG}" != x ] ; then
+  if [ "x${BILD_DREHUNG}" != x ] ; then
 	if [ "${BILD_DREHUNG}" = 90 ] ; then
 		BILD_DREHEN
 	elif [ "${BILD_DREHUNG}" = 270 ] ; then
 		BILD_DREHEN
 	fi
-fi
-IN_BREIT="$(echo "${IN_XY}" | awk -F'x' '{print $1}')"
-IN_HOCH="$(echo  "${IN_XY}" | awk -F'x' '{print $2}')"
+  fi
+  IN_BREIT="$(echo "${IN_XY}" | awk -F'x' '{print $1}')"
+  IN_HOCH="$(echo  "${IN_XY}" | awk -F'x' '{print $2}')"
 
-#------------------------------------------------------------------------------#
+  #------------------------------------------------------------------------------#
 
-echo "# 540
-FORMAT_ANPASSUNG    ='${FORMAT_ANPASSUNG}'
-PIXELVERZERRUNG     ='${PIXELVERZERRUNG}'
-BREITE              ='${BREITE}'
-HOEHE               ='${HOEHE}'
-NAME_XY_DAR         ='${NAME_XY_DAR}'
-IN_DAR              ='${IN_DAR}'
-SOLL_DAR            ='${SOLL_DAR}'
-INBREITE_DAR        ='${INBREITE_DAR}'
-INHOEHE_DAR         ='${INHOEHE_DAR}'
-IN_XY               ='${IN_XY}'
-Originalauflösung   ='${IN_BREIT}x${IN_HOCH}'
-PIXELZAHL           ='${PIXELZAHL}'
-SOLL_XY             ='${SOLL_XY}'
+  echo "# 450
+  FORMAT_ANPASSUNG    ='${FORMAT_ANPASSUNG}'
+  PIXELVERZERRUNG     ='${PIXELVERZERRUNG}'
+  BREITE              ='${BREITE}'
+  HOEHE               ='${HOEHE}'
+  NAME_XY_DAR         ='${NAME_XY_DAR}'
+  IN_DAR              ='${IN_DAR}'
+  SOLL_DAR            ='${SOLL_DAR}'
+  INBREITE_DAR        ='${INBREITE_DAR}'
+  INHOEHE_DAR         ='${INHOEHE_DAR}'
+  IN_XY               ='${IN_XY}'
+  Originalauflösung   ='${IN_BREIT}x${IN_HOCH}'
+  PIXELZAHL           ='${PIXELZAHL}'
+  SOLL_XY             ='${SOLL_XY}'
 
-BILD_BREIT          ='${BILD_BREIT}'
-BILD_HOCH           ='${BILD_HOCH}'
-BILD_SCALE          ='${BILD_SCALE}'
-#==============================================================================#
-" | tee -a ${PROTOKOLLDATEI}.txt
+  BILD_BREIT          ='${BILD_BREIT}'
+  BILD_HOCH           ='${BILD_HOCH}'
+  BILD_SCALE          ='${BILD_SCALE}'
+  #==============================================================================#
+  " | tee -a ${PROTOKOLLDATEI}.txt
 
-#exit 550
+  #exit 460
 
-#------------------------------------------------------------------------------#
-### PAD
-# https://ffmpeg.org/ffmpeg-filters.html#pad-1
-# pad=640:480:0:40:violet
-# pad=width=640:height=480:x=0:y=40:color=violet
-#
-# SCHWARZ="$(echo "${HOEHE} ${BREITE} ${BILD_BREIT} ${BILD_HOCH}" | awk '{sw="oben"; if (($1/$2) < ($3/$4)) sw="oben"; print sw}')"
-# SCHWARZ="$(echo "${HOEHE} ${BREITE} ${BILD_BREIT} ${BILD_HOCH}" | awk '{sw="oben"; if (($1/$2) > ($3/$4)) sw="links"; print sw}')"
-#
-if [ "${ORIGINAL_PIXEL}" = Ja ] ; then
+  #------------------------------------------------------------------------------#
+  ### PAD
+  # https://ffmpeg.org/ffmpeg-filters.html#pad-1
+  # pad=640:480:0:40:violet
+  # pad=width=640:height=480:x=0:y=40:color=violet
+  #
+  # SCHWARZ="$(echo "${HOEHE} ${BREITE} ${BILD_BREIT} ${BILD_HOCH}" | awk '{sw="oben"; if (($1/$2) < ($3/$4)) sw="oben"; print sw}')"
+  # SCHWARZ="$(echo "${HOEHE} ${BREITE} ${BILD_BREIT} ${BILD_HOCH}" | awk '{sw="oben"; if (($1/$2) > ($3/$4)) sw="links"; print sw}')"
+  #
+  if [ "${ORIGINAL_PIXEL}" = Ja ] ; then
 	unset PAD
-else
+  else
 	PAD="pad='max(iw\\,ih*(${BREITE}/${HOEHE})):ow/(${BREITE}/${HOEHE}):(ow-iw)/2:(oh-ih)/2',"
-fi
+  fi
 
 
-#------------------------------------------------------------------------------#
-### hier wird ausgerechnen wieviele Pixel der neue Film pro Bild haben wird
-### und die gewünschte Breite und Höhe wird festgelegt, damit in anderen
-### Funktionen weitere Berechningen für Modus, Bitrate u.a. errechnet werden
-### kann
+  #------------------------------------------------------------------------------#
+  ### hier wird ausgerechnen wieviele Pixel der neue Film pro Bild haben wird
+  ### und die gewünschte Breite und Höhe wird festgelegt, damit in anderen
+  ### Funktionen weitere Berechningen für Modus, Bitrate u.a. errechnet werden
+  ### kann
 
-if [ "x${SOLL_XY}" = "x" ] ; then
+  if [ "x${SOLL_XY}" = "x" ] ; then
 	PIXELZAHL="$(echo "${IN_BREIT} ${IN_HOCH}" | awk '{print $1 * $2}')"
 	VERGLEICH_BREIT="${IN_BREIT}"
 	VERGLEICH_HOCH="${IN_HOCH}"
-else
+  else
 	P_BREIT="$(echo "${SOLL_XY}" | awk -F'x' '{print $1}')"
 	P_HOCH="$(echo "${SOLL_XY}" | awk -F'x' '{print $2}')"
 	PIXELZAHL="$(echo "${P_BREIT} ${P_HOCH}" | awk '{print $1 * $2}')"
 	VERGLEICH_BREIT="${P_BREIT}"
 	VERGLEICH_HOCH="${P_HOCH}"
+  fi
 fi
 
-echo "# 560
+
+if [ -r ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt ] ; then
+    
+        OP_QUELLE="1"
+        unset FFMPEG_TARGET
+        
+	echo "IN_FPS='${IN_FPS}'"
+	#exit 470
+
+	. ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt
+
+else
+	echo "Datei konnte nicht gefunden werden:"
+	echo "${AVERZ}/Filmwandler_Format_${ENDUNG}.txt"
+	exit 480
+fi
+
+echo "# 490
 IN_FPS='${IN_FPS}'
 OP_QUELLE='${OP_QUELLE}'
 " | tee -a ${PROTOKOLLDATEI}.txt
 
-#exit 570
+#exit 500
+
+#==============================================================================#
+### Qualität
+#
+# Qualitäts-Parameter-Übersetzung
+# https://slhck.info/video/2017/02/24/vbr-settings.html
+#
+
+#------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
+### Audio-Qualität
+
+echo "
+# 510 TONQUALIT='${TONQUALIT}'
+"
+
+F_TON_QUALIT()
+{
+	#----------------------------------------------------------------------#
+	# Work-Around
+	#
+	# Leider wird bei dieser Parameterangabe
+	# "-map 0:a:0 -c:a libfdk_aac  -afterburner 1 -b:a 336k  -map 0:a:1 -c:a libfdk_aac  -afterburner 1 -b:a 112k"
+	# für ALLE Tonspuren die Bit-Rate von "112k" verwendet!
+	# Aus diesem Grund werden hier die Kanalinfos überschrieben,
+	# damit für alle Tonspuren die max. Anzahl an Kanälen
+	# bzw. die max. Bit-Rate verwendet wird.
+	# Somit sollten beispielsweise diese Parameter nach diesem Work-Around so aussehen:
+	# "-map 0:a:0 -c:a libfdk_aac  -afterburner 1 -b:a 336k  -map 0:a:1 -c:a libfdk_aac  -afterburner 1 -b:a 336k"
+	#
+	AUDIO_KANAELE="$(echo "${AUDIO_KANAL_INFOS}" | tr -s ';' '\n' | egrep '^channels=' | awk -F'=' '{print $2}' | sort -nr | head -n1)"
+	#----------------------------------------------------------------------#
+
+	F_AUDIO_QUALITAET >> ${PROTOKOLLDATEI}.txt 2>&1
+
+	case "${TONQUALIT}" in
+		0)
+			AUDIOQUALITAET="${AUDIO_QUALITAET_0}"
+			;;
+		1)
+			AUDIOQUALITAET="${AUDIO_QUALITAET_1}"
+			;;
+		2)
+			AUDIOQUALITAET="${AUDIO_QUALITAET_2}"
+			;;
+		3)
+			AUDIOQUALITAET="${AUDIO_QUALITAET_3}"
+			;;
+		4)
+			AUDIOQUALITAET="${AUDIO_QUALITAET_4}"
+			;;
+		5)
+			AUDIOQUALITAET="${AUDIO_QUALITAET_5}"
+			;;
+		6)
+			AUDIOQUALITAET="${AUDIO_QUALITAET_6}"
+			;;
+		7)
+			AUDIOQUALITAET="${AUDIO_QUALITAET_7}"
+			;;
+		8)
+			AUDIOQUALITAET="${AUDIO_QUALITAET_8}"
+			;;
+		9)
+			AUDIOQUALITAET="${AUDIO_QUALITAET_9}"
+			;;
+	esac
+}
+
+#exit 520
+
+echo "# 530
+TONQUALIT='${TONQUALIT}'
+AUDIOCODEC='${AUDIOCODEC}'
+AUDIOQUALITAET='${AUDIOQUALITAET}'
+AUDIO_KANAL_INFOS='${AUDIO_KANAL_INFOS}'
+Sound_ST='${Sound_ST}'
+Sound_51='${Sound_51}'
+Sound_71='${Sound_71}'
+TS_ANZAHL='${TS_ANZAHL}'
+STEREO='${STEREO}'
+" | tee -a ${PROTOKOLLDATEI}.txt
+
+#exit 540
+
+if [ "${TS_ANZAHL}" -gt 0 ] ; then
+	# soll Stereo-Ausgabe erzwungen werden?
+	if [ "x${STEREO}" = "x" ] ; then
+		_ST=""
+	else
+		# wurde die Ausgabe bereits durch die Codec-Optionen auf Stereo gesetzt?
+		BEREITS_AK2="$(echo "${AUDIOCODEC} ${AUDIOQUALITAET}" | grep -E 'ac 2|stereo')"
+		if [ "x${BEREITS_AK2}" = "x" ] ; then
+			_ST="${STEREO}"
+		else
+			_ST=""
+		fi
+	fi
+
+	AUDIO_VERARBEITUNG_01="$(for DIE_TS in ${TS_LISTE}
+	do
+		if [ "x${STEREO}" = "x" ] ; then
+			AKN="$(echo "${DIE_TS}" | awk '{print $1 + 1}')"
+			AUDIO_KANAELE="$(echo "${AUDIO_KANAL_INFOS}" | head -n${AKN} | tail -n1 | tr -s ';' '\n' | egrep '^channels=' | awk -F'=' '{print $2}')"
+			echo "# 550
+			AUDIO_KANAELE='${AUDIO_KANAELE}'
+			" >> ${PROTOKOLLDATEI}.txt
+			AKL51="$(echo "${AUDIO_KANAL_INFOS}" | head -n${AKN} | tail -n1 | tr -s ';' '\n' | fgrep 'channel_layout=5.1')"
+			AKL71="$(echo "${AUDIO_KANAL_INFOS}" | head -n${AKN} | tail -n1 | tr -s ';' '\n' | fgrep 'channel_layout=7.1')"
+			if [ "x${AKL51}" != "x" ] ; then
+				if [ "x${AUDIO_KANAELE}" = x ] ; then
+					AUDIO_KANAELE=6
+				fi
+				F_TON_QUALIT
+				echo -n "  -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_51} ${AUDIOQUALITAET}"
+			elif [ "x${AKL71}" != "x" ] ; then
+				if [ "x${AUDIO_KANAELE}" = x ] ; then
+					AUDIO_KANAELE=8
+				fi
+				F_TON_QUALIT
+				echo -n "  -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_71} ${AUDIOQUALITAET}"
+			else
+				if [ "x${AUDIO_KANAELE}" = x ] ; then
+					AUDIO_KANAELE=2
+				fi
+				F_TON_QUALIT
+				echo -n "  -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_ST} ${AUDIOQUALITAET}"
+			fi
+		else
+			AUDIO_KANAELE="2"
+			echo "# 560
+			AUDIO_KANAELE='${AUDIO_KANAELE}'
+			" >> ${PROTOKOLLDATEI}.txt
+			F_TON_QUALIT
+			echo -n " -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${AUDIOQUALITAET} -ac 2"
+		fi
+	done) -disposition:a:0 default"
+
+	TS_KOPIE="$(seq 0 ${TS_ANZAHL} | head -n ${TS_ANZAHL})"
+	AUDIO_VERARBEITUNG_02="$(for DIE_TS in ${TS_KOPIE}
+	do
+		echo -n " -map 0:a:${DIE_TS} -c:a copy"
+	done)"
+
+else
+	AUDIO_VERARBEITUNG_01="-an"
+	AUDIO_VERARBEITUNG_02="-an"
+fi
+
+echo "" | tee -a ${PROTOKOLLDATEI}.txt
+echo "# 570
+BEREITS_AK2='${BEREITS_AK2}'
+TS_KOPIE='${TS_KOPIE}'
+AUDIO_VERARBEITUNG_01='${AUDIO_VERARBEITUNG_01}'
+AUDIO_VERARBEITUNG_02='${AUDIO_VERARBEITUNG_02}'
+" | tee -a ${PROTOKOLLDATEI}.txt
+
+#exit 580
+
+#------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
 
 #==============================================================================#
 ### Untertitel
@@ -1361,7 +1357,7 @@ else
 	done)"
 fi
 
-echo "# 620
+echo "# 590
 UT_META_DATEN='${UT_META_DATEN}'
 
 UNTERTITEL='${UNTERTITEL}'
@@ -1371,7 +1367,7 @@ U_TITEL_FF_ALT='${U_TITEL_FF_ALT}'
 U_TITEL_FF_02='${U_TITEL_FF_02}'
 " | tee -a ${PROTOKOLLDATEI}.txt
 
-#exit 630
+#exit 600
 
 #==============================================================================#
 ### Video-Qualität
@@ -1427,9 +1423,13 @@ else
 	FPS="-r ${SOLL_FPS}"
 fi
 
+START_ZIEL_FORMAT="-f ${FORMAT}"
+
 #------------------------------------------------------------------------------#
 
-echo "# 640
+SCHNITT_ANZAHL="$(echo "${SCHNITTZEITEN}" | wc -w | awk '{print $1}')"
+
+echo "# 610
 SCHNITTZEITEN='${SCHNITTZEITEN}'
 SCHNITT_ANZAHL='${SCHNITT_ANZAHL}'
 
@@ -1447,23 +1447,24 @@ VIDEOOPTION='${VIDEOOPTION}'
 START_ZIEL_FORMAT='${START_ZIEL_FORMAT}'
 " | tee -a ${PROTOKOLLDATEI}.txt
 
-#exit 650
+#exit 620
 
 #set -x
 
-	#----------------------------------------------------------------------#
-	#--- VIDEO_SPUR -------------------------------------------------------#
-	#----------------------------------------------------------------------#
-		VIDEO_PARAMETER_TRANS="-map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME}"
-		VIDEO_PARAMETER_KOPIE="-map 0:v -c:v copy"
-	else
-		VIDEO_PARAMETER_TRANS="-vn"
-		VIDEO_PARAMETER_KOPIE="-vn"
-		U_TITEL_FF_01=""
-		U_TITEL_FF_ALT=""
-		U_TITEL_FF_02=""
-		UNTERTITEL_AN=""	# für das zusammensetzen der Filmteile
-	fi
+
+#------------------------------------------------------------------------------#
+#--- Video --------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
+VIDEO_PARAMETER_TRANS="-map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME}"
+VIDEO_PARAMETER_KOPIE="-map 0:v -c:v copy"
+
+if [ "${VIDEO_NICHT_UEBERTRAGEN}" = "0" ] ; then
+	VIDEO_PARAMETER_TRANS="-vn"
+	VIDEO_PARAMETER_KOPIE="-vn"
+	U_TITEL_FF_01=""
+	U_TITEL_FF_ALT=""
+	U_TITEL_FF_02=""
+	UNTERTITEL_AN=""		# für das zusammensetzen der Filmteile
 fi
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
@@ -1480,15 +1481,15 @@ if [ ${SCHNITT_ANZAHL} -le 1 ] ; then
 	### hier der Film transkodiert                                       ###
 	###------------------------------------------------------------------###
 	echo
-	echo "1,1: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
+	echo "1,1: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${EIGENE_META_DATEN} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
 	echo
-	         ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} 2>&1 && WEITER=OK || WEITER=ALT
+	         ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${EIGENE_META_DATEN} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} 2>&1 && WEITER=OK || WEITER=ALT
 
 	if [ "${WEITER}" = ALT ] ; then
 		echo
-		echo "1,2: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
+		echo "1,2: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${EIGENE_META_DATEN} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
 		echo
-		${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} 2>&1
+		${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${EIGENE_META_DATEN} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} 2>&1
 	fi
 
 else
@@ -1529,10 +1530,10 @@ else
 		echo "---------------------------------------------------------" | tee -a ${PROTOKOLLDATEI}.txt
 	done
 
-	echo "# 660
-	${PROGRAMM} -f concat -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}_Filmliste.txt ${VIDEO_PARAMETER_KOPIE} ${AUDIO_VERARBEITUNG_02} ${U_TITEL_FF_02} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
+	echo "# 630
+	${PROGRAMM} -f concat -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}_Filmliste.txt ${EIGENE_META_DATEN} ${VIDEO_PARAMETER_KOPIE} ${AUDIO_VERARBEITUNG_02} ${U_TITEL_FF_02} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
 	" | tee -a ${PROTOKOLLDATEI}.txt
-	${PROGRAMM} -f concat -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}_Filmliste.txt ${VIDEO_PARAMETER_KOPIE} ${AUDIO_VERARBEITUNG_02} ${U_TITEL_FF_02} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
+	${PROGRAMM} -f concat -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}_Filmliste.txt ${EIGENE_META_DATEN} ${VIDEO_PARAMETER_KOPIE} ${AUDIO_VERARBEITUNG_02} ${U_TITEL_FF_02} ${SCHNELLSTART} ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIELNAME}.${ENDUNG}
 
 	rm -f ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}_Filmliste.txt
 
@@ -1548,7 +1549,7 @@ fi
 ls -lh ${ZIELVERZ}/${ZIELNAME}.${ENDUNG} ${PROTOKOLLDATEI}.txt | tee -a ${PROTOKOLLDATEI}.txt
 
 LAUFZEIT="$(echo "${STARTZEITPUNKT} $(date +'%s')" | awk '{print $2 - $1}')"
-echo "# 670
+echo "# 640
 $(date +'%F %T') (${LAUFZEIT})" | tee -a ${PROTOKOLLDATEI}.txt
 
-#exit 680
+#exit 650
