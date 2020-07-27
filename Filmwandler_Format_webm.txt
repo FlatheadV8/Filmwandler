@@ -19,7 +19,8 @@
 #VERSION="v2018082600"
 #VERSION="v2019092100"
 #VERSION="v2019102900"
-VERSION="v2020060900"
+#VERSION="v2020060900"
+VERSION="v2020072700"
 
 #==============================================================================#
 
@@ -34,9 +35,11 @@ FORMAT="webm"
 
 
 # Video
+if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 . $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
 IFRAME="-keyint_min 2-8"
 
+fi
 #==============================================================================#
 
 FORMAT_BESCHREIBUNG="
