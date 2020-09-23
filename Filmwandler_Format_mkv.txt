@@ -52,7 +52,7 @@ FORMAT_BESCHREIBUNG="
 ********************************************************************************
 * Name:                 free MKV                                               *
 * ENDUNG:               .mkv                                                   *
-* Video-Kodierung:      AV1                                                    *
+* Video-Kodierung:      AV1  (freie Alternative zu H.265 für 4K)               *
 * Audio-Kodierung:      Opus                                                   *
 * Beschreibung:                                                                *
 *       - freies Format mit guter Unterstützung durch Android                  *
