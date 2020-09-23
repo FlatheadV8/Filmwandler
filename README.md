@@ -46,7 +46,7 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     * Name:                 Matroska                                               *
     * ENDUNG:               .mkv                                                   *
     * Video-Kodierung:      AV1  (freie Alternative zu H.265 für 4K)               *
-    * Audio-Kodierung:      Opus                                                   *
+    * Audio-Kodierung:      Opus (freie Alternative zu AAC)                        *
     * Beschreibung:                                                                *
     *       - freies Format mit sehr hoher Kompressionsrate                        *
     ********************************************************************************
@@ -112,7 +112,7 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     * Name:                 3GPP                                                   *
     * ENDUNG:               .3gp                                                   *
     * Video-Kodierung:      H.263                                                  *
-    * Audio-Kodierung:      AAC                                                    *
+    * Audio-Kodierung:      AAC   (mehrkanalfähiger Nachfolger von MP3)            *
     * Beschreibung:                                                                *
     *   - abspielbar auf vielen kleineren Konsumergeräten                          *
     *       * die meisten dieser Abspielgeräte können nur 15 FPS                   *
@@ -130,7 +130,7 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     * Name:                 3GPP2                                                  *
     * ENDUNG:               .3g2                                                   *
     * Video-Kodierung:      H.263 (MPEG-4 Part 2 / ASP)                            *
-    * Audio-Kodierung:      AAC                                                    *
+    * Audio-Kodierung:      AAC   (mehrkanalfähiger Nachfolger von MP3)            *
     * Beschreibung:                                                                *
     *       - H.263 kann aber leider nur diese Formate beherbergen:                *
     *           * 128x96                                                           *
