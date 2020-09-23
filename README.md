@@ -43,27 +43,12 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
 
 
     ********************************************************************************
-    * Name:                 free MKV                                               *
+    * Name:                 Matroska                                               *
     * ENDUNG:               .mkv                                                   *
     * Video-Kodierung:      AV1                                                    *
     * Audio-Kodierung:      Opus                                                   *
     * Beschreibung:                                                                *
     *       - freies Format mit sehr hoher Kompressionsrate                        *
-    ********************************************************************************
-
-
-    ********************************************************************************
-    * Name:                 OGG                                                    *
-    * ENDUNG:               .ogg                                                   *
-    * Video-Kodierung:      Theora (freie Alternative zu DivX5)                    *
-    * Audio-Kodierung:      Vorbis (freie Alternative zu MP3)                      *
-    * Beschreibung:                                                                *
-    *       - mit HTML5-Unterstützung                                              *
-    *       - auch abspielbar auf Android                                          *
-    *       - 'Royalty free' (komplett frei von patentierten Technologien)         *
-    *       - der ogg-Container ist uneingeschränkt streaming-fähig                *
-    *       - kodiert sehr schnell                                                 *
-    *       - nicht so gut wie 'AVCHD/MP4'                                         *
     ********************************************************************************
 
 
@@ -80,6 +65,21 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     *       - VP9 wird seit Android 4.4 'KitKat' unterstützt                       *
     *       - Opus wird seit Android 5 'Lollipop' unterstützt                      *
     *       - kodiert 5-10 mal langsamer als AVCHD/MP4                             *
+    ********************************************************************************
+
+
+    ********************************************************************************
+    * Name:                 OGG                                                    *
+    * ENDUNG:               .ogg                                                   *
+    * Video-Kodierung:      VP8    (freie Alternative zu H.264)                    *
+    * Audio-Kodierung:      Vorbis (freie Alternative zu MP3)                      *
+    * Beschreibung:                                                                *
+    *       - mit HTML5-Unterstützung                                              *
+    *       - auch abspielbar auf Android                                          *
+    *       - 'Royalty free' (komplett frei von patentierten Technologien)         *
+    *       - der ogg-Container ist uneingeschränkt streaming-fähig                *
+    *       - kodiert sehr schnell                                                 *
+    *       - nicht so gut wie 'AVCHD/MP4'                                         *
     ********************************************************************************
 
 
