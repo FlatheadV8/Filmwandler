@@ -1,4 +1,3 @@
-
 #==============================================================================#
 #
 # OGG -> eine freie und von Softwarepatenten unbeschränkte Alternative zu proprietären Formaten, kann ohne zusätzliche Anpassungen gestreamt werden
@@ -6,7 +5,8 @@
 #==============================================================================#
 
 #VERSION="v2018082900"
-VERSION="v2020072700"
+#VERSION="v2020072700"
+VERSION="v2020092300"
 
 #==============================================================================#
 
@@ -22,17 +22,18 @@ FORMAT="ogg"
 
 # Video
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
-. $(dirname ${0})/Filmwandler_Codec_Video_theora.txt
-IFRAME="-keyint_min 2-8"
-
+#       . $(dirname ${0})/Filmwandler_Codec_Video_theora.txt
+        . $(dirname ${0})/Filmwandler_Codec_Video_vp8.txt
+        IFRAME="-keyint_min 2-8"
 fi
+ 
 #==============================================================================#
 
 FORMAT_BESCHREIBUNG="
 ********************************************************************************
 * Name:                 OGG                                                    *
 * ENDUNG:               .ogg                                                   *
-* Video-Kodierung:      Theora (freie Alternative zu DivX5)                    *
+* Video-Kodierung:      VP8    (freie Alternative zu H.264)                    *
 * Audio-Kodierung:      Vorbis (freie Alternative zu MP3)                      *
 * Beschreibung:                                                                *
 *       - mit HTML5-Unterstützung                                              *
