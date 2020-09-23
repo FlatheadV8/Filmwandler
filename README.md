@@ -45,10 +45,10 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     ********************************************************************************
     * Name:                 free MKV                                               *
     * ENDUNG:               .mkv                                                   *
-    * Video-Kodierung:      VP9                                                    *
+    * Video-Kodierung:      AV1                                                    *
     * Audio-Kodierung:      Opus                                                   *
     * Beschreibung:                                                                *
-    *       - freies Format mit guter Unterstützung durch Android                  *
+    *       - freies Format mit sehr hoher Kompressionsrate                        *
     ********************************************************************************
 
 
