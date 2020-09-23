@@ -45,7 +45,7 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     ********************************************************************************
     * Name:                 Matroska                                               *
     * ENDUNG:               .mkv                                                   *
-    * Video-Kodierung:      AV1                                                    *
+    * Video-Kodierung:      AV1  (freie Alternative zu H.265 für 4K)               *
     * Audio-Kodierung:      Opus                                                   *
     * Beschreibung:                                                                *
     *       - freies Format mit sehr hoher Kompressionsrate                        *
