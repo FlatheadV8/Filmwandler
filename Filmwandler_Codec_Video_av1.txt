@@ -51,7 +51,7 @@ fi
 ### -cpu-used 5         - stark erhöhte Verarbeitsungsgeschwindigkeit (99,64%) / Verarbeitungsdauer 6,63%
 ### -cpu-used 8         - höchste Verarbeitsungsgeschwindigkeit (99,17%) / Verarbeitungsdauer 5,32%
 #
-CPU_VERBRAUCH="3"
+CPU_VERBRAUCH="5"
 #
 #------------------------------------------------------------------------------#
 #
