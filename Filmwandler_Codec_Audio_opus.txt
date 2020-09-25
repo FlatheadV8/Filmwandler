@@ -22,10 +22,10 @@ VERSION="v2019101400"	# ich hatte die Hoffnung, das jetzt mehr als Stereo geht
 
 #------------------------------------------------------------------------------#
 
-#CODEC_PATTERN="libopus"					# Beispiel: "h265|hevc"
-#Sound_ST='-af channelmap=channel_layout=stereo'		# Stereo (2.0)
-#Sound_51='-af channelmap=channel_layout=5.1'		# 5.1
-#Sound_71='-af channelmap=channel_layout=7.1'		# 7.1
+#CODEC_PATTERN="libopus"                                # Beispiel: "h265|hevc"
+#Sound_ST='-af channelmap=channel_layout=stereo'        # Stereo (2.0)
+#Sound_51='-af channelmap=channel_layout=5.1'           # 5.1
+#Sound_71='-af channelmap=channel_layout=7.1'           # 7.1
 #
 #AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
 #if [ "x${AUDIOCODEC}" = "x" ] ; then
