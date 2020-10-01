@@ -43,7 +43,9 @@
 #VERSION="v2020070500"			# soll_xmaly wurde alsch behandelt
 #VERSION="v2020072100"			# die erste Tonspur ist immer die "Default"-Tonspur: -disposition:a:0 default
 #VERSION="v2020072600"			# Jetzt können auch Video-Dateien ohne Video-Spur erstellt werden
-VERSION="v2020072700"			# Fehler behoben
+#VERSION="v2020072700"			# Fehler behoben
+#VERSION="v2020092500"			# bestimmte Audio-Optionen können nur noch global, nicht mehr pro Kanal angegeben werden
+VERSION="v2020100100"			# Fehler behoben
 
 #
 # e[cx][hi][ot]
@@ -275,6 +277,12 @@ while [ "${#}" -ne "0" ]; do
         -ist_xmaly 480x270
         -in_xmaly 480x270
 
+        # die gewünschte Bildauflösung des neuen Filmes (Ausgabe)
+        -soll_xmaly 720x576		# deutscher Parametername
+        -out_xmaly 720x480		# englischer Parametername
+        -soll_xmaly 965x543		# frei wählbares Bildformat kann angegeben werden
+        -soll_xmaly VCD			# Name eines Bildformates kann angegeben werden
+
         # wenn diese Option einen beliebigen Wert (auch "nein") bekommt,
 	# dann wird das originale Seitenverhältnis beibehalten
         -orig_dar ja
@@ -320,12 +328,6 @@ while [ "${#}" -ne "0" ]; do
         # mit schwarzen Balken an den Seiten, diese schwarzen Balken entfernen,
         # dann könnte das zum Beispiel so gemacht werden:
         -crop 540:576:90:0
-
-        # die gewünschte Bildauflösung des neuen Filmes
-        -soll_xmaly 720x576		# deutscher Parametername
-        -out_xmaly 720x480		# englischer Parametername
-        -soll_xmaly 965x543		# frei wählbares Bildformat kann angegeben werden
-        -soll_xmaly VCD			# Name eines Bildformates kann angegeben werden
 
 	mögliche Namen von Grafikauflösungen anzeigen
 	=> ${0} -g
@@ -1228,7 +1230,7 @@ if [ "${TS_ANZAHL}" -gt 0 ] ; then
 		_ST=""
 	else
 		# wurde die Ausgabe bereits durch die Codec-Optionen auf Stereo gesetzt?
-		BEREITS_AK2="$(echo "${AUDIOCODEC} ${AUDIOQUALITAET}" | grep -E 'ac 2|stereo')"
+		BEREITS_AK2="$(echo "${AUDIOCODEC} ${AUDIO_CODEC_OPTION} ${AUDIOQUALITAET}" | grep -E 'ac 2|stereo')"
 		if [ "x${BEREITS_AK2}" = "x" ] ; then
 			_ST="${STEREO}"
 		else
@@ -1236,7 +1238,12 @@ if [ "${TS_ANZAHL}" -gt 0 ] ; then
 		fi
 	fi
 
-	AUDIO_VERARBEITUNG_01="$(for DIE_TS in ${TS_LISTE}
+
+	#--------------------------------------------------------------#
+	# AUDIO_CODEC_OPTION
+	# FFmpeg will die Angabe über den Codec sowie ggf. die Option "-ac 2" nur ein einziges Mal für alle Kanäle bekommen
+	#--------------------------------------------------------------#
+	AUDIO_VERARBEITUNG_01="-c:a ${AUDIOCODEC} ${AUDIO_CODEC_OPTION} $(for DIE_TS in ${TS_LISTE}
 	do
 		if [ "x${STEREO}" = "x" ] ; then
 			AKN="$(echo "${DIE_TS}" | awk '{print $1 + 1}')"
@@ -1251,19 +1258,22 @@ if [ "${TS_ANZAHL}" -gt 0 ] ; then
 					AUDIO_KANAELE=6
 				fi
 				F_TON_QUALIT
-				echo -n "  -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_51} ${AUDIOQUALITAET}"
+				#echo -n "  -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_51} ${AUDIOQUALITAET}"
+				echo -n "  -map 0:a:${DIE_TS} ${Sound_51} ${AUDIOQUALITAET}"
 			elif [ "x${AKL71}" != "x" ] ; then
 				if [ "x${AUDIO_KANAELE}" = x ] ; then
 					AUDIO_KANAELE=8
 				fi
 				F_TON_QUALIT
-				echo -n "  -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_71} ${AUDIOQUALITAET}"
+				#echo -n "  -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_71} ${AUDIOQUALITAET}"
+				echo -n "  -map 0:a:${DIE_TS} ${Sound_71} ${AUDIOQUALITAET}"
 			else
 				if [ "x${AUDIO_KANAELE}" = x ] ; then
 					AUDIO_KANAELE=2
 				fi
 				F_TON_QUALIT
-				echo -n "  -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_ST} ${AUDIOQUALITAET}"
+				#echo -n "  -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_ST} ${AUDIOQUALITAET}"
+				echo -n "  -map 0:a:${DIE_TS} ${Sound_ST} ${AUDIOQUALITAET}"
 			fi
 		else
 			AUDIO_KANAELE="2"
@@ -1274,6 +1284,7 @@ if [ "${TS_ANZAHL}" -gt 0 ] ; then
 			echo -n " -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${AUDIOQUALITAET} -ac 2"
 		fi
 	done) -disposition:a:0 default"
+	#----------------------------------------------------------------------#
 
 	TS_KOPIE="$(seq 0 ${TS_ANZAHL} | head -n ${TS_ANZAHL})"
 	AUDIO_VERARBEITUNG_02="$(for DIE_TS in ${TS_KOPIE}
@@ -1429,6 +1440,8 @@ START_ZIEL_FORMAT="-f ${FORMAT}"
 
 SCHNITT_ANZAHL="$(echo "${SCHNITTZEITEN}" | wc -w | awk '{print $1}')"
 
+#------------------------------------------------------------------------------#
+
 echo "# 610
 SCHNITTZEITEN='${SCHNITTZEITEN}'
 SCHNITT_ANZAHL='${SCHNITT_ANZAHL}'
@@ -1455,7 +1468,17 @@ START_ZIEL_FORMAT='${START_ZIEL_FORMAT}'
 #------------------------------------------------------------------------------#
 #--- Video --------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
-VIDEO_PARAMETER_TRANS="-map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME}"
+#------------------------------------------------------------------------------#
+### Bei VCD und DVD
+### werden die Codecs nicht direkt angegeben
+
+CODEC_ODER_TARGET="$(echo "${VIDEOCODEC}" | fgrep -- '-target ')"
+if [ "x${CODEC_ODER_TARGET}" = x ] ; then
+	VIDEO_PARAMETER_TRANS="-map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME}"
+else
+	VIDEO_PARAMETER_TRANS="-map 0:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME}"
+fi
+
 VIDEO_PARAMETER_KOPIE="-map 0:v -c:v copy"
 
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" = "0" ] ; then
