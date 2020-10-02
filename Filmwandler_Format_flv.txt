@@ -3,6 +3,8 @@
 #
 # FLV -> Flash Video von Adobe
 #
+# https://trac.ffmpeg.org/wiki/SupportedMediaTypesInFormats
+#
 #==============================================================================#
 
 #VERSION="v2018083100"
