@@ -4,25 +4,32 @@
 #
 #------------------------------------------------------------------------------#
 
-VERSION="v2018090300"
+#VERSION="v2018090300"
+VERSION="v2020092500"		# Fehler behoben: Bit-Raten-Abstufung korrigiert
 
 AUDIOCODEC="mp2"
 Sound_ST=''				# Stereo (2.0)
-Sound_51='-ac 2'			# 5.1
-Sound_71='-ac 2'			# 7.1
+Sound_51=''				# 5.1
+Sound_71=''				# 7.1
+
+# diese Option wird mit dem Codec zusammen, nur einmal für alle Kanäle zusammen,
+# angegeben und nicht für jeden Kanal extra
+AUDIO_CODEC_OPTION="-ac 2"
 
 AUDIO_OPTION=""
 
+# von MP2 erlaubte Werte:
+# 64k 80k 96k 112k 128k 160k 192k 224k 256k 320k 384k
 F_AUDIO_QUALITAET()
 {
-AUDIO_QUALITAET_0="-b:a  96k ${AUDIO_OPTION}"
-AUDIO_QUALITAET_1="-b:a 112k ${AUDIO_OPTION}"
-AUDIO_QUALITAET_2="-b:a 130k ${AUDIO_OPTION}"
-AUDIO_QUALITAET_3="-b:a 152k ${AUDIO_OPTION}"
-AUDIO_QUALITAET_4="-b:a 178k ${AUDIO_OPTION}"
-AUDIO_QUALITAET_5="-b:a 208k ${AUDIO_OPTION}"
-AUDIO_QUALITAET_6="-b:a 242k ${AUDIO_OPTION}"
-AUDIO_QUALITAET_7="-b:a 282k ${AUDIO_OPTION}"
-AUDIO_QUALITAET_8="-b:a 330k ${AUDIO_OPTION}"
+AUDIO_QUALITAET_0="-b:a  80k ${AUDIO_OPTION}"
+AUDIO_QUALITAET_1="-b:a  96k ${AUDIO_OPTION}"
+AUDIO_QUALITAET_2="-b:a 112k ${AUDIO_OPTION}"
+AUDIO_QUALITAET_3="-b:a 128k ${AUDIO_OPTION}"
+AUDIO_QUALITAET_4="-b:a 160k ${AUDIO_OPTION}"
+AUDIO_QUALITAET_5="-b:a 192k ${AUDIO_OPTION}"
+AUDIO_QUALITAET_6="-b:a 224k ${AUDIO_OPTION}"
+AUDIO_QUALITAET_7="-b:a 256k ${AUDIO_OPTION}"
+AUDIO_QUALITAET_8="-b:a 320k ${AUDIO_OPTION}"
 AUDIO_QUALITAET_9="-b:a 384k ${AUDIO_OPTION}"
 }
