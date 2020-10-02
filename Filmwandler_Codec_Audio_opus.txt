@@ -2,9 +2,11 @@
 # Opus
 #
 
-#VERSION="v2018082800"	# libopus ist noch experimentell
-#VERSION="v2019092100"	# libopus ist nicht mehr experimentell, kann jetzt auch 5.1 + 7.1
-VERSION="v2019101400"	# ich hatte die Hoffnung, das jetzt mehr als Stereo geht
+#VERSION="v2018082800"		# libopus ist noch experimentell
+#VERSION="v2019092100"		# libopus ist nicht mehr experimentell, kann jetzt auch 5.1 + 7.1
+#VERSION="v2019101400"		# ich hatte die Hoffnung, das jetzt mehr als Stereo geht
+#VERSION="v2020092400"		# libopus kann jetzt Mehrkanalton (mit mapping_family), meine Mehrkanalton-Tests waren aber stumm
+VERSION="v2020092500"		# weitere Variable eingeführt
 
 #------------------------------------------------------------------------------#
 #
@@ -22,10 +24,10 @@ VERSION="v2019101400"	# ich hatte die Hoffnung, das jetzt mehr als Stereo geht
 
 #------------------------------------------------------------------------------#
 
-#CODEC_PATTERN="libopus"                                # Beispiel: "h265|hevc"
-#Sound_ST='-af channelmap=channel_layout=stereo'        # Stereo (2.0)
-#Sound_51='-af channelmap=channel_layout=5.1'           # 5.1
-#Sound_71='-af channelmap=channel_layout=7.1'           # 7.1
+#CODEC_PATTERN="libopus"				# Beispiel: "h265|hevc"
+#Sound_ST='-af channelmap=channel_layout=stereo'	# Stereo (2.0)
+#Sound_51='-af channelmap=channel_layout=5.1'		# 5.1
+#Sound_71='-af channelmap=channel_layout=7.1'		# 7.1
 #
 #AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
 #if [ "x${AUDIOCODEC}" = "x" ] ; then
@@ -42,10 +44,27 @@ VERSION="v2019101400"	# ich hatte die Hoffnung, das jetzt mehr als Stereo geht
 #	AUDIOCODEC="${AUDIOCODEC}"
 #fi
 
-# Von FFmpeg wird (lib)opus immer noch schlecht unterstützt,
-# opus ist noch experimentell und kann nur Stereo und
-# auch im Okt. 2019 liefert libopus nur Stereo,
-# auch wenn an 5.1 oder 7.1 angibt, nur dann werden die anderen Kanäle entfernt!
+#AUDIOCODEC="opus"		# ist noch experimentell und gibt grundsätzlich nur Stereo aus
+
+# https://ffmpeg.org/pipermail/ffmpeg-devel/2016-June/195178.html
+#
+# Example usage:
+#
+# > wget https://samples.ffmpeg.org/A-codecs/wavpcm/8_Channel_ID.wav -O in.wav
+#
+# Use the old behavior. Header contains layout, but no masking
+# > ./ffmpeg -y -i in.wav -c:a opus -mapping_family -1 out.ogg
+#
+# Use libopus surround mode. Masking + automatic channel coupling
+# > ./ffmpeg -y -i in.wav -c:a opus -mapping_family 1 out.ogg
+#
+# Use libopus with independent channels. No header info, no masking,
+# no coupling
+# > ./ffmpeg -y -i in.wav -c:a opus -mapping_family 255 out.ogg
+#
+# This patch also makes it possible to encode up to 254 channels with opus
+# using channel mapping family 255.
+#
 AUDIOCODEC="libopus"
 
 
@@ -60,12 +79,25 @@ Sound_71='${Sound_71}'
 
 #==============================================================================#
 
-## -vbr on -b:a 128k
-## -vbr 0 (fest 96k)
-## -vbr 1 (fest 96k)
-## -vbr 2 (fest 96k)
-#AUDIO_OPTION="-vbr on -compression_level 10"
-AUDIO_OPTION="-vbr on -compression_level 10 -ac 2"
+### diese Option wird mit dem Codec zusammen, nur einmal für alle Kanäle zusammen,
+### angegeben und nicht für jeden Kanal extra
+#
+### Sep. 2020: kann nur Stereo
+#AUDIO_CODEC_OPTION="-strict -2 -ac 2"		# opus
+AUDIO_CODEC_OPTION="-ac 2"			# libopus
+
+#==============================================================================#
+
+### opus
+#AUDIO_OPTION="-compression_level 10"
+
+### libopus
+## -vbr 0 (Use constant bit rate)
+## -vbr 1 (Use variable bit rate)
+## -vbr 2 (Use constrained VBR)
+## Mehrkanalton kann libopus aber nur mit mapping_family (-1, 1, 255), war bis jetzt aber immer stumm
+#AUDIO_OPTION="-vbr 1 -compression_level 10 -mapping_family 255"
+AUDIO_OPTION="-vbr 1 -compression_level 10"
 
 F_AUDIO_QUALITAET()
 {
