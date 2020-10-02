@@ -1,14 +1,16 @@
+
 #==============================================================================#
 #
 # MKV -> Matroska
 #
 #==============================================================================#
 
-#VERSION="v2018082900"          # VP8
-#VERSION="v2019092100"          # VP9
-#VERSION="v2020060200"          # AV1 (deaktiviert, weil noch experimentell)
+#VERSION="v2018082900"		# VP8
+#VERSION="v2019092100" 		# VP9
+#VERSION="v2020060200" 		# AV1 (deaktiviert, weil noch experimentell)
 #VERSION="v2020072700"
-VERSION="v2020092300"           # AV1 (aktiviert, weil nicht mehr experimentell)
+#VERSION="v2020092300" 		# AV1 (aktiviert, weil nicht mehr experimentell)
+VERSION="v2020092400" 		# 
 
 #==============================================================================#
 
@@ -35,7 +37,8 @@ IFRAME="-keyint_min 2-8"
 
 ### Audio
 #. $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt
-. $(dirname ${0})/Filmwandler_Codec_Audio_opus.txt
+#. $(dirname ${0})/Filmwandler_Codec_Audio_vorbis.txt	# der Ton ist abgehackt (Sep. 2020)
+. $(dirname ${0})/Filmwandler_Codec_Audio_opus.txt	# kann z.Z. leider nur Stereo (Sep. 2020)
 
 
 ### Video
