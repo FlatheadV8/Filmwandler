@@ -6,12 +6,14 @@
 #
 #==============================================================================#
 
-VERSION="v2018090300"
+#VERSION="v2018090300"
+VERSION="v2020092500"		# auf das aktuelle Mantelskript angepasst
 
 #==============================================================================#
 
 # Format
 ENDUNG="mpg"
+FORMAT="mpeg"
 
 #------------------------------------------------------------------------------#
 #
@@ -53,22 +55,28 @@ if [ "${VERGLEICH_BREIT}" -gt 352 -o "${VERGLEICH_HOCH}" -gt 288 ] ; then
 	### Video -> DVD
 	###
 	###------------------------------------------------------------------###
+	#FFMPEG_KODEK="mpeg2video -bufsize 1835k"
 	FFMPEG_TARGET="dvd"
-	#
-	POST_TARGET="-f mpegts"
-	ENDUNG="ts"
+
+	# Audio
+	. $(dirname ${0})/Filmwandler_Codec_Audio_ac3.txt
+
+	# Video
+	#. $(dirname ${0})/Filmwandler_Codec_Video_262.txt
 else
 	###------------------------------------------------------------------###
 	###
 	### Video -> VCD
 	###
 	###------------------------------------------------------------------###
+	#FFMPEG_KODEK="mpeg1video"
 	FFMPEG_TARGET="vcd"
-	#
-	if [ "x${SCHNITTZEITEN}" != x ] ; then
-		POST_TARGET="-f mpegts"
-		ENDUNG="ts"
-	fi
+
+	# Audio
+	. $(dirname ${0})/Filmwandler_Codec_Audio_mp2.txt
+
+	# Video
+	#. $(dirname ${0})/Filmwandler_Codec_Video_261.txt
 fi
 
 #------------------------------------------------------------------------------#
@@ -123,6 +131,10 @@ fi
 
 #------------------------------------------------------------------------------#
 
+VIDEOCODEC="${FF_TARGET}"
+
+#------------------------------------------------------------------------------#
+
 echo "
 SOLL_FPS_RUND='${SOLL_FPS_RUND}'
 IN_FPS_RUND='${IN_FPS_RUND}'
@@ -131,9 +143,10 @@ TARGET_PREFIX='${TARGET_PREFIX}'
 FFMPEG_TARGET='${FFMPEG_TARGET}'
 TARGET_FPS='${TARGET_FPS}'
 FF_TARGET='${FF_TARGET}'
-POST_TARGET='${POST_TARGET}'
+FORMAT='${FORMAT}'
 BREITE='${BREITE}'
 HOEHE='${HOEHE}'
+VIDEOCODEC='${VIDEOCODEC}'
 "
 
 #==============================================================================#
