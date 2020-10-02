@@ -1,3 +1,4 @@
+
 #------------------------------------------------------------------------------#
 #
 # AV1
@@ -11,28 +12,28 @@
 #
 #------------------------------------------------------------------------------#
 
-#VERSION="v2018082800"  # erste Unterstützung von AV1 eingebaut
-#VERSION="v2020060200"  # erweitert um Beispiele
-#VERSION="v2020060300"  # VIDEO_OPTION definiert, Anpassungen für FFmpeg 4.2.2
-VERSION="v2020092300"   # ist nicht mehr experimentell
+#VERSION="v2018082800"	# erste Unterstützung von AV1 eingebaut
+#VERSION="v2020060200"	# erweitert um Beispiele
+#VERSION="v2020060300"	# VIDEO_OPTION definiert, Anpassungen für FFmpeg 4.2.2
+VERSION="v2020092300" 	# ist nicht mehr experimentell
 
 
-CODEC_PATTERN="av1"             # Beispiel: "h265|hevc"
+CODEC_PATTERN="av1"		# Beispiel: "h265|hevc"
 
 #VIDEOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
 #VIDEOCODEC="libaom-av1 -strict -2"
-VIDEOCODEC="libaom-av1" # ist seit 23. Sep. 2020 nicht mehr experimentell
+VIDEOCODEC="libaom-av1"	# ist seit 23. Sep. 2020 nicht mehr experimentell
 
 if [ "x${VIDEOCODEC}" = "x" ] ; then
-        VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
-        if [ "x${VIDEOCODEC}" = "x" ] ; then
-                echo ""
-                echo "${CODEC_PATTERN}"
-                echo "Leider wird dieser Codec von der aktuell installierten Version"
-                echo "von FFmpeg nicht unterstützt!"
-                echo ""
-                exit 1
-        fi
+	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
+	if [ "x${VIDEOCODEC}" = "x" ] ; then
+		echo ""
+		echo "${CODEC_PATTERN}"
+		echo "Leider wird dieser Codec von der aktuell installierten Version"
+		echo "von FFmpeg nicht unterstützt!"
+		echo ""
+		exit 1
+	fi
 fi
 
 #------------------------------------------------------------------------------#
@@ -43,13 +44,13 @@ fi
 #  Conversion failed!
 #
 ### https://streaminglearningcenter.com/blogs/good-news-av1-encoding-times-drop-to-near-reasonable-levels.html
-### -cpu-used 0         - beste Qualität (100%) / Verarbeitungsdauer 100%
-### -cpu-used 1         - Standardeinstellung (99,92%) / Verarbeitungsdauer 42,79%
-### -cpu-used 2         - erhöhte Verarbeitsungsgeschwindigkeit (99,91%) / Verarbeitungsdauer 26,03%
-### -cpu-used 3         - erhöhte Verarbeitsungsgeschwindigkeit (99,85%) / Verarbeitungsdauer 14,37%
-### -cpu-used 4         - erhöhte Verarbeitsungsgeschwindigkeit (99,81%) / Verarbeitungsdauer 11,77%
-### -cpu-used 5         - stark erhöhte Verarbeitsungsgeschwindigkeit (99,64%) / Verarbeitungsdauer 6,63%
-### -cpu-used 8         - höchste Verarbeitsungsgeschwindigkeit (99,17%) / Verarbeitungsdauer 5,32%
+### -cpu-used 0 	- beste Qualität (100%) / Verarbeitungsdauer 100%
+### -cpu-used 1 	- Standardeinstellung (99,92%) / Verarbeitungsdauer 42,79%
+### -cpu-used 2 	- erhöhte Verarbeitsungsgeschwindigkeit (99,91%) / Verarbeitungsdauer 26,03%
+### -cpu-used 3 	- erhöhte Verarbeitsungsgeschwindigkeit (99,85%) / Verarbeitungsdauer 14,37%
+### -cpu-used 4 	- erhöhte Verarbeitsungsgeschwindigkeit (99,81%) / Verarbeitungsdauer 11,77%
+### -cpu-used 5 	- stark erhöhte Verarbeitsungsgeschwindigkeit (99,64%) / Verarbeitungsdauer 6,63%
+### -cpu-used 8 	- höchste Verarbeitsungsgeschwindigkeit (99,17%) / Verarbeitungsdauer 5,32%
 #
 CPU_VERBRAUCH="5"
 #
@@ -57,26 +58,26 @@ CPU_VERBRAUCH="5"
 #
 KERNE_ZUM_KODIEREN="$(
 if [ "$(uname -o)" = "FreeBSD" ] ; then
-        sysctl -n hw.ncpu
+	sysctl -n hw.ncpu
 elif [ "$(uname -o)" = "GNU/Linux" ] ; then
-        egrep '^core id' /proc/cpuinfo | sort -u | wc -l
+	egrep '^core id' /proc/cpuinfo | sort -u | wc -l
 else
-        echo "1"
+	echo "1"
 fi)"
 #
 #------------------------------------------------------------------------------#
 
 AUF_KERNE_VERTEILEN="-cpu-used ${CPU_VERBRAUCH} -threads ${KERNE_ZUM_KODIEREN}"
 CONSTANT_QUALITY="-b:v 0 -row-mt 1 -tile-columns 1 -tile-rows 0"
-HDR_FARBRAUM="-colorspace bt2020nc -color_trc smpte2084 -color_primaries bt2020"        # diese verwendet YouTube
+#HDR_FARBRAUM="-colorspace bt2020nc -color_trc smpte2084 -color_primaries bt2020"	# diese verwendet YouTube
 VIDEO_OPTION="${CONSTANT_QUALITY} ${AUF_KERNE_VERTEILEN} ${HDR_FARBRAUM}"
-VIDEO_QUALITAET_0="-crf 52 ${VIDEO_OPTION}"             # von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_1="-crf 48 ${VIDEO_OPTION}"             # von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_2="-crf 44 ${VIDEO_OPTION}"             # von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_3="-crf 40 ${VIDEO_OPTION}"             # von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_4="-crf 36 ${VIDEO_OPTION}"             # von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_5="-crf 32 ${VIDEO_OPTION}"             # von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_6="-crf 28 ${VIDEO_OPTION}"             # von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_7="-crf 24 ${VIDEO_OPTION}"             # von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_8="-crf 20 ${VIDEO_OPTION}"             # von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_9="-crf 16 ${VIDEO_OPTION}"             # von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_0="-crf 52 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_1="-crf 48 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_2="-crf 44 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_3="-crf 40 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_4="-crf 36 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_5="-crf 32 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_6="-crf 28 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_7="-crf 24 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_8="-crf 20 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_9="-crf 16 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
