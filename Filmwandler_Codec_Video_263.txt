@@ -1,8 +1,11 @@
+#------------------------------------------------------------------------------#
 #
 # H.263              -> H.263 1996
 #
+#------------------------------------------------------------------------------#
 
-VERSION="v2018083000"
+#VERSION="v2018083000"
+VERSION="v2020100100"		# Fehler behoben
 
 #------------------------------------------------------------------------------#
 #
@@ -25,7 +28,8 @@ if [ "x${VIDEOCODEC}" = "x" ] ; then
 fi
 
 #==============================================================================#
-### H.263 kann nur diese 5 Formate
+### H.263 kann nur diese 5 Standard-Formate
+### weil: [h263 @ 0x808d66400] w/h must be a multiple of 4
 
 # SQCIF -  128x96   =   12288 Bildpunkte (Pixel)
 # QCIF  -  176x144  =   25344 Bildpunkte (Pixel)
@@ -39,25 +43,24 @@ echo "
 VIDEOCODEC='${VIDEOCODEC}'
 IN_BREIT='${IN_BREIT}'
 IN_HOCH='${IN_HOCH}'
-SOLL_SCALE='scale=${SOLL_XY}'
+SOLL_BILD_SCALE='scale=${SOLL_XY}'
 "
-
-if [ "x${SOLL_XY}" = "x" ] ; then
-        echo "
-        ### automatische auswahl der richtigen Bildauflösung
-        "
-        echo "scale => 12288 25344 101376 405504 1622016 ${IN_BREIT} ${IN_HOCH}"
-        SOLL_SCALE="scale=$(echo "12288 25344 101376 405504 1622016 ${IN_BREIT} ${IN_HOCH}" | awk '{bild=$6*$7 ; h263="1408x1152" ; if (bild <= $5) h263="1408x1152" ; if (bild <= $4) h263="704x576" ; if (bild <= $3) h263="352x288" ; if (bild <= $2) h263="176x144" ; if (bild <= $1) h263="128x96" ; print h263}')"
-else
-        echo "
-        ### manuelle Auswahl mit Bildauflösung
-        "
-        SOLL_SCALE="scale=${SOLL_XY}"
-fi
 
 echo "
-SOLL_SCALE='scale=${SOLL_XY}'
+### automatische auswahl der richtigen Bildauflösung
+scale => 12288 25344 101376 405504 1622016 ${IN_BREIT} ${IN_HOCH}
 "
+
+h263_BILD_FORMAT="scale=$(echo "12288 25344 101376 405504 1622016 ${IN_BREIT} ${IN_HOCH}" | awk '{bild=$6*$7 ; h263="1408x1152" ; if (bild <= $5) h263="1408x1152" ; if (bild <= $4) h263="704x576" ; if (bild <= $3) h263="352x288" ; if (bild <= $2) h263="176x144" ; if (bild <= $1) h263="128x96" ; print h263}'),"
+BILD_BREIT="$(echo "${h263_BILD_FORMAT}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $1}')"
+BILD_HOCH="$(echo "${h263_BILD_FORMAT}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $2}')"
+
+echo "
+IN_BREIT='${IN_BREIT}'
+IN_HOCH='${IN_HOCH}'
+h263_BILD_FORMAT='scale=${SOLL_XY}'
+"
+#exit 69
 
 #==============================================================================#
 
