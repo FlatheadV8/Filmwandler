@@ -6,7 +6,8 @@
 #
 #------------------------------------------------------------------------------#
 
-VERSION="v2020100100"		# erste Version, noch ohne erweiterte Parameter
+#VERSION="v2020100100"		# erste Version, noch ohne erweiterte Parameter
+VERSION="v2020100200"		# Schönheitsverbesserungen
 
 #==============================================================================#
 
@@ -69,7 +70,7 @@ echo "${ENDUNGEN}" > ${ZUFALL}_ENDUNGEN.txt
 for TEST in ${ENDUNGEN}
 do
 	echo "${AVERZ}/Filmwandler.sh -q ${ZUFALL}_Basisfilm.avi -z ${ZUFALL}_Testfilm.${TEST}"
-	${AVERZ}/Filmwandler.sh -q ${ZUFALL}_Basisfilm.avi -z ${ZUFALL}_Testfilm.${TEST} 2>&1 | tee ${ZUFALL}_Basisfilm.${TEST}.log
+	${AVERZ}/Filmwandler.sh -q ${ZUFALL}_Basisfilm.avi -z ${ZUFALL}_Testfilm.${TEST} 2>&1 | tee ${ZUFALL}_Testfilm.${TEST}.log
 done
 
-ls -lha ${ZUFALL}_*
+ls -rtlha ${ZUFALL}_*
