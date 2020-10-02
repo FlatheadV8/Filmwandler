@@ -22,12 +22,17 @@
 #------------------------------------------------------------------------------#
 
 #VERSION="v2018082800"
-VERSION="v2020060900"		# Abstufung geändert
+#VERSION="v2020060900"		# Abstufung geändert
+VERSION="v2020092500"		# weitere Variable eingeführt
 
 AUDIOCODEC="ac3"
 Sound_ST=''				# Stereo (2.0)
 Sound_51=''				# 5.1
 Sound_71=''				# 7.1
+
+# diese Option wird mit dem Codec zusammen, nur einmal für alle Kanäle zusammen,
+# angegeben und nicht für jeden Kanal extra
+AUDIO_CODEC_OPTION=""
 
 AUDIO_OPTION=""
 
