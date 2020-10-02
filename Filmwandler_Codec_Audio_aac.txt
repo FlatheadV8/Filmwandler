@@ -5,7 +5,8 @@
 #VERSION="v2018082900"
 #VERSION="v2019082300"
 #VERSION="v2019092500"
-VERSION="v2020060900"		# Bit-Raten-Abstufung angepasst
+#VERSION="v2020060900"		# Bit-Raten-Abstufung angepasst
+VERSION="v2020092500"		# weitere Variable eingeführt
 
 #------------------------------------------------------------------------------#
 #
@@ -87,6 +88,10 @@ if [ "x${AUDIOCODEC}" = "xlibfdk_aac" ] ; then
 	# VBR für AAC ist noch experimentell (auch wenn es funktioniert)
 	#BIT_RATE="vbr"
 fi
+
+# diese Option wird mit dem Codec zusammen, nur einmal für alle Kanäle zusammen,
+# angegeben und nicht für jeden Kanal extra
+AUDIO_CODEC_OPTION=""
 
 F_AUDIO_QUALITAET()
 {
