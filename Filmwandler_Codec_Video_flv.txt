@@ -1,3 +1,4 @@
+
 #==============================================================================#
 #
 # Sorenson Spark
@@ -7,7 +8,7 @@
 #==============================================================================#
 
 #VERSION="v2018083100"
-VERSION="v2020092500"           # C&P-Fehler von 2018 behoben
+VERSION="v2020092500"		# C&P-Fehler von 2018 behoben
 
 #------------------------------------------------------------------------------#
 #
@@ -21,21 +22,21 @@ VERSION="v2020092500"           # C&P-Fehler von 2018 behoben
 # https://codecs.multimedia.cx/2017/11/h-263-and-mpeg-4-asp-the-root-of-some-evil/
 #
 #------------------------------------------------------------------------------#
- 
-CODEC_PATTERN="flv"             # Beispiel: "h265|hevc"
+
+CODEC_PATTERN="flv"		# Beispiel: "h265|hevc"
 VIDEOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
-        VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
-        if [ "x${VIDEOCODEC}" = "x" ] ; then
-                echo ""
-                echo "${CODEC_PATTERN}"
-                echo "Leider wird dieser Codec von der aktuell installierten Version"
-                echo "von FFmpeg nicht unterstützt!"
-                echo ""
-                exit 1
-        fi
+	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
+	if [ "x${VIDEOCODEC}" = "x" ] ; then
+		echo ""
+		echo "${CODEC_PATTERN}"
+		echo "Leider wird dieser Codec von der aktuell installierten Version"
+		echo "von FFmpeg nicht unterstützt!"
+		echo ""
+		exit 1
+	fi
 fi
- 
+
 VIDEO_QUALITAET_0="-q:v 10"
 VIDEO_QUALITAET_1="-q:v 9"
 VIDEO_QUALITAET_2="-q:v 8"
