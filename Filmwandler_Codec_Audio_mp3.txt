@@ -1,13 +1,17 @@
+
+#------------------------------------------------------------------------------#
 #
 # MP3 - MPEG-1 Layer 3
 #
+#------------------------------------------------------------------------------#
 
-VERSION="v2018090300"
+#VERSION="v2018090300"
+VERSION="v2020092500"		# weitere Variable eingeführt
 
-CODEC_PATTERN="mp3"			# Beispiel: "h265|hevc"
-Sound_ST=''				# Stereo (2.0)
-Sound_51=''				# 5.1
-Sound_71=''				# 7.1
+CODEC_PATTERN="mp3"		# Beispiel: "h265|hevc"
+Sound_ST=''			# Stereo (2.0)
+Sound_51=''			# 5.1
+Sound_71=''			# 7.1
 
 AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
 if [ "x${AUDIOCODEC}" = "x" ] ; then
@@ -21,6 +25,10 @@ if [ "x${AUDIOCODEC}" = "x" ] ; then
 		exit 1
 	fi
 fi
+
+# diese Option wird mit dem Codec zusammen, nur einmal für alle Kanäle zusammen,
+# angegeben und nicht für jeden Kanal extra
+AUDIO_CODEC_OPTION=""
 
 # MP3 kann nur Stereo
 AUDIO_OPTION="-ac 2"
