@@ -2,12 +2,13 @@
 # Vorbis
 #
 
-VERSION="v2018082800"
+#VERSION="v2018082800"
+VERSION="v2020092500"		# weitere Variable eingeführt
 
-CODEC_PATTERN="vorbis"			# Beispiel: "h265|hevc"
-Sound_ST=''				# Stereo (2.0)
-Sound_51=''				# 5.1
-Sound_71=''				# 7.1
+CODEC_PATTERN="vorbis"		# Beispiel: "h265|hevc"
+Sound_ST=''			# Stereo (2.0)
+Sound_51=''			# 5.1
+Sound_71=''			# 7.1
 
 AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
 if [ "x${AUDIOCODEC}" = "x" ] ; then
@@ -22,9 +23,15 @@ if [ "x${AUDIOCODEC}" = "x" ] ; then
 	fi
 fi
 
+# diese Option wird mit dem Codec zusammen, nur einmal für alle Kanäle zusammen,
+# angegeben und nicht für jeden Kanal extra
+AUDIO_CODEC_OPTION=""
+
 AUDIO_OPTION=""
 
-# -q:a 3 (Standard)
+# https://www.ffmpeg.org/ffmpeg-codecs.html#libvorbis
+# -c:a libvorbis -b:a 384k (5.1: 128k * Kanäle / 2 = 384k)
+# -c:a libvorbis -q:a 3 (Standard)
 F_AUDIO_QUALITAET()
 {
 AUDIO_QUALITAET_0="${AUDIO_OPTION} -q:a 1"      # 0-10, 10 ist am besten
