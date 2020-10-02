@@ -118,6 +118,36 @@ echo "# 20
 }
 
 
+BILD_DREHEN()
+{
+	if [ "x${IN_XY}" != x ] ; then
+		IN_XY="$(echo "${IN_XY}" | awk -F'x' '{print $2"x"$1}')"
+	fi
+
+	unset ZWISCHENSPEICHER
+	ZWISCHENSPEICHER="${BREITE}"
+	BREITE="${HOEHE}"
+	HOEHE="${ZWISCHENSPEICHER}"
+	unset ZWISCHENSPEICHER
+
+	if [ "x${BILD_SCALE}" = x ] ; then
+		unset ZWISCHENSPEICHER
+		ZWISCHENSPEICHER="${BILD_BREIT}"
+		BILD_BREIT="${BILD_HOCH}"
+		BILD_HOCH="${ZWISCHENSPEICHER}"
+		unset ZWISCHENSPEICHER
+	else
+		BILD_BREIT="$(echo "${BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $2}')"
+		BILD_HOCH="$(echo "${BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $1}')"
+	fi
+	BILD_SCALE="scale=${BILD_BREIT}x${BILD_HOCH},"
+
+	if [ "x${SOLL_DAR}" = "x" ] ; then
+		FORMAT_ANPASSUNG="setdar='${BREITE}/${HOEHE}',"
+	fi
+}
+
+
 #==============================================================================#
 
 if [ "x${1}" = x ] ; then
@@ -1011,39 +1041,10 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   BILD_BREIT		='${BILD_BREIT}'
   BILD_HOCH		='${BILD_HOCH}'
   BILD_SCALE		='${BILD_SCALE}'
-  SOLL_BILD_SCALE		='${SOLL_BILD_SCALE}'
+  SOLL_BILD_SCALE 	='${SOLL_BILD_SCALE}'
   " | tee -a ${PROTOKOLLDATEI}.txt
 
   #exit 440
-
-BILD_DREHEN()
-{
-	if [ "x${IN_XY}" != x ] ; then
-		IN_XY="$(echo "${IN_XY}" | awk -F'x' '{print $2"x"$1}')"
-	fi
-
-	unset ZWISCHENSPEICHER
-	ZWISCHENSPEICHER="${BREITE}"
-	BREITE="${HOEHE}"
-	HOEHE="${ZWISCHENSPEICHER}"
-	unset ZWISCHENSPEICHER
-
-	if [ "x${BILD_SCALE}" = x ] ; then
-		unset ZWISCHENSPEICHER
-		ZWISCHENSPEICHER="${BILD_BREIT}"
-		BILD_BREIT="${BILD_HOCH}"
-		BILD_HOCH="${ZWISCHENSPEICHER}"
-		unset ZWISCHENSPEICHER
-	else
-		BILD_BREIT="$(echo "${BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $2}')"
-		BILD_HOCH="$(echo "${BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $1}')"
-	fi
-	BILD_SCALE="scale=${BILD_BREIT}x${BILD_HOCH},"
-
-	if [ "x${SOLL_DAR}" = "x" ] ; then
-		FORMAT_ANPASSUNG="setdar='${BREITE}/${HOEHE}',"
-	fi
-}
 
   if [ "x${BILD_DREHUNG}" != x ] ; then
 	if [ "${BILD_DREHUNG}" = 90 ] ; then
@@ -1425,8 +1426,8 @@ esac
 # wie die Bildpunkte im Quell-Film;
 # hinter PAD muss dann die endgültig gewünschte Auflösung für quadratische Pixel
 #
-#VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${BILD_SCALE}${PAD}${FORMAT_ANPASSUNG}" | sed 's/[,]$//')"			# für Testzwecke
-VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${BILD_SCALE}${PAD}${PIXELKORREKTUR}${FORMAT_ANPASSUNG}" | sed 's/[,]$//')"
+#VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${BILD_SCALE}${PAD}${h263_BILD_FORMAT}${FORMAT_ANPASSUNG}" | sed 's/[,]$//')"			# für Testzwecke
+VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${BILD_SCALE}${PAD}${PIXELKORREKTUR}${h263_BILD_FORMAT}${FORMAT_ANPASSUNG}" | sed 's/[,]$//')"
 
 if [ "x${SOLL_FPS}" = "x" ] ; then
 	unset FPS
