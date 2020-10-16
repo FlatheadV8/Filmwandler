@@ -45,7 +45,8 @@
 #VERSION="v2020072600"			# Jetzt können auch Video-Dateien ohne Video-Spur erstellt werden
 #VERSION="v2020072700"			# Fehler behoben
 #VERSION="v2020092500"			# bestimmte Audio-Optionen können nur noch global, nicht mehr pro Kanal angegeben werden
-VERSION="v2020100100"			# Fehler behoben
+#VERSION="v2020100100"			# Fehler behoben
+VERSION="v2020101600"			# Fehler in Interpretation von "field_order" behoben
 
 #
 # e[cx][hi][ot]
@@ -529,25 +530,35 @@ fi
 # tbc (FPS vom Codec)                = the time base in AVCodecContext for the codec used for a particular stream
 # tbr (FPS vom Video-Stream geraten) = tbr is guessed from the video stream and is the value users want to see when they look for the video frame rate
 
-SCAN_TYPE="$(echo "${META_DATEN_STREAM}" | awk '/^field_order=/{print $2}' | grep -Ev '^$' | head -n1)"
-echo "SCAN_TYPE='${SCAN_TYPE}'"
+### "field_order" gibt bei "interlaced" an in welcher Richtung (von oben nach unten oder von links nach rechts)
+### "field_order" gibt nicht an, ob ein Film "progressive" ist
+SCAN_TYPE="$(echo "${META_DATEN_STREAM}" | awk -F'=' '/^field_order=/{print $2}' | grep -Ev '^$' | head -n1)"
+
+echo "# 99
+SCAN_TYPE='${SCAN_TYPE}'
+" | tee -a ${PROTOKOLLDATEI}.txt
+
 if [ "${SCAN_TYPE}" != "progressive" ] ; then
+    if [ "${SCAN_TYPE}" != "unknown" ] ; then
         ### wenn der Film im Zeilensprungverfahren vorliegt
         ZEILENSPRUNG="yadif,"
+    fi
 fi
-
-#exit 90
 
 # META_DATEN_STREAM=" width=720 "
 # META_DATEN_STREAM=" height=576 "
 IN_BREIT="$(echo "${META_DATEN_STREAM}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^width=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 IN_HOCH="$(echo "${META_DATEN_STREAM}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^height=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 IN_XY="${IN_BREIT}x${IN_HOCH}"
+
 echo "# 100
 1 IN_XY='${IN_XY}'
 1 IN_BREIT='${IN_BREIT}'
 1 IN_HOCH='${IN_HOCH}'
 " | tee -a ${PROTOKOLLDATEI}.txt
+
+#exit 100
+
 if [ "${IN_XY}" = "x" ] ; then
 	# META_DATEN_INFO=' 720x576 SAR 64:45 DAR 16:9 25 fps '
 	# META_DATEN_INFO=" 852x480 SAR 1:1 DAR 71:40 25 fps "
