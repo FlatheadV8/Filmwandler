@@ -5,8 +5,8 @@
 # Dieses Skript verändert NICHT die Bildwiederholrate!
 #
 # Das Ergebnis besteht immer aus folgendem Format:
-#  - MKV:     mkv    + VP9        + Opus (mit Untertitel)
-#  - WebM:    webm   + VP9        + Opus (ohne Untertitel)
+#  - WebM:    webm   + AV1        + Opus    (ohne Untertitel)
+#  - MKV:     mkv    + VP9        + Vorbis
 #  - MP4:     mp4    + H.264/AVC  + AAC
 #  - AVCHD:   m2ts   + H.264/AVC  + AC3
 #  - AVI:     avi    + DivX5      + MP3
