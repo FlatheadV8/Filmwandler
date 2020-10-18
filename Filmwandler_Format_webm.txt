@@ -20,7 +20,8 @@
 #VERSION="v2019092100"
 #VERSION="v2019102900"
 #VERSION="v2020060900"
-VERSION="v2020072700"
+#VERSION="v2020072700"
+VERSION="v2020101800"		# auf AV1 + Opus umgestellt
 
 #==============================================================================#
 
@@ -31,29 +32,30 @@ FORMAT="webm"
 #==============================================================================#
 
 # Audio
-. $(dirname ${0})/Filmwandler_Codec_Audio_opus.txt
+#. $(dirname ${0})/Filmwandler_Codec_Audio_vorbis.txt	# nur libvorbis funktioniert
+. $(dirname ${0})/Filmwandler_Codec_Audio_opus.txt	# kann z.Z. leider nur Stereo (Sep. 2020)
 
 
 # Video
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
-. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
-IFRAME="-keyint_min 2-8"
-
+#	. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
+	. $(dirname ${0})/Filmwandler_Codec_Video_av1.txt
+	IFRAME="-keyint_min 2-8"
 fi
+
 #==============================================================================#
 
 FORMAT_BESCHREIBUNG="
 ********************************************************************************
 * Name:                 WebM                                                   *
 * ENDUNG:               .webm                                                  *
-* Video-Kodierung:      VP9  (freie Alternative zu H.265 für 4K)               *
+* Video-Kodierung:      AV1  (freie Alternative zu H.265 für 4K)               *
 * Audio-Kodierung:      Opus (freie Alternative zu AAC)                        *
 * Beschreibung:                                                                *
 *       - mit HTML5-Unterstützung                                              *
 *       - WebM kann leider nur das eine Untertitelformat "WebVTT" (Text)       *
 *       - 'Royalty free' (komplett frei von patentierten Technologien)         *
 *       - WebM wird seit Android  2.3 'Gingerbread' unterstützt                *
-*       - VP9 wird seit Android 4.4 'KitKat' unterstützt                       *
 *       - Opus wird seit Android 5 'Lollipop' unterstützt                      *
 ********************************************************************************
 "
