@@ -10,7 +10,8 @@
 #VERSION="v2020060200" 		# AV1 (deaktiviert, weil noch experimentell)
 #VERSION="v2020072700"
 #VERSION="v2020092300" 		# AV1 (aktiviert, weil nicht mehr experimentell)
-VERSION="v2020092400" 		# 
+#VERSION="v2020092400" 		# 
+VERSION="v2020101800" 		# auf VP9 + Vorbis umgestellt (AV1 ist in webm)
 
 #==============================================================================#
 
@@ -37,27 +38,29 @@ IFRAME="-keyint_min 2-8"
 
 ### Audio
 #. $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt
-#. $(dirname ${0})/Filmwandler_Codec_Audio_vorbis.txt	# der Ton ist abgehackt (Sep. 2020)
-. $(dirname ${0})/Filmwandler_Codec_Audio_opus.txt	# kann z.Z. leider nur Stereo (Sep. 2020)
+. $(dirname ${0})/Filmwandler_Codec_Audio_vorbis.txt	# nur libvorbis funktioniert
+#. $(dirname ${0})/Filmwandler_Codec_Audio_opus.txt	# kann z.Z. leider nur Stereo (Sep. 2020)
 
 
 ### Video
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
-#. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
-#. $(dirname ${0})/Filmwandler_Codec_Video_vp8.txt
-#. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
-. $(dirname ${0})/Filmwandler_Codec_Video_av1.txt
-
+#	. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
+#	. $(dirname ${0})/Filmwandler_Codec_Video_vp8.txt
+	. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
+#	. $(dirname ${0})/Filmwandler_Codec_Video_av1.txt
 fi
+
 #==============================================================================#
 
 FORMAT_BESCHREIBUNG="
 ********************************************************************************
 * Name:                 free MKV                                               *
 * ENDUNG:               .mkv                                                   *
-* Video-Kodierung:      AV1  (freie Alternative zu H.265 für 4K)               *
-* Audio-Kodierung:      Opus (freie Alternative zu AAC)                        *
+* Video-Kodierung:      VP9  (freie Alternative zu H.265 für 4K)               *
+* Audio-Kodierung:      Vorbis (freie Alternative zu MP3)                      *
 * Beschreibung:                                                                *
 *       - freies Format mit guter Unterstützung durch Android                  *
+*       - 'Royalty free' (komplett frei von patentierten Technologien)         *
+*       - VP9 wird seit Android 4.4 'KitKat' unterstützt                       *
 ********************************************************************************
 "
