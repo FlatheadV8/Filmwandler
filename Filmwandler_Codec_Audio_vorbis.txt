@@ -3,7 +3,8 @@
 #
 
 #VERSION="v2018082800"
-VERSION="v2020092500"		# weitere Variable eingeführt
+#VERSION="v2020092500"		# weitere Variable eingeführt
+VERSION="v2020101800"		# auf libvorbis umgestellt
 
 CODEC_PATTERN="vorbis"		# Beispiel: "h265|hevc"
 Sound_ST=''			# Stereo (2.0)
@@ -22,6 +23,9 @@ if [ "x${AUDIOCODEC}" = "x" ] ; then
 		exit 1
 	fi
 fi
+
+### leider ist "vorbis" noch experimentel und kann nur Stereo
+AUDIOCODEC="libvorbis"
 
 # diese Option wird mit dem Codec zusammen, nur einmal für alle Kanäle zusammen,
 # angegeben und nicht für jeden Kanal extra
