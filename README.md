@@ -45,26 +45,26 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     ********************************************************************************
     * Name:                 Matroska                                               *
     * ENDUNG:               .mkv                                                   *
-    * Video-Kodierung:      AV1  (freie Alternative zu H.265 für 4K)               *
-    * Audio-Kodierung:      Opus (freie Alternative zu AAC)                        *
+    * Video-Kodierung:      VP9  (freie Alternative zu H.265 für 4K)               *
+    * Audio-Kodierung:      Vorbis (freie Alternative zu MP3)                      *
     * Beschreibung:                                                                *
     *       - freies Format mit sehr hoher Kompressionsrate                        *
+    *       - 'Royalty free' (komplett frei von patentierten Technologien)         *
+    *       - VP9 wird seit Android 4.4 'KitKat' unterstützt                       *
     ********************************************************************************
 
 
     ********************************************************************************
     * Name:                 WebM                                                   *
     * ENDUNG:               .webm                                                  *
-    * Video-Kodierung:      VP9  (freie Alternative zu H.265 für 4K)               *
+    * Video-Kodierung:      AV1  (freie Alternative zu H.265 für 4K)               *
     * Audio-Kodierung:      Opus (freie Alternative zu AAC)                        *
     * Beschreibung:                                                                *
     *       - mit HTML5-Unterstützung                                              *
     *       - WebM kann leider nur das eine Untertitelformat "WebVTT"              *
     *       - 'Royalty free' (komplett frei von patentierten Technologien)         *
     *       - WebM wird seit Android  2.3 'Gingerbread' unterstützt                *
-    *       - VP9 wird seit Android 4.4 'KitKat' unterstützt                       *
     *       - Opus wird seit Android 5 'Lollipop' unterstützt                      *
-    *       - kodiert 5-10 mal langsamer als AVCHD/MP4                             *
     ********************************************************************************
 
 
