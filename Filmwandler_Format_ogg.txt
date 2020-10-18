@@ -18,7 +18,7 @@ FORMAT="ogg"
 #==============================================================================#
 
 # Audio
-. $(dirname ${0})/Filmwandler_Codec_Audio_vorbis.txt
+. $(dirname ${0})/Filmwandler_Codec_Audio_vorbis.txt	# nur libvorbis funktioniert
 
 
 # Video
