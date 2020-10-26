@@ -53,6 +53,8 @@
 #VERSION="v2020102500"			# die STANDARD-UNTERTITEL-SPUR kann jetzt auch manuell gesetzt werden
 VERSION="v2020102600"			# Jetzt werden auch die Titel richtig behandelt, so das Leerzeichen keine Probleme mehr bereiten
 
+VERSION_METADATEN="${VERSION}"
+
 #
 # e[cx][hi][ot]
 #
@@ -553,7 +555,7 @@ fi
 
 if [ "x${KOMMENTAR}" = x ] ; then
 	if [ "x${BESCHREIBUNG}" = x ] ; then
-		METADATEN_BESCHREIBUNG="-metadata description='https://github.com/FlatheadV8/Filmwandler:${VERSION}'"
+		METADATEN_BESCHREIBUNG="-metadata description='https://github.com/FlatheadV8/Filmwandler:${VERSION_METADATEN}'"
 	else
 		METADATEN_BESCHREIBUNG="-metadata description='${BESCHREIBUNG}'"
 	fi
