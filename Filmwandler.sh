@@ -51,7 +51,8 @@
 #VERSION="v2020102300"			# kleinere Ergänzugen
 #VERSION="v2020102400"			# die STANDARD-AUDIO-SPUR kann jetzt auch manuell gesetzt werden
 #VERSION="v2020102500"			# die STANDARD-UNTERTITEL-SPUR kann jetzt auch manuell gesetzt werden
-VERSION="v2020102600"			# Jetzt werden auch die Titel richtig behandelt, so das Leerzeichen keine Probleme mehr bereiten
+#VERSION="v2020102600"			# Jetzt werden auch die Titel richtig behandelt, so das Leerzeichen keine Probleme mehr bereiten
+VERSION="v2020102800"			# Fehler bei METADATEN behoben
 
 VERSION_METADATEN="${VERSION}"
 
@@ -459,11 +460,6 @@ QUELL_DATEI="$(basename "${FILMDATEI}")"
 ZIELVERZ="$(dirname "${ZIELPFAD}")"
 ZIELDATEI="$(basename "${ZIELPFAD}")"
 
-#------------------------------------------------------------------------------#
-# damit keine Leerzeichen im Dateinamen enthalten sind
-
-ZIELDATEI="$(echo "${ZIELDATEI}" | rev | sed 's/[.]/ /' | rev | awk '{print $1"."$2}')"
-
 #==============================================================================#
 # Das Video-Format wird nach der Dateiendung ermittelt
 # deshalb muss ermittelt werden, welche Dateiendung der Name der Ziel-Datei hat
@@ -475,10 +471,22 @@ ZIELDATEI="$(echo "${ZIELDATEI}" | rev | sed 's/[.]/ /' | rev | awk '{print $1".
 QUELL_BASIS_NAME="$(echo "${QUELL_DATEI}" | awk '{print tolower($0)}')"
 ZIEL_BASIS_NAME="$(echo "${ZIELDATEI}" | awk '{print tolower($0)}')"
 
-ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/[.]/ /' | rev | sed 's/ .*//')"
+ZIELNAME="$(echo "${ZIELDATEI}" | awk '{sub("[.][^.]*$","");print $0}')"
 ZIEL_FILM="${ZIELNAME}"
 ENDUNG="$(echo "${ZIEL_BASIS_NAME}" | rev | sed 's/[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.]/&"/;s/[.]".*//' | rev)"
 
+
+echo "# 480
+QUELL_DATEI='${QUELL_DATEI}'
+ZIELVERZ='${ZIELVERZ}'
+ZIELDATEI='${ZIELDATEI}'
+
+ZIELNAME='${ZIELNAME}'
+ZIEL_FILM='${ZIEL_FILM}'
+ENDUNG='${ENDUNG}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+#exit 490
 
 if [ "${QUELL_BASIS_NAME}" = "${ZIEL_BASIS_NAME}" ] ; then
 	ZIELNAME="${ZIELNAME}_Nr2"
@@ -487,10 +495,10 @@ fi
 #------------------------------------------------------------------------------#
 ### ab hier kann in die Log-Datei geschrieben werden
 
-PROTOKOLLDATEI="${ZIELVERZ}/${ZIELNAME}.${ENDUNG}"
+PROTOKOLLDATEI="$(echo "${ZIELNAME}.${ENDUNG}" | sed 's/[ ][ ]*/_/g;')"
 
 echo "# $(date +'%F %T')
-${0} ${Film2Standardformat_OPTIONEN}" | tee ${PROTOKOLLDATEI}.txt
+${0} ${Film2Standardformat_OPTIONEN}" | tee "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #------------------------------------------------------------------------------#
 ### diese Optionen sind für ffprobe und ffmpeg notwendeig,
@@ -539,8 +547,8 @@ META_DATEN_STREAM="$(echo "${META_DATEN_KOMPLETT}" | sed -e  '1,/STREAM/d')"
 #META_DATEN_STREAM="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_data -show_streams)"
 BILD_DREHUNG="$(echo "${META_DATEN_INFO}" | sed -ne '/Video: /,/Audio: / p' | awk '/ rotate /{print $NF}' | head -n1)"
 
-echo "${META_DATEN_INFO}"                                             | tee -a ${PROTOKOLLDATEI}.txt
-echo "${META_DATEN_STREAM}" | grep -E '^codec_(name|long_name|type)=' | tee -a ${PROTOKOLLDATEI}.txt
+echo "${META_DATEN_INFO}"                                             | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+echo "${META_DATEN_STREAM}" | grep -E '^codec_(name|long_name|type)=' | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #------------------------------------------------------------------------------#
 
@@ -548,10 +556,9 @@ ORIGINAL_TITEL="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -sh
 KOMMENTAR="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_entries format_tags=comment -of compact=p=0:nk=1 | sed 's/[ ]/_/g')"
 BESCHREIBUNG="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_entries format_tags=description -of compact=p=0:nk=1 | sed 's/[ ]/_/g')"
 if [ "x${EIGENER_TITEL}" = x ] ; then
-	unset METADATEN_TITEL
-else
-	METADATEN_TITEL="-metadata title="
+	EIGENER_TITEL="${ZIELNAME}"
 fi
+METADATEN_TITEL="-metadata title="
 
 if [ "x${KOMMENTAR}" = x ] ; then
 	if [ "x${BESCHREIBUNG}" = x ] ; then
@@ -577,7 +584,7 @@ BESCHREIBUNG='${BESCHREIBUNG}'
 METADATEN_TITEL='${METADATEN_TITEL}'
 EIGENER_TITEL='${EIGENER_TITEL}'
 METADATEN_BESCHREIBUNG='${METADATEN_BESCHREIBUNG}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #------------------------------------------------------------------------------#
 
@@ -603,7 +610,7 @@ echo "# 245
 AUDIO_SPUR_INFOS='${AUDIO_SPUR_INFOS}'
 AUDIO_SPUR_SPRACHE='${AUDIO_SPUR_SPRACHE}'
 AUDIO_STANDARD_SPUR='${AUDIO_STANDARD_SPUR}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 255
 
@@ -641,7 +648,7 @@ SCAN_TYPE="$(echo "${META_DATEN_STREAM}" | awk -F'=' '/^field_order=/{print $2}'
 
 echo "# 99
 SCAN_TYPE='${SCAN_TYPE}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 if [ "${SCAN_TYPE}" != "progressive" ] ; then
     if [ "${SCAN_TYPE}" != "unknown" ] ; then
@@ -660,7 +667,7 @@ echo "# 100
 1 IN_XY='${IN_XY}'
 1 IN_BREIT='${IN_BREIT}'
 1 IN_HOCH='${IN_HOCH}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 100
 
@@ -673,7 +680,7 @@ if [ "${IN_XY}" = "x" ] ; then
 	2 IN_XY='${IN_XY}'
 	2 IN_BREIT='${IN_BREIT}'
 	2 IN_HOCH='${IN_HOCH}'
-	" | tee -a ${PROTOKOLLDATEI}.txt
+	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	if [ "x${IN_XY}" = "x" ] ; then
 		# META_DATEN_STREAM=" coded_width=0 "
 		# META_DATEN_STREAM=" coded_height=0 "
@@ -684,7 +691,7 @@ if [ "${IN_XY}" = "x" ] ; then
 		3 IN_XY='${IN_XY}'
 		3 IN_BREIT='${IN_BREIT}'
 		3 IN_HOCH='${IN_HOCH}'
-		" | tee -a ${PROTOKOLLDATEI}.txt
+		" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	fi
 	if [ "x${BILD_DREHUNG}" != x ] ; then
 		if [ "${BILD_DREHUNG}" = 90 ] ; then
@@ -700,23 +707,23 @@ fi
 IN_PAR="$(echo "${META_DATEN_STREAM}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^sample_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 echo "# 130
 1 IN_PAR='${IN_PAR}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 if [ "x${IN_PAR}" = "x" ] ; then
 	IN_PAR="$(echo "${META_DATEN_INFO}" | fgrep 'Video: ' | tr -s ',' '\n' | fgrep ' DAR ' | tr -s '[\[\]]' ' ' | awk '{print $3}')"
 	echo "# 140
 	2 IN_PAR='${IN_PAR}'
-	" | tee -a ${PROTOKOLLDATEI}.txt
+	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 fi
 
 IN_DAR="$(echo "${META_DATEN_STREAM}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^display_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 echo "# 150
 1 IN_DAR='${IN_DAR}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 if [ "x${IN_DAR}" = "x" ] ; then
 	IN_DAR="$(echo "${META_DATEN_INFO}" | fgrep 'Video: ' | tr -s ',' '\n' | fgrep ' DAR ' | tr -s '[\[\]]' ' ' | awk '{print $5}')"
 	echo "# 160
 	2 IN_DAR='${IN_DAR}'
-	" | tee -a ${PROTOKOLLDATEI}.txt
+	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 fi
 
 # META_DATEN_STREAM=" r_frame_rate=25/1 "
@@ -725,22 +732,22 @@ fi
 IN_FPS="$(echo "${META_DATEN_STREAM}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^r_frame_rate=/{print $2}' | grep -Fv 'N/A' | head -n1 | awk -F'/' '{print $1}')"
 echo "# 170
 1 IN_FPS='${IN_FPS}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 if [ "x${IN_FPS}" = "x" ] ; then
 	IN_FPS="$(echo "${META_DATEN_STREAM}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^avg_frame_rate=/{print $2}' | grep -Fv 'N/A' | head -n1 | awk -F'/' '{print $1}')"
 	echo "# 180
 	2 IN_FPS='${IN_FPS}'
-	" | tee -a ${PROTOKOLLDATEI}.txt
+	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	if [ "x${IN_FPS}" = "x" ] ; then
 		IN_FPS="$(echo "${META_DATEN_STREAM}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^codec_time_base=/{print $2}' | grep -Fv 'N/A' | head -n1 | awk -F'/' '{print $2}')"
 		echo "# 190
 		3 IN_FPS='${IN_FPS}'
-		" | tee -a ${PROTOKOLLDATEI}.txt
+		" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 		if [ "x${IN_FPS}" = "x" ] ; then
 			IN_FPS="$(echo "${META_DATEN_INFO}" | fgrep 'Video: ' | tr -s ',' '\n' | fgrep ' fps' | awk '{print $1}')"			# wird benötigt um den Farbraum für BluRay zu ermitteln
 			echo "# 200
 			4 IN_FPS='${IN_FPS}'
-			" | tee -a ${PROTOKOLLDATEI}.txt
+			" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 		fi
 	fi
 fi
@@ -750,17 +757,17 @@ IN_FPS_RUND="$(echo "${IN_FPS}" | awk '{printf "%.0f\n", $1}')"			# für Verglei
 IN_BIT_RATE="$(echo "${META_DATEN_STREAM}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^bit_rate=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 echo "# 210
 1 IN_BIT_RATE='${IN_BIT_RATE}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 if [ "x${IN_BIT_RATE}" = "x" ] ; then
 	IN_BIT_RATE="$(echo "${META_DATEN_INFO}" | grep -F 'Video: ' | tr -s ',' '\n' | awk -F':' '/bitrate: /{print $2}' | tail -n1)"
 	echo "# 220
 	2 IN_BIT_RATE='${IN_BIT_RATE}'
-	" | tee -a ${PROTOKOLLDATEI}.txt
+	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	if [ "x${IN_BIT_RATE}" = "x" ] ; then
 		IN_BIT_RATE="$(echo "${META_DATEN_INFO}" | grep -F 'Duration: ' | tr -s ',' '\n' | awk -F':' '/bitrate: /{print $2}' | tail -n1)"
 		echo "# 230
 		3 IN_BIT_RATE='${IN_BIT_RATE}'
-		" | tee -a ${PROTOKOLLDATEI}.txt
+		" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	fi
 fi
 
@@ -787,7 +794,7 @@ IN_BIT_EINH='${IN_BIT_EINH}'
 IN_BITRATE_KB='${IN_BITRATE_KB}'
 BILDQUALIT='${BILDQUALIT}'
 TONQUALIT='${TONQUALIT}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 unset IN_BIT_RATE
 unset IN_BIT_EINH
@@ -856,7 +863,7 @@ IN_DAR='${IN_DAR}'
 IN_PAR='${IST_PAR}'
 IST_DAR='${IST_DAR}'
 IST_PAR='${IST_PAR}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 290
 
@@ -906,7 +913,7 @@ PAR_KOMMA='${PAR_KOMMA}'
 PAR_FAKTOR='${PAR_FAKTOR}'
 VIDEO_SPUR='${VIDEO_SPUR}'
 VIDEO_NICHT_UEBERTRAGEN='${VIDEO_NICHT_UEBERTRAGEN}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 310
 
@@ -1095,13 +1102,13 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 		if [ "x${PIXELVERZERRUNG}" = x ] ; then
 			echo "# 380
 			# PIXELVERZERRUNG='${PIXELVERZERRUNG}'
-			" | tee -a ${PROTOKOLLDATEI}.txt
+			" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 			exit 390
 		elif [ "${PIXELVERZERRUNG}" -eq 1 ] ; then
 			echo "# 400
 			# quadratische Pixel
 			# PIXELVERZERRUNG = 1 : ${PIXELVERZERRUNG}
-			" | tee -a ${PROTOKOLLDATEI}.txt
+			" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 			BREITE="$(echo "${SOLL_DAR}" | awk '{gsub("/"," ");print $1}')"
 			HOEHE="$(echo "${SOLL_DAR}" | awk '{gsub("/"," ");print $2}')"
 			#
@@ -1111,7 +1118,7 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 			# lange Pixel: breit ziehen
 			# 4CIF (Test 2)
 			# PIXELVERZERRUNG < 1 : ${PIXELVERZERRUNG}
-			" | tee -a ${PROTOKOLLDATEI}.txt
+			" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 			BREITE="$(echo "${SOLL_DAR} ${INBREITE_DAR} ${INHOEHE_DAR} ${BILD_BREIT} ${BILD_HOCH}" | awk '{gsub("/"," ");print $2 * $2 * $5 / $1 / $6}')"
 			HOEHE="$(echo "${SOLL_DAR}" | awk '{gsub("/"," ");print $2}')"
 			#
@@ -1121,7 +1128,7 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 			# breite Pixel: lang ziehen
 			# 2CIF (Test 1)
 			# PIXELVERZERRUNG > 1 : ${PIXELVERZERRUNG}
-			" | tee -a ${PROTOKOLLDATEI}.txt
+			" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 			BREITE="$(echo "${SOLL_DAR}" | awk '{gsub("/"," ");print $1}')"
 			HOEHE="$(echo "${SOLL_DAR} ${INBREITE_DAR} ${INHOEHE_DAR} ${BILD_BREIT} ${BILD_HOCH}" | awk '{gsub("/"," ");print $1 * $1 * $6 / $2 / $5}')"
 			#
@@ -1155,7 +1162,7 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   BILD_HOCH		='${BILD_HOCH}'
   BILD_SCALE		='${BILD_SCALE}'
   SOLL_BILD_SCALE 	='${SOLL_BILD_SCALE}'
-  " | tee -a ${PROTOKOLLDATEI}.txt
+  " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
   #exit 440
 
@@ -1190,7 +1197,7 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   BILD_HOCH           ='${BILD_HOCH}'
   BILD_SCALE          ='${BILD_SCALE}'
   #==============================================================================#
-  " | tee -a ${PROTOKOLLDATEI}.txt
+  " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
   #exit 460
 
@@ -1249,7 +1256,7 @@ fi
 echo "# 490
 IN_FPS='${IN_FPS}'
 OP_QUELLE='${OP_QUELLE}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 500
 
@@ -1286,7 +1293,7 @@ F_TON_QUALIT()
 	AUDIO_KANAELE="$(echo "${AUDIO_SPUR_INFOS}" | tr -s ';' '\n' | egrep '^channels=' | awk -F'=' '{print $2}' | sort -nr | head -n1)"
 	#----------------------------------------------------------------------#
 
-	F_AUDIO_QUALITAET >> ${PROTOKOLLDATEI}.txt 2>&1
+	F_AUDIO_QUALITAET >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt 2>&1
 
 	case "${TONQUALIT}" in
 		0)
@@ -1334,7 +1341,7 @@ Sound_51='${Sound_51}'
 Sound_71='${Sound_71}'
 TS_ANZAHL='${TS_ANZAHL}'
 STEREO='${STEREO}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 540
 
@@ -1365,7 +1372,7 @@ if [ "${TS_ANZAHL}" -gt 0 ] ; then
 			AUDIO_KANAELE="$(echo "${AUDIO_SPUR_INFOS}" | head -n${AKN} | tail -n1 | tr -s ';' '\n' | egrep '^channels=' | awk -F'=' '{print $2}')"
 			echo "# 550
 			AUDIO_KANAELE='${AUDIO_KANAELE}'
-			" >> ${PROTOKOLLDATEI}.txt
+			" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 			AKL51="$(echo "${AUDIO_SPUR_INFOS}" | head -n${AKN} | tail -n1 | tr -s ';' '\n' | fgrep 'channel_layout=5.1')"
 			AKL71="$(echo "${AUDIO_SPUR_INFOS}" | head -n${AKN} | tail -n1 | tr -s ';' '\n' | fgrep 'channel_layout=7.1')"
 			if [ "x${AKL51}" != "x" ] ; then
@@ -1394,7 +1401,7 @@ if [ "${TS_ANZAHL}" -gt 0 ] ; then
 			AUDIO_KANAELE="2"
 			echo "# 560
 			AUDIO_KANAELE='${AUDIO_KANAELE}'
-			" >> ${PROTOKOLLDATEI}.txt
+			" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 			F_TON_QUALIT
 			echo -n " -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${AUDIOQUALITAET} -ac 2"
 		fi
@@ -1414,13 +1421,13 @@ else
 	AUDIO_VERARBEITUNG_02="-an"
 fi
 
-echo "" | tee -a ${PROTOKOLLDATEI}.txt
+echo "" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 echo "# 570
 BEREITS_AK2='${BEREITS_AK2}'
 TS_KOPIE='${TS_KOPIE}'
 AUDIO_VERARBEITUNG_01='${AUDIO_VERARBEITUNG_01}'
 AUDIO_VERARBEITUNG_02='${AUDIO_VERARBEITUNG_02}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 580
 
@@ -1493,7 +1500,7 @@ UT_LISTE='${UT_LISTE}'
 U_TITEL_FF_01='${U_TITEL_FF_01}'
 U_TITEL_FF_ALT='${U_TITEL_FF_ALT}'
 U_TITEL_FF_02='${U_TITEL_FF_02}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 600
 
@@ -1560,7 +1567,7 @@ done)"
 
 echo "# 600
 META_DATEN_DISPOSITIONEN='${META_DATEN_DISPOSITIONEN}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 600
 
@@ -1642,7 +1649,7 @@ AUDIO_VERARBEITUNG_02='${AUDIO_VERARBEITUNG_02}'
 
 VIDEOOPTION='${VIDEOOPTION}'
 START_ZIEL_FORMAT='${START_ZIEL_FORMAT}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 620
 
@@ -1673,6 +1680,90 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" = "0" ] ; then
 	U_TITEL_FF_02=""
 	UNTERTITEL_AN=""		# für das zusammensetzen der Filmteile
 fi
+
+#------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
+### Funktionen
+
+# Es wird nur ein einziges Stück transkodiert
+transkodieren_1_1()
+{
+	### 1001
+	echo "1,1: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}'${EIGENER_TITEL}' ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	echo
+        ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} 2>&1 && WEITER=OK || WEITER=ALT
+}
+
+#------------------------------------------------------------------------------#
+# Es wird nur ein einziges Stück transkodiert
+# aber der erste Versuch ist fehlgeschlagen
+# deshalb wird jetzt mit alternativem Untertitelformat probiert
+transkodieren_2_1()
+{
+	### 1002
+	echo "1,2: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}'${EIGENER_TITEL}' ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	echo
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} 2>&1 && WEITER=OK || WEITER=OHNE
+}
+
+#------------------------------------------------------------------------------#
+# Es wird nur ein einziges Stück transkodiert
+# aber der zweite Versuch ist auch fehlgeschlagen
+# darum wird jetzt zum letzten Mal ohne Untertitel probiert
+transkodieren_3_1()
+{
+	### 1003
+	echo "1,3: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}'${EIGENER_TITEL}' ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	echo
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} 2>&1 && WEITER=OK || WEITER=NEIN
+}
+
+#------------------------------------------------------------------------------#
+# Es werden mehrere Teil aus dem Original transkodiert und am Ende zu einem Film zusammengesetzt
+transkodieren_4_1()
+{
+	### 1004
+	echo "2,1: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}'${EIGENER_TITEL}' ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}.${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	echo
+        ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}.${ENDUNG} 2>&1 && WEITER=OK || WEITER=ALT
+}
+
+#------------------------------------------------------------------------------#
+# Es werden mehrere Teil aus dem Original transkodiert und am Ende zu einem Film zusammengesetzt
+# aber der erste Versuch ist fehlgeschlagen
+# deshalb wird jetzt mit alternativem Untertitelformat probiert
+transkodieren_5_1()
+{
+	### 1005
+	echo "2,2: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}'${EIGENER_TITEL}' ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}.${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	echo
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}.${ENDUNG} 2>&1 && WEITER=OK || WEITER=OHNE
+}
+
+#------------------------------------------------------------------------------#
+# Es werden mehrere Teil aus dem Original transkodiert und am Ende zu einem Film zusammengesetzt
+# aber der zweite Versuch ist auch fehlgeschlagen
+# darum wird jetzt zum letzten Mal ohne Untertitel probiert
+transkodieren_6_1()
+{
+	### 1006
+	echo "2,3: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}'${EIGENER_TITEL}' ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}.${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	echo
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}.${ENDUNG} 2>&1 && WEITER=OK || WEITER=NEIN
+}
+
+#------------------------------------------------------------------------------#
+# Hiermit werden die transkodierten Teil zu einem Film zusammengesetzt
+transkodieren_7_1()
+{
+	### 1007
+	echo "# 630
+	${PROGRAMM} -f concat -i "${ZIELVERZ}"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt ${VIDEO_PARAMETER_KOPIE} ${AUDIO_VERARBEITUNG_02} ${U_TITEL_FF_02} ${SCHNELLSTART} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}'${EIGENER_TITEL}' ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG}
+	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	${PROGRAMM} -f concat -i "${ZIELVERZ}"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt ${VIDEO_PARAMETER_KOPIE} ${AUDIO_VERARBEITUNG_02} ${U_TITEL_FF_02} ${SCHNELLSTART} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG}
+}
+
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
@@ -1688,35 +1779,32 @@ if [ ${SCHNITT_ANZAHL} -le 1 ] ; then
 	### hier der Film transkodiert                                       ###
 	###------------------------------------------------------------------###
 	echo
-	echo "1,1: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}'${EIGENER_TITEL}' ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIEL_FILM}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
-	echo
-	         ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIEL_FILM}.${ENDUNG} 2>&1 && WEITER=OK || WEITER=ALT
+	### 1001
+	transkodieren_1_1
 
 	if [ "${WEITER}" = ALT ] ; then
 		echo
-		echo "1,2: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}'${EIGENER_TITEL}' ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIEL_FILM}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
-		echo
-		${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIEL_FILM}.${ENDUNG} 2>&1 && WEITER=OK || WEITER=OHNE
+		### 1002
+		transkodieren_2_1
 	fi
 
 	if [ "${WEITER}" = OHNE ] ; then
-		rm -vf ${ZIELVERZ}/${ZIEL_FILM}.${ENDUNG} | tee -a ${PROTOKOLLDATEI}.txt
+		rm -vf "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 		ZIEL_FILM="${ZIELNAME}_-_ohne_Untertitel"
 		echo
-		echo "1,3: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}'${EIGENER_TITEL}' ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIEL_FILM}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
-		echo
-		${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIEL_FILM}.${ENDUNG} 2>&1 && WEITER=OK || WEITER=NEIN
+		### 1003
+		transkodieren_3_1
 	fi
 
 else
 
 	#----------------------------------------------------------------------#
 	ZUFALL="$(head -c 100 /dev/urandom | base64 | tr -d '\n' | tr -cd '[:alnum:]' | cut -b-12)"
-	rm -f ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}_Filmliste.txt
+	rm -f "${ZIELVERZ}"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt
 	NUMMER="0"
 	for _SCHNITT in ${SCHNITTZEITEN}
 	do
-		echo "---------------------------------------------------------" | tee -a ${PROTOKOLLDATEI}.txt
+		echo "---------------------------------------------------------" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 		NUMMER="$(echo "${NUMMER}" | awk '{printf "%2.0f\n", $1+1}' | tr -s ' ' '0')"
 		VON="$(echo "${_SCHNITT}" | tr -d '"' | awk -F'-' '{print $1}')"
@@ -1726,42 +1814,37 @@ else
 		### hier werden die Teile zwischen der Werbung transkodiert  ###
 		###----------------------------------------------------------###
 		echo
-		echo "2,1: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}'${EIGENER_TITEL}' ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
-		echo
-		         ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG} 2>&1 && WEITER=OK || WEITER=ALT
+		### 1004
+		transkodieren_4_1
 
 		if [ "${WEITER}" = ALT ] ; then
 			echo
-			echo "2,2: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}'${EIGENER_TITEL}' ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
-			echo
-			${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG} 2>&1 && WEITER=OK || WEITER=OHNE
+			### 1005
+			transkodieren_5_1
 		fi
 
 		if [ "${WEITER}" = OHNE ] ; then
 			ZIEL_FILM="${ZIELNAME}_-_ohne_Untertitel"
 			echo
-			echo "2,3: ${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}'${EIGENER_TITEL}' ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG}" | tee -a ${PROTOKOLLDATEI}.txt
-			echo
-			${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG} 2>&1 && WEITER=OK || WEITER=NEIN
+			### 1006
+			transkodieren_6_1
 		fi
 
-		ffprobe -v error -i ${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG} | tee -a ${PROTOKOLLDATEI}.txt
+		ffprobe -v error -i ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}.${ENDUNG} | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
                 ### den Film in die Filmliste eintragen
-                echo "echo \"file '${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG}'\" >> ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}_Filmliste.txt" | tee -a ${PROTOKOLLDATEI}.txt
-                echo "file '${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG}'" >> ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}_Filmliste.txt
+                echo "echo \"file '${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}.${ENDUNG}'\" >> \"${ZIELVERZ}\"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+                echo "file '${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}.${ENDUNG}'" >> "${ZIELVERZ}"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt
 
-		echo "---------------------------------------------------------" | tee -a ${PROTOKOLLDATEI}.txt
+		echo "---------------------------------------------------------" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	done
 
-	echo "# 630
-	${PROGRAMM} -f concat -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}_Filmliste.txt ${VIDEO_PARAMETER_KOPIE} ${AUDIO_VERARBEITUNG_02} ${U_TITEL_FF_02} ${SCHNELLSTART} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}'${EIGENER_TITEL}' ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIEL_FILM}.${ENDUNG}
-	" | tee -a ${PROTOKOLLDATEI}.txt
-	${PROGRAMM} -f concat -i ${ZIELVERZ}/${ZUFALL}_${ZIELNAME}_Filmliste.txt ${VIDEO_PARAMETER_KOPIE} ${AUDIO_VERARBEITUNG_02} ${U_TITEL_FF_02} ${SCHNELLSTART} ${META_DATEN_DISPOSITIONEN} ${METADATEN_BESCHREIBUNG} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${START_ZIEL_FORMAT} -y ${ZIELVERZ}/${ZIEL_FILM}.${ENDUNG}
+	### 1007
+	transkodieren_7_1
 
-	rm -f ${ZIELVERZ}/${ZUFALL}_*.txt
+	rm -f "${ZIELVERZ}"/${ZUFALL}_*.txt
 
-	ffprobe -v error -i ${ZIELVERZ}/${ZIEL_FILM}.${ENDUNG} | tee -a ${PROTOKOLLDATEI}.txt
+	ffprobe -v error -i "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 	#ls -lh ${ZUFALL}_*.${ENDUNG}
 	rm -f ${ZUFALL}_*.${ENDUNG}
@@ -1770,10 +1853,10 @@ fi
 
 #------------------------------------------------------------------------------#
 
-ls -lh ${ZIELVERZ}/${ZIEL_FILM}.${ENDUNG} ${PROTOKOLLDATEI}.txt | tee -a ${PROTOKOLLDATEI}.txt
+ls -lh "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 LAUFZEIT="$(echo "${STARTZEITPUNKT} $(date +'%s')" | awk '{print $2 - $1}')"
 echo "# 640
-$(date +'%F %T') (${LAUFZEIT})" | tee -a ${PROTOKOLLDATEI}.txt
+$(date +'%F %T') (${LAUFZEIT})" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 650
