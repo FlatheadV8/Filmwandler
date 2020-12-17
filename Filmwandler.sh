@@ -55,7 +55,8 @@
 #VERSION="v2020102800"			# Fehler bei METADATEN behoben
 #VERSION="v2020110400"			# Fehler bei PROTOKOLLDATEI-Namen behoben + VIDEO_DELAY eingebaut
 #VERSION="v2020110900"			# etwas mehr Logausgaben
-VERSION="v2020111100"			# Fehler bei Video-Spurerkennung von Blurays behoben
+#VERSION="v2020111100"			# Fehler bei Video-Spurerkennung von Blurays behoben
+VERSION="v2020121700"			# Multiple -c, -codec, -acodec, -vcodec, -scodec or -dcodec options specified for stream 9, only the last option '-c:s copy' will be used. /  Multiple -q or -qscale options specified for stream 2, only the last option '-q:a 6.000000' will be used.
 
 VERSION_METADATEN="${VERSION}"
 
@@ -698,6 +699,8 @@ BESCHREIBUNG='${BESCHREIBUNG}'
 METADATEN_TITEL='${METADATEN_TITEL}'
 EIGENER_TITEL='${EIGENER_TITEL}'
 METADATEN_BESCHREIBUNG='${METADATEN_BESCHREIBUNG}'
+
+SOLL_STANDARD_AUDIO_SPUR='${SOLL_STANDARD_AUDIO_SPUR}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #------------------------------------------------------------------------------#
@@ -1446,8 +1449,6 @@ echo "
 # 510 TONQUALIT='${TONQUALIT}'
 "
 
-F_TON_QUALIT()
-{
 	#----------------------------------------------------------------------#
 	# Work-Around
 	#
@@ -1497,7 +1498,7 @@ F_TON_QUALIT()
 			AUDIOQUALITAET="${AUDIO_QUALITAET_9}"
 			;;
 	esac
-}
+
 
 #exit 250
 
@@ -1533,13 +1534,17 @@ if [ "${TS_ANZAHL}" -gt 0 ] ; then
 	# AUDIO_CODEC_OPTION
 	# FFmpeg will die Angabe über den Codec sowie ggf. die Option "-ac 2" nur ein einziges Mal für alle Kanäle bekommen
 	#--------------------------------------------------------------#
-	AUDIO_VERARBEITUNG_01="-c:a ${AUDIOCODEC} ${AUDIO_CODEC_OPTION} $(for DIE_TS in ${TS_LISTE}
+	AUDIO_VERARBEITUNG_01="-c:a ${AUDIOCODEC} ${AUDIO_CODEC_OPTION} ${AUDIOQUALITAET} $(for DIE_TS in ${TS_LISTE}
 	do
+
+		#
+		# Multiple -q or -qscale options specified for stream 2, only the last option '-q:a 6.000000' will be used.
+		#
 
 		if [ "x${STEREO}" = "x" ] ; then
 			AKN="$(echo "${DIE_TS}" | awk '{print $1 + 1}')"
 			AUDIO_KANAELE="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | fgrep codec_type=audio | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E '^channels=' | awk -F'=' '{print $2}')"
-			echo "# 350
+			echo "# 350 - ${DIE_TS}
 			AUDIO_KANAELE='${AUDIO_KANAELE}'
 			" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 			AKL51="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | fgrep codec_type=audio | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E 'channel_layout=5.1')"
@@ -1548,31 +1553,27 @@ if [ "${TS_ANZAHL}" -gt 0 ] ; then
 				if [ "x${AUDIO_KANAELE}" = x ] ; then
 					AUDIO_KANAELE=6
 				fi
-				F_TON_QUALIT
-				#echo -n " -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_51} ${AUDIOQUALITAET}"
-				echo -n " -map 0:a:${DIE_TS} ${Sound_51} ${AUDIOQUALITAET}"
+				#echo -n " -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_51}"
+				echo -n " -map 0:a:${DIE_TS} ${Sound_51}"
 			elif [ "x${AKL71}" != "x" ] ; then
 				if [ "x${AUDIO_KANAELE}" = x ] ; then
 					AUDIO_KANAELE=8
 				fi
-				F_TON_QUALIT
-				#echo -n " -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_71} ${AUDIOQUALITAET}"
-				echo -n " -map 0:a:${DIE_TS} ${Sound_71} ${AUDIOQUALITAET}"
+				#echo -n " -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_71}"
+				echo -n " -map 0:a:${DIE_TS} ${Sound_71}"
 			else
 				if [ "x${AUDIO_KANAELE}" = x ] ; then
 					AUDIO_KANAELE=2
 				fi
-				F_TON_QUALIT
-				#echo -n " -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_ST} ${AUDIOQUALITAET}"
-				echo -n " -map 0:a:${DIE_TS} ${Sound_ST} ${AUDIOQUALITAET}"
+				#echo -n " -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_ST}"
+				echo -n " -map 0:a:${DIE_TS} ${Sound_ST}"
 			fi
 		else
 			AUDIO_KANAELE="2"
 			echo "# 360
 			AUDIO_KANAELE='${AUDIO_KANAELE}'
 			" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-			F_TON_QUALIT
-			echo -n " -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${AUDIOQUALITAET} -ac 2"
+			echo -n " -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} -ac 2"
 		fi
 	done)"
 	#----------------------------------------------------------------------#
@@ -1606,18 +1607,19 @@ AUDIO_VERARBEITUNG_02='${AUDIO_VERARBEITUNG_02}'
 
 #==============================================================================#
 ### Untertitel
+#
+# Multiple -c, -codec, -acodec, -vcodec, -scodec or -dcodec options specified for stream 9, only the last option '-c:s copy' will be used.
+#
 
 # -map 0:s:0 -c:s copy -map 0:s:1 -c:s copy		# "0" für die erste Untertitelspur
 # -map 0:s:${i} -scodec copy				# alt
 # -map 0:s:${i} -c:s copy				# neu
 # UNTERTITEL="0,1,2,3,4"
 
-UNTERTITEL_AN="-c:s copy"				# für das zusammensetzen der Filmteile
 if [ "${UNTERTITEL}" = "=0" ] ; then
 	U_TITEL_FF_01=""
 	U_TITEL_FF_ALT=""
 	U_TITEL_FF_02=""
-	UNTERTITEL_AN=""				# für das zusammensetzen der Filmteile
 else
 	if [ "x${UNTERTITEL}" = "x" ] ; then
 		UTNAME="$(echo "${META_DATEN_STREAMS}" | grep -Fi codec_type=subtitle | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
@@ -1629,9 +1631,9 @@ else
 		UT_LISTE="$(echo "${UNTERTITEL}" | sed 's/,/ /g')"
 	fi
 
-	U_TITEL_FF_01="$(for DER_UT in ${UT_LISTE}
+	U_TITEL_FF_01="-c:s copy $(for DER_UT in ${UT_LISTE}
 	do
-		echo -n " -map 0:s:${DER_UT}? -c:s copy"
+		echo -n " -map 0:s:${DER_UT}?"
 	done)"
 
 	### Wenn der Untertitel in einem Text-Format vorliegt, dann muss er ggf. auch transkodiert werden.
@@ -1648,18 +1650,18 @@ else
 		unset U_TITEL_FF_ALT
 	else
 		if [ "x${UT_FORMAT}" != x ] ; then
-			U_TITEL_FF_ALT="$(for DER_UT in ${UT_LISTE}
+			U_TITEL_FF_ALT="-c:s ${UT_FORMAT} $(for DER_UT in ${UT_LISTE}
 			do
-				echo -n " -map 0:s:${DER_UT}? -c:s ${UT_FORMAT}"
+				echo -n " -map 0:s:${DER_UT}?"
 			done)"
 		fi
 	fi
 
 	UT_ANZAHL="$(echo "${UT_LISTE}" | wc -w | awk '{print $1}')"
 	UT_KOPIE="$(seq 0 ${UT_ANZAHL} | head -n ${UT_ANZAHL})"
-	U_TITEL_FF_02="$(for DER_UT in ${UT_KOPIE}
+	U_TITEL_FF_02="$-c:s copy (for DER_UT in ${UT_KOPIE}
 	do
-		echo -n " -map 0:s:${DER_UT}? -c:s copy"
+		echo -n " -map 0:s:${DER_UT}?"
 	done)"
 fi
 
@@ -1673,9 +1675,11 @@ UT_LISTE='${UT_LISTE}'
 U_TITEL_FF_01='${U_TITEL_FF_01}'
 U_TITEL_FF_ALT='${U_TITEL_FF_ALT}'
 U_TITEL_FF_02='${U_TITEL_FF_02}'
+
+AUDIO_STANDARD_SPUR='${AUDIO_STANDARD_SPUR}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
-#exit 280
+#exit 380
 
 #==============================================================================#
 ### Meta-Daten aufbereiten
@@ -1697,8 +1701,14 @@ do
 	if [ "x${AUDIO_STANDARD_SPUR}" != x ] ; then
 		if [ "${DIE_TS}" = "${AUDIO_STANDARD_SPUR}" ] ; then
 			META_DATEN_DISPOSITIONEN="${META_DATEN_DISPOSITIONEN} -disposition:a:${DIE_TS} default"
+			echo "# 381
+			META_DATEN_DISPOSITIONEN='${META_DATEN_DISPOSITIONEN}'
+			" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 		else
 			META_DATEN_DISPOSITIONEN="${META_DATEN_DISPOSITIONEN} -disposition:a:${DIE_TS} 0"
+			echo "# 382
+			META_DATEN_DISPOSITIONEN='${META_DATEN_DISPOSITIONEN}'
+			" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 		fi
 	fi
 done
@@ -1863,7 +1873,6 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" = "0" ] ; then
 	U_TITEL_FF_01=""
 	U_TITEL_FF_ALT=""
 	U_TITEL_FF_02=""
-	UNTERTITEL_AN=""		# für das zusammensetzen der Filmteile
 fi
 
 #------------------------------------------------------------------------------#
