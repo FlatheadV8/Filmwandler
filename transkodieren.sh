@@ -22,7 +22,8 @@
 #VERSION="v2019101600"
 #VERSION="v2019102900"
 #VERSION="v2019110100"
-VERSION="v2020101800"
+#VERSION="v2020101800"
+VERSION="v2020102600"		# jetzt funktionieren auch Titel mit Leerzeichen
 
 
 ALLE_OPTIONEN="${@}"
@@ -31,33 +32,38 @@ PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 STOP="Nein"
 
-AVERZ="$(dirname ${0})"                 # Arbeitsverzeichnis, hier liegen diese Dateien
+AVERZ="$(dirname ${0})"			# Arbeitsverzeichnis, hier liegen diese Dateien
 
 #==============================================================================#
 if [ "x${1}" == x ] ; then
-        echo "${0} OPTIONEN"
-        echo "siehe: ${AVERZ}/Filmwandler.sh -h"
-        echo "${0} -q [Quelle] -z [Ziel]"
-        echo "${0} -q Film.avi -z Film"
-        exit 1
+	echo "${0} OPTIONEN"
+	echo "siehe: ${AVERZ}/Filmwandler.sh -h"
+	echo "${0} -q [Quelle] -z [Ziel]"
+	echo "${0} -q Film.avi -z Film"
+	exit 1
 fi
 #==============================================================================#
 
 while [ "${#}" -ne "0" ]; do
         case "${1}" in
                 -q)
-                        FILMDATEI="${2}"        # Name für die Quelldatei
+                        FILMDATEI="${2}"	# Name für die Quelldatei
                         shift
                         shift
                         ;;
                 -z)
-                        ZIELPFAD="${2}"         # Name für die Zieldatei
+                        ZIELPFAD="${2}"		# Name für die Zieldatei
+                        shift
+                        shift
+                        ;;
+                -titel)
+                        TITEL="${2}"		# Name für die Zieldatei
                         shift
                         shift
                         ;;
                 *)
                         echo -n .
-                        SONSTIGE_OPTIONEN="${SONSTIGE_OPTIONEN} ${1}"
+			SONSTIGE_OPTIONEN="${SONSTIGE_OPTIONEN} ${1}"
                         shift
                         ;;
         esac
@@ -96,7 +102,7 @@ ZIELNAME="$(echo "${ZIELDATEI}" | rev | sed 's/[ ][ ]*/_/g;s/.*[.]//' | rev)"
 ### Schnitt
 
 if [ "x${SCHNITTZEITEN}" != x ] ; then
-        SCHNITT_OPTION="-schnitt \"${SCHNITTZEITEN}\""
+	SCHNITT_OPTION="-schnitt \"${SCHNITTZEITEN}\""
 fi
 
 echo "
@@ -112,12 +118,12 @@ SCHNITT_OPTION='${SCHNITT_OPTION}'
 #set -x
 
 ### MP4
-echo "# 0,1: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" ${SCHNITT_OPTION}"
-${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" ${SCHNITT_OPTION}
+echo "# 0,1: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" ${SCHNITT_OPTION} -titel \"${TITEL}\""
+${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" ${SCHNITT_OPTION} -titel "${TITEL}"
 
 ### MKV
-echo "# 0,2: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}\" ${SCHNITT_OPTION}"
-${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}" ${SCHNITT_OPTION}
+echo "# 0,2: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}\" ${SCHNITT_OPTION} -titel \"${TITEL}\""
+${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}" ${SCHNITT_OPTION} -titel "${TITEL}"
 
 ls -lha "${ZIELPFAD}"*
 
