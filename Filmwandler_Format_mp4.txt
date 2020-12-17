@@ -46,7 +46,7 @@ FORMAT_BESCHREIBUNG="
 * Video-Kodierung:      H.264 (MPEG-4 Part 10 / AVC)                           *
 * Audio-Kodierung:      AAC   (mehrkanalfähiger Nachfolger von MP3)            *
 * Beschreibung:                                                                *
-* 	- hohe Kompatibilität mit Konsumerelektronik                           *
+*       - hohe Kompatibilität mit Konsumerelektronik                           *
 *       - HTML5-Unterstützung                                                  *
 *       - auch abspielbar auf Android                                          *
 ********************************************************************************
