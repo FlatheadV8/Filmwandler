@@ -13,7 +13,8 @@
 #VERSION="v2020060200"	# erweitert um Beispiele
 #VERSION="v2020060300"	# VIDEO_OPTION definiert, Anpassungen für FFmpeg 4.2.2
 #VERSION="v2020092300" 	# der Kodec "libaom-av1" ist nicht mehr experimentell
-VERSION="v2020112800" 	# limitierte Kodeksuche eingebaut, bei der nur nach bestimmten Kodeks gesucht wird
+#VERSION="v2020112800" 	# limitierte Kodeksuche eingebaut, bei der nur nach bestimmten Kodeks gesucht wird
+VERSION="v2020121700" 	# Qualitätsabstufung von AOM angepasst
 
 #==============================================================================#
 ### vollautomatische Kodeksuche wurde in diesem Fall abgeschaltet,
@@ -115,16 +116,17 @@ CPU_VERBRAUCH="5"
 #------------------------------------------------------------------------------#
 
 VIDEO_OPTION="-cpu-used ${CPU_VERBRAUCH} -row-mt 1 -tile-columns 1 -tile-rows 0"
+
 VIDEO_QUALITAET_0="-crf 52 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_1="-crf 48 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_2="-crf 44 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_3="-crf 40 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_4="-crf 36 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_5="-crf 32 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_6="-crf 28 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_7="-crf 24 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_8="-crf 20 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_9="-crf 16 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_1="-crf 47 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_2="-crf 42 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_3="-crf 37 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_4="-crf 32 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_5="-crf 27 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_6="-crf 22 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_7="-crf 17 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_8="-crf 12 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_9="-crf 07 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
 }
 
 
@@ -185,27 +187,16 @@ libsvt_av1()
 
 #VIDEO_OPTION="-preset 8 -profile 0 -level 0 -rc 0"
 
-#VIDEO_QUALITAET_0="-qp 52 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-#VIDEO_QUALITAET_1="-qp 48 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-#VIDEO_QUALITAET_2="-qp 44 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-#VIDEO_QUALITAET_3="-qp 40 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-#VIDEO_QUALITAET_4="-qp 36 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-#VIDEO_QUALITAET_5="-qp 32 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-#VIDEO_QUALITAET_6="-qp 28 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-#VIDEO_QUALITAET_7="-qp 24 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-#VIDEO_QUALITAET_8="-qp 20 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-#VIDEO_QUALITAET_9="-qp 16 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-
 VIDEO_QUALITAET_0="-qp 52 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_1="-qp 47 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_2="-qp 42 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_3="-qp 37 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_4="-qp 32 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_5="-qp 27 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_6="-qp 22 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_7="-qp 17 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_8="-qp 12 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_9="-qp 07 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_1="-qp 48 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_2="-qp 44 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_3="-qp 40 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_4="-qp 36 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_5="-qp 32 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_6="-qp 28 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_7="-qp 24 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_8="-qp 20 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_9="-qp 16 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
 }
 
 
@@ -248,3 +239,4 @@ fi
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
+
