@@ -56,7 +56,8 @@
 #VERSION="v2020110400"			# Fehler bei PROTOKOLLDATEI-Namen behoben + VIDEO_DELAY eingebaut
 #VERSION="v2020110900"			# etwas mehr Logausgaben
 #VERSION="v2020111100"			# Fehler bei Video-Spurerkennung von Blurays behoben
-VERSION="v2020121700"			# Multiple -c, -codec, -acodec, -vcodec, -scodec or -dcodec options specified for stream 9, only the last option '-c:s copy' will be used. /  Multiple -q or -qscale options specified for stream 2, only the last option '-q:a 6.000000' will be used.
+#VERSION="v2020121700"			# Multiple -c, -codec, -acodec, -vcodec, -scodec or -dcodec options specified for stream 9, only the last option '-c:s copy' will be used. /  Multiple -q or -qscale options specified for stream 2, only the last option '-q:a 6.000000' will be used.
+VERSION="v2021032800"			# Fehler: es wurde nur eine Video-Spur transkodiert, wenn es die erste Spur im Container war + PAD nach hinten verschoben
 
 VERSION_METADATEN="${VERSION}"
 
@@ -779,7 +780,7 @@ UNTERTITEL_STANDARD_SPUR='${UNTERTITEL_STANDARD_SPUR}'
 #------------------------------------------------------------------------------#
 #VIDEO_SPUR="$(echo "${META_DATEN_INFO}" | awk '/Stream #.*: Video: /{print $1}' | head -n1)"
 #if [ "${VIDEO_SPUR}" != Stream ] ; then
-VIDEO_SPUR="$(echo "${META_DATEN_STREAMS}" | sed -ne '1,/STREAM/p' | fgrep -i codec_type=video | head -n1)"
+VIDEO_SPUR="$(echo "${META_DATEN_STREAMS}" | fgrep -i codec_type=video | head -n1)"
 if [ "${VIDEO_SPUR}" != codec_type=video ] ; then
 	VIDEO_NICHT_UEBERTRAGEN=0
 fi
@@ -1795,7 +1796,7 @@ esac
 # hinter PAD muss dann die endgültig gewünschte Auflösung für quadratische Pixel
 #
 #VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${BILD_SCALE}${PAD}${h263_BILD_FORMAT}${FORMAT_ANPASSUNG}" | sed 's/[,]$//')"			# für Testzwecke
-VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${BILD_SCALE}${PAD}${PIXELKORREKTUR}${h263_BILD_FORMAT}${FORMAT_ANPASSUNG}" | sed 's/[,]$//')"
+VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${BILD_SCALE}${PIXELKORREKTUR}${h263_BILD_FORMAT}${PAD}${FORMAT_ANPASSUNG}" | sed 's/[,]$//')"
 
 if [ "x${SOLL_FPS}" = "x" ] ; then
 	unset FPS
@@ -2081,3 +2082,4 @@ echo "# 550
 $(date +'%F %T') (${LAUFZEIT})" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 310
+
