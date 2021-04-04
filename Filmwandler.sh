@@ -1796,7 +1796,7 @@ esac
 # hinter PAD muss dann die endgültig gewünschte Auflösung für quadratische Pixel
 #
 #VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${BILD_SCALE}${PAD}${h263_BILD_FORMAT}${FORMAT_ANPASSUNG}" | sed 's/[,]$//')"			# für Testzwecke
-VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${BILD_SCALE}${PIXELKORREKTUR}${h263_BILD_FORMAT}${PAD}${FORMAT_ANPASSUNG}" | sed 's/[,]$//')"
+VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${BILD_SCALE}${PAD}${PIXELKORREKTUR}${h263_BILD_FORMAT}${FORMAT_ANPASSUNG}" | sed 's/[,]$//')"
 
 if [ "x${SOLL_FPS}" = "x" ] ; then
 	unset FPS
