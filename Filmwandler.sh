@@ -57,7 +57,9 @@
 #VERSION="v2020110900"			# etwas mehr Logausgaben
 #VERSION="v2020111100"			# Fehler bei Video-Spurerkennung von Blurays behoben
 #VERSION="v2020121700"			# Multiple -c, -codec, -acodec, -vcodec, -scodec or -dcodec options specified for stream 9, only the last option '-c:s copy' will be used. /  Multiple -q or -qscale options specified for stream 2, only the last option '-q:a 6.000000' will be used.
-VERSION="v2021032800"			# Fehler: es wurde nur eine Video-Spur transkodiert, wenn es die erste Spur im Container war + PAD nach hinten verschoben
+#VERSION="v2021032800"			# Fehler: es wurde nur eine Video-Spur transkodiert, wenn es die erste Spur im Container war + PAD nach hinten verschoben
+#VERSION="v2021040400"			# PAD vor PIXELKORREKTUR verschoben / jetzt gibt es einen Hinweis, wenn die Zieldatei keine Endung hat
+VERSION="v2021050600"			# PAD vor BILD_SCALE verschoben + PIXELKORREKTUR verlagert
 
 VERSION_METADATEN="${VERSION}"
 
@@ -101,7 +103,7 @@ IFRAME="-keyint_min 2-8"		# --keyint in Frames
 
 LANG=C					# damit AWK richtig rechnet
 Film2Standardformat_OPTIONEN="${@}"
-ORIGINAL_PIXEL="Nein"
+TEST="Nein"
 STOP="Nein"
 
 AVERZ="$(dirname ${0})"			# Arbeitsverzeichnis, hier liegen diese Dateien
@@ -300,7 +302,7 @@ while [ "${#}" -ne "0" ]; do
                         shift
                         ;;
                 -test|-t)
-                        ORIGINAL_PIXEL="Ja"	# um die richtigen CROP-Parameter zu ermitteln
+                        TEST="Ja"		# um die richtigen CROP-Parameter zu ermitteln
                         shift
                         ;;
                 -u)
@@ -466,6 +468,7 @@ while [ "${#}" -ne "0" ]; do
         # will man z.B. von einem 4/3-Film, der als 16/9-Film (720x576)
         # mit schwarzen Balken an den Seiten, diese schwarzen Balken entfernen,
         # dann könnte das zum Beispiel so gemacht werden:
+	# -crop Ausschnittsbreite:Ausschnittshöhe:Abstand_von_links:Abstand_von_oben
         -crop 540:576:90:0
 
 	mögliche Namen von Grafikauflösungen anzeigen
@@ -544,6 +547,11 @@ ZIELNAME="$(echo "${ZIELDATEI}" | awk '{sub("[.][^.]*$","");print $0}')"
 ZIEL_FILM="${ZIELNAME}"
 ENDUNG="$(echo "${ZIEL_BASIS_NAME}" | rev | sed 's/[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.]/&"/;s/[.]".*//' | rev)"
 
+if [ "${ZIEL_BASIS_NAME}" = "${ENDUNG}" ] ; then
+	echo 'Die Zieldatei muß eine Endung haben!'
+	ls ${AVERZ}/Filmwandler_Format_*.txt | sed 's/.*Filmwandler_Format_//;s/[.]txt//'
+	exit 1
+fi
 
 if [ "${QUELL_BASIS_NAME}" = "${ZIEL_BASIS_NAME}" ] ; then
 	ZIELNAME="${ZIELNAME}_Nr2"
@@ -1197,58 +1205,56 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   #------------------------------------------------------------------------------#
   ### gewünschtes Rasterformat der Bildgröße (Auflösung)
 
-  if [ "${ORIGINAL_PIXEL}" != Ja ] ; then
-	if [ "x${SOLL_XY}" = "x" ] ; then
-		unset BILD_SCALE
-		unset SOLL_XY
+  if [ "x${SOLL_XY}" = "x" ] ; then
+	unset BILD_SCALE
+	unset SOLL_XY
 
-		### ob die Pixel bereits quadratisch sind
-		if [ "${PAR_FAKTOR}" -ne "100000" ] ; then
-			### Umrechnung in quadratische Pixel
-			#
-			### [swscaler @ 0x81520d000] Warning: data is not aligned! This can lead to a speed loss
-			### laut Googel müssen die Pixel durch 16 teilbar sein, beseitigt aber leider dieses Problem nicht
-			#
-			### die Pixel sollten wenigstens durch 2 teilbar sein! besser aber durch 8                          
-			TEILER="2"
-			##TEILER="4"
-			#TEILER="8"
-			###TEILER="16"
-			#
-			TEIL_HOEHE="$(echo "${IN_BREIT} ${IN_HOCH} ${IN_DAR} ${TEILER}" | awk '{gsub(":"," ");printf "%.0f\n", sqrt($1 * $2 * $3 / $4) / $3 / $5}' | awk '{print $1 * 2}')"
-			BILD_BREIT="$(echo "${TEIL_HOEHE} ${IN_DAR}" | awk '{gsub(":"," ");print $1 * $2}')"
-			BILD_HOCH="$(echo "${TEIL_HOEHE} ${IN_DAR}" | awk '{gsub(":"," ");print $1 * $3}')"
-			BILD_SCALE="scale=${BILD_BREIT}x${BILD_HOCH},"
-		else
-			### wenn die Pixel bereits quadratisch sind
-			BILD_BREIT="${IN_BREIT}"
-			BILD_HOCH="${IN_HOCH}"
-		fi
+	### ob die Pixel bereits quadratisch sind
+	if [ "${PAR_FAKTOR}" -ne "100000" ] ; then
+		### Umrechnung in quadratische Pixel
+		#
+		### [swscaler @ 0x81520d000] Warning: data is not aligned! This can lead to a speed loss
+		### laut Googel müssen die Pixel durch 16 teilbar sein, beseitigt aber leider dieses Problem nicht
+		#
+		### die Pixel sollten wenigstens durch 2 teilbar sein! besser aber durch 8                          
+		TEILER="2"
+		##TEILER="4"
+		#TEILER="8"
+		###TEILER="16"
+		#
+		TEIL_HOEHE="$(echo "${IN_BREIT} ${IN_HOCH} ${IN_DAR} ${TEILER}" | awk '{gsub(":"," ");printf "%.0f\n", sqrt($1 * $2 * $3 / $4) / $3 / $5}' | awk '{print $1 * 2}')"
+		BILD_BREIT="$(echo "${TEIL_HOEHE} ${IN_DAR}" | awk '{gsub(":"," ");print $1 * $2}')"
+		BILD_HOCH="$(echo "${TEIL_HOEHE} ${IN_DAR}" | awk '{gsub(":"," ");print $1 * $3}')"
+		BILD_SCALE="scale=${BILD_BREIT}x${BILD_HOCH},"
 	else
-		### Übersetzung von Bildauflösungsnamen zu Bildauflösungen
-		### tritt nur bei manueller Auswahl der Bildauflösung in Kraft
-		AUFLOESUNG_ODER_NAME="$(echo "${SOLL_XY}" | egrep '[0-9][0-9][0-9][x][0-9][0-9]')"
-		if [ "x${AUFLOESUNG_ODER_NAME}" = "x" ] ; then
-			### manuelle Auswahl der Bildauflösung per Namen
-			if [ "x${BILD_FORMATNAMEN_AUFLOESUNGEN}" != "x" ] ; then
-				NAME_XY_DAR="$(echo "${BILD_FORMATNAMEN_AUFLOESUNGEN}" | egrep '[-]soll_xmaly ' | awk '{print $2,$4,$5}' | egrep -i "^${SOLL_XY} ")"
-				SOLL_XY="$(echo "${NAME_XY_DAR}" | awk '{print $2}')"
-				SOLL_DAR="$(echo "${NAME_XY_DAR}" | awk '{print $3}')"
-
-				# https://ffmpeg.org/ffmpeg-filters.html#setdar_002c-setsar
-				FORMAT_ANPASSUNG="setdar='${SOLL_DAR}',"
-			else
-				echo "Die gewünschte Bildauflösung wurde als 'Name' angegeben: '${SOLL_XY}'"
-				echo "Für die Übersetzung wird die Datei 'Filmwandler_grafik.txt' benötigt."
-				echo "Leider konnte die Datei '$(dirname ${0})/Filmwandler_grafik.txt' nicht gelesen werden."
-				exit 180
-			fi
-		fi
-
-		SOLL_BILD_SCALE="scale=${SOLL_XY},"
-		BILD_BREIT="$(echo "${SOLL_BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $1}')"
-		BILD_HOCH="$(echo "${SOLL_BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $2}')"
+		### wenn die Pixel bereits quadratisch sind
+		BILD_BREIT="${IN_BREIT}"
+		BILD_HOCH="${IN_HOCH}"
 	fi
+  else
+	### Übersetzung von Bildauflösungsnamen zu Bildauflösungen
+	### tritt nur bei manueller Auswahl der Bildauflösung in Kraft
+	AUFLOESUNG_ODER_NAME="$(echo "${SOLL_XY}" | egrep '[0-9][0-9][0-9][x][0-9][0-9]')"
+	if [ "x${AUFLOESUNG_ODER_NAME}" = "x" ] ; then
+		### manuelle Auswahl der Bildauflösung per Namen
+		if [ "x${BILD_FORMATNAMEN_AUFLOESUNGEN}" != "x" ] ; then
+			NAME_XY_DAR="$(echo "${BILD_FORMATNAMEN_AUFLOESUNGEN}" | egrep '[-]soll_xmaly ' | awk '{print $2,$4,$5}' | egrep -i "^${SOLL_XY} ")"
+			SOLL_XY="$(echo "${NAME_XY_DAR}" | awk '{print $2}')"
+			SOLL_DAR="$(echo "${NAME_XY_DAR}" | awk '{print $3}')"
+
+			# https://ffmpeg.org/ffmpeg-filters.html#setdar_002c-setsar
+			FORMAT_ANPASSUNG="setdar='${SOLL_DAR}',"
+		else
+			echo "Die gewünschte Bildauflösung wurde als 'Name' angegeben: '${SOLL_XY}'"
+			echo "Für die Übersetzung wird die Datei 'Filmwandler_grafik.txt' benötigt."
+			echo "Leider konnte die Datei '${AVERZ}/Filmwandler_grafik.txt' nicht gelesen werden."
+			exit 180
+		fi
+	fi
+
+	SOLL_BILD_SCALE="scale=${SOLL_XY},"
+	BILD_BREIT="$(echo "${SOLL_BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $1}')"
+	BILD_HOCH="$(echo "${SOLL_BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $2}')"
   fi
 
   #------------------------------------------------------------------------------#
@@ -1384,11 +1390,7 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   # SCHWARZ="$(echo "${HOEHE} ${BREITE} ${BILD_BREIT} ${BILD_HOCH}" | awk '{sw="oben"; if (($1/$2) < ($3/$4)) sw="oben"; print sw}')"
   # SCHWARZ="$(echo "${HOEHE} ${BREITE} ${BILD_BREIT} ${BILD_HOCH}" | awk '{sw="oben"; if (($1/$2) > ($3/$4)) sw="links"; print sw}')"
   #
-  if [ "${ORIGINAL_PIXEL}" = Ja ] ; then
-	unset PAD
-  else
-	PAD="pad='max(iw\\,ih*(${BREITE}/${HOEHE})):ow/(${BREITE}/${HOEHE}):(ow-iw)/2:(oh-ih)/2',"
-  fi
+  PAD="pad='max(iw\\,ih*(${BREITE}/${HOEHE})):ow/(${BREITE}/${HOEHE}):(ow-iw)/2:(oh-ih)/2',"
 
 
   #------------------------------------------------------------------------------#
@@ -1787,6 +1789,13 @@ case "${BILDQUALIT}" in
 esac
 
 #------------------------------------------------------------------------------#
+### Korrektureingriff
+
+if [ "x${PIXELKORREKTUR}" != x ] ; then
+	BILD_SCALE="${PIXELKORREKTUR}"
+fi
+
+#------------------------------------------------------------------------------#
 # Transkodierung
 #
 # vor PAD muss eine Auflösung, die der Originalauflösung entspricht, die aber
@@ -1795,8 +1804,11 @@ esac
 # wie die Bildpunkte im Quell-Film;
 # hinter PAD muss dann die endgültig gewünschte Auflösung für quadratische Pixel
 #
-#VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${BILD_SCALE}${PAD}${h263_BILD_FORMAT}${FORMAT_ANPASSUNG}" | sed 's/[,]$//')"			# für Testzwecke
-VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${BILD_SCALE}${PAD}${PIXELKORREKTUR}${h263_BILD_FORMAT}${FORMAT_ANPASSUNG}" | sed 's/[,]$//')"
+if [ "${TEST}" = "Ja" ] ; then
+	VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}" | sed 's/[,]$//')"
+else
+	VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${PAD}${BILD_SCALE}${h263_BILD_FORMAT}${FORMAT_ANPASSUNG}" | sed 's/[,]$//')"
+fi
 
 if [ "x${SOLL_FPS}" = "x" ] ; then
 	unset FPS
@@ -2082,4 +2094,3 @@ echo "# 550
 $(date +'%F %T') (${LAUFZEIT})" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 310
-
