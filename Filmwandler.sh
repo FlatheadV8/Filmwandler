@@ -60,7 +60,9 @@
 #VERSION="v2021032800"			# Fehler: es wurde nur eine Video-Spur transkodiert, wenn es die erste Spur im Container war + PAD nach hinten verschoben
 #VERSION="v2021040400"			# PAD vor PIXELKORREKTUR verschoben / jetzt gibt es einen Hinweis, wenn die Zieldatei keine Endung hat
 #VERSION="v2021050600"			# PAD vor BILD_SCALE verschoben + PIXELKORREKTUR verlagert
-VERSION="v2021050801"			# das PAD (padding) verbessert - Verzerrungsproblem bei nicht quadratischen Bildpunkten endlich gelöst
+#VERSION="v2021050800"			# das PAD (padding) verbessert - Verzerrungsproblem bei nicht quadratischen Bildpunkten endlich gelöst
+#VERSION="v2021050801"			# das PAD (padding) verbessert - Verzerrungsproblem bei nicht quadratischen Bildpunkten endlich gelöst
+VERSION="v2021050802"			# Test-Modus optimiert
 
 VERSION_METADATEN="${VERSION}"
 
@@ -1839,12 +1841,11 @@ fi
 # hinter PAD muss dann die endgültig gewünschte Auflösung für quadratische Pixel
 #
 if [ "${TEST}" = "Ja" ] ; then
-	if [ "x${ZEILENSPRUNG}${CROP}" = "x" ] ; then
+	if [ "x${CROP}" = "x" ] ; then
 		VIDEOOPTION="$(echo "${VIDEOQUALITAET}" | sed 's/[,]$//')"
 	else
-		VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}" | sed 's/[,]$//')"
+		VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${CROP}" | sed 's/[,]$//')"
 	fi
-        ZEILENSPRUNG=""
 else
 	if [ "x${ZEILENSPRUNG}${CROP}${PAD}${BILD_SCALE}${h263_BILD_FORMAT}${FORMAT_ANPASSUNG}" = "x" ] ; then
 		VIDEOOPTION="$(echo "${VIDEOQUALITAET}" | sed 's/[,]$//')"
