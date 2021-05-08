@@ -1385,7 +1385,7 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   # PAR = Pixel   Aspect Ratio = SAR
   #
   # PAL-TV         (720x576) : DAR  4/3, SAR 16:15 = 1,066666666666666666
-  # NTNC-TV        (720x480) : DAR  4/3, SAR  8:9  = 0,888888888888888888
+  # NTNC-TV        (720x486) : DAR  4/3, SAR  9:10 = 0,9
   # NTSC-DVD       (720x480) : DAR 16/9, SAR 32:27 = 1,185185185185185185
   # PAL-DVD / DVB  (720x576) : DAR 16/9, SAR 64:45 = 1,422222222222222222
   # BluRay        (1920x1080): DAR 16/9, SAR  1:1  = 1,0
