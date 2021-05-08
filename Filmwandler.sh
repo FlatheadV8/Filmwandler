@@ -60,7 +60,7 @@
 #VERSION="v2021032800"			# Fehler: es wurde nur eine Video-Spur transkodiert, wenn es die erste Spur im Container war + PAD nach hinten verschoben
 #VERSION="v2021040400"			# PAD vor PIXELKORREKTUR verschoben / jetzt gibt es einen Hinweis, wenn die Zieldatei keine Endung hat
 #VERSION="v2021050600"			# PAD vor BILD_SCALE verschoben + PIXELKORREKTUR verlagert
-VERSION="v2021050800"			# das PAD (padding) verbessert - Verzerrungsproblem bei nicht quadratischen Bildpunkten endlich gelöst
+VERSION="v2021050801"			# das PAD (padding) verbessert - Verzerrungsproblem bei nicht quadratischen Bildpunkten endlich gelöst
 
 VERSION_METADATEN="${VERSION}"
 
@@ -620,19 +620,6 @@ REPARATUR_PARAMETER="-fflags +genpts"
 #------------------------------------------------------------------------------#
 ### Meta-Daten auslesen
 
-#META_DATEN_KOMPLETT="$(ffprobe ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_data -show_streams 2>&1)"
-#META_DATEN_INFO="$(echo   "${META_DATEN_KOMPLETT}" | sed -ne '/^Input /,/STREAM/p')"
-#META_DATEN_STREAM="$(echo "${META_DATEN_KOMPLETT}" | sed -e  '1,/STREAM/d')"
-##META_DATEN_STREAM="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_data -show_streams)"
-#BILD_DREHUNG="$(echo "${META_DATEN_INFO}" | sed -ne '/Video: /,/Audio: / p' | awk '/ rotate /{print $NF}' | head -n1)"
-#
-#echo "# META_DATEN_INFO:
-#${META_DATEN_INFO}
-#"                                             | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-#echo "# META_DATEN_STREAM:
-#${META_DATEN_STREAM}
-#" | grep -E '^codec_(name|long_name|type)='   | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-
 META_DATEN_STREAMS="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_streams)"
 META_DATEN_ZEILENWEISE_STREAMS="$(echo "${META_DATEN_STREAMS}" | tr -s '\r' '\n' | tr -s '\n' ';' | sed 's/;\[STREAM\]/³[STREAM]/g' | tr -s '³' '\n')"	# durch Semikolin getrennte Schlüssel
 
@@ -787,8 +774,7 @@ UNTERTITEL_STANDARD_SPUR='${UNTERTITEL_STANDARD_SPUR}'
 #------------------------------------------------------------------------------#
 #--- VIDEO_SPUR ---------------------------------------------------------------#
 #------------------------------------------------------------------------------#
-#VIDEO_SPUR="$(echo "${META_DATEN_INFO}" | awk '/Stream #.*: Video: /{print $1}' | head -n1)"
-#if [ "${VIDEO_SPUR}" != Stream ] ; then
+
 VIDEO_SPUR="$(echo "${META_DATEN_STREAMS}" | fgrep -i codec_type=video | head -n1)"
 if [ "${VIDEO_SPUR}" != codec_type=video ] ; then
 	VIDEO_NICHT_UEBERTRAGEN=0
@@ -859,28 +845,17 @@ echo "# 70
 
 #exit 110
 
-if [ "${IN_XY}" = "x" ] ; then
-	# META_DATEN_INFO=' 720x576 SAR 64:45 DAR 16:9 25 fps '
-	# META_DATEN_INFO=" 852x480 SAR 1:1 DAR 71:40 25 fps "
-	# META_DATEN_INFO=' 1920x800 SAR 1:1 DAR 12:5 23.98 fps '
-	IN_XY="$(echo "${META_DATEN_INFO}" | fgrep 'Video: ' | tr -s ',' '\n' | fgrep ' DAR ' | awk '{print $1}' | head -n1)"
-	echo "# 80
+if [ "x${IN_XY}" = "x" ] ; then
+	# META_DATEN_STREAMS=" coded_width=0 "
+	# META_DATEN_STREAMS=" coded_height=0 "
+	IN_BREIT="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | fgrep ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^coded_width=/{print $2}' | grep -Fv 'N/A' | grep -Ev '^0$' | head -n1)"
+	IN_HOCH="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | fgrep ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^coded_height=/{print $2}' | grep -Fv 'N/A' | grep -Ev '^0$' | head -n1)"
+	IN_XY="${IN_BREIT}x${IN_HOCH}"
+	echo "# 90
 	2 IN_XY='${IN_XY}'
 	2 IN_BREIT='${IN_BREIT}'
 	2 IN_HOCH='${IN_HOCH}'
 	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	if [ "x${IN_XY}" = "x" ] ; then
-		# META_DATEN_STREAMS=" coded_width=0 "
-		# META_DATEN_STREAMS=" coded_height=0 "
-		IN_BREIT="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^coded_width=/{print $2}' | grep -Fv 'N/A' | grep -Ev '^0$' | head -n1)"
-		IN_HOCH="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^coded_height=/{print $2}' | grep -Fv 'N/A' | grep -Ev '^0$' | head -n1)"
-		IN_XY="${IN_BREIT}x${IN_HOCH}"
-		echo "# 90
-		3 IN_XY='${IN_XY}'
-		3 IN_BREIT='${IN_BREIT}'
-		3 IN_HOCH='${IN_HOCH}'
-		" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	fi
 
 	# http://www.borniert.com/2016/03/rasch-mal-ein-video-drehen/
 	# ffmpeg -i in.mp4 -c copy -metadata:s:v:0 rotate=90 out.mp4
@@ -900,18 +875,18 @@ echo "# 100
 1 IN_PAR='${IN_PAR}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 if [ "x${IN_PAR}" = "x" ] ; then
-	IN_PAR="$(echo "${META_DATEN_INFO}" | fgrep 'Video: ' | tr -s ',' '\n' | fgrep ' DAR ' | tr -s '[\[\]]' ' ' | awk '{print $3}')"
+	IN_PAR="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | fgrep ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^sample_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | grep -Ev '^0$' | head -n1)"
 	echo "# 110
 	2 IN_PAR='${IN_PAR}'
 	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 fi
 
-IN_DAR="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^display_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | head -n1)"
+IN_DAR="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | fgrep ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^display_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 echo "# 120
 1 IN_DAR='${IN_DAR}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 if [ "x${IN_DAR}" = "x" ] ; then
-	IN_DAR="$(echo "${META_DATEN_INFO}" | fgrep 'Video: ' | tr -s ',' '\n' | fgrep ' DAR ' | tr -s '[\[\]]' ' ' | awk '{print $5}')"
+	IN_DAR="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | fgrep ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^display_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | grep -Ev '^0$' | head -n1)"
 	echo "# 130
 	2 IN_DAR='${IN_DAR}'
 	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
@@ -934,12 +909,6 @@ if [ "x${IN_FPS}" = "x" ] ; then
 		echo "# 160
 		3 IN_FPS='${IN_FPS}'
 		" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-		if [ "x${IN_FPS}" = "x" ] ; then
-			IN_FPS="$(echo "${META_DATEN_INFO}" | fgrep 'Video: ' | tr -s ',' '\n' | fgrep ' fps' | awk '{print $1}')"			# wird benötigt um den Farbraum für BluRay zu ermitteln
-			echo "# 170
-			4 IN_FPS='${IN_FPS}'
-			" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-		fi
 	fi
 fi
 
@@ -950,16 +919,10 @@ echo "# 180
 1 IN_BIT_RATE='${IN_BIT_RATE}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 if [ "x${IN_BIT_RATE}" = "x" ] ; then
-	IN_BIT_RATE="$(echo "${META_DATEN_INFO}" | grep -F 'Video: ' | tr -s ',' '\n' | awk -F':' '/bitrate: /{print $2}' | tail -n1)"
+	IN_BIT_RATE="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | fgrep ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^bit_rate=/{print $2}' | grep -Fv 'N/A' | grep -Ev '^0$' | head -n1)"
 	echo "# 190
 	2 IN_BIT_RATE='${IN_BIT_RATE}'
 	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	if [ "x${IN_BIT_RATE}" = "x" ] ; then
-		IN_BIT_RATE="$(echo "${META_DATEN_INFO}" | grep -F 'Duration: ' | tr -s ',' '\n' | awk -F':' '/bitrate: /{print $2}' | tail -n1)"
-		echo "# 200
-		3 IN_BIT_RATE='${IN_BIT_RATE}'
-		" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	fi
 fi
 
 IN_BIT_EINH="$(echo "${IN_BIT_RATE}" | awk '{print $2}')"
@@ -1276,9 +1239,8 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   ### Aber wenn nicht, dann sind diese Berechnungen nötig.
 
   if [ "x${ORIGINAL_DAR}" != "x" ] ; then
-	ORIG_DAR="$(echo "${META_DATEN_INFO}" | fgrep 'Video: ' | tr -s ',' '\n' | fgrep ' DAR ' | sed 's/.*DAR /DAR /;s/]//g' | awk '{print $2}' | head -n1)"
-	ORIG_DAR_BREITE="$(echo "${ORIG_DAR}" | awk -F':' '{print $1}')"
-	ORIG_DAR_HOEHE="$(echo "${ORIG_DAR}" | awk -F':' '{print $2}')"
+	ORIG_DAR_BREITE="$(echo "${IN_DAR}" | awk -F':' '{print $1}')"
+	ORIG_DAR_HOEHE="$(echo "${IN_DAR}" | awk -F':' '{print $2}')"
 	BREITE="${ORIG_DAR_BREITE}"
 	HOEHE="${ORIG_DAR_HOEHE}"
 	FORMAT_ANPASSUNG="setdar='${BREITE}/${HOEHE}',"
@@ -1426,14 +1388,17 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   # PAL-DVD / DVB  (720x576) : DAR 16/9, SAR 64:45 = 1,422222222222222222
   # BluRay        (1920x1080): DAR 16/9, SAR  1:1  = 1,0
   #
-  #BREIT_QUADRATISCH="$(echo "${IN_HOCH} ${O_HOCH} ${BREITE} ${IN_BREIT} ${IN_HOCH} ${HOEHE} ${O_BREIT}" | awk '{printf "%.0f\n", ($1*$2*$3*$4/$5/$6/$7)}')"
-  BASISWERTE="${O_BREIT} ${O_HOCH} ${BREITE} ${HOEHE} ${IN_BREIT} ${IN_HOCH}"
+  BILD_DAR_BREITE="$(echo "${IN_DAR}" | awk -F':' '{print $1}')"
+  BILD_DAR_HOEHE="$(echo "${IN_DAR}" | awk -F':' '{print $2}')"
+  BASISWERTE="${O_BREIT} ${O_HOCH} ${BILD_DAR_BREITE} ${BILD_DAR_HOEHE} ${IN_BREIT} ${IN_HOCH}"
   BREIT_QUADRATISCH="$(echo "${IN_HOCH} ${BASISWERTE}" | awk '{printf "%.0f\n", $1*$3*$4*$6/$2/$5/$7/2}' | awk '{printf "%.0f\n", $1*2}')"
   HOCH_QUADRATISCH="$(echo "${IN_BREIT} ${BASISWERTE}" | awk '{printf "%.0f\n", ($1/($3*$4*$6/$2/$5/$7))/2}' | awk '{printf "%.0f\n", $1*2}')"
   if [ "${BREIT_QUADRATISCH}" -gt "${IN_BREIT}" ] ; then
 	ZWISCHENFORMAT_QUADRATISCH="scale=${BREIT_QUADRATISCH}x${IN_HOCH},"
   elif [ "${HOCH_QUADRATISCH}" -gt "${IN_HOCH}" ] ; then
 	ZWISCHENFORMAT_QUADRATISCH="scale=${IN_BREIT}x${HOCH_QUADRATISCH},"
+  else
+	ZWISCHENFORMAT_QUADRATISCH=""
   fi
   #
   ### hier wird die schwarze Hintergrundfläche definiert, auf der dann das Bild zentriert wird
@@ -1445,10 +1410,15 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   echo "# 325
   # O_BREIT='${O_BREIT}'
   # O_HOCH='${O_HOCH}'
+  # IN_DAR='${IN_DAR}'
+  # BILD_DAR_BREITE='${BILD_DAR_BREITE}'
+  # BILD_DAR_HOEHE='${BILD_DAR_HOEHE}'
   # BREITE='${BREITE}'
   # HOEHE='${HOEHE}'
   # IN_BREIT='${IN_BREIT}'
   # IN_HOCH='${IN_HOCH}'
+  # BILD_DAR='${BILD_DAR}'
+  # BASISWERTE='${BASISWERTE}'
   # BREIT_QUADRATISCH='${BREIT_QUADRATISCH}'
   # HOCH_QUADRATISCH='${HOCH_QUADRATISCH}'
   # ZWISCHENFORMAT_QUADRATISCH='${ZWISCHENFORMAT_QUADRATISCH}'
@@ -1874,6 +1844,7 @@ if [ "${TEST}" = "Ja" ] ; then
 	else
 		VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}" | sed 's/[,]$//')"
 	fi
+        ZEILENSPRUNG=""
 else
 	if [ "x${ZEILENSPRUNG}${CROP}${PAD}${BILD_SCALE}${h263_BILD_FORMAT}${FORMAT_ANPASSUNG}" = "x" ] ; then
 		VIDEOOPTION="$(echo "${VIDEOQUALITAET}" | sed 's/[,]$//')"
