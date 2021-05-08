@@ -12,7 +12,8 @@
 ### Video
 
 #VERSION="v2018090600"
-VERSION="v2020040900"
+#VERSION="v2020040900"
+VERSION="v2021050800"		# "bt.709" für alles, "bt.601" deaktiviert
 
 #------------------------------------------------------------------------------#
 ### Kompatibilität zur Blu-ray
@@ -274,12 +275,14 @@ BLURAY_PARAMETER()
 
 #----------------------------------------------------------------------#
 ### Farbraum für SD oder HD
+### für quadratische Bildpunkte wird üblicherweise "bt.709" verwendet
+### für nicht quadratische Bildpunkte wird üblicherweise "bt.601" verwendet
 
-if [ "${BILD_BREIT}" -gt "720" -o "${BILD_HOCH}" -gt "576" ] ; then
+#if [ "${BILD_BREIT}" -gt "720" -o "${BILD_HOCH}" -gt "576" ] ; then
 	FARBCOD="bt709"            # HD: bt.709
-else
-	FARBCOD="smpte170m"        # SD: bt.601
-fi
+#else
+#	FARBCOD="smpte170m"        # SD: bt.601
+#fi
 
 #----------------------------------------------------------------------#
 
