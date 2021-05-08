@@ -59,7 +59,8 @@
 #VERSION="v2020121700"			# Multiple -c, -codec, -acodec, -vcodec, -scodec or -dcodec options specified for stream 9, only the last option '-c:s copy' will be used. /  Multiple -q or -qscale options specified for stream 2, only the last option '-q:a 6.000000' will be used.
 #VERSION="v2021032800"			# Fehler: es wurde nur eine Video-Spur transkodiert, wenn es die erste Spur im Container war + PAD nach hinten verschoben
 #VERSION="v2021040400"			# PAD vor PIXELKORREKTUR verschoben / jetzt gibt es einen Hinweis, wenn die Zieldatei keine Endung hat
-VERSION="v2021050600"			# PAD vor BILD_SCALE verschoben + PIXELKORREKTUR verlagert
+#VERSION="v2021050600"			# PAD vor BILD_SCALE verschoben + PIXELKORREKTUR verlagert
+VERSION="v2021050800"			# das PAD (padding) verbessert - Verzerrungsproblem bei nicht quadratischen Bildpunkten endlich gelöst
 
 VERSION_METADATEN="${VERSION}"
 
@@ -831,7 +832,12 @@ SCAN_TYPE='${SCAN_TYPE}'
 if [ "${SCAN_TYPE}" != "progressive" ] ; then
     if [ "${SCAN_TYPE}" != "unknown" ] ; then
         ### wenn der Film im Zeilensprungverfahren vorliegt
-        ZEILENSPRUNG="yadif,"
+        #ZEILENSPRUNG="yadif,"
+	#
+	# https://ffmpeg.org/ffmpeg-filters.html#yadif-1
+	# https://ffmpeg.org/ffmpeg-filters.html#mcdeint
+        #ZEILENSPRUNG="yadif=3:1,mcdeint=2:1,"
+        ZEILENSPRUNG="yadif=1/3,mcdeint=mode=extra_slow,"
     fi
 fi
 
@@ -840,11 +846,15 @@ fi
 IN_BREIT="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^width=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 IN_HOCH="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^height=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 IN_XY="${IN_BREIT}x${IN_HOCH}"
+O_BREIT="${IN_BREIT}"
+O_HOCH="${IN_HOCH}"
 
 echo "# 70
 1 IN_XY='${IN_XY}'
 1 IN_BREIT='${IN_BREIT}'
 1 IN_HOCH='${IN_HOCH}'
+1 O_BREIT='${O_BREIT}'
+1 O_HOCH='${O_HOCH}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 110
@@ -1161,7 +1171,10 @@ ARBEITSWERTE_PAR
 # von den Seiten die schwarzen Balken entfernen
 # crop=540:576:90:0
 #
-if [ -n "${CROP}" ] ; then
+if [ "x${CROP}" = "x" ] ; then
+	IN_BREIT="$(echo "${IN_XY}" | awk -F'x' '{print $1}')"
+	IN_HOCH="$(echo  "${IN_XY}" | awk -F'x' '{print $2}')"
+else
 	### CROP-Seiten-Format
 	# -vf crop=width:height:x:y
 	# -vf crop=in_w-100:in_h-100:100:100
@@ -1353,29 +1366,32 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 		BILD_DREHEN
 	fi
   fi
-  IN_BREIT="$(echo "${IN_XY}" | awk -F'x' '{print $1}')"
-  IN_HOCH="$(echo  "${IN_XY}" | awk -F'x' '{print $2}')"
 
   #------------------------------------------------------------------------------#
 
   echo "# 320
-  FORMAT_ANPASSUNG    ='${FORMAT_ANPASSUNG}'
-  PIXELVERZERRUNG     ='${PIXELVERZERRUNG}'
-  BREITE              ='${BREITE}'
-  HOEHE               ='${HOEHE}'
-  NAME_XY_DAR         ='${NAME_XY_DAR}'
-  IN_DAR              ='${IN_DAR}'
-  SOLL_DAR            ='${SOLL_DAR}'
-  INBREITE_DAR        ='${INBREITE_DAR}'
-  INHOEHE_DAR         ='${INHOEHE_DAR}'
-  IN_XY               ='${IN_XY}'
-  Originalauflösung   ='${IN_BREIT}x${IN_HOCH}'
-  PIXELZAHL           ='${PIXELZAHL}'
-  SOLL_XY             ='${SOLL_XY}'
+  O_BREIT		='${O_BREIT}'
+  O_HOCH		='${O_HOCH}'
+  FORMAT_ANPASSUNG	='${FORMAT_ANPASSUNG}'
+  PIXELVERZERRUNG	='${PIXELVERZERRUNG}'
+  BREITE		='${BREITE}'
+  HOEHE			='${HOEHE}'
+  NAME_XY_DAR		='${NAME_XY_DAR}'
+  IN_DAR		='${IN_DAR}'
+  IN_BREIT		='${IN_BREIT}'
+  IN_HOCH		='${IN_HOCH}'
+  CROP			='${CROP}'
+  SOLL_DAR		='${SOLL_DAR}'
+  INBREITE_DAR		='${INBREITE_DAR}'
+  INHOEHE_DAR		='${INHOEHE_DAR}'
+  IN_XY			='${IN_XY}'
+  Originalauflösung	='${IN_BREIT}x${IN_HOCH}'
+  PIXELZAHL		='${PIXELZAHL}'
+  SOLL_XY		='${SOLL_XY}'
 
-  BILD_BREIT          ='${BILD_BREIT}'
-  BILD_HOCH           ='${BILD_HOCH}'
-  BILD_SCALE          ='${BILD_SCALE}'
+  BILD_BREIT		='${BILD_BREIT}'
+  BILD_HOCH		='${BILD_HOCH}'
+  BILD_SCALE		='${BILD_SCALE}'
   #==============================================================================#
   " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
@@ -1387,11 +1403,59 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   # pad=640:480:0:40:violet
   # pad=width=640:height=480:x=0:y=40:color=violet
   #
-  # SCHWARZ="$(echo "${HOEHE} ${BREITE} ${BILD_BREIT} ${BILD_HOCH}" | awk '{sw="oben"; if (($1/$2) < ($3/$4)) sw="oben"; print sw}')"
-  # SCHWARZ="$(echo "${HOEHE} ${BREITE} ${BILD_BREIT} ${BILD_HOCH}" | awk '{sw="oben"; if (($1/$2) > ($3/$4)) sw="links"; print sw}')"
+  # max(iw\,ih*(16/9)) => https://ffmpeg.org/ffmpeg-filters.html#maskedmax
   #
-  PAD="pad='max(iw\\,ih*(${BREITE}/${HOEHE})):ow/(${BREITE}/${HOEHE}):(ow-iw)/2:(oh-ih)/2',"
+  # pad=Bild vor dem padden:Bildecke oben links:Hintergrundfarbe
+  # Bild vor dem padden           = iw:ih
+  # Bildecke oben links           = (ow-iw)/2:(oh-ih)/2
+  # Hintergrundfarbe (Bildfläche) = ow:oh
+  #
+  # iw = Bildbreite vor  dem padden
+  # ih = Bildhöhe   vor  dem padden
+  # ow = Bildbreite nach dem padden
+  # oh = Bildhöhe   nach dem padden
+  #  a = iw / ih
+  #
+  # DAR = Display Aspect Ratio
+  # SAR = Sample  Aspect Ratio = PAR
+  # PAR = Pixel   Aspect Ratio = SAR
+  #
+  # PAL-TV         (720x576) : DAR  4/3, SAR 16:15 = 1,066666666666666666
+  # NTNC-TV        (720x480) : DAR  4/3, SAR  8:9  = 0,888888888888888888
+  # NTSC-DVD       (720x480) : DAR 16/9, SAR 32:27 = 1,185185185185185185
+  # PAL-DVD / DVB  (720x576) : DAR 16/9, SAR 64:45 = 1,422222222222222222
+  # BluRay        (1920x1080): DAR 16/9, SAR  1:1  = 1,0
+  #
+  #BREIT_QUADRATISCH="$(echo "${IN_HOCH} ${O_HOCH} ${BREITE} ${IN_BREIT} ${IN_HOCH} ${HOEHE} ${O_BREIT}" | awk '{printf "%.0f\n", ($1*$2*$3*$4/$5/$6/$7)}')"
+  BASISWERTE="${O_BREIT} ${O_HOCH} ${BREITE} ${HOEHE} ${IN_BREIT} ${IN_HOCH}"
+  BREIT_QUADRATISCH="$(echo "${IN_HOCH} ${BASISWERTE}" | awk '{printf "%.0f\n", $1*$3*$4*$6/$2/$5/$7/2}' | awk '{printf "%.0f\n", $1*2}')"
+  HOCH_QUADRATISCH="$(echo "${IN_BREIT} ${BASISWERTE}" | awk '{printf "%.0f\n", ($1/($3*$4*$6/$2/$5/$7))/2}' | awk '{printf "%.0f\n", $1*2}')"
+  if [ "${BREIT_QUADRATISCH}" -gt "${IN_BREIT}" ] ; then
+	ZWISCHENFORMAT_QUADRATISCH="scale=${BREIT_QUADRATISCH}x${IN_HOCH},"
+  elif [ "${HOCH_QUADRATISCH}" -gt "${IN_HOCH}" ] ; then
+	ZWISCHENFORMAT_QUADRATISCH="scale=${IN_BREIT}x${HOCH_QUADRATISCH},"
+  fi
+  #
+  ### hier wird die schwarze Hintergrundfläche definiert, auf der dann das Bild zentriert wird
+  # pad='[hier wird "ow" gesetzt]:[hier wird "oh" gesetzt]:[hier wird der linke Abstand gesetzt]:[hier wird der obere Abstand gesetzt]:[hier wird die padding-Farbe gesetzt]'
+  #  4/3 => PAD="pad='max(iw\,ih*(4/3)):ow/(4/3):(ow-iw)/2:(oh-ih)/2:black',"
+  # 16/9 => PAD="pad='max(iw\,ih*(16/9)):ow/(16/9):(ow-iw)/2:(oh-ih)/2:black',"
+  PAD="${ZWISCHENFORMAT_QUADRATISCH}pad='max(iw\\,ih*(${BREITE}/${HOEHE})):ow/(${BREITE}/${HOEHE}):(ow-iw)/2:(oh-ih)/2:black',"
 
+  echo "# 325
+  # O_BREIT='${O_BREIT}'
+  # O_HOCH='${O_HOCH}'
+  # BREITE='${BREITE}'
+  # HOEHE='${HOEHE}'
+  # IN_BREIT='${IN_BREIT}'
+  # IN_HOCH='${IN_HOCH}'
+  # BREIT_QUADRATISCH='${BREIT_QUADRATISCH}'
+  # HOCH_QUADRATISCH='${HOCH_QUADRATISCH}'
+  # ZWISCHENFORMAT_QUADRATISCH='${ZWISCHENFORMAT_QUADRATISCH}'
+  # PAD='${PAD}'
+  " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+  #exit 215
 
   #------------------------------------------------------------------------------#
   ### hier wird ausgerechnen wieviele Pixel der neue Film pro Bild haben wird
@@ -1805,9 +1869,17 @@ fi
 # hinter PAD muss dann die endgültig gewünschte Auflösung für quadratische Pixel
 #
 if [ "${TEST}" = "Ja" ] ; then
-	VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}" | sed 's/[,]$//')"
+	if [ "x${ZEILENSPRUNG}${CROP}" = "x" ] ; then
+		VIDEOOPTION="$(echo "${VIDEOQUALITAET}" | sed 's/[,]$//')"
+	else
+		VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}" | sed 's/[,]$//')"
+	fi
 else
-	VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${PAD}${BILD_SCALE}${h263_BILD_FORMAT}${FORMAT_ANPASSUNG}" | sed 's/[,]$//')"
+	if [ "x${ZEILENSPRUNG}${CROP}${PAD}${BILD_SCALE}${h263_BILD_FORMAT}${FORMAT_ANPASSUNG}" = "x" ] ; then
+		VIDEOOPTION="$(echo "${VIDEOQUALITAET}" | sed 's/[,]$//')"
+	else
+		VIDEOOPTION="$(echo "${VIDEOQUALITAET} -vf ${ZEILENSPRUNG}${CROP}${PAD}${BILD_SCALE}${h263_BILD_FORMAT}${FORMAT_ANPASSUNG}" | sed 's/[,]$//')"
+	fi
 fi
 
 if [ "x${SOLL_FPS}" = "x" ] ; then
