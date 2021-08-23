@@ -696,7 +696,6 @@ META_DATEN_SPURSPRACHEN='${META_DATEN_SPURSPRACHEN}'
 BILD_DREHUNG='${BILD_DREHUNG}'
 "                                             | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
-exit
 #------------------------------------------------------------------------------#
 
 ORIGINAL_TITEL="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_entries format_tags=title -of compact=p=0:nk=1)"
