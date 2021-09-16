@@ -1,3 +1,4 @@
+#!/bin/sh
 #!/usr/bin/env bash
 
 #------------------------------------------------------------------------------#
@@ -23,7 +24,8 @@
 #VERSION="v2019102900"
 #VERSION="v2019110100"
 #VERSION="v2020101800"
-VERSION="v2020102600"		# jetzt funktionieren auch Titel mit Leerzeichen
+#VERSION="v2020102600"		# jetzt funktionieren auch Titel mit Leerzeichen
+VERSION="v2020091500"		# jetzt kann auch ein Kommentar mit übergeben werden
 
 
 ALLE_OPTIONEN="${@}"
@@ -58,6 +60,11 @@ while [ "${#}" -ne "0" ]; do
                         ;;
                 -titel)
                         TITEL="${2}"		# Name für die Zieldatei
+                        shift
+                        shift
+                        ;;
+                -k)
+                        KOMMENTAR="${2}"	# Kommentar zum Film
                         shift
                         shift
                         ;;
@@ -118,12 +125,12 @@ SCHNITT_OPTION='${SCHNITT_OPTION}'
 #set -x
 
 ### MP4
-echo "# 0,1: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" ${SCHNITT_OPTION} -titel \"${TITEL}\""
-${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" ${SCHNITT_OPTION} -titel "${TITEL}"
+echo "# 0,1: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\""
+${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}"
 
 ### MKV
-echo "# 0,2: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}\" ${SCHNITT_OPTION} -titel \"${TITEL}\""
-${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}" ${SCHNITT_OPTION} -titel "${TITEL}"
+echo "# 0,2: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\""
+${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}"
 
 ls -lha "${ZIELPFAD}"*
 
