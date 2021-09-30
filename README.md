@@ -1,7 +1,7 @@
 # Filmwandler
 Mit diesem Skript kann man einen beliebigen Film in verschiedene Formaten umwandeln (transkodieren), die sehr verbreiteten sind.
 
-    ~/bin/Filmwandler.sh -q Film.mpeg -z Film.mp4 -titel "Titel vom Film" -k "Kommentar zum Film, ggf. aus Wikipedia oder ImDB"
+    ~/bin/Filmwandler.sh -q Original_Film.mpeg -z Neuer_Film.mp4 -titel "Titel vom Film" -k "Kommentar zum Film, ggf. aus Wikipedia oder ImDB"
 
 Am 10. Juli 2004 habe ich meine erste Digitalkamera (eine "KONICA MINOLTA DiMAGE Z1") bekommen, leider konnte ich die damit erzeugten Videos (AVI) nur am PC anschauen oder über die Kamera am Fernseher. Jedoch nicht mit unserem DVD-HDD-Recorder "Philips DVDR3460H", obwohl er "DivX 5"-Filme abspielen konnte.
 Daraus resultierten Ende 2004 die ersten Versuche, Filme in ein Format zu transkodieren, mit dem es auf handelsüblicher Consumer-Elektronik am Fernseher abspielbar wird -> damit begann die 1. Generation von diesem Skript (das arbeitete noch mit MPlayer/MEncoder).
