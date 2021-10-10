@@ -1,5 +1,7 @@
 # Filmwandler
 Mit diesem Skript kann man einen beliebigen Film in verschiedene Formaten umwandeln (transkodieren), die sehr verbreiteten sind.
+Dieses Skript besitzt viele nützliche Option mit denen man z.B. die Möglichkeit hat Werbung und schwarze Ränder zu entfernen, Clips zu erzeugen, Bildformat und -auflösung zu ändern u.v.a.m.
+Außer bei AVI-, MPEG-1 und 3GPP(2)-Filmen werden automatisch die Bildauflösungen so umgerechnen, dass der neu erstellte Film quadratische Bildpunkte (Pixel) besitzt, dazu werden beim Film (wenn nötig) automatisch schwarze Balken angefügt um am Ende ein 4:3- oder 16:9-Bild zu erhalten, bei dem die Kreise immer noch rund sind. Seit dem 22. September 2019 liegt hier die 5. Generation vor (Projekt-Start: 2004/2005).
 
     ~/bin/Filmwandler.sh -q Original_Film.mpeg -z Neuer_Film.mp4 -titel "Titel vom Film" -k "Kommentar zum Film, ggf. aus Wikipedia oder ImDB"
 
