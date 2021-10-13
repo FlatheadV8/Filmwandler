@@ -67,7 +67,8 @@
 #VERSION="v2021080700"			# Untertitelabschaltung verbessert
 #VERSION="v2021091500"			# Jetzt kann man auch manuell einen Kommentar einfügen
 #VERSION="v2021091600"			# alternatives Untertitel-Format MKV->webvtt hinzugefügt
-VERSION="v2021100100"			# wenn PAR und DAR nicht ermittelt werden konnten, dann wird IN_PAR="1:1" gesetzt
+#VERSION="v2021100100"			# wenn PAR und DAR nicht ermittelt werden konnten, dann wird IN_PAR="1:1" gesetzt
+VERSION="v2021101200"			# es wurde die Anzahl der Pixel nicht richtig berechnet, dadurch wurde die Auflösung geringer als nötig berechnet
 
 VERSION_METADATEN="${VERSION}"
 
@@ -115,6 +116,12 @@ TEST="Nein"
 STOP="Nein"
 
 AVERZ="$(dirname ${0})"			# Arbeitsverzeichnis, hier liegen diese Dateien
+
+### die Pixel sollten wenigstens durch 2 teilbar sein! besser aber durch 8                          
+TEILER="2"
+##TEILER="4"
+#TEILER="8"
+###TEILER="16"
 
 #==============================================================================#
 ### Funktionen
@@ -1099,10 +1106,16 @@ VIDEO_NICHT_UEBERTRAGEN='${VIDEO_NICHT_UEBERTRAGEN}'
 ### Kontrolle Seitenverhältnis des Bildes (DAR)
 
 if [ "x${IN_DAR}" = "x" ] ; then
-	echo "# 245" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	IN_DAR="$(echo "${IN_BREIT} ${IN_HOCH} ${PAR_KOMMA}" | awk '{printf("%.16f\n",$3/($2/$1))}')"
-	echo "IN_DAR='${IN_DAR}'" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+	echo "# 245
+	IN_BREIT='${IN_BREIT}'
+	IN_HOCH='${IN_HOCH}'
+	IN_DAR='${IN_DAR}'
+	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 fi
+
+O_DAR="${IN_DAR}"
 
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   echo "# 249" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
@@ -1211,68 +1224,6 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 
 
   #------------------------------------------------------------------------------#
-  ### gewünschtes Rasterformat der Bildgröße (Auflösung)
-
-  if [ "x${SOLL_XY}" = "x" ] ; then
-	echo "# 261" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	unset BILD_SCALE
-	unset SOLL_XY
-
-	### ob die Pixel bereits quadratisch sind
-	if [ "${PAR_FAKTOR}" -ne "100000" ] ; then
-		echo "# 262" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-		### Umrechnung in quadratische Pixel
-		#
-		### [swscaler @ 0x81520d000] Warning: data is not aligned! This can lead to a speed loss
-		### laut Googel müssen die Pixel durch 16 teilbar sein, beseitigt aber leider dieses Problem nicht
-		#
-		### die Pixel sollten wenigstens durch 2 teilbar sein! besser aber durch 8                          
-		TEILER="2"
-		##TEILER="4"
-		#TEILER="8"
-		###TEILER="16"
-		#
-		TEIL_HOEHE="$(echo "${IN_BREIT} ${IN_HOCH} ${IN_DAR} ${TEILER}" | awk '{gsub(":"," ");printf "%.0f\n", sqrt($1 * $2 * $3 / $4) / $3 / $5}' | awk '{print $1 * 2}')"
-		BILD_BREIT="$(echo "${TEIL_HOEHE} ${IN_DAR}" | awk '{gsub(":"," ");print $1 * $2}')"
-		BILD_HOCH="$(echo "${TEIL_HOEHE} ${IN_DAR}" | awk '{gsub(":"," ");print $1 * $3}')"
-		BILD_SCALE="scale=${BILD_BREIT}x${BILD_HOCH},"
-	else
-		echo "# 263" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-		### wenn die Pixel bereits quadratisch sind
-		BILD_BREIT="${IN_BREIT}"
-		BILD_HOCH="${IN_HOCH}"
-	fi
-  else
-	echo "# 264" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	### Übersetzung von Bildauflösungsnamen zu Bildauflösungen
-	### tritt nur bei manueller Auswahl der Bildauflösung in Kraft
-	AUFLOESUNG_ODER_NAME="$(echo "${SOLL_XY}" | egrep '[0-9][0-9][0-9][x][0-9][0-9]')"
-	if [ "x${AUFLOESUNG_ODER_NAME}" = "x" ] ; then
-		echo "# 265" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-		### manuelle Auswahl der Bildauflösung per Namen
-		if [ "x${BILD_FORMATNAMEN_AUFLOESUNGEN}" != "x" ] ; then
-			echo "# 266" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-			NAME_XY_DAR="$(echo "${BILD_FORMATNAMEN_AUFLOESUNGEN}" | egrep '[-]soll_xmaly ' | awk '{print $2,$4,$5}' | egrep -i "^${SOLL_XY} ")"
-			SOLL_XY="$(echo "${NAME_XY_DAR}" | awk '{print $2}')"
-			SOLL_DAR="$(echo "${NAME_XY_DAR}" | awk '{print $3}')"
-
-			# https://ffmpeg.org/ffmpeg-filters.html#setdar_002c-setsar
-			FORMAT_ANPASSUNG="setdar='${SOLL_DAR}',"
-		else
-			echo "# 267" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-			echo "Die gewünschte Bildauflösung wurde als 'Name' angegeben: '${SOLL_XY}'"
-			echo "Für die Übersetzung wird die Datei 'Filmwandler_grafik.txt' benötigt."
-			echo "Leider konnte die Datei '${AVERZ}/Filmwandler_grafik.txt' nicht gelesen werden."
-			exit 180
-		fi
-	fi
-
-	SOLL_BILD_SCALE="scale=${SOLL_XY},"
-	BILD_BREIT="$(echo "${SOLL_BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $1}')"
-	BILD_HOCH="$(echo "${SOLL_BILD_SCALE}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $2}')"
-  fi
-
-  #------------------------------------------------------------------------------#
   ### Wenn die Bildpunkte vom Quell-Film und vom Ziel-Film quadratisch sind,
   ### dann ist es ganz einfach.
   ### Aber wenn nicht, dann sind diese Berechnungen nötig.
@@ -1319,7 +1270,7 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 			BREITE="$(echo "${SOLL_DAR} ${INBREITE_DAR} ${INHOEHE_DAR} ${BILD_BREIT} ${BILD_HOCH}" | awk '{gsub("/"," ");print $2 * $2 * $5 / $1 / $6}')"
 			HOEHE="$(echo "${SOLL_DAR}" | awk '{gsub("/"," ");print $2}')"
 			#
-			PIXELKORREKTUR="${BILD_SCALE}"
+			PIXELKORREKTUR="scale=${BILD_BREIT}x${BILD_HOCH},"
 		elif [ "${PIXELVERZERRUNG}" -ge 1 ] ; then
 			echo "# 284
 			# breite Pixel: lang ziehen
@@ -1329,40 +1280,145 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 			BREITE="$(echo "${SOLL_DAR}" | awk '{gsub("/"," ");print $1}')"
 			HOEHE="$(echo "${SOLL_DAR} ${INBREITE_DAR} ${INHOEHE_DAR} ${BILD_BREIT} ${BILD_HOCH}" | awk '{gsub("/"," ");print $1 * $1 * $6 / $2 / $5}')"
 			#
-			PIXELKORREKTUR="${BILD_SCALE}"
+			PIXELKORREKTUR="scale=${BILD_BREIT}x${BILD_HOCH},"
 		fi
 	else
-		echo "# 290" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 		if [ "${DAR_FAKTOR}" -lt "149333" ] ; then
-			echo "# 291" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 			BREITE="4"
 			HOEHE="3"
+			echo "# 285: 4/3" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 		else
-			echo "# 292" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 			BREITE="16"
 			HOEHE="9"
+			echo "# 286: 16/9" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 		fi
 		FORMAT_ANPASSUNG="setdar='${BREITE}/${HOEHE}',"
+
+		echo "# 287
+		BREITE='${BREITE}'
+		HOEHE='${HOEHE}'
+		FORMAT_ANPASSUNG='${FORMAT_ANPASSUNG}'
+		" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	fi
   fi
 
   #------------------------------------------------------------------------------#
+  ### gewünschtes Rasterformat der Bildgröße (Auflösung)
   ### wenn ein bestimmtes Format gewünscht ist, dann muss es am Ende auch rauskommen
 
-  if [ "x${SOLL_XY}" != x ] ; then
-	echo "# 300" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	PIXELKORREKTUR="${SOLL_BILD_SCALE}"
+  if [ "x${SOLL_XY}" = x ] ; then
+	echo "# 290" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	unset BILD_SCALE
+	unset SOLL_XY
+
+	### ob die Pixel bereits quadratisch sind
+	if [ "${PAR_FAKTOR}" -ne "100000" ] ; then
+		### Umrechnung in quadratische Pixel
+		#
+		### [swscaler @ 0x81520d000] Warning: data is not aligned! This can lead to a speed loss
+		### laut Googel müssen die Pixel durch 16 teilbar sein, beseitigt aber leider dieses Problem nicht
+
+		echo "# 300" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+		IN_DAR="$(echo "${O_BREIT} ${O_HOCH} ${O_DAR} ${IN_BREIT} ${IN_HOCH}" | awk '{gsub(":"," ");print $2 * $3 * $5 / $1 / $4 / $6}')"
+		DARFAKTOR_0="$(echo "${IN_DAR}" | awk '{printf "%u\n", ($1*100000)}')"
+		#TEIL_HOEHE="$(echo "${IN_BREIT} ${IN_HOCH} ${IN_DAR} ${TEILER}" | awk '{gsub(":"," ");printf "%.0f\n", sqrt($1 * $2 * $3 / $4) / $3 / $5, $5}' | awk '{print $1 * $2}')"
+		if [ "${DARFAKTOR_0}" -lt "149333" ] ; then
+			echo "# 301: 4/3" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+			TEIL_HOEHE="$(echo "${IN_BREIT} ${IN_HOCH} ${IN_DAR} ${TEILER}" | awk '{printf "%.0f %.0f\n", sqrt($1 * $2 / $3) / $4, $4}' | awk '{print $1 * $2}')"
+			BILD_BREIT="$(echo "${TEIL_HOEHE} ${BREITE} ${HOEHE} ${TEILER}" | awk '{printf "%.0f %.0f\n", ($1 * $2 / $3) / $4, $4}' | awk '{print $1 * $2}')"
+			BILD_HOCH="${TEIL_HOEHE}"
+		else
+			echo "# 302: 16/9" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+			TEIL_BREIT="$(echo "${IN_BREIT} ${IN_HOCH} ${IN_DAR} ${TEILER}" | awk '{printf "%.0f %.0f\n", sqrt($1 * $2 * $3) / $4, $4}' | awk '{print $1 * $2}')"
+			BILD_BREIT="${TEIL_BREIT}"
+			BILD_HOCH="$(echo "${TEIL_BREIT} ${BREITE} ${HOEHE} ${TEILER}" | awk '{printf "%.0f %.0f\n", ($1 * $3 / $2) / $4, $4}' | awk '{print $1 * $2}')"
+		fi
+		BILD_SCALE="scale=${BILD_BREIT}x${BILD_HOCH},"
+
+		echo "# 303
+		O_BREIT='${O_BREIT}'
+		O_HOCH='${O_HOCH}'
+		O_DAR='${O_DAR}'
+		IN_BREIT='${IN_BREIT}'
+		IN_HOCH='${IN_HOCH}'
+		IN_DAR='${IN_DAR}'
+		TEIL_BREIT='${TEIL_BREIT}'
+		TEIL_HOEHE='${TEIL_HOEHE}'
+		BILD_BREIT='${BILD_BREIT}'
+		BILD_HOCH='${BILD_HOCH}'
+		BILD_SCALE='${BILD_SCALE}'
+		" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	else
+		### wenn die Pixel bereits quadratisch sind
+		BILD_BREIT="${IN_BREIT}"
+		BILD_HOCH="${IN_HOCH}"
+
+		echo "# 304
+		BILD_BREIT='${BILD_BREIT}'
+		BILD_HOCH='${BILD_HOCH}'
+		" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	fi
+  else
+	echo "# 305" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	### Übersetzung von Bildauflösungsnamen zu Bildauflösungen
+	### tritt nur bei manueller Auswahl der Bildauflösung in Kraft
+	AUFLOESUNG_ODER_NAME="$(echo "${SOLL_XY}" | egrep '[0-9][0-9][0-9][x][0-9][0-9]')"
+	if [ "x${AUFLOESUNG_ODER_NAME}" = "x" ] ; then
+		echo "# 306" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+		### manuelle Auswahl der Bildauflösung per Namen
+		if [ "x${BILD_FORMATNAMEN_AUFLOESUNGEN}" != "x" ] ; then
+			echo "# 307" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+			NAME_XY_DAR="$(echo "${BILD_FORMATNAMEN_AUFLOESUNGEN}" | egrep '[-]soll_xmaly ' | awk '{print $2,$4,$5}' | egrep -i "^${SOLL_XY} ")"
+			SOLL_XY="$(echo "${NAME_XY_DAR}" | awk '{print $2}')"
+			SOLL_DAR="$(echo "${NAME_XY_DAR}" | awk '{print $3}')"
+
+			# https://ffmpeg.org/ffmpeg-filters.html#setdar_002c-setsar
+			FORMAT_ANPASSUNG="setdar='${SOLL_DAR}',"
+		else
+			echo "# 308" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+			echo "Die gewünschte Bildauflösung wurde als 'Name' angegeben: '${SOLL_XY}'"
+			echo "Für die Übersetzung wird die Datei 'Filmwandler_grafik.txt' benötigt."
+			echo "Leider konnte die Datei '${AVERZ}/Filmwandler_grafik.txt' nicht gelesen werden."
+			exit 180
+		fi
+	fi
+
+	BILD_BREIT="$(echo "${SOLL_XY}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $1}')"
+	BILD_HOCH="$(echo "${SOLL_XY}" | sed 's/x/ /;s/^[^0-9][^0-9]*//;s/[^0-9][^0-9]*$//' | awk '{print $2}')"
+	BILD_SCALE="scale=${SOLL_XY},"
+
+	echo "# 309
+	BILD_BREIT='${BILD_BREIT}'
+	BILD_HOCH='${BILD_HOCH}'
+	BILD_SCALE='${BILD_SCALE}'
+	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
   fi
+
+  if [ "x${PIXELKORREKTUR}" != x ] ; then
+	echo "# 310
+	BILD_SCALE='${BILD_SCALE}'
+	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+	BILD_SCALE="${PIXELKORREKTUR}"
+
+	echo "# 311
+	BILD_SCALE='${BILD_SCALE}'
+	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+  fi
+
+  #exit 199
 
   #------------------------------------------------------------------------------#
   ### wenn das Bild hochkannt steht, dann müssen die Seiten-Höhen-Parameter vertauscht werden
   ### Breite, Höhe, PAD, SCALE
 
-  echo "# 310
+  echo "# 312
   SOLL_XY		='${SOLL_XY}'
   BILD_BREIT		='${BILD_BREIT}'
   BILD_HOCH		='${BILD_HOCH}'
   BILD_SCALE		='${BILD_SCALE}'
+  PIXELKORREKTUR	='${PIXELKORREKTUR}'
   SOLL_BILD_SCALE 	='${SOLL_BILD_SCALE}'
   " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
@@ -1448,11 +1504,23 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   # PAL-DVD / DVB  (720x576) : DAR 16/9, SAR 64:45 = 1,422222222222222222
   # BluRay        (1920x1080): DAR 16/9, SAR  1:1  = 1,0
   #
-  BILD_DAR_BREITE="$(echo "${IN_DAR}" | awk -F':' '{print $1}')"
-  BILD_DAR_HOEHE="$(echo "${IN_DAR}" | awk -F':' '{print $2}')"
-  BASISWERTE="${O_BREIT} ${O_HOCH} ${BILD_DAR_BREITE} ${BILD_DAR_HOEHE} ${IN_BREIT} ${IN_HOCH}"
-  BREIT_QUADRATISCH="$(echo "${IN_HOCH} ${BASISWERTE}" | awk '{printf "%.0f\n", $1*$3*$4*$6/$2/$5/$7/2}' | awk '{printf "%.0f\n", $1*2}')"
-  HOCH_QUADRATISCH="$(echo "${IN_BREIT} ${BASISWERTE}" | awk '{printf "%.0f\n", ($1/($3*$4*$6/$2/$5/$7))/2}' | awk '{printf "%.0f\n", $1*2}')"
+  BILD_DAR_BREITE="$(echo "${IN_DAR}" | awk -F':' '{a=$1; if (a == "") a=1; print a}')"
+  BILD_DAR_HOEHE="$(echo "${IN_DAR}" | awk -F':' '{a=$2; if (a == "") a=1; print a}')"
+
+  BASISWERTE="${O_BREIT} ${O_HOCH} ${O_DAR} ${IN_BREIT} ${IN_HOCH} ${TEILER}"
+  BREIT_QUADRATISCH="$(echo "${BASISWERTE}" | awk '{gsub("[:/]"," ") ; printf "%.0f %.0f\n", $2 * $3 * $5 / $1 / $4 / $NF, $NF}' | awk '{printf "%.0f\n", $1*$2}')"
+  HOCH_QUADRATISCH="$( echo "${BASISWERTE}" | awk '{gsub("[:/]"," ") ; printf "%.0f %.0f\n", $1 * $4 * $6 / $2 / $3 / $NF, $NF}' | awk '{printf "%.0f\n", $1*$2}')"
+
+  echo "# 324
+  # BILD_DAR_BREITE='${BILD_DAR_BREITE}'
+  # BILD_DAR_HOEHE='${BILD_DAR_HOEHE}'
+  # BASISWERTE='${BASISWERTE}'
+  # BREIT_QUADRATISCH='${BREIT_QUADRATISCH}'
+  # HOCH_QUADRATISCH='${HOCH_QUADRATISCH}'
+  # IN_BREIT='${IN_BREIT}'
+  # IN_HOCH='${IN_HOCH}'
+  "
+
   if [ "${BREIT_QUADRATISCH}" -gt "${IN_BREIT}" ] ; then
 	ZWISCHENFORMAT_QUADRATISCH="scale=${BREIT_QUADRATISCH}x${IN_HOCH},"
   elif [ "${HOCH_QUADRATISCH}" -gt "${IN_HOCH}" ] ; then
@@ -1477,7 +1545,6 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   # HOEHE='${HOEHE}'
   # IN_BREIT='${IN_BREIT}'
   # IN_HOCH='${IN_HOCH}'
-  # BILD_DAR='${BILD_DAR}'
   # BASISWERTE='${BASISWERTE}'
   # BREIT_QUADRATISCH='${BREIT_QUADRATISCH}'
   # HOCH_QUADRATISCH='${HOCH_QUADRATISCH}'
@@ -1506,6 +1573,15 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   fi
 fi
 
+echo "# 328
+BILD_BREIT='${BILD_BREIT}'
+BILD_HOCH='${BILD_HOCH}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+if [ "x${BILD_BREIT}" = x -o "x${BILD_HOCH}" = x ] ; then
+	echo "# 329: ${BILD_BREIT}x${BILD_HOCH}"
+	exit 329
+fi
 
 if [ -r ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt ] ; then
     
@@ -1542,8 +1618,7 @@ OP_QUELLE='${OP_QUELLE}'
 #------------------------------------------------------------------------------#
 ### Audio-Qualität
 
-echo "
-# 510 TONQUALIT='${TONQUALIT}'
+echo "# 500 TONQUALIT='${TONQUALIT}'
 "
 
 	#----------------------------------------------------------------------#
@@ -1793,12 +1868,18 @@ else
 		fi
 	fi
 
-	UT_ANZAHL="$(echo "${UT_LISTE}" | wc -w | awk '{print $1}')"
-	UT_KOPIE="$(seq 0 ${UT_ANZAHL} | head -n ${UT_ANZAHL})"
-	U_TITEL_FF_02="$-c:s copy (for DER_UT in ${UT_KOPIE}
-	do
-		echo -n " -map 0:s:${DER_UT}?"
-	done)"
+	if [ "x${UT_LISTE}" = x ] ; then
+		unset UT_ANZAHL
+		unset UT_KOPIE
+		unset U_TITEL_FF_02
+	else
+		UT_ANZAHL="$(echo "${UT_LISTE}" | wc -w | awk '{print $1}')"
+		UT_KOPIE="$(seq 0 ${UT_ANZAHL} | head -n ${UT_ANZAHL})"
+		U_TITEL_FF_02="$-c:s copy (for DER_UT in ${UT_KOPIE}
+		do
+			echo -n " -map 0:s:${DER_UT}?"
+		done)"
+	fi
 fi
 
 echo "# 380
@@ -1920,13 +2001,6 @@ case "${BILDQUALIT}" in
 		VIDEOQUALITAET="${VIDEO_QUALITAET_9}"
 		;;
 esac
-
-#------------------------------------------------------------------------------#
-### Korrektureingriff
-
-if [ "x${PIXELKORREKTUR}" != x ] ; then
-	BILD_SCALE="${PIXELKORREKTUR}"
-fi
 
 #------------------------------------------------------------------------------#
 # Transkodierung
