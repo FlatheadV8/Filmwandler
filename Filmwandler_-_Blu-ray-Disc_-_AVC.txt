@@ -13,7 +13,8 @@
 
 #VERSION="v2018090600"
 #VERSION="v2020040900"
-VERSION="v2021050800"		# "bt.709" für alles, "bt.601" deaktiviert
+#VERSION="v2021050800"		# "bt.709" für alles, "bt.601" deaktiviert
+VERSION="v2021101300"		# Logging erweitert
 
 #------------------------------------------------------------------------------#
 ### Kompatibilität zur Blu-ray
@@ -63,7 +64,7 @@ VERSION="v2021050800"		# "bt.709" für alles, "bt.601" deaktiviert
 
 #==============================================================================#
 
-#echo "63 IN_FPS='${IN_FPS}'"
+#echo "# 410: IN_FPS='${IN_FPS}'"
 #exit
 
 #----------------------------------------------------------------------#
@@ -158,7 +159,7 @@ BLURAY_PARAMETER()
 
         BHVERH="$(echo "${MBREITE} ${MHOEHE} ${MaxFS}" | awk '{verhaeltnis="gut"; if ($1 > (sqrt($3 * 8))) verhaeltnis="schlecht" ; if ($2 > (sqrt($3 * 8))) verhaeltnis="schlecht" ; print verhaeltnis}')"
 
-        echo "
+        echo "# 420 BLURAY_PARAMETER_01:
 	FNKLEVEL='${FNKLEVEL}'
 	MBREITE='${MBREITE}'
 	MHOEHE='${MHOEHE}'
@@ -168,7 +169,7 @@ BLURAY_PARAMETER()
 	#exit
 
         if [ "${BHVERH}" != "gut" ] ; then
-                echo "# BLURAY_PARAMETER:
+                echo "# 430 BLURAY_PARAMETER_02:
                 Seitenverhaeltnis wird von AVC nicht unterstuetzt!
                 ABBRUCH
                 " | tee -a ${PROTOKOLLDATEI}.txt
@@ -286,13 +287,18 @@ BLURAY_PARAMETER()
 
 #----------------------------------------------------------------------#
 
+echo "# 440:
+BILD_BREIT='${BILD_BREIT}'
+BILD_HOCH='${BILD_HOCH}'
+" | tee -a ${PROTOKOLLDATEI}.txt
+
 KEYINT="$(echo "${IN_FPS}" | awk '{printf "%.0f\n", $1 * 2}')"	# alle 2 Sekunden ein Key-Frame
 QUADR_MAKROBLOECKE="$(echo "${BILD_BREIT} ${BILD_HOCH}" | awk '{printf "%f %.0f %f %.0f\n",$1/16,$1/16,$2/16,$2/16}' | awk '{if ($1 > $2) $2 = $2+1 ; if ($3 > $4) $4 = $4+1 ; print $2,$4}')"
 LEVEL="$(AVC_LEVEL ${QUADR_MAKROBLOECKE} ${IN_FPS})"
 MaxFS="$(echo "${BILD_BREIT} ${BILD_HOCH}" | awk '{print $1 * $2}')"
 BLURAY_PARAMETER ${LEVEL} ${QUADR_MAKROBLOECKE} ${MaxFS}
 
-echo "
+echo "# 450:
 FNKLEVEL='${FNKLEVEL}'
 PROFILE='${PROFILE}'
 
@@ -308,7 +314,7 @@ MinCR='${MinCR}'
 CRF='${CRF}'
 " | tee -a ${PROTOKOLLDATEI}.txt
 
-#exit 302
+#exit 450
 
 #==============================================================================#
 ### Qualität
@@ -348,14 +354,14 @@ CRF='${CRF}'
 ### Die Option "-profile:v" hat nur dann Wirkung, wenn auch die Option "-level" angegeben wird!
 
 if [ "x${MaxBR}" = "x" -o "x${MaxCPB}" = "x" ] ; then
-	echo "
+	echo "# 460
 	FEHLER:
 	für BluDisk-Kompatibilität ist 'nal-hrd=vbr' zwingend notwendig
 	und 'nal-hrd=vbr' braucht die VBV-Optionen
 	vbv-maxrate='${MaxBR}'
 	vbv-bufsize='${MaxCPB}'
 	"
-	exit 346
+	exit 460
 else
 	VIDEO_OPTION="-profile:v ${PROFILE} -preset veryslow -tune film -x264opts ref=4:b-pyramid=strict:bluray-compat=1:weightp=0:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=4:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:aud:subme=9:nal-hrd=vbr"
 fi
@@ -373,7 +379,7 @@ VIDEO_QUALITAET_9="${VIDEO_OPTION} -crf 16"		# von "0" (verlustfrei) bis "51"
 
 IFRAME="-keyint_min 2-8"
 
-echo "
+echo "# 470:
 MLEVEL='${MLEVEL}'
 RLEVEL='${RLEVEL}'
 FNKLEVEL='${FNKLEVEL}'
