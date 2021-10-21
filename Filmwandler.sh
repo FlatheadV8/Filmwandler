@@ -68,7 +68,8 @@
 #VERSION="v2021091500"			# Jetzt kann man auch manuell einen Kommentar einfügen
 #VERSION="v2021091600"			# alternatives Untertitel-Format MKV->webvtt hinzugefügt
 #VERSION="v2021100100"			# wenn PAR und DAR nicht ermittelt werden konnten, dann wird IN_PAR="1:1" gesetzt
-VERSION="v2021101200"			# es wurde die Anzahl der Pixel nicht richtig berechnet, dadurch wurde die Auflösung geringer als nötig berechnet
+#VERSION="v2021101200"			# es wurde die Anzahl der Pixel nicht richtig berechnet, dadurch wurde die Auflösung geringer als nötig berechnet
+VERSION="v2021102100"			# Fehler in Zeile 1511 ("BASISWERTE=") behoben
 
 VERSION_METADATEN="${VERSION}"
 
@@ -1507,7 +1508,15 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   BILD_DAR_BREITE="$(echo "${IN_DAR}" | awk -F':' '{a=$1; if (a == "") a=1; print a}')"
   BILD_DAR_HOEHE="$(echo "${IN_DAR}" | awk -F':' '{a=$2; if (a == "") a=1; print a}')"
 
-  BASISWERTE="${O_BREIT} ${O_HOCH} ${O_DAR} ${IN_BREIT} ${IN_HOCH} ${TEILER}"
+  O_DAR="$(echo "${O_DAR}" | egrep '[:/]')"
+  if [ -n "${PAR}" ] ; then
+	O_DAR_1="$(echo "${O_DAR}" | egrep '[:/]' | awk -F'[:/]' '{print $1}')"
+	O_DAR_2="$(echo "${O_DAR}" | egrep '[:/]' | awk -F'[:/]' '{print $2}')"
+  else
+	O_DAR_1="${O_DAR}"
+	O_DAR_2="1"
+  fi
+  BASISWERTE="${O_BREIT} ${O_HOCH} ${O_DAR_1} ${O_DAR_2} ${IN_BREIT} ${IN_HOCH} ${TEILER}"
   BREIT_QUADRATISCH="$(echo "${BASISWERTE}" | awk '{gsub("[:/]"," ") ; printf "%.0f %.0f\n", $2 * $3 * $5 / $1 / $4 / $NF, $NF}' | awk '{printf "%.0f\n", $1*$2}')"
   HOCH_QUADRATISCH="$( echo "${BASISWERTE}" | awk '{gsub("[:/]"," ") ; printf "%.0f %.0f\n", $1 * $4 * $6 / $2 / $3 / $NF, $NF}' | awk '{printf "%.0f\n", $1*$2}')"
 
