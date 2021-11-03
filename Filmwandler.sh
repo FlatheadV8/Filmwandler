@@ -69,7 +69,9 @@
 #VERSION="v2021091600"			# alternatives Untertitel-Format MKV->webvtt hinzugefügt
 #VERSION="v2021100100"			# wenn PAR und DAR nicht ermittelt werden konnten, dann wird IN_PAR="1:1" gesetzt
 #VERSION="v2021101200"			# es wurde die Anzahl der Pixel nicht richtig berechnet, dadurch wurde die Auflösung geringer als nötig berechnet
-VERSION="v2021102100"			# Fehler in Zeile 1511 ("BASISWERTE=") behoben
+#VERSION="v2021102100"			# Fehler in Zeile 1511 ("BASISWERTE=") behoben
+#VERSION="v2021102600"			# wenn kein Untertitel gewünscht wird, dann wird jetzt die Option "-sn" hinzugefügt
+VERSION="v2021110200"			# ffmpeg kommt mit Umlauten in der Zieldatei nicht klar, jetzt wird davor gewarnt
 
 VERSION_METADATEN="${VERSION}"
 
@@ -578,9 +580,22 @@ ZIELDATEI="$(basename "${ZIELPFAD}")"
 QUELL_BASIS_NAME="$(echo "${QUELL_DATEI}" | awk '{print tolower($0)}')"
 ZIEL_BASIS_NAME="$(echo "${ZIELDATEI}" | awk '{print tolower($0)}')"
 
-ZIELNAME="$(echo "${ZIELDATEI}" | awk '{sub("[.][^.]*$","");print $0}')"
-ZIEL_FILM="${ZIELNAME}"
-ENDUNG="$(echo "${ZIEL_BASIS_NAME}" | rev | sed 's/[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.]/&"/;s/[.]".*//' | rev)"
+### leider kommt (Stand 2021) ffmpeg mit Umlauten nicht richtig zurecht
+#
+# [concat @ 0x80664f000] Unsafe file name 'iWRoMVJd7uIg_01_Jesus_war_Vegetarier_und_die_Texte_über_die_Opfergaben_im_AT_sind_Fälschungen.mp4'
+#
+if [ "x$(echo "${ZIELDATEI}" | grep -Ei 'ä|ö|ü|ß')" = x ] ; then
+	ZIELNAME="$(echo "${ZIELDATEI}" | awk '{sub("[.][^.]*$","");print $0}')"
+	ZIEL_FILM="${ZIELNAME}"
+	ENDUNG="$(echo "${ZIEL_BASIS_NAME}" | rev | sed 's/[a-zA-Z0-9\_\-\+/][a-zA-Z0-9\_\-\+/]*[.]/&"/;s/[.]".*//' | rev)"
+else
+	echo
+	echo 'Der Dateiname'
+	echo "'${ZIELDATEI}'"
+	echo 'enthält Umlaute, damit kommt ffmpeg leider nicht immer klar!'
+	exit 89
+fi
+
 
 if [ "${ZIEL_BASIS_NAME}" = "${ENDUNG}" ] ; then
 	echo 'Die Zieldatei muß eine Endung haben!'
@@ -1798,9 +1813,9 @@ AUDIO_VERARBEITUNG_02='${AUDIO_VERARBEITUNG_02}'
 # UNTERTITEL="0,1,2,3,4"
 
 if [ "${UNTERTITEL}" = "=0" ] ; then
-	U_TITEL_FF_01=""
-	U_TITEL_FF_ALT=""
-	U_TITEL_FF_02=""
+	U_TITEL_FF_01="-sn"
+	U_TITEL_FF_ALT="-sn"
+	U_TITEL_FF_02="-sn"
 	UNTERTITEL_STANDARD_SPUR=""
 else
 	#----------------------------------------------------------------------#
@@ -2108,9 +2123,9 @@ VIDEO_PARAMETER_KOPIE="-map 0:v -c:v copy"
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" = "0" ] ; then
 	VIDEO_PARAMETER_TRANS="-vn"
 	VIDEO_PARAMETER_KOPIE="-vn"
-	U_TITEL_FF_01=""
-	U_TITEL_FF_ALT=""
-	U_TITEL_FF_02=""
+	U_TITEL_FF_01="-sn"
+	U_TITEL_FF_ALT="-sn"
+	U_TITEL_FF_02="-sn"
 fi
 
 #------------------------------------------------------------------------------#
@@ -2169,9 +2184,9 @@ transkodieren_4_1()
 {
 	### 1004
 	echo "# 470
-	${PROGRAMM} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}'${KOMMENTAR}' ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}.${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	${PROGRAMM} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}'${KOMMENTAR}' ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	echo
-        ${PROGRAMM} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}.${ENDUNG} 2>&1 && WEITER=OK || WEITER=ALT
+        ${PROGRAMM} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI} 2>&1 && WEITER=OK || WEITER=ALT
 	echo "# 480
 	WEITER='${WEITER}'
 	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
@@ -2185,9 +2200,9 @@ transkodieren_5_1()
 {
 	### 1005
 	echo "# 490
-	${PROGRAMM} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}'${KOMMENTAR}' ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}.${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	${PROGRAMM} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}'${KOMMENTAR}' ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	echo
-	${PROGRAMM} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}.${ENDUNG} 2>&1 && WEITER=OK || WEITER=OHNE
+	${PROGRAMM} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI} 2>&1 && WEITER=OK || WEITER=OHNE
 	echo "# 500
 	WEITER='${WEITER}'
 	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
@@ -2201,9 +2216,9 @@ transkodieren_6_1()
 {
 	### 1006
 	echo "# 510
-	${PROGRAMM} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}'${KOMMENTAR}' ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}.${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	${PROGRAMM} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}'${KOMMENTAR}' ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	echo
-	${PROGRAMM} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}.${ENDUNG} 2>&1 && WEITER=OK || WEITER=NEIN
+	${PROGRAMM} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI} 2>&1 && WEITER=OK || WEITER=NEIN
 	echo "# 520
 	WEITER='${WEITER}'
 	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
@@ -2289,11 +2304,11 @@ else
 			transkodieren_6_1
 		fi
 
-		ffprobe -v error -i ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}.${ENDUNG} | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+		ffprobe -v error -i ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI} | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
                 ### den Film in die Filmliste eintragen
-                echo "echo \"file '${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}.${ENDUNG}'\" >> \"${ZIELVERZ}\"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-                echo "file '${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}.${ENDUNG}'" >> "${ZIELVERZ}"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt
+                echo "echo \"file '${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}'\" >> \"${ZIELVERZ}\"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+                echo "file '${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}'" >> "${ZIELVERZ}"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt
 
 		echo "---------------------------------------------------------" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	done
