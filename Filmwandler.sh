@@ -71,7 +71,10 @@
 #VERSION="v2021101200"			# es wurde die Anzahl der Pixel nicht richtig berechnet, dadurch wurde die Auflösung geringer als nötig berechnet
 #VERSION="v2021102100"			# Fehler in Zeile 1511 ("BASISWERTE=") behoben
 #VERSION="v2021102600"			# wenn kein Untertitel gewünscht wird, dann wird jetzt die Option "-sn" hinzugefügt
-VERSION="v2021110200"			# ffmpeg kommt mit Umlauten in der Zieldatei nicht klar, jetzt wird davor gewarnt
+#VERSION="v2021110200"			# ffmpeg kommt mit Umlauten in der Zieldatei nicht klar, jetzt wird davor gewarnt
+#VERSION="v2022012200"			# Fehler bei IN_DAR behoben, der nur bei sehr wenigen Videos auftritt
+#VERSION="v2022072400"			# wenn auch das alternative Untertitel-Format nicht funktioniert, dann wird jetzt explizit "-sn" gesetzt
+VERSION="v2022072600"			# Fehler im Abschnitt für die Option "-stereo" (Zeile 1808) behoben
 
 VERSION_METADATEN="${VERSION}"
 
@@ -995,6 +998,25 @@ unset IN_BIT_EINH
 
 #exit 120
 
+INDAR="$(echo "${IN_DAR}" | grep -E '[0-9][:][0-9]' | head -n1)"
+echo "# 211
+IN_DAR='${IN_DAR}'
+INDAR='${INDAR}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+if [ "x${INDAR}" = "x" ] ; then
+	IN_DAR="${IN_DAR}:1"
+	echo "# 212
+	IN_DAR='${IN_DAR}'
+	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+fi
+
+echo "# 213
+IN_DAR='${IN_DAR}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+#exit 121
+
 #==============================================================================#
 #==============================================================================#
 # Audio
@@ -1132,6 +1154,12 @@ if [ "x${IN_DAR}" = "x" ] ; then
 fi
 
 O_DAR="${IN_DAR}"
+
+echo "# 246
+O_BREIT=${O_BREIT}
+O_HOCH=${O_HOCH}
+O_DAR=${O_DAR}
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   echo "# 249" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
@@ -1334,7 +1362,15 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 		### [swscaler @ 0x81520d000] Warning: data is not aligned! This can lead to a speed loss
 		### laut Googel müssen die Pixel durch 16 teilbar sein, beseitigt aber leider dieses Problem nicht
 
-		echo "# 300" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+		echo "# 300
+		O_BREIT=${O_BREIT}
+		O_HOCH=${O_HOCH}
+		O_DAR=${O_DAR}
+		IN_BREIT=${IN_BREIT}
+		IN_HOCH=${IN_HOCH}
+		" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+		#exit 300
 
 		IN_DAR="$(echo "${O_BREIT} ${O_HOCH} ${O_DAR} ${IN_BREIT} ${IN_HOCH}" | awk '{gsub(":"," ");print $2 * $3 * $5 / $1 / $4 / $6}')"
 		DARFAKTOR_0="$(echo "${IN_DAR}" | awk '{printf "%u\n", ($1*100000)}')"
@@ -1701,6 +1737,7 @@ echo "# 500 TONQUALIT='${TONQUALIT}'
 echo "# 340
 TONQUALIT='${TONQUALIT}'
 AUDIOCODEC='${AUDIOCODEC}'
+AUDIO_CODEC_OPTION='${AUDIO_CODEC_OPTION}'
 AUDIOQUALITAET='${AUDIOQUALITAET}'
 Sound_ST='${Sound_ST}'
 Sound_51='${Sound_51}'
@@ -1725,6 +1762,7 @@ if [ "${TS_ANZAHL}" -gt 0 ] ; then
 		fi
 	fi
 
+#exit 262
 
 	#--------------------------------------------------------------#
 	# AUDIO_CODEC_OPTION
@@ -1768,7 +1806,7 @@ if [ "${TS_ANZAHL}" -gt 0 ] ; then
 			AUDIO_KANAELE="2"
 			echo "# 360
 			AUDIO_KANAELE='${AUDIO_KANAELE}'
-			" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+			" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 			echo -n " -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} -ac 2"
 		fi
 	done)"
@@ -2170,9 +2208,9 @@ transkodieren_3_1()
 {
 	### 1003
 	echo "# 450
-	${PROGRAMM} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${META_DATEN_DISPOSITIONEN} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}'${KOMMENTAR}' ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	${PROGRAMM} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} -sn ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${META_DATEN_DISPOSITIONEN} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}'${KOMMENTAR}' ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	echo
-	${PROGRAMM} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${META_DATEN_DISPOSITIONEN} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} 2>&1 && WEITER=OK || WEITER=NEIN
+	${PROGRAMM} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} -sn ${VON} ${BIS} ${FPS} ${SCHNELLSTART} ${META_DATEN_DISPOSITIONEN} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} 2>&1 && WEITER=OK || WEITER=NEIN
 	echo "# 460
 	WEITER='${WEITER}'
 	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
@@ -2216,9 +2254,9 @@ transkodieren_6_1()
 {
 	### 1006
 	echo "# 510
-	${PROGRAMM} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}'${KOMMENTAR}' ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	${PROGRAMM} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} -sn -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}'${KOMMENTAR}' ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	echo
-	${PROGRAMM} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI} 2>&1 && WEITER=OK || WEITER=NEIN
+	${PROGRAMM} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i  "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} -sn -ss ${VON} -to ${BIS} ${FPS} ${META_DATEN_DISPOSITIONEN} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y ${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI} 2>&1 && WEITER=OK || WEITER=NEIN
 	echo "# 520
 	WEITER='${WEITER}'
 	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
