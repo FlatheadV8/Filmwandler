@@ -823,11 +823,15 @@ FFMPEG_FORMATS="$(ffmpeg -formats 2>/dev/null | awk '/^[ \t]*[ ][DE]+[ ]/{print 
 
 #------------------------------------------------------------------------------#
 ### alternative Methode zur Ermittlung der FPS
-R_FPS="$(echo "${META_DATEN_STREAMS}" | egrep '^codec_type=|^r_frame_rate=' | egrep -A1 '^codec_type=video' | awk -F'=' '/^r_frame_rate=/{print $2}' | sed 's|/| |')"
-A_FPS="$(echo "${R_FPS}" | wc -w)"
-if [ "${A_FPS}" -gt 1 ] ; then
-	R_FPS="$(echo "${R_FPS}" | awk '{print $1 / $2}')"
+
+FPS_TEILE="$(echo "${META_DATEN_STREAMS}" | egrep '^codec_type=|^r_frame_rate=' | egrep -A1 '^codec_type=video' | awk -F'=' '/^r_frame_rate=/{print $2}' | sed 's|/| |')"
+TEIL_ZWEI="$(echo "${FPS_TEILE}" | awk '{print $2}')"
+if [ "x${TEIL_ZWEI}" = x ] ; then
+	R_FPS="$(echo "${FPS_TEILE}" | awk '{print $1}')"
+else
+	R_FPS="$(echo "${FPS_TEILE}" | awk '{print $1/$2}')"
 fi
+
 #------------------------------------------------------------------------------#
 ### hier wird ermittelt, ob der film progressiv oder im Zeilensprungverfahren vorliegt
 
@@ -937,10 +941,17 @@ fi
 # META_DATEN_STREAMS=" r_frame_rate=25/1 "
 # META_DATEN_STREAMS=" avg_frame_rate=25/1 "
 # META_DATEN_STREAMS=" codec_time_base=1/25 "
-IN_FPS="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^r_frame_rate=/{print $2}' | grep -Fv 'N/A' | head -n1 | awk -F'/' '{print $1}')"
+FPS_TEILE="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^r_frame_rate=/{print $2}' | grep -Fv 'N/A' | head -n1 | awk -F'/' '{print $1,$2}')"
+TEIL_ZWEI="$(echo "${FPS_TEILE}" | awk '{print $2}')"
+if [ "x${TEIL_ZWEI}" = x ] ; then
+	IN_FPS="$(echo "${FPS_TEILE}" | awk '{print $1}')"
+else
+	IN_FPS="$(echo "${FPS_TEILE}" | awk '{print $1/$2}')"
+fi
 echo "# 140
 1 IN_FPS='${IN_FPS}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
 if [ "x${IN_FPS}" = "x" ] ; then
 	IN_FPS="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^avg_frame_rate=/{print $2}' | grep -Fv 'N/A' | head -n1 | awk -F'/' '{print $1}')"
 	echo "# 150
