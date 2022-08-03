@@ -14,11 +14,7 @@
 #VERSION="v2018090600"
 #VERSION="v2020040900"
 #VERSION="v2021050800"		# "bt.709" für alles, "bt.601" deaktiviert
-#VERSION="v2021101300"		# Logging erweitert
-#VERSION="v2022080100"		# MaxBR + MaxCPB angepasst
-#VERSION="v2022080200"		# Makro-Block-Abstufungen für den Profil-Level überarbeitet
-#VERSION="v2022080201"		# Farbraum von der Bildhöhe abhängig gemacht
-VERSION="v2022080300"		# Funktion AVC_LEVEL neu geschrieben + Fehlerausgabe und Info verbessert
+VERSION="v2021101300"		# Logging erweitert
 
 #------------------------------------------------------------------------------#
 ### Kompatibilität zur Blu-ray
@@ -86,52 +82,60 @@ VERSION="v2022080300"		# Funktion AVC_LEVEL neu geschrieben + Fehlerausgabe und 
 AVC_LEVEL()
 {
         VERSION="v2014110200"
-        VERSION="v2022080300"
     
-	QUADR_MAKROBLOECKE="${1} ${1}"
-	IN_FPS="${3}"
+        # ${0} "Bildbreite in Makrobloecke" "Bildhoehe in Makobloecke" "Bilder pro Sekunde"
+    
+	#----------------------------------------------------------------------#
+	# [libx264 @ 0x81361a100] frame MB size (120x68) > level limit (5120)
+	# [libx264 @ 0x81361a100] DPB size (4 frames, 32640 mbs) > level limit (2 frames, 20480 mbs)
+        #----------------------------------------------------------------------#
+    
 
-	#==============================================================#
-	### Berechnung des AVC-Profil-Level
+        ### frame MakroBlock size
+	#echo "${1} ${2}" | awk '{print $1,"*",$2,"=",$1*$2}';
+
+        MLEVEL="$(echo "${1} ${2}" | awk '{fmbs=$1*$2 ;\
+		LEVEL=52 ;\
+		if (fmbs < 36865) LEVEL=51 ;\
+		if (fmbs < 22081) LEVEL=50 ;\
+		if (fmbs < 8193) LEVEL=42 ;\
+		if (fmbs < 5121) LEVEL=32 ;\
+		if (fmbs < 3601) LEVEL=31 ;\
+		if (fmbs < 1621) LEVEL=30 ;\
+		if (fmbs < 793) LEVEL=21 ;\
+		if (fmbs < 397) LEVEL=20 ;\
+		if (fmbs < 100) LEVEL=10 ;\
+		print LEVEL}')"
     
-	# echo "720 576 25" | awk '{printf "%f %.0f %f %.0f %.0f\n",$1/16,$1/16,$2/16,$2/16,$3}' | awk '{if ($1 > $2) $2 = $2+1 ; if ($3 > $4) $4 = $4+1 ; print "MBLOCK =",$2 * $4"\nRBLOCK =",$2 * $4 * $5}'
-	# MBLOCK = 1620  (Makroblöcke je Bild)
-	# RBLOCK = 40500 (Makroblöcke eines Bildes pro Sekunde)
+
+        ### MakroBlock rate
+	#echo "${1} ${2} ${3}" | awk '{print $1,"*",$2,"*",$3,"=",$1*$2*$3}';
+
+        RLEVEL="$(echo "${1} ${2} ${3}" | awk '{mbr=$1*$2*$3 ;\
+		LEVEL=52 ;\
+		if (mbr < 983041) LEVEL=51 ;\
+		if (mbr < 589825) LEVEL=50 ;\
+		if (mbr < 589825) LEVEL=42 ;\
+		if (mbr < 216001) LEVEL=32 ;\
+		if (mbr < 108001) LEVEL=31 ;\
+		if (mbr < 40501) LEVEL=30 ;\
+		if (mbr < 19801) LEVEL=21 ;\
+		if (mbr < 11881) LEVEL=20 ;\
+		if (mbr < 1486) LEVEL=10 ;\
+		print LEVEL}')"
     
-	MAKRO_BLK_im_BILD="$(echo "${QUADR_MAKROBLOECKE}" | awk '{print $1 * $2}')"
-	MAKRO_BLK_in_SEKUNDE="$(echo "${MAKRO_BLK_im_BILD} ${IN_FPS}" | awk '{printf "%f %.0f\n",$1*$2,$1*$2}' | awk '{if ($1 > $2) $2 = $2+1 ; print $2}')"
+        #echo "${MLEVEL} -gt ${RLEVEL}"
+
+        AVCLEVEL=""
+        if [ "${MLEVEL}" -gt "${RLEVEL}" ] ; then
+                AVCLEVEL="${MLEVEL}"
+        else
+                AVCLEVEL="${RLEVEL}"
+        fi
     
-	#--------------------------------------------------------------#
-	### AVC-Level + Makroblöcke pro Sekunde + Makroblockgröße
+        #----------------------------------------------------------------------#
     
-	# http://blog.mediacoderhq.com/h264-profiles-and-levels/
-	AVCL_MBPS_MBPB="
-	10    99   1485
-	11   396   3000
-	12   396   6000
-	13   396  11880
-	20   396  11880
-	21   792  19800
-	22  1620  20250
-	30  1620  40500
-	31  3600 108000
-	32  5120 216000
-	40  8192 245760
-	41  8192 245760
-	42  8704 522240
-	50 22080 589824
-	51 36864 983040
-	"
-    
-	echo "${AVCL_MBPS_MBPB}" | grep -Ev '^[ \t]*$' | while read AVC_LEVEL MAKRO_BLK_pro_BILD MAKRO_BLK_pro_SEKUNDE
-	do
-        	if [ "${MAKRO_BLK_pro_BILD}" -ge "${MAKRO_BLK_im_BILD}" ] ; then
-                	if [ "${MAKRO_BLK_pro_SEKUNDE}" -ge "${MAKRO_BLK_in_SEKUNDE}" ] ; then
-                        	echo "${AVC_LEVEL}"
-                	fi
-        	fi
-	done | head -n1
-	#==============================================================#
+        echo "${AVCLEVEL}" #| awk '{print $1 / 10}'
 }
 
 #----------------------------------------------------------------------#
@@ -153,20 +157,20 @@ BLURAY_PARAMETER()
 
         # --bluray-compat
 
-	BHVERH="$(echo "${MBREITE} ${MHOEHE} ${MaxFS}" | awk '{verhaeltnis="gut"; if ($1 > (sqrt($3 * 8))) verhaeltnis="schlecht" ; if ($2 > (sqrt($3 * 8))) verhaeltnis="schlecht" ; print verhaeltnis}')"
+        BHVERH="$(echo "${MBREITE} ${MHOEHE} ${MaxFS}" | awk '{verhaeltnis="gut"; if ($1 > (sqrt($3 * 8))) verhaeltnis="schlecht" ; if ($2 > (sqrt($3 * 8))) verhaeltnis="schlecht" ; print verhaeltnis}')"
 
         echo "# 420 BLURAY_PARAMETER_01:
-	# FNKLEVEL='${FNKLEVEL}'
-	# MBREITE='${MBREITE}'
-	# MHOEHE='${MHOEHE}'
-	# MaxFS='${MaxFS}'
+	FNKLEVEL='${FNKLEVEL}'
+	MBREITE='${MBREITE}'
+	MHOEHE='${MHOEHE}'
+	MaxFS='${MaxFS}'
         " | tee -a ${PROTOKOLLDATEI}.txt
 
 	#exit
 
         if [ "${BHVERH}" != "gut" ] ; then
                 echo "# 430 BLURAY_PARAMETER_02:
-                Das Makroblock-Seitenverhaeltnis von ${MBREITE}/${MHOEHE} wird von AVC nicht unterstuetzt!
+                Seitenverhaeltnis wird von AVC nicht unterstuetzt!
                 ABBRUCH
                 " | tee -a ${PROTOKOLLDATEI}.txt
                 exit 1
@@ -200,52 +204,20 @@ BLURAY_PARAMETER()
                 MinCR="2"
                 CRF="24"
         elif [ "${FNKLEVEL}" = "30" -a "${PROFILE}" = "high" ] ; then
-                #MaxBR="12500"			# ?
-                #MaxCPB="12500"			# ?
-                MaxBR="12000"			# DVD + BD
-                MaxCPB="12000"			# DVD + BD
+                MaxBR="12500"
+                MaxCPB="12500"
                 MaxVmvR="-256,255.75"           # max. Vertical MV component range
                 MinCR="2"
                 CRF="23"
         elif [ "${FNKLEVEL}" = "31" -a "${PROFILE}" = "high" ] ; then
-                #MaxBR="17500"			# ?
-                #MaxCPB="17500"			# ?
-                #MaxBR="16800"			# BD
-                #MaxCPB="16800"			# BD
-                MaxBR="15000"			# DVD
-                MaxCPB="15000"			# DVD
+                MaxBR="17500"
+                MaxCPB="17500"
                 MaxVmvR="-512,511.75"           # max. Vertical MV component range
                 MinCR="4"
                 CRF="23"
         elif [ "${FNKLEVEL}" = "32" -a "${PROFILE}" = "high" ] ; then
-                #MaxBR="25000"			# ?
-                #MaxCPB="25000"			# ?
-                #MaxBR="24000"			# BD
-                #MaxCPB="24000"			# BD
-                MaxBR="15000"			# DVD
-                MaxCPB="15000"			# DVD
-                MaxVmvR="-512,511.75"           # max. Vertical MV component range
-                MinCR="4"
-                CRF="23"
-	# leider liegen keine genauen Daten für Level 4.0 und 4.1 (HD ready) vor
-        elif [ "${FNKLEVEL}" = "40" -a "${PROFILE}" = "high" ] ; then
-                #MaxBR="25000"			# ?
-                #MaxCPB="25000"			# ?
-                #MaxBR="24000"			# BD
-                #MaxCPB="24000"			# BD
-                MaxBR="15000"			# DVD
-                MaxCPB="15000"			# DVD
-                MaxVmvR="-512,511.75"           # max. Vertical MV component range
-                MinCR="4"
-                CRF="23"
-	# leider liegen keine genauen Daten für Level 4.0 und 4.1 (HD ready) vor
-        elif [ "${FNKLEVEL}" = "41" -a "${PROFILE}" = "high" ] ; then
-                #MaxBR="25000"			# ?
-                #MaxCPB="25000"			# ?
-                #MaxBR="40000"			# BD
-                #MaxCPB="40000"			# BD
-                MaxBR="15000"			# DVD
-                MaxCPB="15000"			# DVD
+                MaxBR="25000"
+                MaxCPB="25000"
                 MaxVmvR="-512,511.75"           # max. Vertical MV component range
                 MinCR="4"
                 CRF="23"
@@ -314,23 +286,10 @@ BLURAY_PARAMETER()
 #fi
 
 #----------------------------------------------------------------------#
-### Farbraum für SD oder HD
-
-if   [ "${BILD_HOCH}" -le "480" ] ; then
-	FARBCOD="smpte170m"		# 480 (SD): SMPTE 170M / BT.601
-elif [ "${BILD_HOCH}" -le "576" ] ; then
-	FARBCOD="bt470"			# 576 (SD): BT.470 BG
-else
-	FARBCOD="bt709"			# 720, 1080 (HD): BT.709-5
-fi
-
-#----------------------------------------------------------------------#
 
 echo "# 440:
-# BILD_BREIT='${BILD_BREIT}'
-# BILD_HOCH='${BILD_HOCH}'
-# IN_FPS='${IN_FPS}'
-# MBREITE/MHOEHE='${MBREITE}/${MHOEHE}'
+BILD_BREIT='${BILD_BREIT}'
+BILD_HOCH='${BILD_HOCH}'
 " | tee -a ${PROTOKOLLDATEI}.txt
 
 KEYINT="$(echo "${IN_FPS}" | awk '{printf "%.0f\n", $1 * 2}')"	# alle 2 Sekunden ein Key-Frame
@@ -340,19 +299,19 @@ MaxFS="$(echo "${BILD_BREIT} ${BILD_HOCH}" | awk '{print $1 * $2}')"
 BLURAY_PARAMETER ${LEVEL} ${QUADR_MAKROBLOECKE} ${MaxFS}
 
 echo "# 450:
-# FNKLEVEL='${FNKLEVEL}'
-# PROFILE='${PROFILE}'
+FNKLEVEL='${FNKLEVEL}'
+PROFILE='${PROFILE}'
 
-# KEYINT='${KEYINT}'
-# QUADR_MAKROBLOECKE='${QUADR_MAKROBLOECKE}'
-# LEVEL='${LEVEL}'
-# MaxFS='${MaxFS}'
+KEYINT='${KEYINT}'
+QUADR_MAKROBLOECKE='${QUADR_MAKROBLOECKE}'
+LEVEL='${LEVEL}'
+MaxFS='${MaxFS}'
 
-# MaxBR='${MaxBR}'
-# MaxCPB='${MaxCPB}'
-# MaxVmvR='${MaxVmvR}'
-# MinCR='${MinCR}'
-# CRF='${CRF}'
+MaxBR='${MaxBR}'
+MaxCPB='${MaxCPB}'
+MaxVmvR='${MaxVmvR}'
+MinCR='${MinCR}'
+CRF='${CRF}'
 " | tee -a ${PROTOKOLLDATEI}.txt
 
 #exit 450
@@ -421,18 +380,18 @@ VIDEO_QUALITAET_9="${VIDEO_OPTION} -crf 16"		# von "0" (verlustfrei) bis "51"
 IFRAME="-keyint_min 2-8"
 
 echo "# 470:
-# MLEVEL='${MLEVEL}'
-# RLEVEL='${RLEVEL}'
-# FNKLEVEL='${FNKLEVEL}'
+MLEVEL='${MLEVEL}'
+RLEVEL='${RLEVEL}'
+FNKLEVEL='${FNKLEVEL}'
 
-# profile=${PROFILE}
-# rate=${MaxBR}
-# vbv-bufsize=${MaxCPB}
-# level=${LEVEL}
-# colormatrix='${FARBCOD}'
+profile=${PROFILE}
+rate=${MaxBR}
+vbv-bufsize=${MaxCPB}
+level=${LEVEL}
+colormatrix='${FARBCOD}'
 
-# IN_FPS='${IN_FPS}'
-# VIDEO_OPTION='${VIDEO_OPTION}'
+IN_FPS='${IN_FPS}'
+VIDEO_OPTION='${VIDEO_OPTION}'
 " | tee -a ${PROTOKOLLDATEI}.txt
 
 #==============================================================================#

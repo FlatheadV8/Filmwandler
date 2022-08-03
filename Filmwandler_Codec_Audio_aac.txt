@@ -7,7 +7,8 @@
 #VERSION="v2019092500"
 #VERSION="v2020060900"		# Bit-Raten-Abstufung angepasst
 #VERSION="v2020092500"		# weitere Variable eingeführt
-VERSION="v2020121700"		# Warning behoben
+#VERSION="v2020121700"		# Warning behoben
+VERSION="v2022073100"		# Bit-Raten-Abstufung etwas nach oben angepasst
 
 #------------------------------------------------------------------------------#
 #
@@ -58,9 +59,9 @@ Sound_71=''				# 7.1
 
 BIT_RATE="cbr"
 
-#echo "
-#CODEC_PATTERN='${CODEC_PATTERN}'
-#"
+echo "# 1234
+# CODEC_PATTERN='${CODEC_PATTERN}'
+"
 #exit 1234
 
 AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
@@ -118,39 +119,39 @@ else
     if [ "${AUDIO_KANAELE}" -le 2 ] ; then
 	### Mono + Stereo
         AUDIO_QUALITAET_0="-b:a 40k"	#  20k x 2
-        AUDIO_QUALITAET_1="-b:a 56k"	#  28k x 2
-        AUDIO_QUALITAET_2="-b:a 64k"	#  32k x 2
-        AUDIO_QUALITAET_3="-b:a 80k"	#  40k x 2
-        AUDIO_QUALITAET_4="-b:a 96k"	#  48k x 2
-        AUDIO_QUALITAET_5="-b:a 112k"	#  56k x 2
-        AUDIO_QUALITAET_6="-b:a 128k"	#  64k x 2
-        AUDIO_QUALITAET_7="-b:a 144k"	#  72k x 2
-        AUDIO_QUALITAET_8="-b:a 192k"	#  96k x 2
-        AUDIO_QUALITAET_9="-b:a 224k"	# 112k x 2
+        AUDIO_QUALITAET_1="-b:a 52k"	#  26k x 2
+        AUDIO_QUALITAET_2="-b:a 66k"	#  33k x 2
+        AUDIO_QUALITAET_3="-b:a 86k"	#  43k x 2
+        AUDIO_QUALITAET_4="-b:a 110k"	#  55k x 2
+        AUDIO_QUALITAET_5="-b:a 140k"	#  70k x 2
+        AUDIO_QUALITAET_6="-b:a 180k"	#  90k x 2
+        AUDIO_QUALITAET_7="-b:a 232k"	# 116k x 2
+        AUDIO_QUALITAET_8="-b:a 298k"	# 150k x 2
+        AUDIO_QUALITAET_9="-b:a 384k"	# 192k x 2
     elif [ "${AUDIO_KANAELE}" -le 6 ] ; then
 	### DolbyDigital (5.1)
         AUDIO_QUALITAET_0="-b:a 120k"	#  20k x 6
-        AUDIO_QUALITAET_1="-b:a 168k"	#  28k x 6
-        AUDIO_QUALITAET_2="-b:a 192k"	#  32k x 6
-        AUDIO_QUALITAET_3="-b:a 240k"	#  40k x 6
-        AUDIO_QUALITAET_4="-b:a 288k"	#  48k x 6
-        AUDIO_QUALITAET_5="-b:a 336k"	#  56k x 6
-        AUDIO_QUALITAET_6="-b:a 384k"	#  64k x 6
-        AUDIO_QUALITAET_7="-b:a 432k"	#  72k x 6
-        AUDIO_QUALITAET_8="-b:a 576k"	#  96k x 6
-        AUDIO_QUALITAET_9="-b:a 672k"	# 112k x 6
+        AUDIO_QUALITAET_1="-b:a 156k"	#  26k x 6
+        AUDIO_QUALITAET_2="-b:a 198k"	#  33k x 6
+        AUDIO_QUALITAET_3="-b:a 258k"	#  43k x 6
+        AUDIO_QUALITAET_4="-b:a 330k"	#  55k x 6
+        AUDIO_QUALITAET_5="-b:a 420k"	#  70k x 6
+        AUDIO_QUALITAET_6="-b:a 540k"	#  90k x 6
+        AUDIO_QUALITAET_7="-b:a 696k"	# 116k x 6
+        AUDIO_QUALITAET_8="-b:a 894k"	# 150k x 6
+        AUDIO_QUALITAET_9="-b:a 1152k"	# 192k x 6
     else
 	### 7.1
         AUDIO_QUALITAET_0="-b:a 160k"	#  20k x 8
-        AUDIO_QUALITAET_1="-b:a 224k"	#  28k x 8
-        AUDIO_QUALITAET_2="-b:a 256k"	#  32k x 8
-        AUDIO_QUALITAET_3="-b:a 320k"	#  40k x 8
-        AUDIO_QUALITAET_4="-b:a 384k"	#  48k x 8
-        AUDIO_QUALITAET_5="-b:a 448k"	#  56k x 8
-        AUDIO_QUALITAET_6="-b:a 512k"	#  64k x 8
-        AUDIO_QUALITAET_7="-b:a 576k"	#  72k x 8
-        AUDIO_QUALITAET_8="-b:a 768k"	#  96k x 8
-        AUDIO_QUALITAET_9="-b:a 896k"	# 112k x 8
+        AUDIO_QUALITAET_1="-b:a 208k"	#  26k x 8
+        AUDIO_QUALITAET_2="-b:a 264k"	#  33k x 8
+        AUDIO_QUALITAET_3="-b:a 344k"	#  43k x 8
+        AUDIO_QUALITAET_4="-b:a 440k"	#  55k x 8
+        AUDIO_QUALITAET_5="-b:a 560k"	#  70k x 8
+        AUDIO_QUALITAET_6="-b:a 720k"	#  90k x 8
+        AUDIO_QUALITAET_7="-b:a 928k"	# 116k x 8
+        AUDIO_QUALITAET_8="-b:a 1192k"	# 150k x 8
+        AUDIO_QUALITAET_9="-b:a 1536k"	# 192k x 8
     fi
 fi
 }
