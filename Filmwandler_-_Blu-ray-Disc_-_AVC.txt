@@ -88,7 +88,7 @@ AVC_LEVEL()
         VERSION="v2014110200"
         VERSION="v2022080300"
     
-	QUADR_MAKROBLOECKE="${1} ${1}"
+	QUADR_MAKROBLOECKE="${1} ${2}"
 	IN_FPS="${3}"
 
 	#==============================================================#

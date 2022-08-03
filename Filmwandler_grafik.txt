@@ -2,7 +2,8 @@
 #VERSION="v2019010600"
 #VERSION="v2022073100"
 #VERSION="v2022080100"		# Auflösung HDV hinzugefügt + Auflösungen nach Anzahl der Bildpunkte sortiert + AVC-Profil-Level dabei geschrieben
-VERSION="v2022080300"		# AVC-Profil-Level korrigiert, es bezieht sich auf eine Bildwiederholrate von 25 Hz!
+#VERSION="v2022080200"		# AVC-Profil-Level korrigiert (ist nur ein Beispiel für eine Bildwiederholrate von 25 Hz!)
+VERSION="v2022080300"		# alle VHS und VHS-ähnlichen (analoge) Auflösungen korrigiert, die haben alle 576 Zeilen!
 
 bildaufloesungen_namen()
 {
@@ -16,25 +17,31 @@ echo "
 	-soll_xmaly GBA			# 240x160 3/2        ; Level 1.2
 	-soll_xmaly VGA8		# 240x180 4/3        ; Level 1.2
 	-soll_xmaly 3DS			# 256x192 4/3        ; Level 1.2
-	-soll_xmaly VHS			# 320x240 4/3        ; Level 1.3
-	-soll_xmaly VCD			# 352x288 4/3        ; Level 1.3 - es ist ein h263-Format
+	-soll_xmaly VCD			# 352x288 4/3        ; Level 1.3 - MPEG-1; MPEG-2-Profil: Low; es ist ein h263-Format
 	-soll_xmaly Palm_HiRes		# 320x320 1/1        ; Level 2.1
 	-soll_xmaly WQVGA		# 432x240 9/5        ; Level 2.1
 	-soll_xmaly QSVGA		# 400x300 4/3        ; Level 2.1
 	-soll_xmaly PSP			# 480x272 16/9       ; Level 2.1
+	-soll_xmaly VHS			# 240x576 4/3        ; Level 2.1 - minimale VHS-Auflösung
+	-soll_xmaly VIDEO8		# 250x576 4/3        ; Level 2.1 - VHS und Video8 (Sony und Polaroid brachten Video8 1985 auf den Markt. Hi8 und Digital 8 sind unterschiedliche Standards. Hi8 ist der Nachfolger für Video8.)
+	-soll_xmaly VHS2		# 260x576 4/3        ; Level 2.1 - maximale VHS-Auflösung
 	-soll_xmaly HVGA		# 480x320 3/2        ; Level 2.1
 	-soll_xmaly PSION5		# 640x240 8/3        ; Level 2.1
+	-soll_xmaly TV			# 330x576 4/3        ; Level 3.0 - analoges Fernsehsignal über Antenne
 	-soll_xmaly 2CIF		# 704x288 4/3        ; Level 2.1
-	-soll_xmaly SVHS		# 533x400 4/3        ; Level 3.0
 	-soll_xmaly EGA			# 640x350 4/3        ; Level 3.0
+	-soll_xmaly SVHS		# 400x576 4/3        ; Level 3.0 - Die Auflösung des Bildes in der Horizontalachse wurde auf 400 Linien erhöht (VHS = 240-260 Linien). Hi8 hat auch 400 Linien in der Horizontalachse (Spalten).
 	-soll_xmaly QHD_ready		# 640x360 16/9       ; Level 3.0
 	-soll_xmaly HSVGA		# 600x400 3/2        ; Level 3.0
+	-soll_xmaly PAL0		# 352x704 4/3        ; Level 3.0 - wirklich aktiver Bereich von analogem PAL
 	-soll_xmaly HGC			# 720x348 4/3        ; Level 3.0
 	-soll_xmaly MDA			# 720x350 4/3        ; Level 3.0
 	-soll_xmaly Apple_Lisa		# 720x364 4/3        ; Level 3.0
 	-soll_xmaly SVCD		# 480x576 4/3        ; Level 3.0
+	-soll_xmaly DV			# 500x576 4/3        ; Level 3.0 - verbessertes S-VHS
 	-soll_xmaly WGA			# 720x400 9/5        ; Level 3.0
 	-soll_xmaly VGA			# 640x480 4/3        ; Level 3.0
+	-soll_xmaly DVD 		# 550x576 4/3        ; Level 3.1
 	-soll_xmaly MWH			# 768x432 16/9       ; Level 3.0
 	-soll_xmaly NTSC		# 720x480 4/3        ; Level 3.0
 	-soll_xmaly WVGA3		# 800x480 5/3        ; Level 3.0
@@ -43,10 +50,11 @@ echo "
 	-soll_xmaly WVGA4		# 848x480 16/9       ; Level 3.0
 	-soll_xmaly WVGA5		# 852x480 16/9       ; Level 3.0
 	-soll_xmaly FWVGA		# 854x480 16/9       ; Level 3.0 - Full Wide VGA - Nintendo Wii U GamePad, LG K3 (LGE K100, LS450)
-	-soll_xmaly PAL			# 720x576 4/3        ; Level 3.0
+	-soll_xmaly PAL			# 720x576 4/3        ; Level 3.0 - MPEG-2-Profil: Main; Eigentlich hat PAL 625 Zeilen aber 49 Zeilen (eigentlich 2x25 Zeilen) werden zum stabilisieren des Elektronenstrahls benötigt, hier wurde VideoText übertragen.
 	-soll_xmaly WVGA7		# 864x480 9/5        ; Level 3.0
 	-soll_xmaly WVGA6		# 858x484 16/9       ; Level 3.1
 	-soll_xmaly PAL-D		# 768x576 4/3        ; Level 3.1
+	-soll_xmaly BETA		# 800x576 4/3        ; Level 3.1 - Betacam (500-800 Spalten), stand in Konkurenz zu VHS, hat sich aber nicht durchgesetzt
 	-soll_xmaly SVGA		# 800x600 4/3        ; Level 3.1
 	-soll_xmaly QHD			# 960x540 16/9       ; Level 3.1
 	-soll_xmaly HXGA		# 832x624 4/3        ; Level 3.1
@@ -79,9 +87,11 @@ echo "
 	-soll_xmaly HDV 		# 1440x1080 4/3      ; Level 4.0
 	-soll_xmaly 16CIF		# 1408x1152 4/3      ; Level 4.0 - es ist ein h263-Format
 	-soll_xmaly WSXGA2		# 1600x1024 25/16    ; Level 4.0
+	-soll_xmaly MPEG2H1440		# 1440x1152 4/3      ; Level 3.1 - MPEG-2-Profil: High 1440; HDTV 4:3
 	-soll_xmaly WSXGA+		# 1680x1050 8/5      ; Level 4.0
 	-soll_xmaly UXGA		# 1600x1200 4/3      ; Level 4.0
 	-soll_xmaly HD			# 1920x1080 16/9     ; Level 4.0
+	-soll_xmaly MPEG2H		# 1920x1152 16/9     ; Level 3.1 - MPEG-2-Profil: High; HDTV 16:9
 	-soll_xmaly WUXGA		# 1920x1200 8/5      ; Level 5.0
 	-soll_xmaly QWXGA		# 2048x1152 16/9     ; Level 5.0
 	-soll_xmaly TXGA		# 1920x1400 1371     ; Level 5.0

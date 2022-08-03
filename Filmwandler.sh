@@ -81,7 +81,8 @@
 #VERSION="v2022072600"			# Fehler im Abschnitt für die Option "-stereo" (Zeile 1808) behoben
 #VERSION="v2022073100"			# Abbrüche bei zu wenig RAM behoben
 #VERSION="v2022073100"			# Schalter für den (minimalen) HDTV-Standard ("HD ready") eingerichtet
-VERSION="v2022080200"			# Schalter -ffprobe eingerichtet, um eigene Scan-Größen angeben zu können
+#VERSION="v2022080200"			# Schalter -ffprobe eingerichtet, um eigene Scan-Größen angeben zu können
+VERSION="v2022080300"			# Fehler bei der AVC-Profil-Level-Bestimmung behoben, es wurde die In-Auflösung und nicht die Out-Auflösung zur Berechnung verwendet
 
 VERSION_METADATEN="${VERSION}"
 
@@ -375,9 +376,9 @@ while [ "${#}" -ne "0" ]; do
                         FFPROBE_PROBESIZE="${2}"		# ffprobe-Scan-Größe in MiB
                         shift
                         ;;
-                -hdtvmin)
-                        #  4/3: 1024×768 → XGA  (EVGA)
-                        # 16/9: 1280×720 → WXGA (HDTV)
+                -hdtvmin|-minihd)
+                        # Bei  4/3 ist das Bild auf 1024×768 → XGA  (EVGA) begrenzt.
+                        # Bei 16/9 ist das Bild auf 1280×720 → WXGA (HDTV) begrenzt.
                         HDTVMIN="Ja"				# Mindestanvorderungen des "HD ready"-Standards umsetzen
                         STEREO="Ja"				# Die Set-Top-Boxen können keine zu hohen Audio-Bitraten und laufen mit Stereo an zuverlässigsten.
                         shift
@@ -698,6 +699,7 @@ echo "# 130
 $(date +'%F %T')
 ${0} ${Film2Standardformat_OPTIONEN}
 
+ZIEL_BASIS_NAME='${ZIEL_BASIS_NAME}'
 QUELL_DATEI='${QUELL_DATEI}'
 ZIELVERZ='${ZIELVERZ}'
 ZIELDATEI='${ZIELDATEI}'
