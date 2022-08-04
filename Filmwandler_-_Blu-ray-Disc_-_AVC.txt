@@ -18,7 +18,8 @@
 #VERSION="v2022080100"		# MaxBR + MaxCPB angepasst
 #VERSION="v2022080200"		# Makro-Block-Abstufungen für den Profil-Level überarbeitet
 #VERSION="v2022080201"		# Farbraum von der Bildhöhe abhängig gemacht
-VERSION="v2022080300"		# Funktion AVC_LEVEL neu geschrieben + Fehlerausgabe und Info verbessert
+#VERSION="v2022080300"		# Funktion AVC_LEVEL neu geschrieben + Fehlerausgabe und Info verbessert
+VERSION="v2022080400"		# Fehler in Farbraum-Kodierung behoben
 
 #------------------------------------------------------------------------------#
 ### Kompatibilität zur Blu-ray
@@ -319,7 +320,7 @@ BLURAY_PARAMETER()
 if   [ "${BILD_HOCH}" -le "480" ] ; then
 	FARBCOD="smpte170m"		# 480 (SD): SMPTE 170M / BT.601
 elif [ "${BILD_HOCH}" -le "576" ] ; then
-	FARBCOD="bt470"			# 576 (SD): BT.470 BG
+	FARBCOD="bt470bg"		# 576 (SD): BT.470 BG
 else
 	FARBCOD="bt709"			# 720, 1080 (HD): BT.709-5
 fi
