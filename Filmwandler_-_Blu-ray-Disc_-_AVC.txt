@@ -183,7 +183,6 @@ BLURAY_PARAMETER()
         LEVEL="$(echo "${FNKLEVEL}" | awk '{print $1 / 10}')"
 
 	#======================================================================#
-
         #   http://forum.doom9.org/showthread.php?t=101345
         #   http://forum.doom9.org/showthread.php?t=154533
         #   https://de.wikipedia.org/wiki/H.264#Level
@@ -225,38 +224,49 @@ BLURAY_PARAMETER()
         elif [ "${FNKLEVEL}" = "30" -a "${PROFILE}" = "high" ] ; then
 		#MaxBR="12500"			# https://de.wikipedia.org/wiki/H.264#Level
                 #MaxCPB="12500"			# https://de.wikipedia.org/wiki/H.264#Level
-		MaxBR="12000"			# https://forum.doom9.org/showthread.php?t=154533
-                MaxCPB="12000"			# https://forum.doom9.org/showthread.php?t=154533
+		#MaxBR="12000"			# (BD) https://forum.doom9.org/showthread.php?t=154533
+		#MaxCPB="12000"			# (BD) https://forum.doom9.org/showthread.php?t=154533
+		MaxBR="12000"			# (DVD) https://forum.doom9.org/showthread.php?t=154533
+		MaxCPB="12000"			# (DVD) https://forum.doom9.org/showthread.php?t=154533
                 MaxVmvR="-256,255.75"           # noch ungenutzt (max. Vertical MV component range)
                 MinCR="2"			# noch ungenutzt (würde auch nur bei crf=0 von Bedeutung sein)
                 CRF="23"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
         elif [ "${FNKLEVEL}" = "31" -a "${PROFILE}" = "high" ] ; then
 		#MaxBR="17500"			# https://de.wikipedia.org/wiki/H.264#Level
                 #MaxCPB="17500"			# https://de.wikipedia.org/wiki/H.264#Level
-		MaxBR="15000"			# https://forum.doom9.org/showthread.php?t=154533
-                MaxCPB="15000"			# https://forum.doom9.org/showthread.php?t=154533
+		#MaxBR="16800"			# (BD) https://forum.doom9.org/showthread.php?t=154533
+		#MaxCPB="16800"			# (BD) https://forum.doom9.org/showthread.php?t=154533
+		MaxBR="15000"			# (DVD) https://forum.doom9.org/showthread.php?t=154533
+		MaxCPB="15000"			# (DVD) https://forum.doom9.org/showthread.php?t=154533
                 MaxVmvR="-512,511.75"           # noch ungenutzt (max. Vertical MV component range)
                 MinCR="4"			# noch ungenutzt (würde auch nur bei crf=0 von Bedeutung sein)
                 CRF="23"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
         elif [ "${FNKLEVEL}" = "32" -a "${PROFILE}" = "high" ] ; then
 		#MaxBR="25000"			# https://de.wikipedia.org/wiki/H.264#Level
-                #MaxCPB="25000"			# https://de.wikipedia.org/wiki/H.264#Level
-		MaxBR="15000"			# https://forum.doom9.org/showthread.php?t=154533
-                MaxCPB="15000"			# https://forum.doom9.org/showthread.php?t=154533
+                #MaxCPB="25000"			# vbv-bufsize
+		#MaxBR="24000"			# (BD) https://forum.doom9.org/showthread.php?t=154533
+		#MaxCPB="24000"			# (BD) https://forum.doom9.org/showthread.php?t=154533
+		MaxBR="15000"			# (DVD/HD) https://forum.doom9.org/showthread.php?t=154533
+		#MaxBR="8000"			# (DVD/SD) https://forum.doom9.org/showthread.php?t=154533
+		MaxCPB="15000"			# (DVD) https://forum.doom9.org/showthread.php?t=154533
                 MaxVmvR="-512,511.75"           # noch ungenutzt (max. Vertical MV component range)
                 MinCR="4"			# noch ungenutzt (würde auch nur bei crf=0 von Bedeutung sein)
                 CRF="23"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
         elif [ "${FNKLEVEL}" = "40" -a "${PROFILE}" = "high" ] ; then
 		#MaxBR="25000"			# https://de.wikipedia.org/wiki/H.264#Level
                 #MaxCPB="25000"			# https://de.wikipedia.org/wiki/H.264#Level
-		MaxBR="15000"			# https://forum.doom9.org/showthread.php?t=154533
-                MaxCPB="15000"			# https://forum.doom9.org/showthread.php?t=154533
+		#MaxBR="24000"			# (BD/SD) https://forum.doom9.org/showthread.php?t=154533
+		#MaxCPB="24000"			# (BD/SD) https://forum.doom9.org/showthread.php?t=154533
+		MaxBR="15000"			# (DVD) https://forum.doom9.org/showthread.php?t=154533
+		MaxCPB="15000"			# (DVD) https://forum.doom9.org/showthread.php?t=154533
                 CRF="23"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
         elif [ "${FNKLEVEL}" = "41" -a "${PROFILE}" = "high" ] ; then
 		#MaxBR="62500"			# https://de.wikipedia.org/wiki/H.264#Level
                 #MaxCPB="62500"			# https://de.wikipedia.org/wiki/H.264#Level
-		MaxBR="15000"			# https://forum.doom9.org/showthread.php?t=154533
-                MaxCPB="15000"			# https://forum.doom9.org/showthread.php?t=154533
+		#MaxBR="40000"			# (BD) https://forum.doom9.org/showthread.php?t=154533
+		#MaxCPB="30000"			# (BD) https://forum.doom9.org/showthread.php?t=154533
+		MaxBR="15000"			# (DVD) https://forum.doom9.org/showthread.php?t=154533
+		MaxCPB="15000"			# (DVD) https://forum.doom9.org/showthread.php?t=154533
 		SLICES=4
                 CRF="23"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
         elif [ "${FNKLEVEL}" = "42" -a "${PROFILE}" = "high" ] ; then
