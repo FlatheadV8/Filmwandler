@@ -187,6 +187,7 @@ BLURAY_PARAMETER()
         #   http://forum.doom9.org/showthread.php?t=101345
         #   http://forum.doom9.org/showthread.php?t=154533
         #   https://de.wikipedia.org/wiki/H.264#Level
+	SLICES=1
         if [ "${FNKLEVEL}" = "10" -a "${PROFILE}" = "high" ] ; then
 		MaxBR="80"			# vbv-maxrate (darf nie kleiner als vbv-bufsize sein)
                 MaxCPB="80"			# vbv-bufsize
@@ -256,6 +257,7 @@ BLURAY_PARAMETER()
                 #MaxCPB="62500"			# https://de.wikipedia.org/wiki/H.264#Level
 		MaxBR="15000"			# https://forum.doom9.org/showthread.php?t=154533
                 MaxCPB="15000"			# https://forum.doom9.org/showthread.php?t=154533
+		SLICES=4
                 CRF="23"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
         elif [ "${FNKLEVEL}" = "42" -a "${PROFILE}" = "high" ] ; then
 		MaxBR="62500"			# vbv-maxrate (darf nie kleiner als vbv-bufsize sein)
