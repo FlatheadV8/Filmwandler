@@ -106,24 +106,26 @@ AVC_LEVEL()
 	### AVC-Level + Makroblöcke pro Sekunde + Makroblockgröße
     
 	# http://blog.mediacoderhq.com/h264-profiles-and-levels/
+	# https://de.wikipedia.org/wiki/H.264#Level
 	AVCL_MBPS_MBPB="
-	10    99   1485
-	11   396   3000
-	12   396   6000
-	13   396  11880
-	20   396  11880
-	21   792  19800
-	22  1620  20250
-	30  1620  40500
-	31  3600 108000
-	32  5120 216000
-	40  8192 245760
-	41  8192 245760
-	42  8704 522240
-	50 22080 589824
-	51 36864 983040
+	10    99    1485
+	11   396    3000
+	12   396    6000
+	13   396   11880
+	20   396   11880
+	21   792   19800
+	22  1620   20250
+	30  1620   40500
+	31  3600  108000
+	32  5120  216000
+	40  8192  245760
+	41  8192  245760
+	42  8704  522240
+	50 22080  589824
+	51 36864  983040
+	52 36864 2073600
 	"
-    
+
 	echo "${AVCL_MBPS_MBPB}" | grep -Ev '^[ \t]*$' | while read AVC_LEVEL MAKRO_BLK_pro_BILD MAKRO_BLK_pro_SEKUNDE
 	do
         	if [ "${MAKRO_BLK_pro_BILD}" -ge "${MAKRO_BLK_im_BILD}" ] ; then
@@ -180,100 +182,105 @@ BLURAY_PARAMETER()
         #LEVEL="$(echo "${FNKLEVEL}" | sed 's/[0-9]$/.&/')"
         LEVEL="$(echo "${FNKLEVEL}" | awk '{print $1 / 10}')"
 
-        ### fuer 1000 bit/s !!!
+	#======================================================================#
+
         #   http://forum.doom9.org/showthread.php?t=101345
+        #   http://forum.doom9.org/showthread.php?t=154533
+        #   https://de.wikipedia.org/wiki/H.264#Level
         if [ "${FNKLEVEL}" = "10" -a "${PROFILE}" = "high" ] ; then
-                MaxBR="80"
-                MaxCPB="175"
-                MaxVmvR="-64,63.75"             # max. Vertical MV component range
-                MinCR="2"
-                CRF="25"
+		MaxBR="80"			# vbv-maxrate (darf nie kleiner als vbv-bufsize sein)
+                MaxCPB="80"			# vbv-bufsize
+                MaxVmvR="-64,63.75"             # noch ungenutzt (max. Vertical MV component range)
+                MinCR="2"			# noch ungenutzt (würde auch nur bei crf=0 von Bedeutung sein)
+                CRF="25"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
+        elif [ "${FNKLEVEL}" = "11" -a "${PROFILE}" = "high" ] ; then
+		MaxBR="240"			# vbv-maxrate (darf nie kleiner als vbv-bufsize sein)
+                MaxCPB="240"			# vbv-bufsize
+                CRF="25"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
+        elif [ "${FNKLEVEL}" = "12" -a "${PROFILE}" = "high" ] ; then
+		MaxBR="480"			# vbv-maxrate (darf nie kleiner als vbv-bufsize sein)
+                MaxCPB="480"			# vbv-bufsize
+                CRF="25"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
+        elif [ "${FNKLEVEL}" = "13" -a "${PROFILE}" = "high" ] ; then
+		MaxBR="960"			# vbv-maxrate (darf nie kleiner als vbv-bufsize sein)
+                MaxCPB="960"			# vbv-bufsize
+                CRF="25"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
         elif [ "${FNKLEVEL}" = "20" -a "${PROFILE}" = "high" ] ; then
-                MaxBR="2500"
-                MaxCPB="2500"
-                MaxVmvR="-128,127.75"           # max. Vertical MV component range
-                MinCR="2"
-                CRF="24"
+		MaxBR="2500"			# vbv-maxrate (darf nie kleiner als vbv-bufsize sein)
+                MaxCPB="2500"			# vbv-bufsize
+                MaxVmvR="-128,127.75"           # noch ungenutzt (max. Vertical MV component range)
+                MinCR="2"			# noch ungenutzt (würde auch nur bei crf=0 von Bedeutung sein)
+                CRF="24"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
         elif [ "${FNKLEVEL}" = "21" -a "${PROFILE}" = "high" ] ; then
-                MaxBR="5000"
-                MaxCPB="5000"
-                MaxVmvR="-256,255.75"           # max. Vertical MV component range
-                MinCR="2"
-                CRF="24"
+		MaxBR="5000"			# vbv-maxrate (darf nie kleiner als vbv-bufsize sein)
+                MaxCPB="5000"			# vbv-bufsize
+                MaxVmvR="-256,255.75"           # noch ungenutzt (max. Vertical MV component range)
+                MinCR="2"			# noch ungenutzt (würde auch nur bei crf=0 von Bedeutung sein)
+                CRF="24"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
+        elif [ "${FNKLEVEL}" = "22" -a "${PROFILE}" = "high" ] ; then
+		MaxBR="5000"			# vbv-maxrate (darf nie kleiner als vbv-bufsize sein)
+                MaxCPB="5000"			# vbv-bufsize
+                CRF="24"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
         elif [ "${FNKLEVEL}" = "30" -a "${PROFILE}" = "high" ] ; then
-                #MaxBR="12500"			# ?
-                #MaxCPB="12500"			# ?
-                MaxBR="12000"			# DVD + BD
-                MaxCPB="12000"			# DVD + BD
-                MaxVmvR="-256,255.75"           # max. Vertical MV component range
-                MinCR="2"
-                CRF="23"
+		#MaxBR="12500"			# https://de.wikipedia.org/wiki/H.264#Level
+                #MaxCPB="12500"			# https://de.wikipedia.org/wiki/H.264#Level
+		MaxBR="12000"			# https://forum.doom9.org/showthread.php?t=154533
+                MaxCPB="12000"			# https://forum.doom9.org/showthread.php?t=154533
+                MaxVmvR="-256,255.75"           # noch ungenutzt (max. Vertical MV component range)
+                MinCR="2"			# noch ungenutzt (würde auch nur bei crf=0 von Bedeutung sein)
+                CRF="23"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
         elif [ "${FNKLEVEL}" = "31" -a "${PROFILE}" = "high" ] ; then
-                #MaxBR="17500"			# ?
-                #MaxCPB="17500"			# ?
-                #MaxBR="16800"			# BD
-                #MaxCPB="16800"			# BD
-                MaxBR="15000"			# DVD
-                MaxCPB="15000"			# DVD
-                MaxVmvR="-512,511.75"           # max. Vertical MV component range
-                MinCR="4"
-                CRF="23"
+		#MaxBR="17500"			# https://de.wikipedia.org/wiki/H.264#Level
+                #MaxCPB="17500"			# https://de.wikipedia.org/wiki/H.264#Level
+		MaxBR="15000"			# https://forum.doom9.org/showthread.php?t=154533
+                MaxCPB="15000"			# https://forum.doom9.org/showthread.php?t=154533
+                MaxVmvR="-512,511.75"           # noch ungenutzt (max. Vertical MV component range)
+                MinCR="4"			# noch ungenutzt (würde auch nur bei crf=0 von Bedeutung sein)
+                CRF="23"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
         elif [ "${FNKLEVEL}" = "32" -a "${PROFILE}" = "high" ] ; then
-                #MaxBR="25000"			# ?
-                #MaxCPB="25000"			# ?
-                #MaxBR="24000"			# BD
-                #MaxCPB="24000"			# BD
-                MaxBR="15000"			# DVD
-                MaxCPB="15000"			# DVD
-                MaxVmvR="-512,511.75"           # max. Vertical MV component range
-                MinCR="4"
-                CRF="23"
-	# leider liegen keine genauen Daten für Level 4.0 und 4.1 (HD ready) vor
+		#MaxBR="25000"			# https://de.wikipedia.org/wiki/H.264#Level
+                #MaxCPB="25000"			# https://de.wikipedia.org/wiki/H.264#Level
+		MaxBR="15000"			# https://forum.doom9.org/showthread.php?t=154533
+                MaxCPB="15000"			# https://forum.doom9.org/showthread.php?t=154533
+                MaxVmvR="-512,511.75"           # noch ungenutzt (max. Vertical MV component range)
+                MinCR="4"			# noch ungenutzt (würde auch nur bei crf=0 von Bedeutung sein)
+                CRF="23"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
         elif [ "${FNKLEVEL}" = "40" -a "${PROFILE}" = "high" ] ; then
-                #MaxBR="25000"			# ?
-                #MaxCPB="25000"			# ?
-                #MaxBR="24000"			# BD
-                #MaxCPB="24000"			# BD
-                MaxBR="15000"			# DVD
-                MaxCPB="15000"			# DVD
-                MaxVmvR="-512,511.75"           # max. Vertical MV component range
-                MinCR="4"
-                CRF="23"
-	# leider liegen keine genauen Daten für Level 4.0 und 4.1 (HD ready) vor
+		#MaxBR="25000"			# https://de.wikipedia.org/wiki/H.264#Level
+                #MaxCPB="25000"			# https://de.wikipedia.org/wiki/H.264#Level
+		MaxBR="15000"			# https://forum.doom9.org/showthread.php?t=154533
+                MaxCPB="15000"			# https://forum.doom9.org/showthread.php?t=154533
+                CRF="23"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
         elif [ "${FNKLEVEL}" = "41" -a "${PROFILE}" = "high" ] ; then
-                #MaxBR="25000"			# ?
-                #MaxCPB="25000"			# ?
-                #MaxBR="40000"			# BD
-                #MaxCPB="40000"			# BD
-                MaxBR="15000"			# DVD
-                MaxCPB="15000"			# DVD
-                MaxVmvR="-512,511.75"           # max. Vertical MV component range
-                MinCR="4"
-                CRF="23"
+		#MaxBR="62500"			# https://de.wikipedia.org/wiki/H.264#Level
+                #MaxCPB="62500"			# https://de.wikipedia.org/wiki/H.264#Level
+		MaxBR="15000"			# https://forum.doom9.org/showthread.php?t=154533
+                MaxCPB="15000"			# https://forum.doom9.org/showthread.php?t=154533
+                CRF="23"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
         elif [ "${FNKLEVEL}" = "42" -a "${PROFILE}" = "high" ] ; then
-                MaxBR="62500"
-                MaxCPB="62500"
-                MaxVmvR="-512,511.75"           # max. Vertical MV component range
-                MinCR="2"
-                CRF="22"
+		MaxBR="62500"			# vbv-maxrate (darf nie kleiner als vbv-bufsize sein)
+                MaxCPB="62500"			# vbv-bufsize
+                CRF="22"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
         elif [ "${FNKLEVEL}" = "50" -a "${PROFILE}" = "high" ] ; then
-                MaxBR="168750"
-                MaxCPB="168750"
-                MaxVmvR="-512,511.75"           # max. Vertical MV component range
-                MinCR="2"
-                CRF="21"
+		MaxBR="168750"			# vbv-maxrate (darf nie kleiner als vbv-bufsize sein)
+                MaxCPB="168750"			# vbv-bufsize
+                MaxVmvR="-512,511.75"           # noch ungenutzt (max. Vertical MV component range)
+                MinCR="2"			# noch ungenutzt (würde auch nur bei crf=0 von Bedeutung sein)
+                CRF="21"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
         elif [ "${FNKLEVEL}" = "51" -a "${PROFILE}" = "high" ] ; then
-                MaxBR="300000"
-                MaxCPB="300000"
-                MaxVmvR="-512,511.75"           # max. Vertical MV component range
-                MinCR="2"
-                CRF="20"
+		MaxBR="300000"			# vbv-maxrate (darf nie kleiner als vbv-bufsize sein)
+                MaxCPB="300000"			# vbv-bufsize
+                CRF="20"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
+        elif [ "${FNKLEVEL}" = "52" -a "${PROFILE}" = "high" ] ; then
+		MaxBR="300000"			# vbv-maxrate (darf nie kleiner als vbv-bufsize sein)
+                MaxCPB="300000"			# vbv-bufsize
+                CRF="20"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
         else
-                MaxBR="300000"
-                MaxCPB="300000"
-                MaxVmvR="-512,511.75"           # max. Vertical MV component range
-                MinCR="2"
-                CRF="20"
+		MaxBR="300000"			# vbv-maxrate (darf nie kleiner als vbv-bufsize sein)
+                MaxCPB="300000"			# vbv-bufsize
+                MaxVmvR="-512,511.75"           # noch ungenutzt (max. Vertical MV component range)
+                MinCR="2"			# noch ungenutzt (würde auch nur bei crf=0 von Bedeutung sein)
+                CRF="20"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
         fi
 
 }
