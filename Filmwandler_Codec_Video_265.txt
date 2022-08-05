@@ -2,7 +2,8 @@
 # H.265
 #
 
-VERSION="v2018082800"
+#VERSION="v2018082800"
+VERSION="v2022080400"		# mit --bluray-compat lassen sich ein paar Zusatzoptionen einsparen + VIDEO_OPTION rudimentär definiert
 
 #------------------------------------------------------------------------------#
 
@@ -31,8 +32,13 @@ fi
 # 2018-07-06: [libx265 @ 0x813618d00] Possible profiles: main main10 mainstillpicture msp main-intra main10-intra main444-8 main444-intra main444-stillpicture main422-10 main422-10-intra main444-10 main444-10-intra main12 main12-intra main422-12 main422-12-intra main444-12 main444-12-intra main444-16-intra main444-16-stillpicture
 
 ### Die Option -profile:v hat nur dann Wirkung, wenn auch die Option -level angegeben wird!
-# Beispiel von AVC: -x264opts ref=4:b-pyramid=strict:bluray-compat=1:weightp=0:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=4:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=
-${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:aud:subme=9:nal-hrd=vbr"
+# Beispiel von AVC:
+# -x264opts bluray-compat=1:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=${SLICES}:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:subme=9"
+# -x264opts bluray-compat=1:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=1:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:subme=9"
+
+KEYINT="$(echo "${IN_FPS}" | awk '{printf "%.0f\n", $1 * 2}')"			# alle 2 Sekunden ein Key-Frame
+VIDEO_OPTION="-x264opts bluray-compat=1:slices=1:b-adapt=2:direct=auto:colorprim=bt709:transfer=bt709:colormatrix=bt709:keyint=${KEYINT}:subme=9"
+
 
 PROFILE="main10"
 VIDEO_OPTION="-profile:v ${PROFILE}"
