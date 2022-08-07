@@ -82,7 +82,8 @@
 #VERSION="v2022073100"			# Abbrüche bei zu wenig RAM behoben
 #VERSION="v2022073100"			# Schalter für den (minimalen) HDTV-Standard ("HD ready") eingerichtet
 #VERSION="v2022080200"			# Schalter -ffprobe eingerichtet, um eigene Scan-Größen angeben zu können
-VERSION="v2022080300"			# Fehler bei der AVC-Profil-Level-Bestimmung behoben, es wurde die In-Auflösung und nicht die Out-Auflösung zur Berechnung verwendet
+#VERSION="v2022080300"			# Fehler bei der AVC-Profil-Level-Bestimmung behoben, es wurde die In-Auflösung und nicht die Out-Auflösung zur Berechnung verwendet
+VERSION="v2022080700"			# Tests haben ergeben, das manche Set-Top-Boxen nur eine Tonspur können, deshalb wird ab jetzt mit den Parametern -hdtvmin oder -minihd nur noch die erste Tonspur in den Film übernommen
 
 VERSION_METADATEN="${VERSION}"
 
@@ -519,6 +520,7 @@ while [ "${#}" -ne "0" ]; do
         #  4/3: maximal 1024×768 → XGA  (EVGA)
         # 16/9: maximal 1280×720 → WXGA (HDTV)
         -hdtvmin
+        -minihd
 
         # Bildwiederholrate für den neuen Film festlegen,
         # manche Geräte können nur eine begrenzte Zahl an Bildern pro Sekunde (FPS)
@@ -1137,6 +1139,27 @@ IN_DAR='${IN_DAR}'
 #==============================================================================#
 #==============================================================================#
 # Audio
+
+#------------------------------------------------------------------------------#
+### Mindestanvorderungen des "HD ready"-Standards umsetzen
+### das macht bei MP4-Filmen am meisten Sinn
+
+echo "# 522
+HDTVMIN='${HDTVMIN}'
+TONSPUR='${TONSPUR}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+if [ "Ja" = "${HDTVMIN}" ] ; then
+	if [ "x${TONSPUR}" != "x" ] ; then
+        	TONSPUR="$(echo "${TONSPUR}" | awk -F',' '{print $1}')"
+	fi
+fi
+
+echo "# 524
+HDTVMIN='${HDTVMIN}'
+TONSPUR='${TONSPUR}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+#------------------------------------------------------------------------------#
 
 # ${META_DATEN_SPURSPRACHEN}
 #   1 audio ger 
