@@ -381,7 +381,7 @@ while [ "${#}" -ne "0" ]; do
                         # Bei  4/3 ist das Bild auf 1024×768 → XGA  (EVGA) begrenzt.
                         # Bei 16/9 ist das Bild auf 1280×720 → WXGA (HDTV) begrenzt.
                         HDTVMIN="Ja"				# Mindestanvorderungen des "HD ready"-Standards umsetzen
-                        STEREO="Ja"				# Die Set-Top-Boxen können keine zu hohen Audio-Bitraten und laufen mit Stereo an zuverlässigsten.
+                        #STEREO="Ja"				# Die Set-Top-Boxen können keine zu hohen Audio-Bitraten und laufen mit Stereo an zuverlässigsten.
                         shift
                         ;;
                 -stereo)
