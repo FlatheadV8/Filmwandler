@@ -83,7 +83,8 @@
 #VERSION="v2022073100"			# Schalter für den (minimalen) HDTV-Standard ("HD ready") eingerichtet
 #VERSION="v2022080200"			# Schalter -ffprobe eingerichtet, um eigene Scan-Größen angeben zu können
 #VERSION="v2022080300"			# Fehler bei der AVC-Profil-Level-Bestimmung behoben, es wurde die In-Auflösung und nicht die Out-Auflösung zur Berechnung verwendet
-VERSION="v2022080700"			# Tests haben ergeben, das manche Set-Top-Boxen nur eine Tonspur können, deshalb wird ab jetzt mit den Parametern -hdtvmin oder -minihd nur noch die erste Tonspur in den Film übernommen
+#VERSION="v2022080700"			# Tests haben ergeben, das manche Set-Top-Boxen nur eine Tonspur können, deshalb wird ab jetzt mit den Parametern -hdtvmin oder -minihd nur noch die erste Tonspur in den Film übernommen
+VERSION="v2022080800"			# jetzt werden die Filme, die mit dem Parameter -hdtvmin oder -minihd verkleinert werden den Namenszusatz HD-ready bekommen
 
 VERSION_METADATEN="${VERSION}"
 
@@ -1384,6 +1385,7 @@ fi
 
 
 #------------------------------------------------------------------------------#
+### HD ready
 ### Mindestanvorderungen des "HD ready"-Standards umsetzen
 ### das macht bei MP4-Filmen am meisten Sinn
 
@@ -1411,6 +1413,7 @@ if [ "Ja" = "${HDTVMIN}" ] ; then
 			SOLL_XY="1280x720"	# 16/9: 1280×720 → WXGA
 		fi
 	fi
+	ZIEL_FILM="${ZIELNAME}_-_HD-ready"
 fi
 
 echo "# 720
@@ -1638,7 +1641,6 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   fi
 
   #exit 1020
-
   #------------------------------------------------------------------------------#
   ### wenn das Bild hochkannt steht, dann müssen die Seiten-Höhen-Parameter vertauscht werden
   ### Breite, Höhe, PAD, SCALE
@@ -1810,6 +1812,8 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 	VERGLEICH_HOCH="${P_HOCH}"
   fi
 fi
+
+#------------------------------------------------------------------------------#
 
 echo "# 1110
 BILD_BREIT='${BILD_BREIT}'
