@@ -450,8 +450,8 @@ while [ "${#}" -ne "0" ]; do
         ${0} -q \"Filmname mit Leerzeichen.avi\" -z Film.mp4
 
 	# Titel/Name des Filmes
-	titel \"Titel oder Name des Filmes\"
-	titel \"Battlestar Galactica\"
+	-titel \"Titel oder Name des Filmes\"
+	-titel \"Battlestar Galactica\"
 
 	# Kommentar zum Film / Beschreibung des Filmes
 	${0} -k 'Ein Kommentar zum Film.'
