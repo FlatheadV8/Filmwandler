@@ -1217,7 +1217,7 @@ if [ -z "${IN_XY}" ] ; then
 	echo "z.B. (NTSC-DVD): -in_xmaly 720x480"
 	echo "z.B. (iPad)    : -in_xmaly 1024x576"
 	echo "z.B. (HDTV)    : -in_xmaly 1280x720"
-	echo "z.B. (FullHD)  : -in_xmaly 1920x1080"
+	echo "z.B. (HD)      : -in_xmaly 1920x1080"
 	echo "ABBRUCH!"
 	exit 540
 fi
