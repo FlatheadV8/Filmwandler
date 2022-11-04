@@ -6,8 +6,9 @@
 # Dieses Skript verändert NICHT die Bildwiederholrate!
 #
 # Das Ergebnis besteht immer aus folgendem Format:
-#  - WebM:    webm   + AV1        + Opus    (kann nur das eine Untertitelformat WebVTT)
-#  - MKV:     mkv    + VP9        + Vorbis  (z.Z. das beste Format)
+#  - WebM:    webm   + AV1        + Opus    (kann nur das eine Untertitelformat WebVTT) - AV1 ist einfach noch zu langsam...
+#  - WebM:    webm   + VP9        + Opus    (kann nur das eine Untertitelformat WebVTT)
+#  - MKV:     mkv    + VP9        + Vorbis  (z.Z. das beste Format, leider ist MKV aber kein HTML5-Format)
 #  - MP4:     mp4    + H.264/AVC  + AAC     (das z.Z. mit Abstand kompatibelste Format)
 #  - AVCHD:   m2ts   + H.264/AVC  + AC3
 #  - AVI:     avi    + DivX5      + MP3
@@ -84,7 +85,8 @@
 #VERSION="v2022080200"			# Schalter -ffprobe eingerichtet, um eigene Scan-Größen angeben zu können
 #VERSION="v2022080300"			# Fehler bei der AVC-Profil-Level-Bestimmung behoben, es wurde die In-Auflösung und nicht die Out-Auflösung zur Berechnung verwendet
 #VERSION="v2022080700"			# Tests haben ergeben, das manche Set-Top-Boxen nur eine Tonspur können, deshalb wird ab jetzt mit den Parametern -hdtvmin oder -minihd nur noch die erste Tonspur in den Film übernommen
-VERSION="v2022080800"			# jetzt werden die Filme, die mit dem Parameter -hdtvmin oder -minihd verkleinert werden den Namenszusatz HD-ready bekommen
+#VERSION="v2022080800"			# jetzt werden die Filme, die mit dem Parameter -hdtvmin oder -minihd verkleinert werden den Namenszusatz HD-ready bekommen
+VERSION="v2022110300"			# Kommentar und Hilfe leicht angepasst
 
 VERSION_METADATEN="${VERSION}"
 
@@ -450,11 +452,11 @@ while [ "${#}" -ne "0" ]; do
         ${0} -q \"Filmname mit Leerzeichen.avi\" -z Film.mp4
 
 	# Titel/Name des Filmes
-	titel \"Titel oder Name des Filmes\"
-	titel \"Battlestar Galactica\"
+	-titel \"Titel oder Name des Filmes\"
+	-titel \"Battlestar Galactica\"
 
 	# Kommentar zum Film / Beschreibung des Filmes
-	${0} -k 'Ein Kommentar zum Film.'
+	-k 'Ein Kommentar zum Film.'
 
 	# Wenn Audio- und Video-Spur nicht synchron sind,
 	# dann muss das korrigiert werden.
@@ -1217,7 +1219,7 @@ if [ -z "${IN_XY}" ] ; then
 	echo "z.B. (NTSC-DVD): -in_xmaly 720x480"
 	echo "z.B. (iPad)    : -in_xmaly 1024x576"
 	echo "z.B. (HDTV)    : -in_xmaly 1280x720"
-	echo "z.B. (FullHD)  : -in_xmaly 1920x1080"
+	echo "z.B. (HD)      : -in_xmaly 1920x1080"
 	echo "ABBRUCH!"
 	exit 540
 fi

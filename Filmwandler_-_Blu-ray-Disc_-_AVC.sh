@@ -1,152 +1,45 @@
+#!/bin/sh
 
-#==============================================================================#
+#------------------------------------------------------------------------------#
 #
-# AVC - optimiert auf Kompatibilität zur Blu-ray Disk
+# Test-Skript!
+# siehe auch Filmwandler_-_AVC_-_Profil-Level.sh
 #
-# x264opts
-#           bluray-compat=1   =>   http://www.x264bluray.com/
-#           b-pyramid=strict
-#           nal-hrd=vbr
-#
-#==============================================================================#
-### Video
+#------------------------------------------------------------------------------#
 
-#VERSION="v2018090600"
-#VERSION="v2020040900"
-#VERSION="v2021050800"		# "bt.709" für alles, "bt.601" deaktiviert
-#VERSION="v2021101300"		# Logging erweitert
+#VERSION="v2022072700"		# erstellt
 #VERSION="v2022080100"		# MaxBR + MaxCPB angepasst
-#VERSION="v2022080200"		# Makro-Block-Abstufungen für den Profil-Level überarbeitet
-#VERSION="v2022080201"		# Farbraum von der Bildhöhe abhängig gemacht
+#VERSION="v2022080101"		# Farbraumunterscheidung für SD und HD wieder aktiviert
 #VERSION="v2022080300"		# Funktion AVC_LEVEL neu geschrieben + Fehlerausgabe und Info verbessert
 #VERSION="v2022080400"		# Fehler in Farbraum-Kodierung behoben
 VERSION="v2022080401"		# mit --bluray-compat lassen sich ein paar Zusatzoptionen einsparen
 
-#------------------------------------------------------------------------------#
-### Kompatibilität zur Blu-ray
+if [ "x${2}" = "x" ] ; then
+	echo "${0} [Bildbreite] [Bildhöhe] [Bildwiederholrate]"
+	echo "${0} 1024x576  25"
+	echo "${0} 1024x768  25"
+	echo "${0} 1440x1080 50"
+	echo "${0} 1280x720  25"
+	echo "${0} 1920x1080 50"
+	exit 1
+fi
 
-#------------------------------------------------------------------------------#
-### 2010-03-27 - Neuigkeiten vom x264-Team:
-# x264 can now generate Blu-ray-compliant streams for authoring Blu-ray Discs!
-# Compliance tested using Sony BD-ROM Verifier 1.21.
-# x264 --crf 16 --preset veryslow --tune film --weightp 0 --bframes 3 \
-#         --nal-hrd vbr --vbv-maxrate 40000 --vbv-bufsize 30000 --level 4.1 \
-#         --keyint 24 --b-pyramid strict --slices 4 --aud --colorprim "bt709" \
-#         --transfer "bt709" --colormatrix "bt709" --sar 1:1 <input> -o <output>
+AUFL="${1}"			# 1280x720
+IN_FPS="${2}"			# 25
 
-### https://encodingwissen.de/codecs/x264/referenz/#b-pyramid-modus
-# "--b-pyramid strict" hat eine etwas schlechtere Qualität als "--b-pyramid normal",
-# ist aber für Blu-Ray-kompatible B-Pyramide zwingend notwendig,
-# ansonsten aber wenig nützlich.
-
-### https://encodingwissen.de/codecs/x264/referenz/#bluray-compat
-# "--bluray-compat" erzwingt ein blu-ray-kompatibles Encoding,
-# der Schalter allein reicht aber für garantierte Kompatibilität zur Blu-ray
-# nicht aus. => http://www.x264bluray.com/
-# Mit diesem Schalter ist die Qualität etwas schlechtere.
-
-### https://encodingwissen.de/codecs/x264/referenz/#slices-anzahl
-# Legt die Anzahl an Slices fest, in jedes Bild zerlegt werden soll.
-# Slices senken die Effizienz. Für ein normales Encoding sind sie unnötig
-# und sollten deaktiviert bleiben.
-# Lediglich wer H.264-Material für eine Video-BluRay erzeugt,
-# muss mindestens vier Slices verwenden.
-
-#------------------------------------------------------------------------------#
-# http://forum.doom9.org/showthread.php?p=730001#post730001
-# These are the properties listed in the levels tables in the standard, and how they should limit x264 settings:
-#
-# MaxMBPS >= width*height*fps. (w&h measured in macroblocks, i.e. pixels/16 round up in each dimension)
-# MaxFS >= width*height
-# sqrt(MaxFS*8) >= width
-# sqrt(MaxFS*8) >= height
-# MaxDPB >= if(pyramid) ; then MaxDPB >= (bytes in a frame) * min(16, ref + 2) ; elif(bframes) MaxDPB >= (bytes in a frame) * min(16, ref + 1) ; else MaxDPB >= (bytes in a frame) * ref ; fi
-# MaxBR >= vbv_maxrate. It isn't strictly required since we don't write the VCL HRD parameters, but this satisfies the intent.
-# MaxCPB >= vbv_bufsize. Likewise.
-# MaxVmvR >= max_mv_range. (Not exposed in the cli, I'll add it if people care.)
-# MaxMvsPer2Mb, MinLumaBiPredSize, direct_8x8_inference_flag : are not enforced by x264. The only way to ensure compliance is to disable p4x4 at level>=3.1, or at level>=3 w/ B-frames.
-# MinCR : is not enforced by x264. Won't ever be an issue unless you use lossless.
-# SliceRate : I don't know what this limits.
+BILD_BREIT="$(echo "${AUFL}" | sed 's/x.*$//')"
+BILD_HOCH="$(echo "${AUFL}" | sed 's/^.*x//')"
 
 #==============================================================================#
-
-#echo "# 410: IN_FPS='${IN_FPS}'"
-#exit
-
-#----------------------------------------------------------------------#
-
-# MPEG-4 Part 10 (AVC) / x264
-### funktioniert erst mit dem x264 ab Version vom 2010-04-25 (Bluray-kompatibel: --nal-hrd vbr)
-
-#==============================================================================#
-#==============================================================================#
-### Funktionen
-
-#----------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
 ### Bluray-kompatibele Werte errechnen
 
-AVC_LEVEL()
-{
-        VERSION="v2014110200"
-        VERSION="v2022080300"
-    
-	QUADR_MAKROBLOECKE="${1} ${2}"
-	IN_FPS="${3}"
-
-	#==============================================================#
-	### Berechnung des AVC-Profil-Level
-    
-	# echo "720 576 25" | awk '{printf "%f %.0f %f %.0f %.0f\n",$1/16,$1/16,$2/16,$2/16,$3}' | awk '{if ($1 > $2) $2 = $2+1 ; if ($3 > $4) $4 = $4+1 ; print "MBLOCK =",$2 * $4"\nRBLOCK =",$2 * $4 * $5}'
-	# MBLOCK = 1620  (Makroblöcke je Bild)
-	# RBLOCK = 40500 (Makroblöcke eines Bildes pro Sekunde)
-    
-	MAKRO_BLK_im_BILD="$(echo "${QUADR_MAKROBLOECKE}" | awk '{print $1 * $2}')"
-	MAKRO_BLK_in_SEKUNDE="$(echo "${MAKRO_BLK_im_BILD} ${IN_FPS}" | awk '{printf "%f %.0f\n",$1*$2,$1*$2}' | awk '{if ($1 > $2) $2 = $2+1 ; print $2}')"
-    
-	#--------------------------------------------------------------#
-	### AVC-Level + Makroblöcke pro Sekunde + Makroblockgröße
-    
-	# http://blog.mediacoderhq.com/h264-profiles-and-levels/
-	# https://de.wikipedia.org/wiki/H.264#Level
-	AVCL_MBPS_MBPB="
-	10    99    1485
-	11   396    3000
-	12   396    6000
-	13   396   11880
-	20   396   11880
-	21   792   19800
-	22  1620   20250
-	30  1620   40500
-	31  3600  108000
-	32  5120  216000
-	40  8192  245760
-	41  8192  245760
-	42  8704  522240
-	50 22080  589824
-	51 36864  983040
-	52 36864 2073600
-	"
-
-	echo "${AVCL_MBPS_MBPB}" | grep -Ev '^[ \t]*$' | while read AVC_LEVEL MAKRO_BLK_pro_BILD MAKRO_BLK_pro_SEKUNDE
-	do
-        	if [ "${MAKRO_BLK_pro_BILD}" -ge "${MAKRO_BLK_im_BILD}" ] ; then
-                	if [ "${MAKRO_BLK_pro_SEKUNDE}" -ge "${MAKRO_BLK_in_SEKUNDE}" ] ; then
-                        	echo "${AVC_LEVEL}"
-                	fi
-        	fi
-	done | head -n1
-	#==============================================================#
-}
-
-#----------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
 BLURAY_PARAMETER()
 {
         VERSION="v2014010500"
         PROFILE="high"
 
-	# LEVEL="$(AVC_LEVEL ${IN_FPS} ${QUADR_MAKROBLOECKE})"
-	# MaxFS="$(echo "${BILD_BREIT} ${BILD_HOCH}" | awk '{print $1 * $2}')"
-	# BLURAY_PARAMETER ${LEVEL} ${QUADR_MAKROBLOECKE} ${MaxFS}
         FNKLEVEL="${1}"
         MBREITE="${2}"
         MHOEHE="${3}"
@@ -159,12 +52,12 @@ BLURAY_PARAMETER()
 
 	BHVERH="$(echo "${MBREITE} ${MHOEHE} ${MaxFS}" | awk '{verhaeltnis="gut"; if ($1 > (sqrt($3 * 8))) verhaeltnis="schlecht" ; if ($2 > (sqrt($3 * 8))) verhaeltnis="schlecht" ; print verhaeltnis}')"
 
-        echo "# 420 BLURAY_PARAMETER_01:
+        #echo "# 420 BLURAY_PARAMETER_01:
 	# FNKLEVEL='${FNKLEVEL}'
 	# MBREITE='${MBREITE}'
 	# MHOEHE='${MHOEHE}'
 	# MaxFS='${MaxFS}'
-        " | tee -a ${PROTOKOLLDATEI}.txt
+        #"
 
 	#exit
 
@@ -172,7 +65,7 @@ BLURAY_PARAMETER()
                 echo "# 430 BLURAY_PARAMETER_02:
                 Das Makroblock-Seitenverhaeltnis von ${MBREITE}/${MHOEHE} wird von AVC nicht unterstuetzt!
                 ABBRUCH
-                " | tee -a ${PROTOKOLLDATEI}.txt
+                "
                 exit 1
         fi
 
@@ -309,7 +202,7 @@ BLURAY_PARAMETER()
 # else
 #     MaxDPB >= (bytes in a frame) * ref
 
-#----------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
 ### NTSC-, PAL- oder Blu-ray-Farbraum
 
 #if [ "${IN_FPS}" = "10" -o "${IN_FPS}" = "15" -o "${IN_FPS}" = "20" -o "${IN_FPS}" = "24" ] ; then
@@ -323,18 +216,7 @@ BLURAY_PARAMETER()
 #	FARBCOD="smpte170m"        # SD: bt.601
 #fi
 
-#----------------------------------------------------------------------#
-### Farbraum für SD oder HD
-### für quadratische Bildpunkte wird üblicherweise "bt.709" verwendet
-### für nicht quadratische Bildpunkte wird üblicherweise "bt.601" verwendet
-
-#if [ "${BILD_BREIT}" -gt "720" -o "${BILD_HOCH}" -gt "576" ] ; then
-	FARBCOD="bt709"            # HD: bt.709
-#else
-#	FARBCOD="smpte170m"        # SD: bt.601
-#fi
-
-#----------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
 ### Farbraum für SD oder HD
 
 if   [ "${BILD_HOCH}" -le "480" ] ; then
@@ -345,38 +227,68 @@ else
 	FARBCOD="bt709"			# 720, 1080 (HD): BT.709-5
 fi
 
-#----------------------------------------------------------------------#
+#------------------------------------------------------------------------------#
 
-echo "# 440:
+#echo "# 440:
 # BILD_BREIT='${BILD_BREIT}'
 # BILD_HOCH='${BILD_HOCH}'
 # IN_FPS='${IN_FPS}'
 # MBREITE/MHOEHE='${MBREITE}/${MHOEHE}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+#"
 
 KEYINT="$(echo "${IN_FPS}" | awk '{printf "%.0f\n", $1 * 2}')"	# alle 2 Sekunden ein Key-Frame
+#==============================================================================#
+
+#==============================================================================#
+### Berechnung des AVC-Profil-Level
+
+# echo "720 576 25" | awk '{printf "%f %.0f %f %.0f %.0f\n",$1/16,$1/16,$2/16,$2/16,$3}' | awk '{if ($1 > $2) $2 = $2+1 ; if ($3 > $4) $4 = $4+1 ; print "MBLOCK =",$2 * $4"\nRBLOCK =",$2 * $4 * $5}'
+# MBLOCK = 1620  (Makroblöcke je Bild)
+# RBLOCK = 40500 (Makroblöcke eines Bildes pro Sekunde)
+
 QUADR_MAKROBLOECKE="$(echo "${BILD_BREIT} ${BILD_HOCH}" | awk '{printf "%f %.0f %f %.0f\n",$1/16,$1/16,$2/16,$2/16}' | awk '{if ($1 > $2) $2 = $2+1 ; if ($3 > $4) $4 = $4+1 ; print $2,$4}')"
-LEVEL="$(AVC_LEVEL ${QUADR_MAKROBLOECKE} ${IN_FPS})"
+MAKRO_BLK_im_BILD="$(echo "${QUADR_MAKROBLOECKE}" | awk '{print $1 * $2}')"
+MAKRO_BLK_in_SEKUNDE="$(echo "${MAKRO_BLK_im_BILD} ${IN_FPS}" | awk '{printf "%f %.0f\n",$1*$2,$1*$2}' | awk '{if ($1 > $2) $2 = $2+1 ; print $2}')"
+
+#------------------------------------------------------------------------------#
+### AVC-Level + Makroblöcke pro Sekunde + Makroblockgröße
+
+# http://blog.mediacoderhq.com/h264-profiles-and-levels/
+# https://de.wikipedia.org/wiki/H.264#Level
+AVCL_MBPS_MBPB="
+10    99    1485
+11   396    3000
+12   396    6000
+13   396   11880
+20   396   11880
+21   792   19800
+22  1620   20250
+30  1620   40500
+31  3600  108000
+32  5120  216000
+40  8192  245760
+41  8192  245760
+42  8704  522240
+50 22080  589824
+51 36864  983040
+52 36864 2073600
+"
+
+LEVEL="$(echo "${AVCL_MBPS_MBPB}" | grep -Ev '^[ \t]*$' | while read AVC_LEVEL MAKRO_BLK_pro_BILD MAKRO_BLK_pro_SEKUNDE
+do
+	#echo "level='${AVC_LEVEL}' ${MAKRO_BLK_pro_BILD} ${MAKRO_BLK_pro_SEKUNDE} ; ${BILD_BREIT}x${BILD_HOCH}_${IN_FPS} ; ${MAKRO_BLK_im_BILD} ${MAKRO_BLK_in_SEKUNDE}"
+
+	if [ "${MAKRO_BLK_pro_BILD}" -ge "${MAKRO_BLK_im_BILD}" ] ; then
+		if [ "${MAKRO_BLK_pro_SEKUNDE}" -ge "${MAKRO_BLK_in_SEKUNDE}" ] ; then
+			echo "${AVC_LEVEL}"
+		fi
+	fi
+done | head -n1)"
+#==============================================================================#
+
+#==============================================================================#
 MaxFS="$(echo "${BILD_BREIT} ${BILD_HOCH}" | awk '{print $1 * $2}')"
 BLURAY_PARAMETER ${LEVEL} ${QUADR_MAKROBLOECKE} ${MaxFS}
-
-echo "# 450:
-# FNKLEVEL='${FNKLEVEL}'
-# PROFILE='${PROFILE}'
-
-# KEYINT='${KEYINT}'
-# QUADR_MAKROBLOECKE='${QUADR_MAKROBLOECKE}'
-# LEVEL='${LEVEL}'
-# MaxFS='${MaxFS}'
-
-# MaxBR='${MaxBR}'
-# MaxCPB='${MaxCPB}'
-# MaxVmvR='${MaxVmvR}'
-# MinCR='${MinCR}'
-# CRF='${CRF}'
-" | tee -a ${PROTOKOLLDATEI}.txt
-
-#exit 450
 
 #==============================================================================#
 ### Qualität
@@ -428,7 +340,7 @@ else
 	### https://forum.doom9.org/showthread.php?t=154533
 	### --bluray-compat: Enforce x264 to create BD compliant stream, that will reduce x264 settings to BD compatible: bframe<=3, ref<=4 for 1080, ref<=6 for 720/576/480, bpyramid<=strict, weightp<=1, aud=1, nalhrd=vbr
 	#VIDEO_OPTION="-profile:v ${PROFILE} -preset veryslow -tune film -x264opts ref=4:b-pyramid=strict:bluray-compat=1:weightp=0:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=4:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:aud:subme=9:nal-hrd=vbr"
-	VIDEO_OPTION="-profile:v ${PROFILE} -preset veryslow -tune film -x264opts bluray-compat=1:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=${SLICES}:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:subme=9"
+	VIDEO_OPTION="-profile:v ${PROFILE} -preset veryslow -tune film -x264opts bluray-compat=1:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=1:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:subme=9"
 fi
 
 VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 30"		# von "0" (verlustfrei) bis "51"
@@ -444,20 +356,21 @@ VIDEO_QUALITAET_9="${VIDEO_OPTION} -crf 16"		# von "0" (verlustfrei) bis "51"
 
 IFRAME="-keyint_min 2-8"
 
-echo "# 470:
-# MLEVEL='${MLEVEL}'
-# RLEVEL='${RLEVEL}'
-# FNKLEVEL='${FNKLEVEL}'
-
+#echo "# 470:
+# LEVEL='${LEVEL}'
+#
 # profile=${PROFILE}
 # rate=${MaxBR}
 # vbv-bufsize=${MaxCPB}
 # level=${LEVEL}
 # colormatrix='${FARBCOD}'
+#"
 
-# IN_FPS='${IN_FPS}'
-# VIDEO_OPTION='${VIDEO_OPTION}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+#echo "'${BILD_BREIT}'x'${BILD_HOCH}'@'${IN_FPS}' Bildpunkte='${MaxFS}' level='${LEVEL}'"
+
+M_R_BLOCK="$(echo "${BILD_BREIT} ${BILD_HOCH} ${IN_FPS}" | awk '{printf "%f %.0f %f %.0f %.0f\n",$1/16,$1/16,$2/16,$2/16,$3}' | awk '{if ($1 > $2) $2 = $2+1 ; if ($3 > $4) $4 = $4+1 ; print $2 * $4,$2 * $4 * $5}')"
+#echo "level='${LEVEL}'  ${BILD_BREIT}x${BILD_HOCH}_${IN_FPS}  ${MaxFS}  ${M_R_BLOCK}" | awk '{print $1"\t"$2"  \t"$3"   \t"$4"  \t"$5}'
+echo "level='${LEVEL}'  ${BILD_BREIT}x${BILD_HOCH}_${IN_FPS}  ${MaxFS}  ${M_R_BLOCK}" | awk '{print $3"   \t"$2"  \t"$4"      \t"$5"    \t"$1}'
 
 #==============================================================================#
 

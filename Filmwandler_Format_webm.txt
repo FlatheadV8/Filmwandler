@@ -21,7 +21,8 @@
 #VERSION="v2019102900"
 #VERSION="v2020060900"
 #VERSION="v2020072700"
-VERSION="v2020101800"		# auf AV1 + Opus umgestellt
+#VERSION="v2020101800"		# auf AV1 + Opus umgestellt
+VERSION="v2022102100"		# auf VP9 + Opus umgestellt, weil AV1 einfach viel zu langsam ist
 
 #==============================================================================#
 
@@ -38,8 +39,8 @@ FORMAT="webm"
 
 # Video
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
-#	. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
-	. $(dirname ${0})/Filmwandler_Codec_Video_av1.txt
+	. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
+#	. $(dirname ${0})/Filmwandler_Codec_Video_av1.txt
 	IFRAME="-keyint_min 2-8"
 fi
 
