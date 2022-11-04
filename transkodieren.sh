@@ -27,7 +27,8 @@
 #VERSION="v2020102600"		# jetzt funktionieren auch Titel mit Leerzeichen
 #VERSION="v2020091500"		# jetzt kann auch ein Kommentar mit übergeben werden
 #VERSION="v2022072600"		# um die Kompatibilität der MP4 zu erhöhen, wurde der Parameter '-stereo' hinzugefügt, jetzt werden auch Filme mit großer Audio-Bit-Rate auf einfachen Media-Playern abgespielt
-VERSION="v2022080800"		# um die Kompatibilität der MP4 zu erhöhen, wurde der Parameter '-minihd' (das beinhaltet auch, dass nur die erste Tonspur im Film landet) hinzugefügt, jetzt sollten die MP4-Filme (fast) überall laufen :-) 
+#VERSION="v2022080800"		# um die Kompatibilität der MP4 zu erhöhen, wurde der Parameter '-minihd' (das beinhaltet auch, dass nur die erste Tonspur im Film landet) hinzugefügt, jetzt sollten die MP4-Filme (fast) überall laufen :-) 
+VERSION="v2022081300"		# Kommentare erweitert
 
 
 ALLE_OPTIONEN="${@}"
@@ -127,6 +128,14 @@ SCHNITT_OPTION='${SCHNITT_OPTION}'
 #set -x
 
 ### MP4
+### HD ready
+### Mindestanvorderungen des "HD ready"-Standards umsetzen
+### Das bedeutet in diesem Fall:
+###   - Auflösung begrenzt auf:
+###     -  4/3:  1024×768 → XGA  (EVGA)
+###     - 16/9:  1280×720 → WXGA (HDTV)
+###   - nur eine Tonspur
+###   - keine Untertitelspur
 echo "# 0,1: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -minihd -u =0"
 ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -minihd -u =0
 
