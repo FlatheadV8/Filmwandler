@@ -2133,7 +2133,7 @@ else
 	else
 		UT_ANZAHL="$(echo "${UT_LISTE}" | wc -w | awk '{print $1}')"
 		UT_KOPIE="$(seq 0 ${UT_ANZAHL} | head -n ${UT_ANZAHL})"
-		U_TITEL_FF_02="$-c:s copy (for DER_UT in ${UT_KOPIE}
+		U_TITEL_FF_02="-c:s copy $(for DER_UT in ${UT_KOPIE}
 		do
 			echo -n " -map 0:s:${DER_UT}?"
 		done)"
