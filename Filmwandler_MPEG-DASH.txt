@@ -1,0 +1,89 @@
+#
+
+#------------------------------------------------------------------------------#
+#
+# MPEG-DASH unterstützt alle Video-Codecs und es ist ein offener Standard
+# ISO/IEC 23009 (https://www.mpeg.org/standards/MPEG-DASH/)
+#
+#------------------------------------------------------------------------------#
+#
+# 90er bis ~2010: Real-Time Messaging Protocol (RTMP) von Adobe (vorher SmartSketch und Macromedia)
+#                RTMP (Flash) wurde von HTML5-basierten Technologien verdrängt
+# seit 2008: Smooth Streaming von Microsoft
+# seit 2009: 3GPP - Industriestandard für adaptives Streaming (seit 2010 ISO/IEC-MPEG-Arbeitsgruppen verlagert)
+# seit 2009: HTTP Live Streaming (HLS) protocol von Apple (Anteil 2020 von 70,62%, laut Streaming Latency Report)
+# seit 2010: HTTP Dynamic Streaming (HDS) von Adobe
+# seit 2012: 3GPP - Industriestandard für adaptives Streaming von mehr als 50 Unternehmen (darunter Microsoft, Netflix und Apple)
+# seit April 2012: Dynamic Adaptive Streaming over HTTP (MPEG-DASH)
+#                  Die Moving Pictures Expert Group (MPEG) hat DASH als Alternative zu HLS und anderen proprietären Technologien konzipiert.
+#                  Obwohl das DASH-Protokoll von Natur aus flexibel ist,
+#                  kann dies Herausforderungen mit sich bringen. Insbesondere
+#                  ist es für Sendeanstalten schwierig, die besten
+#                  Konfigurationen zu bestimmen, wenn alles möglich ist.
+#                  Das DASH-IF hat dieses Hindernis erkannt und die
+#                  DASH-AVC/264-Implementierungsrichtlinien als Leitfaden für
+#                  die Einführung entwickelt.
+#                  Das DASH-IF entschied sich dafür, den rohen DASH-Standard zu
+#                  nehmen, ihn mit einem Codec zu heiraten, strenge Profile und
+#                  andere Einschränkungen anzuwenden und eine Basisempfehlung
+#                  zu erstellen, die jeder zum Erstellen verwenden könnte, um
+#                  interoperable Produkte und Dienstleistungen ohne mühsame
+#                  Integration anzubieten. Interoperabilität ist der Schlüssel
+#                  zur Akzeptanz, denn wenn ein Format „überall funktioniert“,
+#                  wird sich sein Wachstum beschleunigen.  Der Name dieser
+#                  Empfehlung lautet „DASH-AVC/264 Implementation Guidelines“
+#                  und Sie können sie von https://dashif.org herunterladen.
+#                  Mehrere einbettbare HTML5-Videoplayer unterstützen die
+#                  MPEG-DASH-Wiedergabe über Browser hinweg. Das DASH-IF hat
+#                  dash.js als kostenlosen Open-Source-Player gestartet,
+#                  es gibt aber weitere Player mit MPEG-DASH-Unterstützung.
+#
+#------------------------------------------------------------------------------#
+
+#VERSION="v2022120400"		# Datei erstellt
+VERSION="v2022120500"		# Geschichte hinzugefügt
+
+#==============================================================================#
+
+# Video-Codecs:
+# https://dashif.org/codecs/video/
+#   * AVC High profile (avc1, avc3)
+#   * HEVC Main profile (hev1)
+#   * HEVC Main 10 profile (hev1, dvhe)
+#   * VVC Main 10 profile (vvc1)
+#   * EVC Baseline profile (evc1.vprf0)
+#   * EVC Main profile (evc1.vprf1)
+#
+# Audio-Codecs:
+# https://dashif.org/codecs/audio/
+#   * MPEG-4 AAC Profile (mp4a)
+#   * MPEG-4 HE-AAC Profile (mp4a)
+#   * MPEG-4 HE-AAC v2 Profile (mp4a)
+#   * Enhanced AC-3 (ec-3)
+#   * AC-4 single stream (ac-4)
+#   * AC-4 main (ac-4)
+#   * DTS core (dtsc)
+#   * DTS-HD core+extension (dtsh)
+#   * DTS-HD LBR (dtse)
+#   * DTS-UHD Profile 2 (dtsx)
+#   * DTS-UHD Profile 3 (dtsy)
+#   * MPEG-H Audio LC Profile Level 1, 2, 3 (mhm1)
+#   * MPEG-H Audio LC Profile Level 1, 2, 3 multistream (mhm2)
+#   * MPEG-D USAC (xHE-AAC) (mp4a)
+#
+# Text-Codecs:
+# https://dashif.org/codecs/text/
+#   * IMSC1 Text, Image (stpp)
+#   * IMSC1.1 Text, Image (stpp)
+#   * WebVTT (wvtt)
+#
+# Container (https://www.keycdn.com/support/mpeg-dash):
+#   * "any"
+
+#==============================================================================#
+#
+# https://www.keycdn.com/support/mpeg-dash
+#   How to create MPEG-DASH streams
+#
+#==============================================================================#
+

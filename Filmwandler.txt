@@ -1,0 +1,35 @@
+#==============================================================================#
+# Stand: Juli 2022
+
++------------------+----------------+-------------------+--------------+---------------------+
+| Größenvergleich  | Format-Name    | Video-Codec       | Audio-Codec  | Container (Endung)  |
++------------------+----------------+-------------------+--------------+---------------------+
+|             2000 | WebM           | AV1               | Opus         | webm                |
+|             2057 | Matroska       | VP9               | Vorbis       | mkv                 |
+|             2185 | Matroska       | VP8               | Vorbis       | mkv                 |
+|             4873 | MP4            | H.264             | AAC          | mp4                 |
+|             4873 | Matroska       | H.264             | AAC          | mkv                 |
+|             5001 | OGG            | VP8               | Vorbis       | ogg                 |
+|             5129 | Flash Video    | Sorenson Spark    | MP3          | flv                 |
+|             5769 | MPEG-TS        | MPEG-TS           | AC3          | ts                  |
+|             5897 | AVCHD          | H.264             | AC3          | m2ts                |
+|             8585 | 3GPP           | H.263             | AAC          | 3gp                 |
+|             9609 | AVI            | H.263++ (DivX 5)  | MP3          | avi                 |
+|            11537 | VCD            | MPEG-1            | MP2          | mpg                 |
+|            11537 | DVD (1995)     | MPEG-2            | MP2          | mpg                 |
+|            11537 | DVD (ab 1996)  | MPEG-2            | AC3          | mpg                 |
+|            12561 | 3GPP2          | H.263             | AAC          | 3g2                 |
++------------------+----------------+-------------------+--------------+---------------------+
+
+#==============================================================================#
+#
+# eine stumme Tonspur erzeugen
+#
+
+### es werden die ersten 3 Sekunden einer Audio-Datei gelesen und als stumme Tonspur, mit zusätzlichen Tags, wieder abgelegt
+ffmpeg -i Quelle.ogg -filter:a "volume=0.0" -metadata Album=EMUI -metadata "Track name"=Stumm -metadata Performer=HUAWEI -metadata ANDROID_LOOP=true -c:a libmp3lame -q:a 9 -ac 2 -f mp3 -to 3 -y Digital_Ringtone_3s.mp3
+#
+ffmpeg -i Quelle.mp3 -filter:a "volume=0.0" -metadata Album=EMUI -metadata "Track name"=Stumm -metadata Performer=HUAWEI -metadata ANDROID_LOOP=true -f ogg -to 3 -y Digital_Ringtone_3s.ogg
+
+#==============================================================================#
+
