@@ -23,7 +23,9 @@
 #VERSION="v2020072700"
 #VERSION="v2020101800"		# auf AV1 + Opus umgestellt
 #VERSION="v2022102100"		# auf VP9 + Opus umgestellt, weil AV1 einfach viel zu langsam ist
-VERSION="v2022112900"		# auf AV1 + Opus umgestellt, weil WebM nicht HLS-kompatibel ist, wohl aber MP4
+#VERSION="v2022112900"		# auf AV1 + Opus umgestellt, weil WebM nicht HLS-kompatibel ist, wohl aber MP4
+#VERSION="v2022120400"		# auf VP9 + Opus umgestellt, weil AV1 einfach viel zu langsam ist
+VERSION="v2022120500"		# auf AV1 + Opus umgestellt, weil mit dem neuen Skript Filmwandler_zu_WebM-Kontainer.sh bequem und schnell aus einem MKV ein WebM gemacht werden kann
 
 #==============================================================================#
 
@@ -34,14 +36,14 @@ FORMAT="webm"
 #==============================================================================#
 
 # Audio
-. $(dirname ${0})/Filmwandler_Codec_Audio_vorbis.txt	# nur libvorbis funktioniert
-#. $(dirname ${0})/Filmwandler_Codec_Audio_opus.txt	# kann z.Z. leider nur Stereo (Sep. 2020)
+#. $(dirname ${0})/Filmwandler_Codec_Audio_vorbis.txt	# nur libvorbis funktioniert
+. $(dirname ${0})/Filmwandler_Codec_Audio_opus.txt	# kann z.Z. leider nur Stereo (Sep. 2020)
 
 
 # Video
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
-	. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
-#	. $(dirname ${0})/Filmwandler_Codec_Video_av1.txt
+#	. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
+	. $(dirname ${0})/Filmwandler_Codec_Video_av1.txt
 	IFRAME="-keyint_min 2-8"
 fi
 
@@ -61,3 +63,4 @@ FORMAT_BESCHREIBUNG="
 *       - Opus wird seit Android 5 'Lollipop' unterstützt                      *
 ********************************************************************************
 "
+
