@@ -46,6 +46,7 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     *           * 352x288                                                          *
     *           * 704x576                                                          *
     *           * 1408x1152                                                        *
+    *       - kann nicht jedes Untertitelformat
     ********************************************************************************
 
 
@@ -63,6 +64,7 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     *           * 352x288                                                          *
     *           * 704x576                                                          *
     *           * 1408x1152                                                        *
+    *       - kann nicht jedes Untertitelformat
     ********************************************************************************
 
 
@@ -73,6 +75,7 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     * Audio-Kodierung:      MP3                                                    *
     * Beschreibung:                                                                *
     *       - hohe Kompatibilität mit Konsumerelektronik (DivX 5 / XviD)           *
+    *       - kann nicht jedes Untertitelformat
     ********************************************************************************
 
 
@@ -85,6 +88,7 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     *       - ab Adobe Flash Player Version 6 abspielbar                           *
     *       - Flash Video Version 1                                                *
     *       - FourCC: FLV1                                                         *
+    *       - kann nicht jedes Untertitelformat
     ********************************************************************************
 
 
@@ -96,6 +100,7 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     * Beschreibung:                                                                *
     *       - hohe Kompatibilität mit Konsumerelektronik                           *
     *       - auch abspielbar auf Android                                          *
+    *       - kann nicht jedes Untertitelformat
     ********************************************************************************
 
 
@@ -108,6 +113,7 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     *       - freies Format mit guter Unterstützung durch Android                  *
     *       - 'Royalty free' (komplett frei von patentierten Technologien)         *
     *       - VP9 wird seit Android 4.4 'KitKat' unterstützt                       *
+    *       - kann alle Untertitelformate
     ********************************************************************************
 
 
@@ -120,6 +126,7 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     *       - hohe Kompatibilität mit Konsumerelektronik                           *
     *       - HTML5-Unterstützung                                                  *
     *       - auch abspielbar auf Android                                          *
+    *       - kann nicht jedes Untertitelformat
     ********************************************************************************
 
 
@@ -132,6 +139,7 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     *       - hohe Kompatibilität mit Konsumerelektronik                           *
     *       - ähnlich dem VCD-Format                                               *
     *       - Auflösung bis 352x288                                                *
+    *       - kann nicht jedes Untertitelformat
     *------------------------------------------------------------------------------*
     * Name:                 DVD                                                    *
     * ENDUNG:               .mpg                                                   *
@@ -141,6 +149,7 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     *       - hohe Kompatibilität mit Konsumerelektronik                           *
     *       - ähnlich dem DVD-Format                                               *
     *       - Auflösung größer als 352x288                                         *
+    *       - kann nicht jedes Untertitelformat
     ********************************************************************************
 
 
@@ -157,6 +166,7 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     *       - kodiert sehr schnell                                                 *
     *       - nicht so gut wie 'AVC'                                               *
     *       - kann nur Untertitel im SRT-Format                                    *
+    *       - kann nicht jedes Untertitelformat
     ********************************************************************************
 
 
@@ -168,6 +178,7 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     * Beschreibung:                                                                *
     *       - hohe Kompatibilität mit Konsumerelektronik                           *
     *       - ähnlich dem DVD-Format                                               *
+    *       - kann nicht jedes Untertitelformat
     ********************************************************************************
 
 
@@ -182,6 +193,7 @@ Zur Zeit können mit diesem Skript die folgenden Film-Formate erzeugt werden:
     *       - 'Royalty free' (komplett frei von patentierten Technologien)         *
     *       - WebM wird seit Android  2.3 'Gingerbread' unterstützt                *
     *       - Opus wird seit Android 5 'Lollipop' unterstützt                      *
+    *       - kann nur 2 Text-Untertitelformate
     ********************************************************************************
 
 ---
