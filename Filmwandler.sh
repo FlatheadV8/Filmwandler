@@ -1177,6 +1177,19 @@ TS_ANZAHL='${TS_ANZAHL}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #------------------------------------------------------------------------------#
+### FLV unterstützt nur eine einzige Tonspur
+#   flv    + FLV        + MP3     (Sorenson Spark: H.263)
+
+if [ "flv" = "${ENDUNG}" ] ; then
+	if [ "1" -lt "${TS_ANZAHL}" ] ; then
+		echo '# 532
+		FLV unterstützt nur eine einzige Tonspur!
+		' | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+		exit 1186
+	fi
+fi
+
+#------------------------------------------------------------------------------#
 ### STANDARD-AUDIO-SPUR
 
 if [ "x${TONSPUR}" = "x" ] ; then
