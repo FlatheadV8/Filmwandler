@@ -35,7 +35,8 @@
 #VERSION="v2022112900"		# meine MP4-Filme sind alle HLS-kompatibel, da das nun ausreichend ist, wurde der Parameter '-minihd' entfernt; der Kompatibilitäts-Standard "HD ready" schränkt zu stark ein, weil er die Auflösung und die Bit-Rate begrenzt
 #VERSION="v2022120200"		# wenn keine Untertitel im Quell-Film enthalten sind, dann wird nur in ein sehr kompatibles Fotmat (HD ready, HTML5 oder HLS) transkodiert => von WebM auf MP4 umgestellt
 #VERSION="v2022120400"		# MKV -> WebM - Konverter, der die Untertitel entfernt, damit der WebM-Film überall abgespielt werden kann
-VERSION="v2022120500"		# MKV + MP4 für HTML5- und HLS-Kompatibilität
+#VERSION="v2022120500"		# MKV + MP4 für HTML5- und HLS-Kompatibilität
+VERSION="v2022120600"		# + HLS-Kompatibilitäts-Option
 
 
 ALLE_OPTIONEN="${@}"
@@ -199,8 +200,8 @@ else
 
   ### Um eine "HD ready"-Kompatibilität (max. 720p + keine Untertitel) zu erreichen, wird das MKV-Video noch einmal transkodiert.
   ### Kompatibilität: "HD ready", HTML5, HLS, MPEG-DASH
-  echo "# 1,5: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" =0 -minihd"
-  ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" -u =0 -minihd
+  echo "# 1,5: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" =0 -minihd -hls"
+  ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" -u =0 -minihd -hls
 
   ### konvertiert den MKV-Film in einen WebM-Konterner und entfernt dabei die Untertitel
   ### Kompatibilität: teilweise HTML5, teilweise HLS, teilweise MPEG-DASH
