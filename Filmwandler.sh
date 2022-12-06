@@ -90,7 +90,8 @@
 #VERSION="v2022120300"			# Sprachen für Ton- und Untertitelspuren können jetzt mit angegeben werden und überschreiben die Angaben aus der Quelle
 #VERSION="v2022120500"			# Video-Format (Alternative zur Endung): -format
 #VERSION="v2022120600"			# HLS-Kompatibilität (ersteinmal nur die Einschränkung auf die erlaubten Bildschirmauflösungen)
-VERSION="v2022120601"			# Selektion für die FLK-kompatibelen Bildauflösungen verbessert
+#VERSION="v2022120601"			# Selektion für die FLK-kompatibelen Bildauflösungen verbessert
+VERSION="v2022120602"			# bei HLS-Kompatibilität wird der Dateiname geändert, ähnlich wie bei "HD ready"
 
 VERSION_METADATEN="${VERSION}"
 
@@ -1477,7 +1478,15 @@ if [ "Ja" = "${HDTVMIN}" ] ; then
 			SOLL_XY="1280x720"	# 16/9: 1280×720 → WXGA
 		fi
 	fi
-	ZIEL_FILM="${ZIELNAME}_-_HD-ready"
+	if [ "Ja" = "${HLS}" ] ; then
+		ZIEL_FILM="${ZIELNAME}_-_HD-ready+HLS"
+	else
+		ZIEL_FILM="${ZIELNAME}_-_HD-ready"
+	fi
+else
+	if [ "Ja" = "${HLS}" ] ; then
+		ZIEL_FILM="${ZIELNAME}_-_HLS"
+	fi
 fi
 
 echo "# 720
@@ -1485,7 +1494,6 @@ HDTVMIN='${HDTVMIN}'
 DAR_FAKTOR='${DAR_FAKTOR}'
 SOLL_XY='${SOLL_XY}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-
 
 #------------------------------------------------------------------------------#
 ### Seitenverhältnis des Bildes (DAR) muss hier bekannt sein!
