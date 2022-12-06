@@ -3,6 +3,8 @@
 #
 # AVI -> Microsoft
 #
+# Subtitle streams other than DivX XSUB is not implemented.
+#
 #==============================================================================#
 
 #VERSION="v2018090300"
