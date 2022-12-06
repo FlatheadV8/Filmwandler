@@ -18,7 +18,7 @@ FORMAT="mpeg"
 #------------------------------------------------------------------------------#
 #
 # 2018-08-31
-# Dieser Fehler erscheint beim abspielen, wenn AC3 mit den Container-Formaten
+# Dieser Fehler erscheint beim abspielen, wenn AC-3 mit den Container-Formaten
 # - DVD
 # - VOB
 # gemuxt wird.
@@ -165,7 +165,7 @@ FORMAT_BESCHREIBUNG="
 * Name:                 DVD                                                    *
 * ENDUNG:               .mpg                                                   *
 * Video-Kodierung:      MPEG-2                                                 *
-* Audio-Kodierung:      AC3                                                    *
+* Audio-Kodierung:      AC-3                                                   *
 * Beschreibung:                                                                *
 *       - hohe Kompatibilität mit Konsumerelektronik                           *
 *       - ähnlich dem DVD-Format                                               *

@@ -14,9 +14,9 @@ VERSION="v2022080400"		# mit --bluray-compat lassen sich ein paar Zusatzoptionen
 #------------------------------------------------------------------------------#
 
 CODEC_PATTERN="h265|hevc"		# Beispiel: "h265|hevc"
-VIDEOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
+VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
-	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
+	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 	if [ "x${VIDEOCODEC}" = "x" ] ; then
 		echo ""
 		echo "${CODEC_PATTERN}"
@@ -52,3 +52,4 @@ VIDEO_QUALITAET_6="-preset veryslow ${VIDEO_OPTION} -crf 21"                    
 VIDEO_QUALITAET_7="-preset veryslow ${VIDEO_OPTION} -crf 17"                    # von "0" (verlustfrei) bis "51"
 VIDEO_QUALITAET_8="-preset veryslow ${VIDEO_OPTION} -crf 13"                    # von "0" (verlustfrei) bis "51"
 VIDEO_QUALITAET_9="-preset veryslow ${VIDEO_OPTION} -crf 09"                    # von "0" (verlustfrei) bis "51"
+

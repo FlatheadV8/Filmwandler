@@ -34,7 +34,8 @@
 #VERSION="v2022110300"		# -standard_ton 0 -standard_u 0
 #VERSION="v2022112900"		# meine MP4-Filme sind alle HLS-kompatibel, da das nun ausreichend ist, wurde der Parameter '-minihd' entfernt; der Kompatibilitäts-Standard "HD ready" schränkt zu stark ein, weil er die Auflösung und die Bit-Rate begrenzt
 #VERSION="v2022120200"		# wenn keine Untertitel im Quell-Film enthalten sind, dann wird nur in ein sehr kompatibles Fotmat (HD ready, HTML5 oder HLS) transkodiert => von WebM auf MP4 umgestellt
-VERSION="v2022120400"		# MKV -> WebM - Konverter, der die Untertitel entfernt, damit der WebM-Film überall abgespielt werden kann
+#VERSION="v2022120400"		# MKV -> WebM - Konverter, der die Untertitel entfernt, damit der WebM-Film überall abgespielt werden kann
+VERSION="v2022120500"		# MKV + MP4 für HTML5- und HLS-Kompatibilität
 
 
 ALLE_OPTIONEN="${@}"
@@ -165,9 +166,6 @@ if [ 0 -eq ${UNTERTITELSPUREN} ] ; then
 else
 
   #----------------------------------------------------------------------------#
-  # Wenn kein Untertitel angegeben wurde, dann werden alle vorhandenen genommen.
-  # Wenn kein Untertitel vorhanden ist, dann das WEBM-Format ohne Untertitel + das MKV-Format mit Untertitel.
-  # Das MP4-Format wird durch das WEBM-Format mit explizit abgeschalteten Untertiteln ersetzt.
 
   ### MP4 (AVC + AAC) => HD ready (preiswerte DVD- und BD-Player unterstützen nur diesen Standard
   ###
@@ -179,26 +177,37 @@ else
   ###     - 16/9:  1280×720 → WXGA (HDTV)
   ###   - nur eine Tonspur (wegen Bit-Raten-Begrenzung)
   ###   - keine Untertitelspur (wegen Bit-Raten-Begrenzung)
-  #echo "# 1,1: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -minihd -standard_ton 0 -u =0"
-  #${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -minihd -standard_ton 0 -u =0
-
-  ### WEBM (VP9 + Vorbis) => HTML5-kompatibel
-  ### WEBM (AV1 + Opus) => HTML5-kompatibel
-  ### der Kontainer "WebM" schränkt zu stark ein, weil er nur seltene Untertitelformate unterstützt
-  #echo "# 1,2: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_3}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -u =0"
-  #${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_3}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -standard_ton 0 -u =0
+  #echo "# 1,1: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -u =0 -minihd"
+  #${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -standard_ton 0 -u =0 -minihd
 
   ### MP4 (AVC + AAC) => für DLNA- und HLS-Kompatibilität
-  #echo "# 1,3: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -standard_u 0"
+  #echo "# 1,2: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -standard_u 0"
   #${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -standard_ton 0 -standard_u 0
 
   ### MKV (VP9 + Vorbis) => kann alle Audio-Kanäle und alle Untertitelformate
   #   Wird nur benötigt, wenn die vorhandenen Untertiten nicht in den MP4-Film übernommen werden konnten.
-  echo "# 1,4: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -standard_u 0"
+  echo "# 1,3: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -standard_u 0"
   ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -standard_ton 0 -standard_u 0
-  #
+
+  ### WEBM (VP9 + Vorbis) => HTML5-kompatibel
+  ### WEBM (AV1 + Opus) => HTML5-kompatibel
+  ### der Kontainer "WebM" schränkt zu stark ein, weil er nur seltene Untertitelformate unterstützt
+  #echo "# 1,4: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_3}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -u =0"
+  #${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_3}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -standard_ton 0 -u =0
+
+  #----------------------------------------------------------------------------#
+
+  ### Um eine "HD ready"-Kompatibilität (max. 720p + keine Untertitel) zu erreichen, wird das MKV-Video noch einmal transkodiert.
+  ### Kompatibilität: "HD ready", HTML5, HLS, MPEG-DASH
+  echo "# 1,5: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" =0 -minihd"
+  ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" -u =0 -minihd
+
   ### konvertiert den MKV-Film in einen WebM-Konterner und entfernt dabei die Untertitel
-  ${AVERZ}/Filmwandler_zu_WebM-Kontainer.sh -q "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}"
+  ### Kompatibilität: teilweise HTML5, teilweise HLS, teilweise MPEG-DASH
+  #echo "# 1,6: ${AVERZ}/Filmwandler_zu_WebM-Kontainer.sh -q \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}\""
+  #${AVERZ}/Filmwandler_zu_WebM-Kontainer.sh -q "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}"
+
+  #----------------------------------------------------------------------------#
 
   ls -lha "${ZIELPFAD}"*
 

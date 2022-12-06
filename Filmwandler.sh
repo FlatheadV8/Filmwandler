@@ -10,13 +10,13 @@
 #  - WebM:    webm   + VP9        + Opus    (kann nur das eine Untertitelformat WebVTT)
 #  - MKV:     mkv    + VP9        + Vorbis  (z.Z. das beste Format, leider ist MKV aber kein HTML5-Format)
 #  - MP4:     mp4    + H.264/AVC  + AAC     (das z.Z. mit Abstand kompatibelste Format)
-#  - AVCHD:   m2ts   + H.264/AVC  + AC3
+#  - AVCHD:   m2ts   + H.264/AVC  + AC-3
 #  - AVI:     avi    + DivX5      + MP3
 #  - FLV:     flv    + FLV        + MP3     (Sorenson Spark: H.263)
 #  - 3GPP:    3gp    + H.263      + AAC     (128x96 176x144 352x288 704x576 1408x1152)
 #  - 3GPP2:   3g2    + H.263      + AAC
 #  - OGG:     ogg    + Theora     + Vorbis
-#  - MPEG:    mpg/ts + MPEG-1/2   + MP2/AC3 (bei kleinen Bitraten ist MPEG-1 besser)
+#  - MPEG:    mpg/ts + MPEG-1/2   + MP2/AC-3 (bei kleinen Bitraten ist MPEG-1 besser)
 #
 # https://de.wikipedia.org/wiki/Containerformat
 #
@@ -87,7 +87,9 @@
 #VERSION="v2022080700"			# Tests haben ergeben, das manche Set-Top-Boxen nur eine Tonspur können, deshalb wird ab jetzt mit den Parametern -hdtvmin oder -minihd nur noch die erste Tonspur in den Film übernommen
 #VERSION="v2022080800"			# jetzt werden die Filme, die mit dem Parameter -hdtvmin oder -minihd verkleinert werden den Namenszusatz HD-ready bekommen
 #VERSION="v2022110300"			# Kommentar und Hilfe leicht angepasst
-VERSION="v2022120300"			# Sprachen für Ton- und Untertitelspuren können jetzt mit angegeben werden und überschreiben die Angaben aus der Quelle
+#VERSION="v2022120300"			# Sprachen für Ton- und Untertitelspuren können jetzt mit angegeben werden und überschreiben die Angaben aus der Quelle
+#VERSION="v2022120500"			# Video-Format (Alternative zur Endung): -format
+VERSION="v2022120600"			# HLS-Kompatibilität (ersteinmal nur die Einschränkung auf die erlaubten Bildschirmauflösungen)
 
 VERSION_METADATEN="${VERSION}"
 
@@ -394,6 +396,16 @@ while [ "${#}" -ne "0" ]; do
                         # Bei 16/9 ist das Bild auf 1280×720 → WXGA (HDTV) begrenzt.
                         HDTVMIN="Ja"				# Mindestanvorderungen des "HD ready"-Standards umsetzen
                         #STEREO="Ja"				# Die Set-Top-Boxen können keine zu hohen Audio-Bitraten und laufen mit Stereo an zuverlässigsten.
+                        shift
+                        ;;
+                -hls)
+                        # Diese Option ist ein Platzhalter, um später Codec-Kombinationen frei auswählen zu können
+                        HLS="Ja"				# HLS-Kompatibilität aktivieren
+                        shift
+                        ;;
+                -format)
+                        # Diese Option ist ein Platzhalter, um später Codec-Kombinationen frei auswählen zu können
+                        VIDEO_FORMAT="${2}"			# Video-Format
                         shift
                         ;;
                 -stereo)
@@ -1798,6 +1810,25 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   # IN_BREIT='${IN_BREIT}'
   # IN_HOCH='${IN_HOCH}'
   "
+
+  #============================================================================#
+  ### HLS unterstützt insgesamt nur 7 Bildauflösungen
+
+  if [ "${HLS}" = "Ja" ] ; then
+	. ${AVERZ}/Filmwandler_HLS.txt
+
+	HLS_BREIT_HOCH="$(if [ "mp4" = "${ENDUNG}" ] ; then
+		hls_aufloesungen | grep -F AVC | awk '{print $1}'
+		#hls_aufloesungen | grep -F HEVC | awk '{print $1}'
+	else
+		hls_aufloesungen | awk '{print $1}'
+	fi | grep -Ev '^$' | awk -F'x' -v qb="${BREIT_QUADRATISCH}" -v qh="${HOCH_QUADRATISCH}" '{s1=$1*$2 ; s2=qb*qh ; if (s1 == s2) print $1,$2 ; if (s1 > s2) print $1,$2}' | grep -Ev '^$' | head -n1)"
+
+	BREIT_QUADRATISCH="$(echo "${HLS_BREIT_HOCH}" | awk '{print $1}')"
+	HOCH_QUADRATISCH="$( echo "${HLS_BREIT_HOCH}" | awk '{print $2}')"
+  fi
+
+  #============================================================================#
 
   if [ "${BREIT_QUADRATISCH}" -gt "${IN_BREIT}" ] ; then
 	ZWISCHENFORMAT_QUADRATISCH="scale=${BREIT_QUADRATISCH}x${IN_HOCH},"

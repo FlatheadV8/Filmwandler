@@ -64,9 +64,9 @@ echo "# 1234
 "
 #exit 1234
 
-AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
+AUDIOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 if [ "x${AUDIOCODEC}" = "x" ] ; then
-	AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
+	AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 	if [ "x${AUDIOCODEC}" = "x" ] ; then
 		echo ""
 		echo "${CODEC_PATTERN}"
@@ -155,3 +155,4 @@ else
     fi
 fi
 }
+

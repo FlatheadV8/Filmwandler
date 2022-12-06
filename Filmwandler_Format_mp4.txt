@@ -6,11 +6,12 @@
 #==============================================================================#
 
 #VERSION="v2019092100"
-VERSION="v2020072700"
+#VERSION="v2020072700"
+VERSION="v2022120500"		# MP4 kann doch AC-3
 
 #------------------------------------------------------------------------------#
 #
-# Leider kann eine MP4-Datei keinen AC3 (a52) - Codec abspielen.
+# Leider kann eine MP4-Datei keinen AC-3 (a52) - Codec abspielen.
 # Deshalb gehen AVCHD-Filme auch nicht im MP4-Container
 #
 #==============================================================================#
@@ -22,14 +23,15 @@ FORMAT="mp4"
 #==============================================================================#
 
 # Audio
-. $(dirname ${0})/Filmwandler_Codec_Audio_aac.txt
+#. $(dirname ${0})/Filmwandler_Codec_Audio_ac3.txt
+. $(dirname ${0})/Filmwandler_Codec_Audio_aac.txt	# -> HTML5, HLS
 
 
 # Video
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 . ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
-. $(dirname ${0})/Filmwandler_Codec_Video_264.txt	# -> HTML5
-#. $(dirname ${0})/Filmwandler_Codec_Video_265.txt
+. $(dirname ${0})/Filmwandler_Codec_Video_264.txt	# -> HTML5, HLS
+#. $(dirname ${0})/Filmwandler_Codec_Video_265.txt	# -> HTML5, HLS
 IFRAME="-keyint_min 2-8"
 
 # verschiebt den Index an den Anfang

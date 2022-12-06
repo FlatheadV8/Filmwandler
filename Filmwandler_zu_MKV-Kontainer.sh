@@ -9,7 +9,7 @@
 # schnell anschauen zu können.
 #
 # Aus Kompatibilitäts-Gründen wäre die Unterstützung von AC-3 sehr hilfreich.
-# Aber leider unterstützt der MP4-Kontainer keinen AC3 (a52) - Codec,
+# Aber leider unterstützt der MP4-Kontainer keinen AC-3 (a52) - Codec,
 # deshalb wird der MKV-Kontainer verwendet.
 #
 #------------------------------------------------------------------------------#

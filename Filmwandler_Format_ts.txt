@@ -26,7 +26,7 @@ FORMAT_BESCHREIBUNG="
 * Name:                 MPEG-TS                                                *
 * ENDUNG:               .ts                                                    *
 * Video-Kodierung:      MPEG-TS                                                *
-* Audio-Kodierung:      AC3                                                    *
+* Audio-Kodierung:      AC-3                                                   *
 * Beschreibung:                                                                *
 *       - hohe Kompatibilität mit Konsumerelektronik                           *
 *       - ähnlich dem DVD-Format                                               *

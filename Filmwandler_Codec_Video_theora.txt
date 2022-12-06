@@ -5,9 +5,9 @@
 VERSION="v2018082800"
 
 CODEC_PATTERN="theora"		# Beispiel: "h265|hevc"
-VIDEOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
+VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
-	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
+	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 	if [ "x${VIDEOCODEC}" = "x" ] ; then
 		echo ""
 		echo "${CODEC_PATTERN}"
@@ -30,3 +30,4 @@ VIDEO_QUALITAET_6="-q:v 7 ${VIDEO_OPTION}"      # 0-10, 10 ist am besten
 VIDEO_QUALITAET_7="-q:v 8 ${VIDEO_OPTION}"      # 0-10, 10 ist am besten
 VIDEO_QUALITAET_8="-q:v 9 ${VIDEO_OPTION}"      # 0-10, 10 ist am besten
 VIDEO_QUALITAET_9="-q:v 10 ${VIDEO_OPTION}"     # 0-10, 10 ist am besten
+

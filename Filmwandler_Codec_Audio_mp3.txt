@@ -1,4 +1,3 @@
-
 #------------------------------------------------------------------------------#
 #
 # MP3 - MPEG-1 Layer 3
@@ -13,9 +12,9 @@ Sound_ST=''			# Stereo (2.0)
 Sound_51=''			# 5.1
 Sound_71=''			# 7.1
 
-AUDIOCODEC="$(echo "${FFMPEG_LIB}" | egrep "${CODEC_PATTERN}" | head -n1)"
+AUDIOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 if [ "x${AUDIOCODEC}" = "x" ] ; then
-	AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | egrep "${CODEC_PATTERN}" | head -n1)"
+	AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 	if [ "x${AUDIOCODEC}" = "x" ] ; then
 		echo ""
 		echo "${CODEC_PATTERN}"
@@ -60,3 +59,4 @@ else
         AUDIO_QUALITAET_9="-b:a 320k ${AUDIO_OPTION}"
 fi
 }
+

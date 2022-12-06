@@ -11,13 +11,13 @@
 |             4873 | Matroska       | H.264             | AAC          | mkv                 |
 |             5001 | OGG            | VP8               | Vorbis       | ogg                 |
 |             5129 | Flash Video    | Sorenson Spark    | MP3          | flv                 |
-|             5769 | MPEG-TS        | MPEG-TS           | AC3          | ts                  |
-|             5897 | AVCHD          | H.264             | AC3          | m2ts                |
+|             5769 | MPEG-TS        | MPEG-TS           | AC-3         | ts                  |
+|             5897 | AVCHD          | H.264             | AC-3         | m2ts                |
 |             8585 | 3GPP           | H.263             | AAC          | 3gp                 |
 |             9609 | AVI            | H.263++ (DivX 5)  | MP3          | avi                 |
 |            11537 | VCD            | MPEG-1            | MP2          | mpg                 |
 |            11537 | DVD (1995)     | MPEG-2            | MP2          | mpg                 |
-|            11537 | DVD (ab 1996)  | MPEG-2            | AC3          | mpg                 |
+|            11537 | DVD (ab 1996)  | MPEG-2            | AC-3         | mpg                 |
 |            12561 | 3GPP2          | H.263             | AAC          | 3g2                 |
 +------------------+----------------+-------------------+--------------+---------------------+
 

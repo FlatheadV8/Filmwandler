@@ -35,7 +35,7 @@ FORMAT_BESCHREIBUNG="
 * Name:                 AVCHD                                                  *
 * ENDUNG:               .m2ts                                                  *
 * Video-Kodierung:      H.264 (MPEG-4 Part 10 / AVC / Blu Ray / MP4)           *
-* Audio-Kodierung:      AC3                                                    *
+* Audio-Kodierung:      AC-3                                                   *
 * Beschreibung:                                                                *
 *       - hohe Kompatibilität mit Konsumerelektronik                           *
 *       - auch abspielbar auf Android                                          *

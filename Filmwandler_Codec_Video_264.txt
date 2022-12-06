@@ -13,9 +13,9 @@
 VERSION="v2018082900"
 
 CODEC_PATTERN="x264"		# Beispiel: "h264|x264" (libopenh264, libx264)
-VIDEOCODEC="$(echo "${FFMPEG_LIB}" | fgrep "${CODEC_PATTERN}" | head -n1)"
+VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
-	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | fgrep "${CODEC_PATTERN}" | head -n1)"
+	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 	if [ "x${VIDEOCODEC}" = "x" ] ; then
 		echo ""
 		echo "${CODEC_PATTERN}"
@@ -26,6 +26,8 @@ if [ "x${VIDEOCODEC}" = "x" ] ; then
 	fi
 fi
 
+#==============================================================================#
 ### Bluray-kompatibele Werte errechnen
+
 . ${AVERZ}/Filmwandler_-_Blu-ray-Disc_-_AVC.txt
 

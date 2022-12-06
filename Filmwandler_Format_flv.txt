@@ -8,13 +8,17 @@
 #==============================================================================#
 
 #VERSION="v2018083100"
-VERSION="v2020072700"
+#VERSION="v2020072700"
+VERSION="v2022120600"		# Flash kann leider nur eine einzige Audio-Spur
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
 #==============================================================================#
 #
 # https://trac.ffmpeg.org/wiki/Encode/MP3
+#
+# Flash kann leider nur eine einzige Audio-Spur:
+#   at most one audio stream is supported in flv
 #
 #==============================================================================#
 
@@ -51,5 +55,6 @@ FORMAT_BESCHREIBUNG="
 *       - ab Adobe Flash Player Version 6 abspielbar                           *
 *       - Flash Video Version 1                                                *
 *       - FourCC: FLV1                                                         *
+*       - Flash kann leider nur eine einzige Audio-Spur                        *
 ********************************************************************************
 "

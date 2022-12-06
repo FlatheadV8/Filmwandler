@@ -1,5 +1,5 @@
 #
-# Dolby Digital / a52 / AC3
+# Dolby Digital / a52 / AC-3
 #
 
 #------------------------------------------------------------------------------#
@@ -62,3 +62,4 @@ else
         AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 320k"
 fi
 }
+
