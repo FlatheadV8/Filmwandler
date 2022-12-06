@@ -89,7 +89,8 @@
 #VERSION="v2022110300"			# Kommentar und Hilfe leicht angepasst
 #VERSION="v2022120300"			# Sprachen für Ton- und Untertitelspuren können jetzt mit angegeben werden und überschreiben die Angaben aus der Quelle
 #VERSION="v2022120500"			# Video-Format (Alternative zur Endung): -format
-VERSION="v2022120600"			# HLS-Kompatibilität (ersteinmal nur die Einschränkung auf die erlaubten Bildschirmauflösungen)
+#VERSION="v2022120600"			# HLS-Kompatibilität (ersteinmal nur die Einschränkung auf die erlaubten Bildschirmauflösungen)
+VERSION="v2022120601"			# Selektion für die FLK-kompatibelen Bildauflösungen verbessert
 
 VERSION_METADATEN="${VERSION}"
 
@@ -1830,12 +1831,15 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   if [ "${HLS}" = "Ja" ] ; then
 	. ${AVERZ}/Filmwandler_HLS.txt
 
-	HLS_BREIT_HOCH="$(if [ "mp4" = "${ENDUNG}" ] ; then
+	HLS_BREIT_HOCH="$(HLS_AUFLOESUNGEN="$(if [ "mp4" = "${ENDUNG}" ] ; then
 		hls_aufloesungen | grep -F AVC | awk '{print $1}'
 		#hls_aufloesungen | grep -F HEVC | awk '{print $1}'
 	else
 		hls_aufloesungen | awk '{print $1}'
-	fi | grep -Ev '^$' | awk -F'x' -v qb="${BREIT_QUADRATISCH}" -v qh="${HOCH_QUADRATISCH}" '{s1=$1*$2 ; s2=qb*qh ; if (s1 == s2) print $1,$2 ; if (s1 > s2) print $1,$2}' | grep -Ev '^$' | head -n1)"
+	fi)"
+
+	(echo "${HLS_AUFLOESUNGEN}" | grep -Ev '^$' | awk -F'x' -v qb="${BREIT_QUADRATISCH}" -v qh="${HOCH_QUADRATISCH}" '{s1=$1*$2 ; s2=qb*qh ; if (s1 == s2) print $1,$2 ; if (s1 < s2) print $1,$2 ; }' | grep -Ev '^$' | tail -n1
+	echo "${HLS_AUFLOESUNGEN}" | grep -Ev '^$' | awk -F'x' -v qb="${BREIT_QUADRATISCH}" -v qh="${HOCH_QUADRATISCH}" '{s1=$1*$2 ; s2=qb*qh ; if (s1 == s2) print $1,$2 ; if (s1 > s2) print $1,$2 ; }' | grep -Ev '^$' | head -n1) | tail -n1)"
 
 	BREIT_QUADRATISCH="$(echo "${HLS_BREIT_HOCH}" | awk '{print $1}')"
 	HOCH_QUADRATISCH="$( echo "${HLS_BREIT_HOCH}" | awk '{print $2}')"
