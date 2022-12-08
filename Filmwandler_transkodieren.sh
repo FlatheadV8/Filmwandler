@@ -36,7 +36,8 @@
 #VERSION="v2022120200"		# wenn keine Untertitel im Quell-Film enthalten sind, dann wird nur in ein sehr kompatibles Fotmat (HD ready, HTML5 oder HLS) transkodiert => von WebM auf MP4 umgestellt
 #VERSION="v2022120400"		# MKV -> WebM - Konverter, der die Untertitel entfernt, damit der WebM-Film überall abgespielt werden kann
 #VERSION="v2022120500"		# MKV + MP4 für HTML5- und HLS-Kompatibilität
-VERSION="v2022120600"		# + HLS-Kompatibilitäts-Option
+#VERSION="v2022120600"		# + HLS-Kompatibilitäts-Option
+VERSION="v2022120700"		# den alternativen Zweig (für den Fall, dass keine UUntertitel vorhanden sind) abgeschaltet, weil dort WebM mit AV1 zum Einsatz kommt, was z.Z. noch viel zu langsam ist
 
 
 ALLE_OPTIONEN="${@}"
@@ -145,7 +146,7 @@ echo "UNTERTITELSPUREN='${UNTERTITELSPUREN}'"
 # Die Frage lautet: "Sind Untertitel vorhanden?".
 
 ### das WEBM-Format verwenden wir hier nur dann, wenn keine Untertitel im Film sind und als Video-Codec "VP9" zum Einsatz kommt!
-if [ 0 -eq ${UNTERTITELSPUREN} ] ; then
+#if [ 0 -eq ${UNTERTITELSPUREN} ] ; then
 
   #----------------------------------------------------------------------------#
   # Wenn im Film kein Untertitel vorhanden ist, dann wird nur in ein sehr kompatibles Fotmat (HD ready, HTML5 oder HLS) transkodiert.
@@ -157,14 +158,14 @@ if [ 0 -eq ${UNTERTITELSPUREN} ] ; then
   ### WEBM (VP9 + Vorbis) => HTML5-kompatibel
   ### WEBM (AV1 + Opus) => HTML5-kompatibel, transkodiert viel zu langsam
   ### der Kontainer "WebM" schränkt zu stark ein, weil er nur seltene Untertitelformate unterstützt
-  echo "# 0,2: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_3}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -u =0"
-  ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_3}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -standard_ton 0 -u =0
+#  echo "# 0,2: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_3}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -u =0"
+#  ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_3}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -standard_ton 0 -u =0
 
-  ls -lha "${ZIELPFAD}"*
+#  ls -lha "${ZIELPFAD}"*
 
   #----------------------------------------------------------------------------#
 
-else
+#else
 
   #----------------------------------------------------------------------------#
 
@@ -212,7 +213,7 @@ else
 
   ls -lha "${ZIELPFAD}"*
 
-fi
+#fi
 
 #==============================================================================#
 
