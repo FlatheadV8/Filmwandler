@@ -554,10 +554,10 @@ while [ "${#}" -ne "0" ]; do
 	# Ist der Wert zu klein, dann werden beispielsweise keine
 	# Untertitel gefunden, die erst sehr spät beginnen.
         # Der Wert sollte so groß sein wie der zu transkodierende Film ist.
-        # Die Voreinstellung ist "9223372036854" MiB
+        # Die Voreinstellung ist \"9223372036854\" MiB
 	# Das ist der praktisch ermittelte Maximalwert von einem
-	# "Intel(R) Core(TM) i5-10600T CPU @ 2.40GHz"
-	# auf einem "FreeBSD 13.0"-System mit 64 GiB RAM.
+	# \"Intel Core i5-10600T CPU @ 2.40GHz\"
+	# auf einem \"FreeBSD 13.0\"-System mit 64 GiB RAM.
 	# 
 	# Hat der Film nur eine Tonspur, die ganz am Anfang des Films beginnt, und keine Untertitel,
 	# dann kann der Wert sehr klein gehalten werden. Zum Beispiel: 50
