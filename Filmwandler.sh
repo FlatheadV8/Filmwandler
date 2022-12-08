@@ -91,7 +91,8 @@
 #VERSION="v2022120500"			# Video-Format (Alternative zur Endung): -format
 #VERSION="v2022120600"			# HLS-Kompatibilität (ersteinmal nur die Einschränkung auf die erlaubten Bildschirmauflösungen)
 #VERSION="v2022120601"			# Selektion für die FLK-kompatibelen Bildauflösungen verbessert
-VERSION="v2022120602"			# bei HLS-Kompatibilität wird der Dateiname geändert, ähnlich wie bei "HD ready"
+#VERSION="v2022120602"			# bei HLS-Kompatibilität wird der Dateiname geändert, ähnlich wie bei "HD ready"
+VERSION="v2022120700"			# Zusammenspiel von HDTV und HLS verbessert
 
 VERSION_METADATEN="${VERSION}"
 
@@ -401,7 +402,7 @@ while [ "${#}" -ne "0" ]; do
                         shift
                         ;;
                 -hls)
-                        # Diese Option ist ein Platzhalter, um später Codec-Kombinationen frei auswählen zu können
+                        # Bildauflösungen werden gemäß HSL eingeschränkt
                         HLS="Ja"				# HLS-Kompatibilität aktivieren
                         shift
                         ;;
@@ -548,6 +549,22 @@ while [ "${#}" -ne "0" ]; do
 	# egal wieviele Audio-Kanäle der Originalfilm hat, der neue Film wird Stereo haben
 	-stereo
 
+	# Dieser Wert gibt an wie weit von beginn der Filmdatei an
+	# ffprobe nach Tonspuren und Untertiteln suchen soll.
+	# Ist der Wert zu klein, dann werden beispielsweise keine
+	# Untertitel gefunden, die erst sehr spät beginnen.
+        # Der Wert sollte so groß sein wie der zu transkodierende Film ist.
+        # Die Voreinstellung ist "9223372036854" MiB
+	# Das ist der praktisch ermittelte Maximalwert von einem
+	# "Intel(R) Core(TM) i5-10600T CPU @ 2.40GHz"
+	# auf einem "FreeBSD 13.0"-System mit 64 GiB RAM.
+	# 
+	# Hat der Film nur eine Tonspur, die ganz am Anfang des Films beginnt, und keine Untertitel,
+	# dann kann der Wert sehr klein gehalten werden. Zum Beispiel: 50
+	-ffprobe 9223372036854
+	-ffprobe 100000000000
+	-ffprobe 50
+
         # HD ready
         # Damit der Film auch auf gewöhnlichen Set-Top-Boxen abgespielt werden kann
         # Mindestanvorderungen des "HD ready"-Standards umsetzen
@@ -555,6 +572,9 @@ while [ "${#}" -ne "0" ]; do
         # 16/9: maximal 1280×720 → WXGA (HDTV)
         -hdtvmin
         -minihd
+
+        # Bildauflösungen werden gemäß HSL eingeschränkt
+        -hls
 
         # Bildwiederholrate für den neuen Film festlegen,
         # manche Geräte können nur eine begrenzte Zahl an Bildern pro Sekunde (FPS)
@@ -1449,6 +1469,28 @@ else
 fi
 
 
+#==============================================================================#
+### HLS unterstützt insgesamt nur 7 Bildauflösungen
+
+if [ "${HLS}" = "Ja" ] ; then
+	. ${AVERZ}/Filmwandler_HLS.txt
+
+	HLS_BREIT_HOCH="$(HLS_AUFLOESUNGEN="$(if [ "mp4" = "${ENDUNG}" ] ; then
+		hls_aufloesungen | grep -F AVC | awk '{print $1}'
+		#hls_aufloesungen | grep -F HEVC | awk '{print $1}'
+	else
+		hls_aufloesungen | awk '{print $1}'
+	fi)"
+
+	(echo "${HLS_AUFLOESUNGEN}" | grep -Ev '^$' | awk -F'x' -v qb="${BREIT_QUADRATISCH}" -v qh="${HOCH_QUADRATISCH}" '{s1=$1*$2 ; s2=qb*qh ; if (s1 == s2) print $1,$2 ; if (s1 < s2) print $1,$2 ; }' | grep -Ev '^$' | tail -n1
+	echo "${HLS_AUFLOESUNGEN}" | grep -Ev '^$' | awk -F'x' -v qb="${BREIT_QUADRATISCH}" -v qh="${HOCH_QUADRATISCH}" '{s1=$1*$2 ; s2=qb*qh ; if (s1 == s2) print $1,$2 ; if (s1 > s2) print $1,$2 ; }' | grep -Ev '^$' | head -n1) | tail -n1)"
+
+	BREIT_QUADRATISCH="$(echo "${HLS_BREIT_HOCH}" | awk '{print $1}')"
+	HOCH_QUADRATISCH="$( echo "${HLS_BREIT_HOCH}" | awk '{print $2}')"
+fi
+
+#==============================================================================#
+
 #------------------------------------------------------------------------------#
 ### HD ready
 ### Mindestanvorderungen des "HD ready"-Standards umsetzen
@@ -1833,28 +1875,7 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   # IN_HOCH='${IN_HOCH}'
   "
 
-  #============================================================================#
-  ### HLS unterstützt insgesamt nur 7 Bildauflösungen
-
-  if [ "${HLS}" = "Ja" ] ; then
-	. ${AVERZ}/Filmwandler_HLS.txt
-
-	HLS_BREIT_HOCH="$(HLS_AUFLOESUNGEN="$(if [ "mp4" = "${ENDUNG}" ] ; then
-		hls_aufloesungen | grep -F AVC | awk '{print $1}'
-		#hls_aufloesungen | grep -F HEVC | awk '{print $1}'
-	else
-		hls_aufloesungen | awk '{print $1}'
-	fi)"
-
-	(echo "${HLS_AUFLOESUNGEN}" | grep -Ev '^$' | awk -F'x' -v qb="${BREIT_QUADRATISCH}" -v qh="${HOCH_QUADRATISCH}" '{s1=$1*$2 ; s2=qb*qh ; if (s1 == s2) print $1,$2 ; if (s1 < s2) print $1,$2 ; }' | grep -Ev '^$' | tail -n1
-	echo "${HLS_AUFLOESUNGEN}" | grep -Ev '^$' | awk -F'x' -v qb="${BREIT_QUADRATISCH}" -v qh="${HOCH_QUADRATISCH}" '{s1=$1*$2 ; s2=qb*qh ; if (s1 == s2) print $1,$2 ; if (s1 > s2) print $1,$2 ; }' | grep -Ev '^$' | head -n1) | tail -n1)"
-
-	BREIT_QUADRATISCH="$(echo "${HLS_BREIT_HOCH}" | awk '{print $1}')"
-	HOCH_QUADRATISCH="$( echo "${HLS_BREIT_HOCH}" | awk '{print $2}')"
-  fi
-
-  #============================================================================#
-
+  ### -=-
   if [ "${BREIT_QUADRATISCH}" -gt "${IN_BREIT}" ] ; then
 	ZWISCHENFORMAT_QUADRATISCH="scale=${BREIT_QUADRATISCH}x${IN_HOCH},"
   elif [ "${HOCH_QUADRATISCH}" -gt "${IN_HOCH}" ] ; then
