@@ -24,7 +24,8 @@
 
 #VERSION="v2022072100"		# erstellt, um die vorhandenen AVI-Filme mit defektem Index, schnell anschauen zu können
 #VERSION="v2022120400"		# jetzt wird der Titel und Kommentar nicht mehr zwangsläufig überschrieben
-VERSION="v2022120500"		# einen Schönheitskorrekturen vorgenommen
+#VERSION="v2022120500"		# einen Schönheitskorrekturen vorgenommen
+VERSION="v2022120800"		# jetzt werden auch alle Tonspuren mit kopiert
 
 
 #set -x
@@ -141,44 +142,44 @@ transkodieren()
 {
 	echo
 	echo "1: 
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
 	" | tee -a "${FILM_NAME}".${ENDUNG}.txt
 
 	echo
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
 }
 #------------------------------------------------------------------------------#
 transkodieren_titel()
 {
 	echo
 	echo "1: 
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -metadata title=\"${EIGENER_TITEL}\" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata title=\"${EIGENER_TITEL}\" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
 	" | tee -a "${FILM_NAME}".${ENDUNG}.txt
 
 	echo
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -metadata title="${EIGENER_TITEL}" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata title="${EIGENER_TITEL}" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
 }
 #------------------------------------------------------------------------------#
 transkodieren_kommentar()
 {
 	echo
 	echo "1: 
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -metadata description=\"${KOMMENTAR}\" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata description=\"${KOMMENTAR}\" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
 	" | tee -a "${FILM_NAME}".${ENDUNG}.txt
 
 	echo
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -metadata description="${KOMMENTAR}" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata description="${KOMMENTAR}" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
 }
 #------------------------------------------------------------------------------#
 transkodieren_titel_kommentar()
 {
 	echo
 	echo "1: 
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -metadata title=\"${EIGENER_TITEL}\" -metadata description=\"${KOMMENTAR}\" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata title=\"${EIGENER_TITEL}\" -metadata description=\"${KOMMENTAR}\" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
 	" | tee -a "${FILM_NAME}".${ENDUNG}.txt
 
 	echo
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -metadata title="${EIGENER_TITEL}" -metadata description="${KOMMENTAR}" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata title="${EIGENER_TITEL}" -metadata description="${KOMMENTAR}" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
 }
 #==============================================================================#
 
