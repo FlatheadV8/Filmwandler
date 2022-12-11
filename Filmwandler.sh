@@ -751,8 +751,18 @@ else
 	exit 120
 fi
 
+#------------------------------------------------------------------------------#
+### ggf das Format ändern
 
-if [ "${ZIEL_BASIS_NAME}" = "${ENDUNG}" ] ; then
+if [ "x${VIDEO_FORMAT}" = x ] ; then
+	VIDEO_FORMAT=${ENDUNG}
+else
+	VIDEO_FORMAT="$(echo "${VIDEO_FORMAT}" | awk '{print tolower($1)}')"
+fi
+
+#------------------------------------------------------------------------------#
+
+if [ "${ZIEL_BASIS_NAME}" = "${VIDEO_FORMAT}" ] ; then
 	echo 'Die Zieldatei muß eine Endung haben!'
 	ls ${AVERZ}/Filmwandler_Format_*.txt | sed 's/.*Filmwandler_Format_//;s/[.]txt//'
 	exit 1
@@ -1942,13 +1952,6 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 	VERGLEICH_BREIT="${P_BREIT}"
 	VERGLEICH_HOCH="${P_HOCH}"
   fi
-fi
-
-#------------------------------------------------------------------------------#
-### ggf das Format ändern
-
-if [ "x${VIDEO_FORMAT}" = x ] ; then
-	VIDEO_FORMAT=${ENDUNG}
 fi
 
 #------------------------------------------------------------------------------#
