@@ -7,12 +7,12 @@
 #==============================================================================#
 
 #VERSION="v2018090300"
-VERSION="v2020092500"		# auf das aktuelle Mantelskript angepasst
+#VERSION="v2020092500"			# auf das aktuelle Mantelskript angepasst
+VERSION="v2022121100"			# die Variable ENDUNG darf hier nicht drin stehen
 
 #==============================================================================#
 
 # Format
-ENDUNG="mpg"
 FORMAT="mpeg"
 
 #------------------------------------------------------------------------------#

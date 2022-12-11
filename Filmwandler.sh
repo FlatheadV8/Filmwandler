@@ -245,6 +245,16 @@ BILD_DREHEN()
 }
 
 
+video_format()
+{
+	if [ "x${VIDEO_FORMAT}" = x ] ; then
+		VIDEO_FORMAT=${ENDUNG}
+	else
+		VIDEO_FORMAT="$(echo "${VIDEO_FORMAT}" | awk '{print tolower($1)}')"
+	fi
+}
+
+
 #==============================================================================#
 
 if [ "x${1}" = x ] ; then
@@ -754,11 +764,7 @@ fi
 #------------------------------------------------------------------------------#
 ### ggf das Format ändern
 
-if [ "x${VIDEO_FORMAT}" = x ] ; then
-	VIDEO_FORMAT=${ENDUNG}
-else
-	VIDEO_FORMAT="$(echo "${VIDEO_FORMAT}" | awk '{print tolower($1)}')"
-fi
+video_format
 
 #------------------------------------------------------------------------------#
 
@@ -788,7 +794,9 @@ ZIELDATEI='${ZIELDATEI}'
 
 ZIELNAME='${ZIELNAME}'
 ZIEL_FILM='${ZIEL_FILM}'
+
 ENDUNG='${ENDUNG}'
+VIDEO_FORMAT='${VIDEO_FORMAT}'
 " | tee "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 140
@@ -904,6 +912,8 @@ echo "# 210
 META_DATEN_SPURSPRACHEN='${META_DATEN_SPURSPRACHEN}'
 BILD_DREHUNG='${BILD_DREHUNG}'
 "                                             | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+#exit 913
 
 #------------------------------------------------------------------------------#
 
@@ -1931,6 +1941,9 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   # HOCH_QUADRATISCH='${HOCH_QUADRATISCH}'
   # ZWISCHENFORMAT_QUADRATISCH='${ZWISCHENFORMAT_QUADRATISCH}'
   # PAD='${PAD}'
+
+  # ENDUNG=${ENDUNG}
+  # VIDEO_FORMAT=${VIDEO_FORMAT}
   " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
   #exit 1100
@@ -1960,6 +1973,9 @@ fi
 echo "# 1110
 BILD_BREIT='${BILD_BREIT}'
 BILD_HOCH='${BILD_HOCH}'
+
+ENDUNG=${ENDUNG}
+VIDEO_FORMAT=${VIDEO_FORMAT}
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #set -x
@@ -1984,10 +2000,13 @@ else
 	exit 1150
 fi
 
+#------------------------------------------------------------------------------#
+
 echo "# 1160
 IN_FPS='${IN_FPS}'
 OP_QUELLE='${OP_QUELLE}'
 STEREO='${STEREO}'
+
 ENDUNG=${ENDUNG}
 VIDEO_FORMAT=${VIDEO_FORMAT}
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt

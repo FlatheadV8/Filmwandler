@@ -9,7 +9,8 @@
 
 #VERSION="v2018083100"
 #VERSION="v2020072700"
-VERSION="v2022120600"		# Flash kann leider nur eine einzige Audio-Spur
+#VERSION="v2022120600"		# Flash kann leider nur eine einzige Audio-Spur
+VERSION="v2022121100"			# die Variable ENDUNG darf hier nicht drin stehen
 
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 
@@ -23,7 +24,6 @@ VERSION="v2022120600"		# Flash kann leider nur eine einzige Audio-Spur
 #==============================================================================#
 
 # Format
-ENDUNG="flv"
 FORMAT="flv"
 
 #==============================================================================#
