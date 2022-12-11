@@ -92,7 +92,8 @@
 #VERSION="v2022120600"			# HLS-Kompatibilität (ersteinmal nur die Einschränkung auf die erlaubten Bildschirmauflösungen)
 #VERSION="v2022120601"			# Selektion für die FLK-kompatibelen Bildauflösungen verbessert
 #VERSION="v2022120602"			# bei HLS-Kompatibilität wird der Dateiname geändert, ähnlich wie bei "HD ready"
-VERSION="v2022120700"			# Zusammenspiel von HDTV und HLS verbessert
+#VERSION="v2022120700"			# Zusammenspiel von HDTV und HLS verbessert
+VERSION="v2022120700"			# RegEx-Fehler in Zeile 1192 behoben
 
 VERSION_METADATEN="${VERSION}"
 
@@ -1189,7 +1190,7 @@ else
 fi
 
 # 0 1 2 3 4
-TS_LISTE="$(echo "${TSNAME}" | sed 's/:[a-z]*,/ /g;s/,/ /g')"
+TS_LISTE="$(echo "${TSNAME}" | sed 's/:[a-z]*/ /g;s/,/ /g')"
 # 5
 TS_ANZAHL="$(echo "${TSNAME}" | sed 's/,/ /g' | wc -w | awk '{print $1}')"
 

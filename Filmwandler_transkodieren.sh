@@ -199,15 +199,15 @@ echo "UNTERTITELSPUREN='${UNTERTITELSPUREN}'"
 
   #----------------------------------------------------------------------------#
 
+  ### konvertiert den MKV-Film in einen WebM-Konterner und entfernt dabei die Untertitel
+  ### Kompatibilität: teilweise HTML5, teilweise HLS, teilweise MPEG-DASH
+  echo "# 1,6: ${AVERZ}/Filmwandler_zu_WebM-Kontainer.sh -q \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}\""
+  ${AVERZ}/Filmwandler_zu_WebM-Kontainer.sh -q "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}"
+
   ### Um eine "HD ready"-Kompatibilität (max. 720p + keine Untertitel) zu erreichen, wird das MKV-Video noch einmal transkodiert.
   ### Kompatibilität: "HD ready", HTML5, HLS, MPEG-DASH
   echo "# 1,5: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" =0 -minihd -hls"
   ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" -u =0 -minihd -hls
-
-  ### konvertiert den MKV-Film in einen WebM-Konterner und entfernt dabei die Untertitel
-  ### Kompatibilität: teilweise HTML5, teilweise HLS, teilweise MPEG-DASH
-  #echo "# 1,6: ${AVERZ}/Filmwandler_zu_WebM-Kontainer.sh -q \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}\""
-  #${AVERZ}/Filmwandler_zu_WebM-Kontainer.sh -q "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}"
 
   #----------------------------------------------------------------------------#
 
