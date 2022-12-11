@@ -93,7 +93,8 @@
 #VERSION="v2022120601"			# Selektion für die FLK-kompatibelen Bildauflösungen verbessert
 #VERSION="v2022120602"			# bei HLS-Kompatibilität wird der Dateiname geändert, ähnlich wie bei "HD ready"
 #VERSION="v2022120700"			# Zusammenspiel von HDTV und HLS verbessert
-VERSION="v2022120700"			# RegEx-Fehler in Zeile 1192 behoben
+#VERSION="v2022120700"			# RegEx-Fehler in Zeile 1192 behoben
+VERSION="v2022121100"			# Mit der ption -format können die Vorgaben der Cdecs überschrieben werden.
 
 VERSION_METADATEN="${VERSION}"
 
@@ -408,7 +409,8 @@ while [ "${#}" -ne "0" ]; do
                         shift
                         ;;
                 -format)
-                        # Diese Option ist ein Platzhalter, um später Codec-Kombinationen frei auswählen zu können
+                        # Das Format ist normalerweise dur die Dateiendung der Ziel-Datei vorgegeben.
+			# Diese Vorgabe kann mit dieser Option überschrieben werden.
                         VIDEO_FORMAT="${2}"			# Video-Format
                         shift
                         ;;
@@ -576,6 +578,19 @@ while [ "${#}" -ne "0" ]; do
 
         # Bildauflösungen werden gemäß HSL eingeschränkt
         -hls
+
+        # Das Format ist normalerweise dur die Dateiendung der Ziel-Datei vorgegeben.
+	# Diese Vorgabe kann mit dieser Option überschrieben werden.
+	# z.B.:
+	#   Will man einen Film in das MKV-Format transkodieren, dann sind die
+	#   vorgegebenen Codecs dafür VP9+Vorbis. Für das WebM-Format sind die
+	#   vorgegebenen Codecs dafür AV1+Opus.
+	#   Will man jetzt aber einen WebM-Film mit den Codes von einem MKV-Film
+	#   erstellen, dann benötigt man diese Option:
+	#   ... -z Film.webm -format mkv
+        -format mp4
+        -format mkv
+        -format webm
 
         # Bildwiederholrate für den neuen Film festlegen,
         # manche Geräte können nur eine begrenzte Zahl an Bildern pro Sekunde (FPS)
@@ -1930,6 +1945,14 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 fi
 
 #------------------------------------------------------------------------------#
+### ggf das Format ändern
+
+if [ "x${VIDEO_FORMAT}" = x ] ; then
+	VIDEO_FORMAT=${ENDUNG}
+fi
+
+#------------------------------------------------------------------------------#
+### Format-Codecs einlesen
 
 echo "# 1110
 BILD_BREIT='${BILD_BREIT}'
@@ -1942,7 +1965,7 @@ if [ "x${BILD_BREIT}" = x -o "x${BILD_HOCH}" = x ] ; then
 	exit 1130
 fi
 
-if [ -r ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt ] ; then
+if [ -r ${AVERZ}/Filmwandler_Format_${VIDEO_FORMAT}.txt ] ; then
     
         OP_QUELLE="1"
         unset FFMPEG_TARGET
@@ -1950,7 +1973,7 @@ if [ -r ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt ] ; then
 	echo "IN_FPS='${IN_FPS}'"
 	#exit 1140
 
-	. ${AVERZ}/Filmwandler_Format_${ENDUNG}.txt
+	. ${AVERZ}/Filmwandler_Format_${VIDEO_FORMAT}.txt
 
 else
 	echo "Datei konnte nicht gefunden werden:"
@@ -1962,6 +1985,8 @@ echo "# 1160
 IN_FPS='${IN_FPS}'
 OP_QUELLE='${OP_QUELLE}'
 STEREO='${STEREO}'
+ENDUNG=${ENDUNG}
+VIDEO_FORMAT=${VIDEO_FORMAT}
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 1170
