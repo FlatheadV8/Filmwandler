@@ -7,7 +7,6 @@
 #
 # Das Ergebnis besteht immer aus folgendem Format:
 #  - WebM:    webm   + AV1        + Opus    (kann nur das eine Untertitelformat WebVTT) - AV1 ist einfach noch zu langsam...
-#  - WebM:    webm   + VP9        + Opus    (kann nur das eine Untertitelformat WebVTT)
 #  - MKV:     mkv    + VP9        + Vorbis  (z.Z. das beste Format, leider ist MKV aber kein HTML5-Format)
 #  - MP4:     mp4    + H.264/AVC  + AAC     (das z.Z. mit Abstand kompatibelste Format)
 #  - AVCHD:   m2ts   + H.264/AVC  + AC-3
