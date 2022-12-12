@@ -206,7 +206,7 @@ echo "UNTERTITELSPUREN='${UNTERTITELSPUREN}'"
 
   ### Um eine "HD ready"-Kompatibilität (max. 720p + keine Untertitel) zu erreichen, wird das MKV-Video noch einmal transkodiert.
   ### Kompatibilität: "HD ready", HTML5, HLS, MPEG-DASH
-  echo "# 1,5: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" =0 -minihd -hls"
+  echo "# 1,5: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" -u =0 -minihd -hls"
   ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" -u =0 -minihd -hls
 
   #----------------------------------------------------------------------------#
