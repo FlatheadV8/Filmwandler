@@ -94,7 +94,7 @@
 #VERSION="v2022120602"			# bei HLS-Kompatibilität wird der Dateiname geändert, ähnlich wie bei "HD ready"
 #VERSION="v2022120700"			# Zusammenspiel von HDTV und HLS verbessert
 #VERSION="v2022120700"			# RegEx-Fehler in Zeile 1192 behoben
-VERSION="v2022121100"			# Mit der ption -format können die Vorgaben der Cdecs überschrieben werden.
+VERSION="v2022121100"			# Mit der Option -format können die Vorgaben der Cdecs überschrieben werden.
 
 VERSION_METADATEN="${VERSION}"
 
