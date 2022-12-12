@@ -418,7 +418,7 @@ while [ "${#}" -ne "0" ]; do
                         shift
                         ;;
                 -format)
-                        # Das Format ist normalerweise dur die Dateiendung der Ziel-Datei vorgegeben.
+                        # Das Format ist normalerweise durch die Dateiendung der Ziel-Datei vorgegeben.
 			# Diese Vorgabe kann mit dieser Option überschrieben werden.
                         VIDEO_FORMAT="${2}"			# Video-Format
                         shift
@@ -588,7 +588,7 @@ while [ "${#}" -ne "0" ]; do
         # Bildauflösungen werden gemäß HSL eingeschränkt
         -hls
 
-        # Das Format ist normalerweise dur die Dateiendung der Ziel-Datei vorgegeben.
+        # Das Format ist normalerweise durch die Dateiendung der Ziel-Datei vorgegeben.
 	# Diese Vorgabe kann mit dieser Option überschrieben werden.
 	# z.B.:
 	#   Will man einen Film in das MKV-Format transkodieren, dann sind die
