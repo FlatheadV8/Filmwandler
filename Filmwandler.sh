@@ -93,7 +93,8 @@
 #VERSION="v2022120602"			# bei HLS-Kompatibilität wird der Dateiname geändert, ähnlich wie bei "HD ready"
 #VERSION="v2022120700"			# Zusammenspiel von HDTV und HLS verbessert
 #VERSION="v2022120700"			# RegEx-Fehler in Zeile 1192 behoben
-VERSION="v2022121100"			# Mit der Option -format können die Vorgaben der Cdecs überschrieben werden.
+#VERSION="v2022121100"			# Mit der Option -format können die Vorgaben der Cdecs überschrieben werden.
+VERSION="v2022121900"			# es können jetzt alternative Video- und Audio-Codecs angegeben werden: -cv ... -ca ...
 
 VERSION_METADATEN="${VERSION}"
 
@@ -423,6 +424,18 @@ while [ "${#}" -ne "0" ]; do
                         VIDEO_FORMAT="${2}"			# Video-Format
                         shift
                         ;;
+                -cv)
+                        # Das Format (Video-Codec + Audio-Codec) ist normalerweise durch die Dateiendung der Ziel-Datei vorgegeben.
+			# Mit dieser Option kann der Video-Codec überschrieben werden.
+                        ALT_CODEC_VIDEO="${2}"			# Video-Codec
+                        shift
+                        ;;
+                -ca)
+                        # Das Format (Video-Codec + Audio-Codec) ist normalerweise durch die Dateiendung der Ziel-Datei vorgegeben.
+			# Mit dieser Option kann der Audio-Codec überschrieben werden.
+                        ALT_CODEC_AUDIO="${2}"			# Audio-Codec
+                        shift
+                        ;;
                 -stereo)
                         STEREO="Ja"
                         #STEREO="-ac 2"				# Stereo-Ausgabe erzwingen
@@ -601,6 +614,20 @@ while [ "${#}" -ne "0" ]; do
         -format mkv
         -format webm
 
+	# Das Format (Video-Codec + Audio-Codec) ist normalerweise durch die Dateiendung der Ziel-Datei vorgegeben.
+	# Mit dieser Option kann der Video-Codec überschrieben werden.
+	-cv theora
+	-cv 264
+	-cv vp9
+	-cv av1
+
+	# Das Format (Video-Codec + Audio-Codec) ist normalerweise durch die Dateiendung der Ziel-Datei vorgegeben.
+	# Mit dieser Option kann der Audio-Codec überschrieben werden.
+	-ca a3
+	-ca aac
+	-ca vorbis
+	-ca opus
+
         # Bildwiederholrate für den neuen Film festlegen,
         # manche Geräte können nur eine begrenzte Zahl an Bildern pro Sekunde (FPS)
         -soll_fps 15
@@ -778,6 +805,53 @@ if [ "${QUELL_BASIS_NAME}" = "${ZIEL_BASIS_NAME}" ] ; then
 fi
 
 #------------------------------------------------------------------------------#
+### Video-Codec
+
+if [ x != "x${ALT_CODEC_VIDEO}" ] ; then
+	if [ -r ${AVERZ}/Filmwandler_Codec_Video_${ALT_CODEC_VIDEO}.txt ] ; then
+		. ${AVERZ}/Filmwandler_Codec_Video_${ALT_CODEC_VIDEO}.txt
+	else
+		# -cv 261
+		# -cv 262
+		# -cv 263
+		# -cv 264
+		# -cv 265
+		# -cv av1
+		# -cv divx
+		# -cv ffv1
+		# -cv flv
+		# -cv snow
+		# -cv theora
+		# -cv vc2
+		# -cv vp8
+		# -cv vp9
+		# -cv xvid
+		echo "Es sind zur Zeit die Möglichkeiten verfügbar:"
+		ls ${AVERZ}/Filmwandler_Codec_Video_*.txt | awk -F'[_.]' '{print "-cv",$(NF-1)}'
+		exit 136
+	fi
+fi
+
+#------------------------------------------------------------------------------#
+### Audio-Codec
+
+if [ x != "x${ALT_CODEC_AUDIO}" ] ; then
+	if [ -r ${AVERZ}/Filmwandler_Codec_Audio_${ALT_CODEC_AUDIO}.txt ] ; then
+		. ${AVERZ}/Filmwandler_Codec_Audio_${ALT_CODEC_AUDIO}.txt
+	else
+		# -ca aac
+		# -ca ac3
+		# -ca mp2
+		# -ca mp3
+		# -ca opus
+		# -ca vorbis
+		echo "Es sind zur Zeit die Möglichkeiten verfügbar:"
+		ls ${AVERZ}/Filmwandler_Codec_Audio_*.txt | awk -F'[_.]' '{print "-ca",$(NF-1)}'
+		exit 138
+	fi
+fi
+
+#------------------------------------------------------------------------------#
 ### ab hier kann in die Log-Datei geschrieben werden
 
 PROTOKOLLDATEI="$(echo "${ZIELNAME}.${ENDUNG}" | sed 's/[ ][ ]*/_/g;')"
@@ -796,6 +870,9 @@ ZIEL_FILM='${ZIEL_FILM}'
 
 ENDUNG='${ENDUNG}'
 VIDEO_FORMAT='${VIDEO_FORMAT}'
+
+ALT_CODEC_VIDEO='${ALT_CODEC_VIDEO}'
+ALT_CODEC_AUDIO='${ALT_CODEC_AUDIO}'
 " | tee "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 140
