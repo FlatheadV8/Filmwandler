@@ -95,7 +95,8 @@
 #VERSION="v2022120700"			# RegEx-Fehler in Zeile 1192 behoben
 #VERSION="v2022121100"			# Mit der Option -format können die Vorgaben der Cdecs überschrieben werden.
 #VERSION="v2022121900"			# es können jetzt alternative Video- und Audio-Codecs angegeben werden: -cv ... -ca ...
-VERSION="v2022122000"			# Die Optionen -cv ... -ca ... waren falsch platziert.
+#VERSION="v2022122000"			# Die Optionen -cv ... -ca ... waren falsch platziert.
+VERSION="v2022122200"			# Fehler in der Untertitelbeschriftung behoben
 
 VERSION_METADATEN="${VERSION}"
 
@@ -132,7 +133,7 @@ STARTZEITPUNKT="$(date +'%s')"
 # https://sites.google.com/site/linuxencoding/x264-ffmpeg-mapping
 # -keyint <int>
 #
-# ffmpeg -h full 2>/dev/null | fgrep keyint
+# ffmpeg -h full 2>/dev/null | grep -F keyint
 # -keyint_min        <int>        E..V.... minimum interval between IDR-frames (from INT_MIN to INT_MAX) (default 25)
 IFRAME="-keyint_min 2-8"		# --keyint in Frames
 #IFRAME="-g 1"				# -g in Sekunden
@@ -185,7 +186,7 @@ ausgabe_hilfe()
 echo "# 10
 #==============================================================================#
 "
-egrep -h '^[*][* ]' ${AVERZ}/Filmwandler_Format_*.txt
+grep -E -h '^[*][* ]' ${AVERZ}/Filmwandler_Format_*.txt
 echo "# 20
 #==============================================================================#
 "
@@ -706,7 +707,7 @@ while [ "${#}" -ne "0" ]; do
                         exit 80
                         ;;
                 *)
-                        if [ "$(echo "${1}"|egrep '^-')" ] ; then
+                        if [ "$(echo "${1}" | grep -E '^-')" ] ; then
                                 echo "Der Parameter '${1}' wird nicht unterstützt!"
 				export STOP="Ja"
                         fi
@@ -896,7 +897,7 @@ META_DATEN_ZEILENWEISE_STREAMS="$(echo "${META_DATEN_STREAMS}" | tr -s '\r' '\n'
 #   1 audio ger 
 #   2 audio eng 
 #   3 subtitle eng 
-META_DATEN_SPURSPRACHEN="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | egrep 'TAG:language=' | while read Z ; do echo "${Z}" | tr -s ';' '\n' | awk -F'=' '/^index=|^codec_type=|^TAG:language=/{print $2}' | tr -s '\n' ' ' ; echo ; done)"
+META_DATEN_SPURSPRACHEN="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -E 'TAG:language=' | while read Z ; do echo "${Z}" | tr -s ';' '\n' | awk -F'=' '/^index=|^codec_type=|^TAG:language=/{print $2}' | tr -s '\n' ' ' ; echo ; done)"
 
 # https://techbeasts.com/fmpeg-commands/
 # Video um 90° drehen: ffmpeg -i input.mp4 -filter:v 'transpose=1' ouput.mp4
@@ -930,7 +931,7 @@ fi
 # rotation=-180
 # [/SIDE_DATA]
 # [/STREAM]
-# ffprobe -v error -i /home/privat/Video/Filme_ab_2014/2015/2015-02-16/20150216_142433.mp4 -show_streams | sed -ne '/index=0/,/index=1/p' | fgrep -i rotat
+# ffprobe -v error -i /home/privat/Video/Filme_ab_2014/2015/2015-02-16/20150216_142433.mp4 -show_streams | sed -ne '/index=0/,/index=1/p' | grep -F -i rotat
 # TAG:rotate=180
 # rotation=-180
 
@@ -977,7 +978,7 @@ SOLL_STANDARD_AUDIO_SPUR='${SOLL_STANDARD_AUDIO_SPUR}'
 #--- VIDEO_SPUR ---------------------------------------------------------------#
 #------------------------------------------------------------------------------#
 
-VIDEO_SPUR="$(echo "${META_DATEN_STREAMS}" | fgrep -i codec_type=video | head -n1)"
+VIDEO_SPUR="$(echo "${META_DATEN_STREAMS}" | grep -F -i codec_type=video | head -n1)"
 if [ "${VIDEO_SPUR}" != codec_type=video ] ; then
 	VIDEO_NICHT_UEBERTRAGEN=0
 fi
@@ -992,13 +993,13 @@ VIDEO_NICHT_UEBERTRAGEN='${VIDEO_NICHT_UEBERTRAGEN}'
 #------------------------------------------------------------------------------#
 ### hier wird eine Liste externer verfügbarer Codecs erstellt
 
-FFMPEG_LIB="$( (ffmpeg -formats >/dev/null) 2>&1 | tr -s ' ' '\n' | egrep '^[-][-]enable[-]' | sed 's/^[-]*enable[-]*//;s/[-]/_/g' | egrep '^lib')"
+FFMPEG_LIB="$( (ffmpeg -formats >/dev/null) 2>&1 | tr -s ' ' '\n' | grep -E '^[-][-]enable[-]' | sed 's/^[-]*enable[-]*//;s/[-]/_/g' | grep -E '^lib')"
 FFMPEG_FORMATS="$(ffmpeg -formats 2>/dev/null | awk '/^[ \t]*[ ][DE]+[ ]/{print $2}')"
 
 #------------------------------------------------------------------------------#
 ### alternative Methode zur Ermittlung der FPS
 
-FPS_TEILE="$(echo "${META_DATEN_STREAMS}" | egrep '^codec_type=|^r_frame_rate=' | egrep -A1 '^codec_type=video' | awk -F'=' '/^r_frame_rate=/{print $2}' | sed 's|/| |')"
+FPS_TEILE="$(echo "${META_DATEN_STREAMS}" | grep -E '^codec_type=|^r_frame_rate=' | grep -E -A1 '^codec_type=video' | awk -F'=' '/^r_frame_rate=/{print $2}' | sed 's|/| |')"
 TEIL_ZWEI="$(echo "${FPS_TEILE}" | awk '{print $2}')"
 if [ "x${TEIL_ZWEI}" = x ] ; then
 	R_FPS="$(echo "${FPS_TEILE}" | awk '{print $1}')"
@@ -1054,8 +1055,8 @@ echo "# 310
 if [ "x${IN_XY}" = "x" ] ; then
 	# META_DATEN_STREAMS=" coded_width=0 "
 	# META_DATEN_STREAMS=" coded_height=0 "
-	IN_BREIT="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | fgrep ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^coded_width=/{print $2}' | grep -Fv 'N/A' | grep -Ev '^0$' | head -n1)"
-	IN_HOCH="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | fgrep ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^coded_height=/{print $2}' | grep -Fv 'N/A' | grep -Ev '^0$' | head -n1)"
+	IN_BREIT="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^coded_width=/{print $2}' | grep -Fv 'N/A' | grep -Ev '^0$' | head -n1)"
+	IN_HOCH="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^coded_height=/{print $2}' | grep -Fv 'N/A' | grep -Ev '^0$' | head -n1)"
 	IN_XY="${IN_BREIT}x${IN_HOCH}"
 	echo "# 330
 	2 IN_XY='${IN_XY}'
@@ -1083,7 +1084,7 @@ echo "# 340
 1 IN_PAR='${IN_PAR}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 if [ "x${IN_PAR}" = "x" ] ; then
-	IN_PAR="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | fgrep ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^sample_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | grep -Ev '^0$' | head -n1)"
+	IN_PAR="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^sample_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | grep -Ev '^0$' | head -n1)"
 	echo "# 350
 	2 IN_PAR='${IN_PAR}'
 	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
@@ -1098,12 +1099,12 @@ fi
 
 #------------------------------------------------------------------------------#
 
-IN_DAR="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | fgrep ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^display_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | head -n1)"
+IN_DAR="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^display_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 echo "# 370
 1 IN_DAR='${IN_DAR}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 if [ "x${IN_DAR}" = "x" ] ; then
-	IN_DAR="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | fgrep ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^display_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | grep -Ev '^0$' | head -n1)"
+	IN_DAR="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^display_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | grep -Ev '^0$' | head -n1)"
 	echo "# 380
 	2 IN_DAR='${IN_DAR}'
 	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
@@ -1153,7 +1154,7 @@ echo "# 430
 1 IN_BIT_RATE='${IN_BIT_RATE}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 if [ "x${IN_BIT_RATE}" = "x" ] ; then
-	IN_BIT_RATE="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | fgrep ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^bit_rate=/{print $2}' | grep -Fv 'N/A' | grep -Ev '^0$' | head -n1)"
+	IN_BIT_RATE="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^bit_rate=/{print $2}' | grep -Fv 'N/A' | grep -Ev '^0$' | head -n1)"
 	echo "# 440
 	2 IN_BIT_RATE='${IN_BIT_RATE}'
 	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
@@ -1245,7 +1246,7 @@ TONSPUR='${TONSPUR}'
 #------------------------------------------------------------------------------#
 
 if [ "x${TONSPUR}" = "x" ] ; then
-	TSNAME="$(echo "${META_DATEN_STREAMS}" | fgrep -i codec_type=audio | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
+	TSNAME="$(echo "${META_DATEN_STREAMS}" | grep -F -i codec_type=audio | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
 else
 	# 0:deu,1:eng,2:spa,3,4
 	TSNAME="${TONSPUR}"
@@ -1279,7 +1280,7 @@ fi
 
 if [ "x${TONSPUR}" = "x" ] ; then
 	#AUDIO_SPUR_SPRACHE="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_entries stream=index:stream_tags=language -select_streams a -of compact=p=0:nk=1 | awk -F '|' '{print $1-1,$2}')"
-	AUDIO_SPUR_SPRACHE="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F codec_type=audio | tr -s ';' '\n' | fgrep 'TAG:language=' | awk -F'=' '{print $NF}' | nl | awk '{print $1-1,$2}')"
+	AUDIO_SPUR_SPRACHE="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F codec_type=audio | tr -s ';' '\n' | grep -F 'TAG:language=' | awk -F'=' '{print $NF}' | nl | awk '{print $1-1,$2}')"
 	unset META_AUDIO_SPRACHE
 else
 	# 0 audio deu
@@ -1302,7 +1303,7 @@ if [ "x${SOLL_STANDARD_AUDIO_SPUR}" = x ] ; then
 		### und es keine als deutsch gekennzeichnete Spur gibt, dann
 		### STANDARD-AUDIO-SPUR vom Originalfilm übernehmen
 		### DISPOSITION:default=1
-		AUDIO_STANDARD_SPUR="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | fgrep codec_type=audio | tr -s ';' '\n' | fgrep 'DISPOSITION:default=1' | grep -E 'default=[0-9]' | awk -F'=' '{print $2-1}')"
+		AUDIO_STANDARD_SPUR="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F codec_type=audio | tr -s ';' '\n' | grep -F 'DISPOSITION:default=1' | grep -E 'default=[0-9]' | awk -F'=' '{print $2-1}')"
 		if [ "x${AUDIO_STANDARD_SPUR}" = x ] ; then
 			### wenn es keine STANDARD-AUDIO-SPUR im Originalfilm gibt, dann
 			### alternativ einfach die erste Tonspur zur STANDARD-AUDIO-SPUR machen
@@ -1399,14 +1400,14 @@ fi
 ARBEITSWERTE_PAR()
 {
 if [ -n "${IN_PAR}" ] ; then
-	PAR="$(echo "${IN_PAR}" | egrep '[:/]')"
+	PAR="$(echo "${IN_PAR}" | grep -E '[:/]')"
 	if [ -n "${PAR}" ] ; then
-		PAR_KOMMA="$(echo "${PAR}" | egrep '[:/]' | awk -F'[:/]' '{print $1/$2}')"
-		PAR_FAKTOR="$(echo "${PAR}" | egrep '[:/]' | awk -F'[:/]' '{printf "%u\n", ($1*100000)/$2}')"
+		PAR_KOMMA="$(echo "${PAR}" | grep -E '[:/]' | awk -F'[:/]' '{print $1/$2}')"
+		PAR_FAKTOR="$(echo "${PAR}" | grep -E '[:/]' | awk -F'[:/]' '{printf "%u\n", ($1*100000)/$2}')"
 	else
-		PAR="$(echo "${IN_PAR}" | fgrep '.')"
+		PAR="$(echo "${IN_PAR}" | grep -F '.')"
 		PAR_KOMMA="${PAR}"
-		PAR_FAKTOR="$(echo "${PAR}" | fgrep '.' | awk '{printf "%u\n", $1*100000}')"
+		PAR_FAKTOR="$(echo "${PAR}" | grep -F '.' | awk '{printf "%u\n", $1*100000}')"
 	fi
 fi
 }
@@ -1474,16 +1475,16 @@ fi
 #----------------------------------------------------------------------#
 ### Seitenverhältnis des Bildes - Arbeitswerte berechnen (DAR)
 
-DAR="$(echo "${IN_DAR}" | egrep '[:/]')"
+DAR="$(echo "${IN_DAR}" | grep -E '[:/]')"
 if [ "x${DAR}" = "x" ] ; then
 	echo "# 640" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	DAR="$(echo "${IN_DAR}" | fgrep '.')"
+	DAR="$(echo "${IN_DAR}" | grep -F '.')"
 	DAR_KOMMA="${DAR}"
-	DAR_FAKTOR="$(echo "${DAR}" | fgrep '.' | awk '{printf "%u\n", $1*100000}')"
+	DAR_FAKTOR="$(echo "${DAR}" | grep -F '.' | awk '{printf "%u\n", $1*100000}')"
 else
 	echo "# 650" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	DAR_KOMMA="$(echo "${DAR}" | egrep '[:/]' | awk -F'[:/]' '{print $1/$2}')"
-	DAR_FAKTOR="$(echo "${DAR}" | egrep '[:/]' | awk -F'[:/]' '{printf "%u\n", ($1*100000)/$2}')"
+	DAR_KOMMA="$(echo "${DAR}" | grep -E '[:/]' | awk -F'[:/]' '{print $1/$2}')"
+	DAR_FAKTOR="$(echo "${DAR}" | grep -E '[:/]' | awk -F'[:/]' '{printf "%u\n", ($1*100000)/$2}')"
 fi
 
 
@@ -1773,13 +1774,13 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 	echo "# 940" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	### Übersetzung von Bildauflösungsnamen zu Bildauflösungen
 	### tritt nur bei manueller Auswahl der Bildauflösung in Kraft
-	AUFLOESUNG_ODER_NAME="$(echo "${SOLL_XY}" | egrep '[0-9][0-9][0-9][x][0-9][0-9]')"
+	AUFLOESUNG_ODER_NAME="$(echo "${SOLL_XY}" | grep -E '[0-9][0-9][0-9][x][0-9][0-9]')"
 	if [ "x${AUFLOESUNG_ODER_NAME}" = "x" ] ; then
 		echo "# 950" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 		### manuelle Auswahl der Bildauflösung per Namen
 		if [ "x${BILD_FORMATNAMEN_AUFLOESUNGEN}" != "x" ] ; then
 			echo "# 960" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-			NAME_XY_DAR="$(echo "${BILD_FORMATNAMEN_AUFLOESUNGEN}" | egrep '[-]soll_xmaly ' | awk '{print $2,$4,$5}' | egrep -i "^${SOLL_XY} ")"
+			NAME_XY_DAR="$(echo "${BILD_FORMATNAMEN_AUFLOESUNGEN}" | grep -E '[-]soll_xmaly ' | awk '{print $2,$4,$5}' | grep -E -i "^${SOLL_XY} ")"
 			SOLL_XY="$(echo "${NAME_XY_DAR}" | awk '{print $2}')"
 			SOLL_DAR="$(echo "${NAME_XY_DAR}" | awk '{print $3}')"
 
@@ -1916,10 +1917,10 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   BILD_DAR_BREITE="$(echo "${IN_DAR}" | awk -F':' '{a=$1; if (a == "") a=1; print a}')"
   BILD_DAR_HOEHE="$(echo "${IN_DAR}" | awk -F':' '{a=$2; if (a == "") a=1; print a}')"
 
-  O_DAR="$(echo "${O_DAR}" | egrep '[:/]')"
+  O_DAR="$(echo "${O_DAR}" | grep -E '[:/]')"
   if [ -n "${PAR}" ] ; then
-	O_DAR_1="$(echo "${O_DAR}" | egrep '[:/]' | awk -F'[:/]' '{print $1}')"
-	O_DAR_2="$(echo "${O_DAR}" | egrep '[:/]' | awk -F'[:/]' '{print $2}')"
+	O_DAR_1="$(echo "${O_DAR}" | grep -E '[:/]' | awk -F'[:/]' '{print $1}')"
+	O_DAR_2="$(echo "${O_DAR}" | grep -E '[:/]' | awk -F'[:/]' '{print $2}')"
   else
 	O_DAR_1="${O_DAR}"
 	O_DAR_2="1"
@@ -2120,7 +2121,7 @@ if [ "${STEREO}" = "Ja" ] ; then
 	AC2="-ac 2"
 else
 	echo "# 1164 AUDIO_KANAELE=?" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	AUDIO_KANAELE="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | fgrep codec_type=audio | tr -s ';' '\n' | grep -E '^channels=' | awk -F'=' '{print $2}' | sort -nr | head -n1)"
+	AUDIO_KANAELE="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F codec_type=audio | tr -s ';' '\n' | grep -E '^channels=' | awk -F'=' '{print $2}' | sort -nr | head -n1)"
 	AC2=""
 fi
 #------------------------------------------------------------------------------#
@@ -2204,12 +2205,12 @@ if [ "${TS_ANZAHL}" -gt 0 ] ; then
 
 		if [ "x${STEREO}" = "x" ] ; then
 			AKN="$(echo "${DIE_TS}" | awk '{print $1 + 1}')"
-			AUDIO_KANAELE="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | fgrep codec_type=audio | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E '^channels=' | awk -F'=' '{print $2}')"
+			AUDIO_KANAELE="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F codec_type=audio | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E '^channels=' | awk -F'=' '{print $2}')"
 			echo "# 1230 - ${DIE_TS}
 			AUDIO_KANAELE='${AUDIO_KANAELE}'
 			" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-			AKL51="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | fgrep codec_type=audio | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E 'channel_layout=5.1')"
-			AKL71="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | fgrep codec_type=audio | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E 'channel_layout=7.1')"
+			AKL51="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F codec_type=audio | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E 'channel_layout=5.1')"
+			AKL71="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F codec_type=audio | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E 'channel_layout=7.1')"
 			if [ "x${AKL51}" != "x" ] ; then
 				if [ "x${AUDIO_KANAELE}" = x ] ; then
 					AUDIO_KANAELE=6
@@ -2291,7 +2292,7 @@ else
 	### STANDARD-UNTERTITEL-SPUR
 
 	if [ "x${UNTERTITEL}" = x ] ; then
-		UNTERTITEL_SPUR_SPRACHE="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F codec_type=subtitle | tr -s ';' '\n' | fgrep 'TAG:language=' | awk -F'=' '{print $NF}' | nl | awk '{print $1-1,$2}')"
+		UNTERTITEL_SPUR_SPRACHE="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F codec_type=subtitle | tr -s ';' '\n' | grep -F 'TAG:language=' | awk -F'=' '{print $NF}' | nl | awk '{print $1-1,$2}')"
 	else
 		UNTERTITEL_SPUR_SPRACHE="$(echo "${UNTERTITEL}" | grep -F ':' | tr -s ',' '\n' | sed 's/:/ /g;s/.*/& und/' | awk '{print $1,"subtitle",$2}')"
 		META_UNTERTITEL_SPRACHE="$(echo "${UNTERTITEL_SPUR_SPRACHE}" | grep -Ev '^$' | while read A B C; do echo "-metadata:s:s:${A} language=${C}"; done | tr -s '\n' ' ')"
@@ -2308,7 +2309,7 @@ else
 			### und es keine als deutsch gekennzeichnete Spur gibt, dann
 			### STANDARD-UNTERTITEL-SPUR vom Originalfilm übernehmen
 			### DISPOSITION:default=1
-			UNTERTITEL_STANDARD_SPUR="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | fgrep codec_type=subtitle | tr -s ';' '\n' | fgrep 'DISPOSITION:default=1' | grep -E 'default=[0-9]' | awk -F'=' '{print $2-1}')"
+			UNTERTITEL_STANDARD_SPUR="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F codec_type=subtitle | tr -s ';' '\n' | grep -F 'DISPOSITION:default=1' | grep -E 'default=[0-9]' | awk -F'=' '{print $2-1}')"
 			if [ "x${UNTERTITEL_STANDARD_SPUR}" = x ] ; then
 				### wenn es keine STANDARD-UNTERTITEL-SPUR im Originalfilm gibt, dann
 				### alternativ einfach die erste Tonspur zur STANDARD-UNTERTITEL-SPUR machen
@@ -2330,12 +2331,16 @@ else
 	#----------------------------------------------------------------------#
 	if [ "x${UNTERTITEL}" = "x" ] ; then
 		UTNAME="$(echo "${META_DATEN_STREAMS}" | grep -Fi codec_type=subtitle | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
-		UT_META_DATEN="$(echo "${META_DATEN_STREAMS}" | fgrep -i codec_type=subtitle)"
+		UT_META_DATEN="$(echo "${META_DATEN_STREAMS}" | grep -F -i codec_type=subtitle)"
 		if [ "x${UT_META_DATEN}" != "x" ] ; then
 			UT_LISTE="$(echo "${UT_META_DATEN}" | nl | awk '{print $1 - 1}' | tr -s '\n' ' ')"
 		fi
+
+		UT_LISTE="$(echo "${UTNAME}"      | sed 's/:[a-z]*/ /g;s/,/ /g')"
+		UT_ANZAHL="$(echo "${UTNAME}"     | sed 's/,/ /g' | wc -w | awk '{print $1}')"
 	else
-		UT_LISTE="$(echo "${UNTERTITEL}" | sed 's/:[a-z]*,/ /g;s/,/ /g')"
+		UT_LISTE="$(echo "${UNTERTITEL}"  | sed 's/:[a-z]*/ /g;s/,/ /g')"
+		UT_ANZAHL="$(echo "${UNTERTITEL}" | sed 's/,/ /g' | wc -w | awk '{print $1}')"
 	fi
 
 	U_TITEL_FF_01="-c:s copy $(for DER_UT in ${UT_LISTE}
@@ -2343,6 +2348,12 @@ else
 		echo -n " -map 0:s:${DER_UT}?"
 	done)"
 
+	echo "# 1272
+	UT_LISTE='${UT_LISTE}'
+	UT_ANZAHL='${UT_ANZAHL}'
+	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+	#----------------------------------------------------------------------#
 	### Wenn der Untertitel in einem Text-Format vorliegt, dann muss er ggf. auch transkodiert werden.
 	if [ "${ENDUNG}" = mp4 ] ; then
 		UT_FORMAT="mov_text"
@@ -2354,6 +2365,7 @@ else
 		unset UT_FORMAT
 	fi
 
+	#----------------------------------------------------------------------#
 	### wenn kein alternatives Untertitelformat vorgesehen ist, dann weiter ohne Untertitel als "Alternative bei Fehlschlag"
 	if [ "x${ENDUNG}" = x ] ; then
 		unset U_TITEL_FF_ALT
@@ -2586,7 +2598,7 @@ fi
 ### Bei VCD und DVD
 ### werden die Codecs nicht direkt angegeben
 
-CODEC_ODER_TARGET="$(echo "${VIDEOCODEC}" | fgrep -- '-target ')"
+CODEC_ODER_TARGET="$(echo "${VIDEOCODEC}" | grep -F -- '-target ')"
 if [ "x${CODEC_ODER_TARGET}" = x ] ; then
 	VIDEO_PARAMETER_TRANS="-map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME}"
 else
