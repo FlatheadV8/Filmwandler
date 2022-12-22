@@ -38,7 +38,8 @@
 #VERSION="v2022120500"		# MKV + MP4 für HTML5- und HLS-Kompatibilität
 #VERSION="v2022120600"		# + HLS-Kompatibilitäts-Option
 #VERSION="v2022120700"		# den alternativen Zweig (für den Fall, dass keine UUntertitel vorhanden sind) abgeschaltet, weil dort WebM mit AV1 zum Einsatz kommt, was z.Z. noch viel zu langsam ist
-VERSION="v2022120700"		# Fehler in der MP4-Erstellung behoben
+#VERSION="v2022120700"		# Fehler in der MP4-Erstellung behoben
+VERSION="v2022122200"		# Fehler in der MP4-Erstellung behoben
 
 
 ALLE_OPTIONEN="${@}"
@@ -207,8 +208,8 @@ echo "UNTERTITELSPUREN='${UNTERTITELSPUREN}'"
 
   ### Um eine "HD ready"-Kompatibilität (max. 720p + keine Untertitel) zu erreichen, wird das MKV-Video noch einmal transkodiert.
   ### Kompatibilität: "HD ready", HTML5, HLS, MPEG-DASH
-  echo "# 1,5: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" -u =0 -minihd -hls"
-  ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" -u =0 -minihd -hls
+  echo "# 1,5: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -u =0 -minihd -hls"
+  ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -standard_ton 0 -u =0 -minihd -hls
 
   #----------------------------------------------------------------------------#
 
