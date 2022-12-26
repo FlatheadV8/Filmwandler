@@ -52,6 +52,7 @@ META_DATEN_ZEILENWEISE_STREAMS="$(echo "${META_DATEN_STREAMS}" | tr -s '\r' '\n'
 ### Test 2
 #echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n'
 
+DATEI_GROESSE="$(du -sm "${FILMDATEI}")"
 CODEC_LONG_NAME="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^codec_long_name=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 META_DATEN_SPURSPRACHEN="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -E 'TAG:language=' | while read Z ; do echo "${Z}" | tr -s ';' '\n' | awk -F'=' '/^index=|^codec_type=|^TAG:language=/{print $2}' | tr -s '\n' ' ' ; echo ; done)"
 TSNAME="$(echo "${META_DATEN_STREAMS}" | grep -F -i codec_type=audio | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
@@ -77,9 +78,10 @@ if [ "x${DURATION}" == x ] ; then
 	${AVERZ}/Filmwandler_zu_MKV-Kontainer.sh -q "${FILMDATEI}" >/dev/null 2>/dev/null
 	${0} "${FILMDATEI}".mkv && rm -f "${FILMDATEI}".mkv "${FILMDATEI}".mkv.txt
 else
-	echo "${DURATION} | ${IN_BREIT}x${IN_HOCH} | ${TSNAME} | ${UTNAME}"
+	echo "${DURATION} | ${IN_BREIT}x${IN_HOCH} | ${TSNAME} | ${UTNAME} | ${DATEI_GROESSE}"
 
 #echo "
+	# DATEI_GROESSE='${DATEI_GROESSE}'
 	# CODEC_LONG_NAME='${CODEC_LONG_NAME}'
 	# IN_XY='${IN_BREIT}x${IN_HOCH}'
 	# IN_XY_CODED='${IN_BREIT_CODED}x${IN_HOCH_CODED}'
