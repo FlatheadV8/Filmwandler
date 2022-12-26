@@ -11,6 +11,7 @@
 #VERSION="v2022072800"			# Version 1
 VERSION="v2022122600"			# Version 2
 
+AVERZ="$(dirname ${0})"			# Arbeitsverzeichnis, hier liegen diese Dateien
 #META_DATEN_STREAMS="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${1}" -show_streams)"
 #echo "${META_DATEN_STREAMS}" | grep -Ei 'width|height|aspect_ratio|frame_rate|level'
 
@@ -43,7 +44,14 @@ FILMDATEI="${1}"
 KOMPLETT_DURCHSUCHEN="-probesize 9223372036G -analyzeduration 9223372036G"
 META_DATEN_STREAMS="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_streams 2>/dev/null)"
 
+### Test 1
+#echo "${META_DATEN_STREAMS}"
+
 META_DATEN_ZEILENWEISE_STREAMS="$(echo "${META_DATEN_STREAMS}" | tr -s '\r' '\n' | tr -s '\n' ';' | sed 's/;\[STREAM\]/³[STREAM]/g' | tr -s '³' '\n')"
+
+### Test 2
+#echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n'
+
 CODEC_LONG_NAME="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^codec_long_name=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 META_DATEN_SPURSPRACHEN="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -E 'TAG:language=' | while read Z ; do echo "${Z}" | tr -s ';' '\n' | awk -F'=' '/^index=|^codec_type=|^TAG:language=/{print $2}' | tr -s '\n' ' ' ; echo ; done)"
 TSNAME="$(echo "${META_DATEN_STREAMS}" | grep -F -i codec_type=audio | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
@@ -59,24 +67,33 @@ IN_BREIT_CODED="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | 
 IN_HOCH_CODED="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^coded_height=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 IN_PAR="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^sample_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 IN_DAR="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^display_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | head -n1)"
-DURATION="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^duration=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 
-echo "${DURATION} | ${IN_BREIT}x${IN_HOCH} | ${TSNAME} | ${UTNAME}"
+#DURATION="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^duration=/{print $2}' | grep -Fv 'N/A' | head -n1)"
+#if [ "x${DURATION}" == x ] ; then
+	DURATION="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^TAG:DURATION=/{print $2}' | grep -Fv 'N/A' | head -n1)"
+#fi
+
+if [ "x${DURATION}" == x ] ; then
+	${AVERZ}/Filmwandler_zu_MKV-Kontainer.sh -q "${FILMDATEI}" >/dev/null 2>/dev/null
+	${0} "${FILMDATEI}".mkv && rm -f "${FILMDATEI}".mkv "${FILMDATEI}".mkv.txt
+else
+	echo "${DURATION} | ${IN_BREIT}x${IN_HOCH} | ${TSNAME} | ${UTNAME}"
 
 #echo "
-# CODEC_LONG_NAME='${CODEC_LONG_NAME}'
-# IN_XY='${IN_BREIT}x${IN_HOCH}'
-# IN_XY_CODED='${IN_BREIT_CODED}x${IN_HOCH_CODED}'
-# TSNAME='${TSNAME}'
-# UTNAME='${UTNAME}'
-# META_DATEN_SPURSPRACHEN='${META_DATEN_SPURSPRACHEN}'
-# BILD_DREHUNG='${BILD_DREHUNG}'
-# FPS_TEILE='${FPS_TEILE}'
-# IN_FPS='${IN_FPS}'
-# SCAN_TYPE='${SCAN_TYPE}'
-# LEVEL='${LEVEL}'
-# IN_PAR='${IN_PAR}'
-# IN_DAR='${IN_DAR}'
-# DURATION='${DURATION}'
+	# CODEC_LONG_NAME='${CODEC_LONG_NAME}'
+	# IN_XY='${IN_BREIT}x${IN_HOCH}'
+	# IN_XY_CODED='${IN_BREIT_CODED}x${IN_HOCH_CODED}'
+	# TSNAME='${TSNAME}'
+	# UTNAME='${UTNAME}'
+	# META_DATEN_SPURSPRACHEN='${META_DATEN_SPURSPRACHEN}'
+	# BILD_DREHUNG='${BILD_DREHUNG}'
+	# FPS_TEILE='${FPS_TEILE}'
+	# IN_FPS='${IN_FPS}'
+	# SCAN_TYPE='${SCAN_TYPE}'
+	# LEVEL='${LEVEL}'
+	# IN_PAR='${IN_PAR}'
+	# IN_DAR='${IN_DAR}'
+	# DURATION='${DURATION}'
 #"
+fi
 

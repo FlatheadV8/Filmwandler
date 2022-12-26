@@ -25,7 +25,8 @@
 #VERSION="v2022072100"		# erstellt, um die vorhandenen AVI-Filme mit defektem Index, schnell anschauen zu können
 #VERSION="v2022120400"		# jetzt wird der Titel und Kommentar nicht mehr zwangsläufig überschrieben
 #VERSION="v2022120500"		# einen Schönheitskorrekturen vorgenommen
-VERSION="v2022120800"		# jetzt werden auch alle Tonspuren mit kopiert
+#VERSION="v2022120800"		# jetzt werden auch alle Tonspuren mit kopiert
+VERSION="v2022122600"		# jetzt werden auch alle Untertitel mit kopiert
 
 
 #set -x
@@ -103,10 +104,7 @@ fi
 #==============================================================================#
 ### Trivialitäts-Check
 
-if [ ! -r "${FILMDATEI}" ] ; then
-        echo "Der Film '${FILMDATEI}' konnte nicht gefunden werden. Abbruch!"
-        exit 60
-else
+if [ -r "${FILMDATEI}" ] ; then
 	### Endung wird ersätzt
         #FILM_NAME="$(echo "${FILMDATEI}" | rev | sed 's/^[^.]*.//' | rev)"
 	#
@@ -118,6 +116,9 @@ else
 	FILMDATEI='${FILMDATEI}'
 	FILM_NAME='${FILM_NAME}'
 	" | tee "${FILM_NAME}".${ENDUNG}.txt
+else
+        echo "Der Film '${FILMDATEI}' konnte nicht gefunden werden. Abbruch!"
+        exit 60
 fi
 
 #------------------------------------------------------------------------------#
@@ -142,44 +143,44 @@ transkodieren()
 {
 	echo
 	echo "1: 
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -c:s copy -dn -map 0 -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
 	" | tee -a "${FILM_NAME}".${ENDUNG}.txt
 
 	echo
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -c:s copy -dn -map 0 -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
 }
 #------------------------------------------------------------------------------#
 transkodieren_titel()
 {
 	echo
 	echo "1: 
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata title=\"${EIGENER_TITEL}\" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -c:s copy -c:d copy -map 0 -metadata title=\"${EIGENER_TITEL}\" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
 	" | tee -a "${FILM_NAME}".${ENDUNG}.txt
 
 	echo
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata title="${EIGENER_TITEL}" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -c:s copy -c:d copy -map 0 -metadata title="${EIGENER_TITEL}" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
 }
 #------------------------------------------------------------------------------#
 transkodieren_kommentar()
 {
 	echo
 	echo "1: 
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata description=\"${KOMMENTAR}\" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -c:s copy -c:d copy -map 0 -metadata description=\"${KOMMENTAR}\" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
 	" | tee -a "${FILM_NAME}".${ENDUNG}.txt
 
 	echo
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata description="${KOMMENTAR}" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -c:s copy -c:d copy -map 0 -metadata description="${KOMMENTAR}" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
 }
 #------------------------------------------------------------------------------#
 transkodieren_titel_kommentar()
 {
 	echo
 	echo "1: 
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata title=\"${EIGENER_TITEL}\" -metadata description=\"${KOMMENTAR}\" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -c:s copy -c:d copy -map 0 -metadata title=\"${EIGENER_TITEL}\" -metadata description=\"${KOMMENTAR}\" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
 	" | tee -a "${FILM_NAME}".${ENDUNG}.txt
 
 	echo
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata title="${EIGENER_TITEL}" -metadata description="${KOMMENTAR}" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -c:s copy -c:d copy -map 0 -metadata title="${EIGENER_TITEL}" -metadata description="${KOMMENTAR}" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
 }
 #==============================================================================#
 
