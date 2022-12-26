@@ -8,28 +8,73 @@
 # ffprobe -v error -select_streams v:0 -show_entries stream=width,height,duration,bit_rate -of default=noprint_wrappers=1 input.mp4
 #------------------------------------------------------------------------------#
 
-META_DATEN_STREAMS="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${1}" -show_streams)"
-echo "${META_DATEN_STREAMS}" | grep -Ei 'width|height|aspect_ratio|frame_rate|level'
+#VERSION="v2022072800"			# Version 1
+VERSION="v2022122600"			# Version 2
+
+#META_DATEN_STREAMS="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${1}" -show_streams)"
+#echo "${META_DATEN_STREAMS}" | grep -Ei 'width|height|aspect_ratio|frame_rate|level'
 
 #------------------------------------------------------------------------------#
+### Version 1
 
-TITEL="$(ffprobe -v error -probesize 9223372036G -analyzeduration 9223372036G -i "${1}" -show_entries format_tags=title -of compact=p=0:nk=1)"
+#TITEL="$(ffprobe -v error -probesize 9223372036G -analyzeduration 9223372036G -i "${1}" -show_entries format_tags=title -of compact=p=0:nk=1)"
+#KOMMENTAR="$(ffprobe -v error -probesize 9223372036G -analyzeduration 9223372036G -i "${1}" -show_entries format_tags=comment -of compact=p=0:nk=1)"
+#BESCHREIBUNG="$(ffprobe -v error -probesize 9223372036G -analyzeduration 9223372036G -i "${1}" -show_entries format_tags=description -of compact=p=0:nk=1)"
+##TITEL_KOMMENTAR="$(ffprobe -v error -probesize 9223372036G -analyzeduration 9223372036G -i "${1}" -show_entries format_tags=title,comment -of compact=p=0:nk=1)"
+#ID_SPRACHE_AUDIO_SPUREN="$(ffprobe -v error -probesize 9223372036G -analyzeduration 9223372036G -i "${1}" -show_entries stream=index:stream_tags=language -select_streams a -of compact=p=0:nk=1)"
+#ID_SPRACHE_UNTERTITEL_SPUREN="$(ffprobe -v error -probesize 9223372036G -analyzeduration 9223372036G -i "${1}" -show_entries stream=index:stream_tags=language -select_streams s -of compact=p=0:nk=1)"
 
-KOMMENTAR="$(ffprobe -v error -probesize 9223372036G -analyzeduration 9223372036G -i "${1}" -show_entries format_tags=comment -of compact=p=0:nk=1)"
+#echo "
+# TITEL='${TITEL}'
+#
+# KOMMENTAR='${KOMMENTAR}'
+#
+# BESCHREIBUNG='${BESCHREIBUNG}'
+#
+# ID_SPRACHE_AUDIO_SPUREN='${ID_SPRACHE_AUDIO_SPUREN}'
+#
+# ID_SPRACHE_UNTERTITEL_SPUREN='${ID_SPRACHE_UNTERTITEL_SPUREN}'
+#"
 
-BESCHREIBUNG="$(ffprobe -v error -probesize 9223372036G -analyzeduration 9223372036G -i "${1}" -show_entries format_tags=description -of compact=p=0:nk=1)"
+#------------------------------------------------------------------------------#
+### Version 2
 
-#TITEL_KOMMENTAR="$(ffprobe -v error -probesize 9223372036G -analyzeduration 9223372036G -i "${1}" -show_entries format_tags=title,comment -of compact=p=0:nk=1)"
+FILMDATEI="${1}"
+KOMPLETT_DURCHSUCHEN="-probesize 9223372036G -analyzeduration 9223372036G"
+META_DATEN_STREAMS="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_streams 2>/dev/null)"
 
-ID_SPRACHE_AUDIO_SPUREN="$(ffprobe -v error -probesize 9223372036G -analyzeduration 9223372036G -i "${1}" -show_entries stream=index:stream_tags=language -select_streams a -of compact=p=0:nk=1)"
+META_DATEN_ZEILENWEISE_STREAMS="$(echo "${META_DATEN_STREAMS}" | tr -s '\r' '\n' | tr -s '\n' ';' | sed 's/;\[STREAM\]/³[STREAM]/g' | tr -s '³' '\n')"
+CODEC_LONG_NAME="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^codec_long_name=/{print $2}' | grep -Fv 'N/A' | head -n1)"
+META_DATEN_SPURSPRACHEN="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -E 'TAG:language=' | while read Z ; do echo "${Z}" | tr -s ';' '\n' | awk -F'=' '/^index=|^codec_type=|^TAG:language=/{print $2}' | tr -s '\n' ' ' ; echo ; done)"
+TSNAME="$(echo "${META_DATEN_STREAMS}" | grep -F -i codec_type=audio | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
+UTNAME="$(echo "${META_DATEN_STREAMS}" | grep -Fi codec_type=subtitle | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
+BILD_DREHUNG="$(echo "${META_DATEN_STREAMS}" | sed -ne '/index=0/,/index=1/p' | awk -F'=' '/TAG:rotate=/{print $NF}' | head -n1)"	# TAG:rotate=180 -=> 180
+FPS_TEILE="$(echo "${META_DATEN_STREAMS}" | grep -E '^codec_type=|^r_frame_rate=' | grep -E -A1 '^codec_type=video' | awk -F'=' '/^r_frame_rate=/{print $2}' | sed 's|/| |')"
+IN_FPS="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^avg_frame_rate=/{print $2}' | grep -Fv 'N/A' | head -n1 | awk -F'/' '{print $1}')"
+SCAN_TYPE="$(echo "${META_DATEN_STREAMS}" | awk -F'=' '/^field_order=/{print $2}' | grep -Ev '^$' | head -n1)"
+LEVEL="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^level=/{print $2}' | grep -Fv 'N/A' | head -n1)"
+IN_BREIT="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^width=/{print $2}' | grep -Fv 'N/A' | head -n1)"
+IN_HOCH="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^height=/{print $2}' | grep -Fv 'N/A' | head -n1)"
+IN_BREIT_CODED="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^coded_width=/{print $2}' | grep -Fv 'N/A' | head -n1)"
+IN_HOCH_CODED="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^coded_height=/{print $2}' | grep -Fv 'N/A' | head -n1)"
+IN_PAR="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^sample_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | head -n1)"
+IN_DAR="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^display_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | head -n1)"
+DURATION="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^duration=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 
 echo "
-TITEL='${TITEL}'
-
-KOMMENTAR='${KOMMENTAR}'
-
-BESCHREIBUNG='${BESCHREIBUNG}'
-
-ID_SPRACHE_AUDIO_SPUREN='${ID_SPRACHE_AUDIO_SPUREN}'
+CODEC_LONG_NAME='${CODEC_LONG_NAME}'
+IN_XY="${IN_BREIT}x${IN_HOCH}"
+IN_XY_CODED="${IN_BREIT_CODED}x${IN_HOCH_CODED}"
+TSNAME='${TSNAME}'
+UTNAME='${UTNAME}'
+META_DATEN_SPURSPRACHEN='${META_DATEN_SPURSPRACHEN}'
+BILD_DREHUNG='${BILD_DREHUNG}'
+FPS_TEILE='${FPS_TEILE}'
+IN_FPS='${IN_FPS}'
+SCAN_TYPE='${SCAN_TYPE}'
+LEVEL='${LEVEL}'
+IN_PAR='${IN_PAR}'
+IN_DAR='${IN_DAR}'
+DURATION='${DURATION}'
 "
 
