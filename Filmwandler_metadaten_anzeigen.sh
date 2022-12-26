@@ -61,7 +61,7 @@ IN_PAR="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | awk -F'=
 IN_DAR="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^display_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 DURATION="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^duration=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 
-echo "${IN_BREIT}x${IN_HOCH} | ${TSNAME} | ${UTNAME} | ${DURATION}"
+echo "${DURATION} | ${IN_BREIT}x${IN_HOCH} | ${TSNAME} | ${UTNAME}"
 
 #echo "
 # CODEC_LONG_NAME='${CODEC_LONG_NAME}'
