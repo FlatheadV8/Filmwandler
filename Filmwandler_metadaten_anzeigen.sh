@@ -61,20 +61,22 @@ IN_PAR="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | awk -F'=
 IN_DAR="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^display_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 DURATION="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^duration=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 
-echo "
-CODEC_LONG_NAME='${CODEC_LONG_NAME}'
-IN_XY="${IN_BREIT}x${IN_HOCH}"
-IN_XY_CODED="${IN_BREIT_CODED}x${IN_HOCH_CODED}"
-TSNAME='${TSNAME}'
-UTNAME='${UTNAME}'
-META_DATEN_SPURSPRACHEN='${META_DATEN_SPURSPRACHEN}'
-BILD_DREHUNG='${BILD_DREHUNG}'
-FPS_TEILE='${FPS_TEILE}'
-IN_FPS='${IN_FPS}'
-SCAN_TYPE='${SCAN_TYPE}'
-LEVEL='${LEVEL}'
-IN_PAR='${IN_PAR}'
-IN_DAR='${IN_DAR}'
-DURATION='${DURATION}'
-"
+echo "${IN_BREIT}x${IN_HOCH} | ${TSNAME} | ${UTNAME} | ${DURATION}"
+
+#echo "
+# CODEC_LONG_NAME='${CODEC_LONG_NAME}'
+# IN_XY='${IN_BREIT}x${IN_HOCH}'
+# IN_XY_CODED='${IN_BREIT_CODED}x${IN_HOCH_CODED}'
+# TSNAME='${TSNAME}'
+# UTNAME='${UTNAME}'
+# META_DATEN_SPURSPRACHEN='${META_DATEN_SPURSPRACHEN}'
+# BILD_DREHUNG='${BILD_DREHUNG}'
+# FPS_TEILE='${FPS_TEILE}'
+# IN_FPS='${IN_FPS}'
+# SCAN_TYPE='${SCAN_TYPE}'
+# LEVEL='${LEVEL}'
+# IN_PAR='${IN_PAR}'
+# IN_DAR='${IN_DAR}'
+# DURATION='${DURATION}'
+#"
 
