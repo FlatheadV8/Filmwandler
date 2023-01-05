@@ -26,7 +26,8 @@
 #VERSION="v2022120400"		# jetzt wird der Titel und Kommentar nicht mehr zwangsläufig überschrieben
 #VERSION="v2022120500"		# einen Schönheitskorrekturen vorgenommen
 #VERSION="v2022120800"		# jetzt werden auch alle Tonspuren mit kopiert
-VERSION="v2022122600"		# jetzt werden auch alle Untertitel mit kopiert + kleine Fehler behoben
+#VERSION="v2022122600"		# jetzt werden auch alle Untertitel mit kopiert + kleine Fehler behoben
+VERSION="v2023010500"		# kleine Fehler behoben
 
 
 #set -x
@@ -66,7 +67,7 @@ while [ "${#}" -ne "0" ]; do
                         shift
                         ;;
                 -z)
-                        ZIELPFAD="${2}"				# Name für die Zieldatei
+                        ZIELDATEI="${2}"			# Name für die Zieldatei
                         shift
                         ;;
                 -h)
@@ -109,30 +110,20 @@ fi
 ### Trivialitäts-Check
 
 if [ -r "${FILMDATEI}" ] ; then
-	### Endung wird ersätzt
-        #FILM_NAME="$(echo "${FILMDATEI}" | rev | sed 's/^[^.]*.//' | rev)"
-	#
-	### Endung wird angehängt
         FILM_NAME="${FILMDATEI}"
-
-	echo "#
-	${0} ${@}
-	FILMDATEI='${FILMDATEI}'
-	FILM_NAME='${FILM_NAME}'
-	" | tee "${FILM_NAME}".${ENDUNG}.txt
 else
         echo "Der Film '${FILMDATEI}' konnte nicht gefunden werden. Abbruch!"
         exit 60
 fi
 
-if [ x == "x${ZIELPFAD}" ] ; then
+if [ x == "x${ZIELDATEI}" ] ; then
 	ZIEL_DATEI="${FILM_NAME}.${ENDUNG}"
 else
-	MKV="$(echo "${ZIELPFAD}" | grep -E '[.]mkv$')"
+	MKV="$(echo "${ZIELDATEI}" | grep -E '[.]mkv$')"
 	if [ x == "x${MKV}" ] ; then
-		ZIEL_DATEI="${ZIELPFAD}.${ENDUNG}"
+		ZIEL_DATEI="${ZIELDATEI}.${ENDUNG}"
 	else
-		ZIEL_DATEI="${ZIELPFAD}"
+		ZIEL_DATEI="${ZIELDATEI}"
 	fi
 fi
 
