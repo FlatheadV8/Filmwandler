@@ -11,7 +11,8 @@
 #VERSION="v2022072800"			# Version 1
 #VERSION="v2022122600"			# Version 2
 #VERSION="v2023010200"			# Version 3, weil die Version 2 rekursiver Aufrufe erzeugte, wenn das Ziel nicht gefunden wurde
-VERSION="v2023010500"			# leider braucht der jedesmal ein weiteres ENTER und ggf. auch noch einen 2. Aufruf
+#VERSION="v2023010500"			# leider braucht der jedesmal ein weiteres ENTER und ggf. auch noch einen 2. Aufruf
+VERSION="v2023010700"			# Ungenauigkeit bei TAG:DURATION behoben
 
 AVERZ="$(dirname ${0})"			# Arbeitsverzeichnis, hier liegen diese Dateien
 #META_DATEN_STREAMS="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${1}" -show_streams)"
@@ -51,10 +52,11 @@ if [ -r "${FILM_DATEI}" ] ; then
   FILM_SCANNEN()
   {
     FILMDATEI="${1}"
-    META_DATEN_STREAMS="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_streams 2>/dev/null)"
+    #META_DATEN_STREAMS="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_streams 2>/dev/null)"
+    META_DATEN_STREAMS="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_streams 2>&1)"
     META_DATEN_ZEILENWEISE_STREAMS="$(echo "${META_DATEN_STREAMS}" | tr -s '\r' '\n' | tr -s '\n' ';' | sed 's/;\[STREAM\]/³[STREAM]/g' | tr -s '³' '\n')"
 
-    DURATION="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^TAG:DURATION=/{print $2}' | grep -Fv 'N/A' | head -n1)"
+    DURATION="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^TAG:DURATION/{print $2}' | grep -Fv 'N/A' | head -n1)"
     if [ "x${DURATION}" != x ] ; then
 	CODEC_LONG_NAME="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^codec_long_name=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 	META_DATEN_SPURSPRACHEN="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -E 'TAG:language=' | while read Z ; do echo "${Z}" | tr -s ';' '\n' | awk -F'=' '/^index=|^codec_type=|^TAG:language=/{print $2}' | tr -s '\n' ' ' ; echo ; done)"
