@@ -4,6 +4,9 @@
 
 # AVERZ="$(dirname ${0})"
 
+### alle Dateien aus dem DVD-Rip für die Analyse
+### in ein Skript schreiben, welches alle
+### META-Daten ausliest
 # for A in $(find */ -type f | grep -E '[.]mpg$');
 # do
 #	if [ -r ${A} ] ; then
