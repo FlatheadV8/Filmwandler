@@ -7,7 +7,7 @@
 # for A in $(find */ -type f | grep -E '[.]mpg$');
 # do
 #	if [ -r ${A} ] ; then
-#		echo "/home/bin/Filmwandler_metadaten_anzeigen.sh \"${A}\"";
+#		echo "${AVERZ}/Filmwandler_metadaten_anzeigen.sh \"${A}\"";
 #	fi
 # done > Liste.sh
 
@@ -19,7 +19,7 @@
 # grep -E '\| 0[1-9]' Liste.txt > Liste2.txt
 
 ### aus der 2. Liste einen Prototypen erstellen
-# /home/bin/Filmwandler_metadaten_liste_zu_cli.sh Liste2.txt > Start_transkodieren.sh 
+# ${AVERZ}/Filmwandler_metadaten_liste_zu_cli.sh Liste2.txt > Start_transkodieren.sh 
 
 ### den Prototypen bearbeiten
 # vi Start_transkodieren.sh 
