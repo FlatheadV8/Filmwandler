@@ -1,6 +1,7 @@
 #!/bin/sh
 
-VERSION="v2023010700"
+#VERSION="v2023010700"
+VERSION="v2023010800"		# Sprachbezeichnungen
 
 #------------------------------------------------------------------------------#
 
@@ -9,6 +10,8 @@ AVERZ="$(dirname ${0})"			# Arbeitsverzeichnis, hier liegen diese Dateien
 #------------------------------------------------------------------------------#
 
 if [ "x${1}" == x ] ; then
+	echo "Es muss diesem Skript eine Liste übergeben werden."
+	echo ""
 	echo "${AVERZ}/Filmwandler_metadaten_anzeigen.sh > Liste.txt"
 	echo "${0} Liste.txt"
 	exit 11
@@ -32,8 +35,10 @@ do
 	DAUER="$(echo "${DATANSATZ}" | head -n2 | tail -n1)"
 	AUFL="$(echo "${DATANSATZ}" | head -n3 | tail -n1)"
 	TONSPUREN="$(echo "${DATANSATZ}" | head -n4 | tail -n1)"
-	UNTERTITELSP="$(echo "${DATANSATZ}" | head -n5 | tail -n1)"
-	DATEINAME="$(echo "${DATANSATZ}" | head -n6 | tail -n1)"
+	TON_LANG="$(echo "${DATANSATZ}" | head -n5 | tail -n1)"
+	UNTERTITELSP="$(echo "${DATANSATZ}" | head -n6 | tail -n1)"
+	U_LANG="$(echo "${DATANSATZ}" | head -n7 | tail -n1)"
+	DATEINAME="$(echo "${DATANSATZ}" | head -n8 | tail -n1)"
 
 	#echo "'${GR}' / '${DAUER}' / '${AUFL}' / '${TONSPUREN}' / '${UNTERTITELSP}' / '${DATEINAME}'"
 
@@ -49,6 +54,6 @@ do
 		U_UNTERTITEL_SP="-u ${UNTERTITELSP}"
 	fi
 
-	echo "${AVERZ}/Filmwandler_transkodieren.sh -q \"${DATEINAME}\" -z \"${DATEINAME}\" ${TON_TON_SPUREN} ${U_UNTERTITEL_SP}"
+	echo "${AVERZ}/Filmwandler_transkodieren.sh -q \"${DATEINAME}\" -z \"${DATEINAME}\" ${TON_TON_SPUREN} ${U_UNTERTITEL_SP} # ${TON_LANG} / ${U_LANG}"
 done
 

@@ -7,22 +7,22 @@
 ### alle Dateien aus dem DVD-Rip für die Analyse
 ### in ein Skript schreiben, welches alle
 ### META-Daten ausliest
-# for A in $(find */ -type f | grep -E '[.]mpg$');
+# find */ -type f | grep -E '[.]mpg$' | while read A
 # do
-#	if [ -r ${A} ] ; then
-#		echo "${AVERZ}/Filmwandler_metadaten_anzeigen.sh \"${A}\"";
+#	if [ -r "${A}" ] ; then
+#		"${AVERZ}"/Filmwandler_metadaten_anzeigen.sh "${A}";
 #	fi
 # done > Liste.sh
 
 ### META-Daten-Liste erstellen
-# time sh Liste.sh | tee Liste.txt
+# sh Liste.sh | tee Liste.txt
 
 ### alle Dateien mit einer Spieldauer ab 1 Stunde
 ### in eine 2. Liste übertragen
-# grep -E '\| 0[1-9]' Liste.txt > Liste2.txt
+# grep -Fv '| 00' Liste.txt > Liste2.txt
 
 ### aus der 2. Liste einen Prototypen erstellen
-# ${AVERZ}/Filmwandler_metadaten_liste_zu_cli.sh Liste2.txt > Start_transkodieren.sh 
+# "${AVERZ}"/Filmwandler_metadaten_liste_zu_cli.sh Liste2.txt > Start_transkodieren.sh 
 
 ### den Prototypen bearbeiten
 # vi Start_transkodieren.sh 
