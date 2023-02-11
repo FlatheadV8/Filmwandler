@@ -86,7 +86,7 @@
 #VERSION="v2022080700"			# Tests haben ergeben, das manche Set-Top-Boxen nur eine Tonspur können, deshalb wird ab jetzt mit den Parametern -hdtvmin oder -minihd nur noch die erste Tonspur in den Film übernommen
 #VERSION="v2022080800"			# jetzt werden die Filme, die mit dem Parameter -hdtvmin oder -minihd verkleinert werden den Namenszusatz HD-ready bekommen
 #VERSION="v2022110300"			# Kommentar und Hilfe leicht angepasst
-#VERSION="v2022120300"			# Sprachen für Ton- und Untertitelspuren können jetzt mit angegeben werden und überschreiben die Angaben aus der Quelle
+#VERSION="v2022120300"			# Sprachen nach ISO-639-2 für Ton- und Untertitelspuren können jetzt mit angegeben werden und überschreiben die Angaben aus der Quelle
 #VERSION="v2022120500"			# Video-Format (Alternative zur Endung): -format
 #VERSION="v2022120600"			# HLS-Kompatibilität (ersteinmal nur die Einschränkung auf die erlaubten Bildschirmauflösungen)
 #VERSION="v2022120601"			# Selektion für die FLK-kompatibelen Bildauflösungen verbessert
@@ -386,10 +386,11 @@ while [ "${#}" -ne "0" ]; do
                         # die gewünschten Tonspuren (in der gewünschten Reihenfolge) angeben
                         # -ton 0,1,2,3,4
                         #
+                        # Sprachen nach ISO-639-2 für Tonspuren können jetzt mit angegeben werden und überschreiben die Angaben aus der Quelle.
                         # für die angegebenen Tonspuren auch noch die entsprechende Sprache mit angeben
-                        # -ton 0:deu,1:eng,2:spa,3,4
+                        # -ton 0:deu,1:eng,2:spa,3:fra,4:ita
                         #
-                        TONSPUR="${2}"				# -ton 0,1,2,3,4 / -ton 0:deu,1:eng,2:spa,3,4
+                        TONSPUR="${2}"				# -ton 0,1,2,3,4 / -ton 0:deu,1:eng,2:spa,3:fra,4:ita
                         shift
                         ;;
 		-ffprobe)
@@ -474,10 +475,11 @@ while [ "${#}" -ne "0" ]; do
                         # die gewünschten Untertitelspuren (in der gewünschten Reihenfolge) angeben
                         # -u 0,1,2,3,4
                         #
+                        # Sprachen nach ISO-639-2 für Untertitelspuren können jetzt mit angegeben werden und überschreiben die Angaben aus der Quelle.
                         # für die angegebenen Untertitelspuren auch noch die entsprechende Sprache mit angeben
-                        # -u 0:deu,1:eng,2:spa,3,4
+                        # -u 0:deu,1:eng,2:spa,3:fra,4:ita
                         #
-                        UNTERTITEL="${2}"	# -u 0,1,2,3,4
+                        UNTERTITEL="${2}"	# -u 0,1,2,3,4 / -u 0:deu,1:eng,2:spa,3:fra,4:ita
                         shift
                         ;;
                 -g)
