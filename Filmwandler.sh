@@ -96,7 +96,8 @@
 #VERSION="v2022121100"			# Mit der Option -format können die Vorgaben der Cdecs überschrieben werden.
 #VERSION="v2022121900"			# es können jetzt alternative Video- und Audio-Codecs angegeben werden: -cv ... -ca ...
 #VERSION="v2022122000"			# Die Optionen -cv ... -ca ... waren falsch platziert.
-VERSION="v2022122200"			# Fehler in der Untertitelbeschriftung behoben
+#VERSION="v2022122200"			# Fehler in der Untertitelbeschriftung behoben
+VERSION="v2023021100"			# Fehler im Container-Format bei Verwendung von -format behoben
 
 VERSION_METADATEN="${VERSION}"
 
@@ -2012,6 +2013,32 @@ if [ "x${BILD_BREIT}" = x -o "x${BILD_HOCH}" = x ] ; then
 	exit 1130
 fi
 
+#------------------------------------------------------------------------------#
+
+VIDEO_ENDUNG="$(echo "${ENDUNG}" | awk '{print tolower($1)}')"
+
+#------------------------------------------------------------------------------#
+### Variable FORMAT füllen
+
+# laut Endung
+if [ -r ${AVERZ}/Filmwandler_Format_${VIDEO_ENDUNG}.txt ] ; then
+    
+        OP_QUELLE="1"
+        unset FFMPEG_TARGET
+        
+	echo "IN_FPS='${IN_FPS}'"
+	#exit 1140
+
+	. ${AVERZ}/Filmwandler_Format_${VIDEO_ENDUNG}.txt
+	CONTAINER_FORMAT="${FORMAT}"
+
+else
+	echo "Datei konnte nicht gefunden werden:"
+	echo "${AVERZ}/Filmwandler_Format_${VIDEO_ENDUNG}.txt"
+	exit 1150
+fi
+
+# laut Wunsch-Kodecs
 if [ -r ${AVERZ}/Filmwandler_Format_${VIDEO_FORMAT}.txt ] ; then
     
         OP_QUELLE="1"
@@ -2024,9 +2051,29 @@ if [ -r ${AVERZ}/Filmwandler_Format_${VIDEO_FORMAT}.txt ] ; then
 
 else
 	echo "Datei konnte nicht gefunden werden:"
-	echo "${AVERZ}/Filmwandler_Format_${ENDUNG}.txt"
+	echo "${AVERZ}/Filmwandler_Format_${VIDEO_FORMAT}.txt"
 	exit 1150
 fi
+
+#------------------------------------------------------------------------------#
+### Container-Format nach Wunsch setzen
+
+if [ "${VIDEO_FORMAT}" != "${VIDEO_ENDUNG}" ] ; then
+	FORMAT="${CONTAINER_FORMAT}"
+fi
+
+#------------------------------------------------------------------------------#
+
+echo "# 1115
+$(date +'%F %T')
+
+ENDUNG='${ENDUNG}'
+VIDEO_ENDUNG='${VIDEO_ENDUNG}'
+VIDEO_FORMAT='${VIDEO_FORMAT}'
+FORMAT='${FORMAT}'
+" | tee "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+#exit 1135
 
 #------------------------------------------------------------------------------#
 ### Video-Codec
