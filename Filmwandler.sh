@@ -97,7 +97,8 @@
 #VERSION="v2022121900"			# es können jetzt alternative Video- und Audio-Codecs angegeben werden: -cv ... -ca ...
 #VERSION="v2022122000"			# Die Optionen -cv ... -ca ... waren falsch platziert.
 #VERSION="v2022122200"			# Fehler in der Untertitelbeschriftung behoben
-VERSION="v2023021100"			# Fehler im Container-Format bei Verwendung von -format behoben
+#VERSION="v2023021100"			# Fehler im Container-Format bei Verwendung von -format behoben
+VERSION="v2023021200"			# letzter Fehler in der Untertitelbeschriftung behoben
 
 VERSION_METADATEN="${VERSION}"
 
@@ -2344,7 +2345,7 @@ else
 		UNTERTITEL_SPUR_SPRACHE="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F codec_type=subtitle | tr -s ';' '\n' | grep -F 'TAG:language=' | awk -F'=' '{print $NF}' | nl | awk '{print $1-1,$2}')"
 	else
 		UNTERTITEL_SPUR_SPRACHE="$(echo "${UNTERTITEL}" | grep -F ':' | tr -s ',' '\n' | sed 's/:/ /g;s/.*/& und/' | awk '{print $1,"subtitle",$2}')"
-		META_UNTERTITEL_SPRACHE="$(echo "${UNTERTITEL_SPUR_SPRACHE}" | grep -Ev '^$' | while read A B C; do echo "-metadata:s:s:${A} language=${C}"; done | tr -s '\n' ' ')"
+		META_UNTERTITEL_SPRACHE="$(echo "${UNTERTITEL_SPUR_SPRACHE}" | grep -Ev '^$' | nl | awk '{print $1-1,$2,$3,$4}' | while read A B C D; do echo "-metadata:s:s:${A} language=${D}"; done | tr -s '\n' ' ')"
 	fi
 
 	### Die Bezeichnungen (Sprache) für die Audiospuren werden automatisch übernommen.
@@ -2373,6 +2374,7 @@ else
 	echo "# 1270
 	UNTERTITEL_SPUR_SPRACHE='${UNTERTITEL_SPUR_SPRACHE}'
 	UNTERTITEL_STANDARD_SPUR='${UNTERTITEL_STANDARD_SPUR}'
+	META_UNTERTITEL_SPRACHE='${META_UNTERTITEL_SPRACHE}'
 	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 	#exit 1280
