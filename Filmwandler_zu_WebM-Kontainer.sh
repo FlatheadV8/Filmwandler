@@ -24,7 +24,8 @@
 
 #VERSION="v2022120400"		# erstellt
 #VERSION="v2022120500"		# einen Schönheitsfehler behoben
-VERSION="v2022120800"		# jetzt werden auch alle Tonspuren mit kopiert
+#VERSION="v2022120800"		# jetzt werden auch alle Tonspuren mit kopiert
+VERSION="v2023021900"		# jetzt wird das Ziel ungefragt überschrieben
 
 
 #set -x
@@ -141,44 +142,44 @@ transkodieren()
 {
 	echo
 	echo "1: 
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -f ${FORMAT} -y "${FILM_NAME}".${ENDUNG}
 	" | tee -a "${FILM_NAME}".${ENDUNG}.txt
 
 	echo
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -f ${FORMAT} -y "${FILM_NAME}".${ENDUNG}
 }
 #------------------------------------------------------------------------------#
 transkodieren_titel()
 {
 	echo
 	echo "1: 
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata title=\"${EIGENER_TITEL}\" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata title=\"${EIGENER_TITEL}\" -f ${FORMAT} -y "${FILM_NAME}".${ENDUNG}
 	" | tee -a "${FILM_NAME}".${ENDUNG}.txt
 
 	echo
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata title="${EIGENER_TITEL}" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata title="${EIGENER_TITEL}" -f ${FORMAT} -y "${FILM_NAME}".${ENDUNG}
 }
 #------------------------------------------------------------------------------#
 transkodieren_kommentar()
 {
 	echo
 	echo "1: 
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata description=\"${KOMMENTAR}\" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata description=\"${KOMMENTAR}\" -f ${FORMAT} -y "${FILM_NAME}".${ENDUNG}
 	" | tee -a "${FILM_NAME}".${ENDUNG}.txt
 
 	echo
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata description="${KOMMENTAR}" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata description="${KOMMENTAR}" -f ${FORMAT} -y "${FILM_NAME}".${ENDUNG}
 }
 #------------------------------------------------------------------------------#
 transkodieren_titel_kommentar()
 {
 	echo
 	echo "1: 
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata title=\"${EIGENER_TITEL}\" -metadata description=\"${KOMMENTAR}\" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata title=\"${EIGENER_TITEL}\" -metadata description=\"${KOMMENTAR}\" -f ${FORMAT} -y "${FILM_NAME}".${ENDUNG}
 	" | tee -a "${FILM_NAME}".${ENDUNG}.txt
 
 	echo
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata title="${EIGENER_TITEL}" -metadata description="${KOMMENTAR}" -f ${FORMAT} "${FILM_NAME}".${ENDUNG}
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -sn -map 0 -metadata title="${EIGENER_TITEL}" -metadata description="${KOMMENTAR}" -f ${FORMAT} -y "${FILM_NAME}".${ENDUNG}
 }
 #==============================================================================#
 

@@ -27,7 +27,8 @@
 #VERSION="v2022120500"		# einen Schönheitskorrekturen vorgenommen
 #VERSION="v2022120800"		# jetzt werden auch alle Tonspuren mit kopiert
 #VERSION="v2022122600"		# jetzt werden auch alle Untertitel mit kopiert + kleine Fehler behoben
-VERSION="v2023010500"		# kleine Fehler behoben
+#VERSION="v2023010500"		# kleine Fehler behoben
+VERSION="v2023021900"		# jetzt wird das Ziel ungefragt überschrieben
 
 
 #set -x
@@ -149,44 +150,44 @@ transkodieren()
 {
 	echo
 	echo "1:
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -c:v copy -c:a copy -c:s copy -dn -map 0 -f ${FORMAT} \"${ZIEL_DATEI}\"
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -c:v copy -c:a copy -c:s copy -dn -map 0 -f ${FORMAT} -y \"${ZIEL_DATEI}\"
 	" | tee -a "${ZIEL_DATEI}".txt
 
 	echo
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -c:s copy -dn -map 0 -f ${FORMAT} "${ZIEL_DATEI}"
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -c:s copy -dn -map 0 -f ${FORMAT} -y "${ZIEL_DATEI}"
 }
 #------------------------------------------------------------------------------#
 transkodieren_titel()
 {
 	echo
 	echo "2:
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -c:v copy -c:a copy -c:s copy -c:d copy -map 0 -metadata title=\"${EIGENER_TITEL}\" -f ${FORMAT} \"${ZIEL_DATEI}\"
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -c:v copy -c:a copy -c:s copy -c:d copy -map 0 -metadata title=\"${EIGENER_TITEL}\" -f ${FORMAT} -y \"${ZIEL_DATEI}\"
 	" | tee -a "${ZIEL_DATEI}".txt
 
 	echo
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -c:s copy -c:d copy -map 0 -metadata title="${EIGENER_TITEL}" -f ${FORMAT} "${ZIEL_DATEI}"
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -c:s copy -c:d copy -map 0 -metadata title="${EIGENER_TITEL}" -f ${FORMAT} -y "${ZIEL_DATEI}"
 }
 #------------------------------------------------------------------------------#
 transkodieren_kommentar()
 {
 	echo
 	echo "3:
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -c:v copy -c:a copy -c:s copy -c:d copy -map 0 -metadata description=\"${KOMMENTAR}\" -f ${FORMAT} \"${ZIEL_DATEI}\"
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -c:v copy -c:a copy -c:s copy -c:d copy -map 0 -metadata description=\"${KOMMENTAR}\" -f ${FORMAT} -y \"${ZIEL_DATEI}\"
 	" | tee -a "${ZIEL_DATEI}".txt
 
 	echo
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -c:s copy -c:d copy -map 0 -metadata description="${KOMMENTAR}" -f ${FORMAT} "${ZIEL_DATEI}"
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -c:s copy -c:d copy -map 0 -metadata description="${KOMMENTAR}" -f ${FORMAT} -y "${ZIEL_DATEI}"
 }
 #------------------------------------------------------------------------------#
 transkodieren_titel_kommentar()
 {
 	echo
 	echo "4:
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -c:v copy -c:a copy -c:s copy -c:d copy -map 0 -metadata title=\"${EIGENER_TITEL}\" -metadata description=\"${KOMMENTAR}\" -f ${FORMAT} \"${ZIEL_DATEI}\"
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" -c:v copy -c:a copy -c:s copy -c:d copy -map 0 -metadata title=\"${EIGENER_TITEL}\" -metadata description=\"${KOMMENTAR}\" -f ${FORMAT} -y \"${ZIEL_DATEI}\"
 	" | tee -a "${ZIEL_DATEI}".txt
 
 	echo
-	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -c:s copy -c:d copy -map 0 -metadata title="${EIGENER_TITEL}" -metadata description="${KOMMENTAR}" -f ${FORMAT} "${ZIEL_DATEI}"
+	${PROGRAMM} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" -c:v copy -c:a copy -c:s copy -c:d copy -map 0 -metadata title="${EIGENER_TITEL}" -metadata description="${KOMMENTAR}" -f ${FORMAT} -y "${ZIEL_DATEI}"
 }
 #==============================================================================#
 
