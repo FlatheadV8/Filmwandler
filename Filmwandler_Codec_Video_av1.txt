@@ -13,7 +13,8 @@
 #VERSION="v2020060300"	# VIDEO_OPTION definiert, Anpassungen für FFmpeg 4.2.2
 #VERSION="v2020092300" 	# der Kodec "libaom-av1" ist nicht mehr experimentell
 #VERSION="v2020112800" 	# limitierte Kodeksuche eingebaut, bei der nur nach bestimmten Kodeks gesucht wird
-VERSION="v2020121700" 	# Qualitätsabstufung von AOM angepasst
+#VERSION="v2020121700" 	# Qualitätsabstufung von AOM angepasst
+VERSION="v2023032100" 	# Optionen für "libaom-av1" so geändert, dass die Dateien etwas größer werden aber deutlich schneller encodet werden
 
 #==============================================================================#
 ### vollautomatische Kodeksuche wurde in diesem Fall abgeschaltet,
@@ -27,7 +28,8 @@ VERSION="v2020121700" 	# Qualitätsabstufung von AOM angepasst
 #	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 #	if [ "x${VIDEOCODEC}" = "x" ] ; then
 #		echo ""
-#		echo "${CODEC_PATTERN}"
+#		echo "CODEC_PATTERN='${CODEC_PATTERN}'"
+#		echo "VIDEOCODEC='${VIDEOCODEC}'"
 #		echo "Leider wird dieser Codec von der aktuell installierten Version"
 #		echo "von FFmpeg nicht unterstützt!"
 #		echo ""
@@ -77,6 +79,9 @@ done | head -n1)"
 #------------------------------------------------------------------------------#
 ### Funktionen
 
+### Codec AVOption vbr (VBR mode (1-5)) specified for output file #0 (test.mkv) has not been used for any stream.
+### The most likely reason is either wrong type (e.g. a video option with no video streams)
+### or that it is a private option of some encoder which was not actually used for any stream.
 libaom_av1()
 {
 # libaom-av1 ist seit 23. Sep. 2020 nicht mehr experimentell
@@ -110,11 +115,15 @@ libaom_av1()
 ### -cpu-used 5 	- stark erhöhte Verarbeitsungsgeschwindigkeit (99,64%) / Verarbeitungsdauer 6,63%
 ### -cpu-used 8 	- höchste Verarbeitsungsgeschwindigkeit (99,17%) / Verarbeitungsdauer 5,32%
 #
-CPU_VERBRAUCH="5"
+CPU_VERBRAUCH="7"
+#
+### -usage 0		- gute Kompression (normal)
+### -usage 1		- real time / streaming
 #
 #------------------------------------------------------------------------------#
 
-VIDEO_OPTION="-cpu-used ${CPU_VERBRAUCH} -row-mt 1 -tile-columns 1 -tile-rows 0"
+#VIDEO_OPTION="-cpu-used ${CPU_VERBRAUCH} -row-mt 1 -tile-columns 1 -tile-rows 0"
+VIDEO_OPTION="-usage 1 -cpu-used ${CPU_VERBRAUCH} -aq-mode 2 -tune 1 -lag-in-frames 5"
 
 VIDEO_QUALITAET_0="-crf 52 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
 VIDEO_QUALITAET_1="-crf 47 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
