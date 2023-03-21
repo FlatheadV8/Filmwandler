@@ -98,7 +98,8 @@
 #VERSION="v2022122000"			# Die Optionen -cv ... -ca ... waren falsch platziert.
 #VERSION="v2022122200"			# Fehler in der Untertitelbeschriftung behoben
 #VERSION="v2023021100"			# Fehler im Container-Format bei Verwendung von -format behoben
-VERSION="v2023021200"			# letzter Fehler in der Untertitelbeschriftung behoben
+#VERSION="v2023021200"			# letzter Fehler in der Untertitelbeschriftung behoben
+VERSION="v2023032100"			# Kommentare und Beschreibungen verbessert
 
 VERSION_METADATEN="${VERSION}"
 
@@ -297,7 +298,7 @@ while [ "${#}" -ne "0" ]; do
                         shift
                         ;;
                 -orig_dar)
-			ORIGINAL_DAR="${2}"			# das originale Seitenverhältnis soll beibehalten werden
+			ORIGINAL_DAR="Ja"			# das originale Seitenverhältnis soll beibehalten werden
                         shift
                         ;;
                 -fps|-soll_fps)
@@ -414,31 +415,31 @@ while [ "${#}" -ne "0" ]; do
                         # HD ready
                         # Bei  4/3 ist das Bild auf 1024×768 → XGA  (EVGA) begrenzt.
                         # Bei 16/9 ist das Bild auf 1280×720 → WXGA (HDTV) begrenzt.
-                        HDTVMIN="Ja"				# Mindestanvorderungen des "HD ready"-Standards umsetzen
+                        HDTVMIN="Ja"				# Mindestanvorderungen des "HD ready"-Standards umsetzen (begrenzt auf 720p)
                         #STEREO="Ja"				# Die Set-Top-Boxen können keine zu hohen Audio-Bitraten und laufen mit Stereo an zuverlässigsten.
                         shift
                         ;;
                 -hls)
                         # Bildauflösungen werden gemäß HSL eingeschränkt
-                        HLS="Ja"				# HLS-Kompatibilität aktivieren
+                        HLS="Ja"				# HLS-Kompatibilität aktivieren; HLS unterstützt insgesamt nur 7 Bildauflösungen
                         shift
                         ;;
                 -format)
                         # Das Format ist normalerweise durch die Dateiendung der Ziel-Datei vorgegeben.
 			# Diese Vorgabe kann mit dieser Option überschrieben werden.
-                        VIDEO_FORMAT="${2}"			# Video-Format
+                        VIDEO_FORMAT="${2}"			# Video-Format: 3g2, 3gp, avi, flv, m2ts, mkv, mp4, mpg, ogg, ts, webm
                         shift
                         ;;
                 -cv)
                         # Das Format (Video-Codec + Audio-Codec) ist normalerweise durch die Dateiendung der Ziel-Datei vorgegeben.
 			# Mit dieser Option kann der Video-Codec überschrieben werden.
-                        ALT_CODEC_VIDEO="${2}"			# Video-Codec
+                        ALT_CODEC_VIDEO="${2}"			# Video-Codec: 261, 262, 263, 264, 265, av1, divx, ffv1, flv, snow, theora, vc2, vp8, vp9, xvid
                         shift
                         ;;
                 -ca)
                         # Das Format (Video-Codec + Audio-Codec) ist normalerweise durch die Dateiendung der Ziel-Datei vorgegeben.
 			# Mit dieser Option kann der Audio-Codec überschrieben werden.
-                        ALT_CODEC_AUDIO="${2}"			# Audio-Codec
+                        ALT_CODEC_AUDIO="${2}"			# Audio-Codec: aac, ac3, mp2, mp3, opus, vorbis
                         shift
                         ;;
                 -stereo)
@@ -616,12 +617,14 @@ while [ "${#}" -ne "0" ]; do
 	#   Will man jetzt aber einen WebM-Film mit den Codes von einem MKV-Film
 	#   erstellen, dann benötigt man diese Option:
 	#   ... -z Film.webm -format mkv
+        # Video-Format: 3g2, 3gp, avi, flv, m2ts, mkv, mp4, mpg, ogg, ts, webm
         -format mp4
         -format mkv
         -format webm
 
 	# Das Format (Video-Codec + Audio-Codec) ist normalerweise durch die Dateiendung der Ziel-Datei vorgegeben.
 	# Mit dieser Option kann der Video-Codec überschrieben werden.
+        # Video-Codec: 261, 262, 263, 264, 265, av1, divx, ffv1, flv, snow, theora, vc2, vp8, vp9, xvid
 	-cv theora
 	-cv 264
 	-cv vp9
@@ -629,10 +632,11 @@ while [ "${#}" -ne "0" ]; do
 
 	# Das Format (Video-Codec + Audio-Codec) ist normalerweise durch die Dateiendung der Ziel-Datei vorgegeben.
 	# Mit dieser Option kann der Audio-Codec überschrieben werden.
-	-ca a3
+        # Audio-Codec: aac, ac3, mp2, mp3, opus, vorbis
 	-ca aac
-	-ca vorbis
+	-ca ac3
 	-ca opus
+	-ca vorbis
 
         # Bildwiederholrate für den neuen Film festlegen,
         # manche Geräte können nur eine begrenzte Zahl an Bildern pro Sekunde (FPS)
@@ -650,9 +654,9 @@ while [ "${#}" -ne "0" ]; do
         -soll_xmaly 965x543		# frei wählbares Bildformat kann angegeben werden
         -soll_xmaly VCD			# Name eines Bildformates kann angegeben werden
 
-        # wenn diese Option einen beliebigen Wert (auch \"nein\") bekommt,
-	# dann wird das originale Seitenverhältnis beibehalten
-        -orig_dar ja
+        # mit dieser Option wird das originale Seitenverhältnis beibehalten,
+	# sonst wird automatisch auf 4:3 oder 16:9 umgerechnet
+        -orig_dar
 
         # wenn das Bildformat des Originalfilmes nicht automatisch ermittelt
         # werden kann oder falsch ermittelt wurde,
