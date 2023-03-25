@@ -8,7 +8,8 @@
 #VERSION="v2019092100"		# libopus ist nicht mehr experimentell, kann jetzt auch 5.1 + 7.1
 #VERSION="v2019101400"		# ich hatte die Hoffnung, das jetzt mehr als Stereo geht
 #VERSION="v2020092400"		# libopus kann jetzt Mehrkanalton (mit mapping_family), meine Mehrkanalton-Tests waren aber stumm
-VERSION="v2020092500"		# weitere Variable eingeführt
+#VERSION="v2020092500"		# weitere Variable eingeführt
+VERSION="v2023032500"		# jetzt wird "opus" verwendet, wenn "libopus" nicht vorhanden ist
 
 #------------------------------------------------------------------------------#
 #
@@ -68,7 +69,26 @@ VERSION="v2020092500"		# weitere Variable eingeführt
 # This patch also makes it possible to encode up to 254 channels with opus
 # using channel mapping family 255.
 #
-AUDIOCODEC="libopus"
+#------------------------------------------------------------------------------#
+
+#==============================================================================#
+### besten unterstützten Kodek finden
+### es wird nur nach bestimmten Kodeks gesucht, die bereits bekannt sind
+
+# der oberste wird bevorzugt
+KODEKS="
+libopus
+opus
+"
+
+# der erste Treffer wird verwendet
+AUDIOCODEC="$(for K in ${KODEKS}
+do
+	ffmpeg -h encoder=${K} 2>/dev/null | fgrep 'is not recognized by FFmpeg.' >/dev/null || echo "${K}"
+done | head -n1)"
+
+#------------------------------------------------------------------------------#
+#AUDIOCODEC="libopus"
 
 
 echo "# 1001
