@@ -12,7 +12,8 @@
 #VERSION="v2020092300"			# AV1 (aktiviert, weil nicht mehr experimentell)
 #VERSION="v2020092400"			# 
 #VERSION="v2020101800"			# auf VP9 + Vorbis umgestellt (AV1 ist in webm)
-VERSION="v2022121100"			# die Variable ENDUNG darf hier nicht drin stehen
+#VERSION="v2022121100"			# die Variable ENDUNG darf hier nicht drin stehen
+VERSION="v2023032400"			# auf AV1 + Vorbis umgestellt
 
 #==============================================================================#
 
@@ -46,8 +47,8 @@ IFRAME="-keyint_min 2-8"
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 #	. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 #	. $(dirname ${0})/Filmwandler_Codec_Video_vp8.txt
-	. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
-#	. $(dirname ${0})/Filmwandler_Codec_Video_av1.txt
+#	. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
+	. $(dirname ${0})/Filmwandler_Codec_Video_av1.txt
 fi
 
 #==============================================================================#
