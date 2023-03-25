@@ -15,7 +15,8 @@
 #VERSION="v2020112800" 	# limitierte Kodeksuche eingebaut, bei der nur nach bestimmten Kodeks gesucht wird
 #VERSION="v2020121700" 	# Qualitätsabstufung von AOM angepasst
 #VERSION="v2023032100" 	# Optionen für "libaom-av1" so geändert, dass die Dateien etwas größer werden aber deutlich schneller encodet werden
-VERSION="v2023032400" 	# Fehler in der Zuordnung von Parameter zu Codec behoben
+#VERSION="v2023032400" 	# Fehler in der Zuordnung von Parameter zu Codec behoben
+VERSION="v2023032500" 	# neuen Namen für den SVT-AV1-Coder aufgenommen: libsvtav1
 
 #==============================================================================#
 ### vollautomatische Kodeksuche wurde in diesem Fall abgeschaltet,
@@ -57,6 +58,7 @@ fi)"
 
 # der oberste wird bevorzugt
 KODEKS="
+libsvtav1
 libsvt_av1
 libaom-av1
 librav1e
