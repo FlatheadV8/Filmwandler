@@ -102,6 +102,22 @@ if [ -r "${FILM_DATEI}" ] ; then
 
   #----------------------------------------------------------------------------#
 
+  unset TSNAME
+  unset TON_LANG
+  unset UTNAME
+  unset U_LANG
+  unset BILD_DREHUNG
+  unset FPS_TEILE
+  unset IN_FPS
+  unset SCAN_TYPE
+  unset LEVEL
+  unset IN_BREIT
+  unset IN_HOCH
+  unset IN_BREIT_CODED
+  unset IN_HOCH_CODED
+  unset IN_PAR
+  unset IN_DAR
+
   FILM_SCANNEN "${FILM_DATEI}"
   if [ "x${DURATION}" == x ] ; then
 	${AVERZ}/Filmwandler_zu_MKV-Kontainer.sh -q "${FILM_DATEI}" -z MKV-Testdatei.mkv >/dev/null 2>/dev/null
@@ -147,7 +163,7 @@ if [ -r "${FILM_DATEI}" ] ; then
   # IN_DAR='${IN_DAR}'
   # DURATION='${DURATION}'
   #"
-else
-  echo "Der Film '${FILM_DATEI}' konnte nicht gelesen werden."
+#else
+#  echo "Der Film '${FILM_DATEI}' konnte nicht gelesen werden."
 fi
 

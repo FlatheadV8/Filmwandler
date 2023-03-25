@@ -2027,6 +2027,10 @@ VIDEO_ENDUNG="$(echo "${ENDUNG}" | awk '{print tolower($1)}')"
 #------------------------------------------------------------------------------#
 ### Variable FORMAT füllen
 
+echo "# 1 CONSTANT_QUALITY
+CONSTANT_QUALITY='${CONSTANT_QUALITY}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
 # laut Endung
 if [ -r ${AVERZ}/Filmwandler_Format_${VIDEO_ENDUNG}.txt ] ; then
     
@@ -2044,6 +2048,10 @@ else
 	echo "${AVERZ}/Filmwandler_Format_${VIDEO_ENDUNG}.txt"
 	exit 1150
 fi
+
+echo "# 2 CONSTANT_QUALITY
+CONSTANT_QUALITY='${CONSTANT_QUALITY}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 # laut Wunsch-Kodecs
 if [ -r ${AVERZ}/Filmwandler_Format_${VIDEO_FORMAT}.txt ] ; then
@@ -2074,6 +2082,7 @@ fi
 echo "# 1115
 $(date +'%F %T')
 
+CONSTANT_QUALITY='${CONSTANT_QUALITY}'
 ENDUNG='${ENDUNG}'
 VIDEO_ENDUNG='${VIDEO_ENDUNG}'
 VIDEO_FORMAT='${VIDEO_FORMAT}'
@@ -2110,6 +2119,10 @@ if [ x != "x${ALT_CODEC_VIDEO}" ] ; then
 	fi
 fi
 
+echo "# CONSTANT_QUALITY
+CONSTANT_QUALITY='${CONSTANT_QUALITY}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
 #------------------------------------------------------------------------------#
 ### Audio-Codec
 
@@ -2136,8 +2149,9 @@ IN_FPS='${IN_FPS}'
 OP_QUELLE='${OP_QUELLE}'
 STEREO='${STEREO}'
 
-ENDUNG=${ENDUNG}
-VIDEO_FORMAT=${VIDEO_FORMAT}
+ENDUNG='${ENDUNG}'
+VIDEO_FORMAT='${VIDEO_FORMAT}'
+CONSTANT_QUALITY='${CONSTANT_QUALITY}'
 
 ALT_CODEC_VIDEO='${ALT_CODEC_VIDEO}'
 ALT_CODEC_AUDIO='${ALT_CODEC_AUDIO}'

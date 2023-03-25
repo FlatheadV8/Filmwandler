@@ -14,7 +14,8 @@
 #VERSION="v2020092300" 	# der Kodec "libaom-av1" ist nicht mehr experimentell
 #VERSION="v2020112800" 	# limitierte Kodeksuche eingebaut, bei der nur nach bestimmten Kodeks gesucht wird
 #VERSION="v2020121700" 	# Qualitätsabstufung von AOM angepasst
-VERSION="v2023032100" 	# Optionen für "libaom-av1" so geändert, dass die Dateien etwas größer werden aber deutlich schneller encodet werden
+#VERSION="v2023032100" 	# Optionen für "libaom-av1" so geändert, dass die Dateien etwas größer werden aber deutlich schneller encodet werden
+VERSION="v2023032400" 	# Fehler in der Zuordnung von Parameter zu Codec behoben
 
 #==============================================================================#
 ### vollautomatische Kodeksuche wurde in diesem Fall abgeschaltet,
@@ -57,8 +58,8 @@ fi)"
 # der oberste wird bevorzugt
 KODEKS="
 libsvt_av1
-librav1e
 libaom-av1
+librav1e
 av1
 "
 
@@ -75,36 +76,32 @@ done | head -n1)"
 # CONSTANT_QUALITY="-b:v 0 -row-mt 1 -tile-columns 1 -tile-rows 0"
 # HDR_FARBRAUM="-colorspace bt2020nc -color_trc smpte2084 -color_primaries bt2020"	# diese verwendet YouTube
 
+CONSTANT_QUALITY="-b:v 0"	# für konstante Qualität
+#CONSTANT_QUALITY=""		# am schnellsten
+
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
 ### Funktionen
 
-### Codec AVOption vbr (VBR mode (1-5)) specified for output file #0 (test.mkv) has not been used for any stream.
-### The most likely reason is either wrong type (e.g. a video option with no video streams)
-### or that it is a private option of some encoder which was not actually used for any stream.
+################################################################################
 libaom_av1()
 {
+echo "libaom_av1()"
 # libaom-av1 ist seit 23. Sep. 2020 nicht mehr experimentell
 #
 # Constant Quality
-#   ffmpeg -i input.mp4 -c:v libaom-av1 -crf 30 -b:v 0 av1_test.mkv
-#
+#   ffmpeg -i input.mp4 -c:v libaom-av1 -crf 40 -b:v 0 av1_test.mkv
 #   ffmpeg -h encoder=libaom-av1
 #
 # https://ffmpeg.org/ffmpeg-codecs.html
 #  -c:v libaom-av1
 #  -crf "-1 bis 63"
-#  -cpu-used "0 bis 8" (default 1)
+#  -cpu-used "0 bis 8" (1 ist default, 8 ist am schnellsten)
 #
 ### kurz gesagt:
 # - Qualität und Dateigröße ist von "-crf" abhängig;
-# - Transkodier-Geschwindigkeit ist von "-cpu-used" abhängig;
+# - Transkodier-Geschwindigkeit und Dateigröße ist von "-cpu-used" abhängig;
 #------------------------------------------------------------------------------#
-#
-#  [libaom-av1 encoder @ 0x808d3b180] Value 12.000000 for parameter 'cpu-used' out of range [0 - 8]
-#  [libaom-av1 encoder @ 0x808d3b180] Error setting option cpu-used to value 12.
-#  Error initializing output stream 0:0 -- Error while opening encoder for output stream #0:0 - maybe incorrect parameters such as bit_rate, rate, width or height
-#  Conversion failed!
 #
 ### https://streaminglearningcenter.com/blogs/good-news-av1-encoding-times-drop-to-near-reasonable-levels.html
 ### -cpu-used 0 	- beste Qualität (100%) / Verarbeitungsdauer 100%
@@ -115,31 +112,32 @@ libaom_av1()
 ### -cpu-used 5 	- stark erhöhte Verarbeitsungsgeschwindigkeit (99,64%) / Verarbeitungsdauer 6,63%
 ### -cpu-used 8 	- höchste Verarbeitsungsgeschwindigkeit (99,17%) / Verarbeitungsdauer 5,32%
 #
-CPU_VERBRAUCH="7"
+CPU_VERBRAUCH="8"
+#
+#------------------------------------------------------------------------------#
 #
 ### -usage 0		- gute Kompression (normal)
 ### -usage 1		- real time / streaming
-#
-#------------------------------------------------------------------------------#
 
-#VIDEO_OPTION="-cpu-used ${CPU_VERBRAUCH} -row-mt 1 -tile-columns 1 -tile-rows 0"
-VIDEO_OPTION="-usage 1 -cpu-used ${CPU_VERBRAUCH} -aq-mode 2 -tune 1 -lag-in-frames 5"
+#VIDEO_OPTION="${CONSTANT_QUALITY} -cpu-used ${CPU_VERBRAUCH} -row-mt 1 -tile-columns 1 -tile-rows 0"
+VIDEO_OPTION="${CONSTANT_QUALITY} -usage 0 -cpu-used ${CPU_VERBRAUCH} -aq-mode 2 -tune 1 -lag-in-frames 5"
 
-VIDEO_QUALITAET_0="-crf 52 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_1="-crf 47 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_2="-crf 42 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_3="-crf 37 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_4="-crf 32 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_5="-crf 27 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_6="-crf 22 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_7="-crf 17 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_8="-crf 12 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_9="-crf 07 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_0="-crf 63 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_1="-crf 58 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_2="-crf 53 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_3="-crf 48 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_4="-crf 43 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_5="-crf 38 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_6="-crf 30 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_7="-crf 20 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_8="-crf 10 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+VIDEO_QUALITAET_9="-crf 00 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
 }
 
-
+################################################################################
 librav1e()
 {
+echo "librav1e()"
 # librav1e ist deutlich schneller als interner Kodec "av1"
 #   ffmpeg -h encoder=librav1e
 #     ffmpeg -rav1e-params rav1e --help  ("?" - zeigt nicht das richtige an)
@@ -172,9 +170,10 @@ VIDEO_QUALITAET_8="-qp 125 ${VIDEO_OPTION}"		# von "-1" bis "255"
 VIDEO_QUALITAET_9="-qp 140 ${VIDEO_OPTION}"		# von "-1" bis "255"
 }
 
-
+################################################################################
 libsvt_av1()
 {
+echo "libsvt_av1()"
 #   ffmpeg -h encoder=libsvt_av1
 #
 # https://ffmpeg.org/ffmpeg-codecs.html
@@ -207,9 +206,10 @@ VIDEO_QUALITAET_8="-qp 20 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
 VIDEO_QUALITAET_9="-qp 16 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
 }
 
-
+################################################################################
 intern_av1()
 {
+echo "intern_av1()"
 #   ffmpeg -h encoder=av1
 #
 # https://ffmpeg.org/ffmpeg-codecs.html
@@ -233,13 +233,13 @@ VIDEO_QUALITAET_9="-crf 16 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
 #------------------------------------------------------------------------------#
 
 if [ libsvt_av1 = "${VIDEOCODEC}" ] ; then
+	libsvt_av1
+
+elif [ libaom-av1 = "${VIDEOCODEC}" ] ; then
 	libaom_av1
 
 elif [ librav1e = "${VIDEOCODEC}" ] ; then
 	librav1e
-
-elif [ libaom-av1 = "${VIDEOCODEC}" ] ; then
-	libsvt_av1
 
 elif [ av1 = "${VIDEOCODEC}" ] ; then
 	intern_av1

@@ -17,7 +17,8 @@ if [ "x${AUDIOCODEC}" = "x" ] ; then
 	AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 	if [ "x${AUDIOCODEC}" = "x" ] ; then
 		echo ""
-		echo "${CODEC_PATTERN}"
+		echo "CODEC_PATTERN='${CODEC_PATTERN}'"
+		echo "AUDIOCODEC='${AUDIOCODEC}'"
 		echo "Leider wird dieser Codec von der aktuell installierten Version"
 		echo "von FFmpeg nicht unterstützt!"
 		echo ""
