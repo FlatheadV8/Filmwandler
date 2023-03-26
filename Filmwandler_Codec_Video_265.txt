@@ -5,21 +5,13 @@
 #==============================================================================#
 
 #VERSION="v2018082800"
-#VERSION="v2022080400"		# mit --bluray-compat lassen sich ein paar Zusatzoptionen einsparen + VIDEO_OPTION rudimentär definiert
-VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
+#VERSION="v2022080400"			# mit --bluray-compat lassen sich ein paar Zusatzoptionen einsparen + VIDEO_OPTION rudimentär definiert
+#VERSION="v2023032500"                  # neue Ermittlungsmethode für Encoder
+VERSION="v2023032600"                   # Parameter für den x265-Encoder korrigiert
 
 CODEC_PATTERN="h265|hevc"		# Beispiel: "h265|hevc"
-#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
+VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 
-#------------------------------------------------------------------------------#
-
-# http://x265.org/
-# https://www.heise.de/newsticker/meldung/Videokodierung-HEVC-H-265-Encoder-haelt-Einzug-bei-FFmpeg-und-LibAV-2113223.html
-# https://github.com/OpenHEVC/openHEVC
-
-#------------------------------------------------------------------------------#
-
-VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
 	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 	if [ "x${VIDEOCODEC}" = "x" ] ; then
@@ -37,25 +29,23 @@ fi
 # 2018-07-06: [libx265 @ 0x813618d00] Possible tunes: psnr ssim grain zerolatency fastdecode
 # 2018-07-06: [libx265 @ 0x813618d00] Possible profiles: main main10 mainstillpicture msp main-intra main10-intra main444-8 main444-intra main444-stillpicture main422-10 main422-10-intra main444-10 main444-10-intra main12 main12-intra main422-12 main422-12-intra main444-12 main444-12-intra main444-16-intra main444-16-stillpicture
 
-### Die Option -profile:v hat nur dann Wirkung, wenn auch die Option -level angegeben wird!
-# Beispiel von AVC:
-# -x264opts bluray-compat=1:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=${SLICES}:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:subme=9"
-# -x264opts bluray-compat=1:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=1:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:subme=9"
-
 KEYINT="$(echo "${IN_FPS}" | awk '{printf "%.0f\n", $1 * 2}')"			# alle 2 Sekunden ein Key-Frame
-VIDEO_OPTION="-x264opts bluray-compat=1:slices=1:b-adapt=2:direct=auto:colorprim=bt709:transfer=bt709:colormatrix=bt709:keyint=${KEYINT}:subme=9"
-
-
-PROFILE="main10"
-VIDEO_OPTION="-profile:v ${PROFILE}"
-VIDEO_QUALITAET_0="-preset veryslow ${VIDEO_OPTION} -crf 45"                    # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_1="-preset veryslow ${VIDEO_OPTION} -crf 41"                    # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_2="-preset veryslow ${VIDEO_OPTION} -crf 37"                    # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_3="-preset veryslow ${VIDEO_OPTION} -crf 33"                    # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_4="-preset veryslow ${VIDEO_OPTION} -crf 29"                    # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_5="-preset veryslow ${VIDEO_OPTION} -crf 25"                    # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_6="-preset veryslow ${VIDEO_OPTION} -crf 21"                    # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_7="-preset veryslow ${VIDEO_OPTION} -crf 17"                    # von "0" (verlustfrei) bis "51"
+#VIDEO_OPTION="-x265opts bluray-compat=1:slices=1:b-adapt=2:direct=auto:keyint=${KEYINT}:subme=9"
+#
+#PROFILE="main10"
+#VIDEO_OPTION="-profile:v ${PROFILE}"
+#
+PROFILE=""
+VIDEO_OPTION="-b:v 0"
+#
+VIDEO_QUALITAET_0="-preset veryfast ${VIDEO_OPTION} -crf 45"                    # von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_1="-preset veryfast ${VIDEO_OPTION} -crf 41"                    # von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_2="-preset fast     ${VIDEO_OPTION} -crf 37"                    # von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_3="-preset fast     ${VIDEO_OPTION} -crf 33"                    # von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_4="-preset medium   ${VIDEO_OPTION} -crf 29"                    # von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_5="-preset medium   ${VIDEO_OPTION} -crf 25"                    # von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_6="-preset slow     ${VIDEO_OPTION} -crf 21"                    # von "0" (verlustfrei) bis "51"
+VIDEO_QUALITAET_7="-preset slow     ${VIDEO_OPTION} -crf 17"                    # von "0" (verlustfrei) bis "51"
 VIDEO_QUALITAET_8="-preset veryslow ${VIDEO_OPTION} -crf 13"                    # von "0" (verlustfrei) bis "51"
 VIDEO_QUALITAET_9="-preset veryslow ${VIDEO_OPTION} -crf 09"                    # von "0" (verlustfrei) bis "51"
 

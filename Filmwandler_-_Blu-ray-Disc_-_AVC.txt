@@ -369,13 +369,13 @@ BLURAY_PARAMETER ${LEVEL} ${QUADR_MAKROBLOECKE} ${MaxFS}
 BIT_TIEFE="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -select_streams v -show_entries stream=bits_per_raw_sample | grep -Fv 'N/A' | awk -F'=' '/=/{print $2}' | head -n1)"
 
 echo "#AVC# 448
-KOMPLETT_DURCHSUCHEN='${KOMPLETT_DURCHSUCHEN}'
-FILMDATEI='${FILMDATEI}'
 BIT_TIEFE='${BIT_TIEFE}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-if [ 8 -lt ${BIT_TIEFE} ] ; then
-	echo "#AVC# 449 PROFILE: high => high10"
-	PROFILE="high10"
+if [ x != "x${BIT_TIEFE}" ] ; then
+	if [ 8 -lt "${BIT_TIEFE}" ] ; then
+		echo "#AVC# 449 PROFILE: high => high10"
+		PROFILE="high10"
+	fi
 fi
 
 #----------------------------------------------------------------------#
