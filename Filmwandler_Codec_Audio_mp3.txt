@@ -1,13 +1,16 @@
-#------------------------------------------------------------------------------#
+#==============================================================================#
 #
 # MP3 - MPEG-1 Layer 3
 #
-#------------------------------------------------------------------------------#
+#==============================================================================#
 
 #VERSION="v2018090300"
-VERSION="v2020092500"		# weitere Variable eingeführt
+#VERSION="v2020092500"		# weitere Variable eingeführt
+VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
 
 CODEC_PATTERN="mp3"		# Beispiel: "h265|hevc"
+#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
+
 Sound_ST=''			# Stereo (2.0)
 Sound_51=''			# 5.1
 Sound_71=''			# 7.1

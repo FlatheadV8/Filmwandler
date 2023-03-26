@@ -1,11 +1,15 @@
-#------------------------------------------------------------------------------#
+#==============================================================================#
 #
 # H.263              -> H.263 1996
 #
-#------------------------------------------------------------------------------#
+#==============================================================================#
 
 #VERSION="v2018083000"
-VERSION="v2020100100"		# Fehler behoben
+#VERSION="v2020100100"			# Fehler behoben
+VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
+
+CODEC_PATTERN="h263"			# Beispiel: "h265|hevc"
+#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 
 #------------------------------------------------------------------------------#
 #
@@ -13,7 +17,6 @@ VERSION="v2020100100"		# Fehler behoben
 #
 #------------------------------------------------------------------------------#
 
-CODEC_PATTERN="h263"		# Beispiel: "h265|hevc"
 VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
 	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"

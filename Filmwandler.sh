@@ -99,7 +99,8 @@
 #VERSION="v2022122200"			# Fehler in der Untertitelbeschriftung behoben
 #VERSION="v2023021100"			# Fehler im Container-Format bei Verwendung von -format behoben
 #VERSION="v2023021200"			# letzter Fehler in der Untertitelbeschriftung behoben
-VERSION="v2023032100"			# Kommentare und Beschreibungen verbessert
+#VERSION="v2023032100"			# Kommentare und Beschreibungen verbessert
+VERSION="v2023032500"			# jetzt ist eine neue Auswahlmethode für die verfügbaren Encoder vorhanden
 
 VERSION_METADATEN="${VERSION}"
 
@@ -1004,6 +1005,57 @@ VIDEO_NICHT_UEBERTRAGEN='${VIDEO_NICHT_UEBERTRAGEN}'
 FFMPEG_LIB="$( (ffmpeg -formats >/dev/null) 2>&1 | tr -s ' ' '\n' | grep -E '^[-][-]enable[-]' | sed 's/^[-]*enable[-]*//;s/[-]/_/g' | grep -E '^lib')"
 FFMPEG_FORMATS="$(ffmpeg -formats 2>/dev/null | awk '/^[ \t]*[ ][DE]+[ ]/{print $2}')"
 
+#==============================================================================#
+
+FFMPEG_VIDEO_CODECS="$( ffmpeg -codecs 2>/dev/null | grep -E '^ .EV[^ ]' | awk '{print $2}')"
+FFMPEG_VIDEO_ENCODER="$(ffmpeg -codecs 2>/dev/null | grep -E '^ .EV[^ ]' | grep -Fi encoders: | sed 's/^ [^ ][^ ]* //;s/ .*encoders://;s/[)].*$//')"
+FFMPEG_AUDIO_CODECS="$( ffmpeg -codecs 2>/dev/null | grep -E '^ .EA[^ ]' | awk '{print $2}')"
+FFMPEG_AUDIO_ENCODER="$(ffmpeg -codecs 2>/dev/null | grep -E '^ .EA[^ ]' | grep -Fi encoders: | sed 's/^ [^ ][^ ]* //;s/ .*encoders://;s/[)].*$//')"
+FFMPEG_UNTER_CODECS="$( ffmpeg -codecs 2>/dev/null | grep -E '^ .ES[^ ]' | awk '{print $2}')"
+FFMPEG_UNTER_ENCODER="$(ffmpeg -codecs 2>/dev/null | grep -E '^ .ES[^ ]' | grep -Fi encoders: | sed 's/^ [^ ][^ ]* //;s/ .*encoders://;s/[)].*$//')"
+
+#------------------------------------------------------------------------------#
+
+suche_video_encoder()
+{
+for C in ${1}
+do
+	E="$(echo "${FFMPEG_VIDEO_ENCODER}" | grep -Fi ${C} | wc -l | awk '{print $1}')"
+	if [ 0 -lt ${E} ] ; then
+		echo "${FFMPEG_VIDEO_ENCODER}" | grep -Fi ${C} | head -n1 | while read F G
+		do
+			echo "${G}" | head -n1 | tr -s ' ' '\n' | head -n1
+		done
+	else
+		echo "${FFMPEG_VIDEO_CODECS}" | grep -Fi ${C} | head -n1
+	fi
+done
+}
+
+# suche_video_encoder ${V}
+
+#------------------------------------------------------------------------------#
+
+suche_audio_encoder()
+{
+for C in ${1}
+do
+	E="$(echo "${FFMPEG_AUDIO_ENCODER}" | grep -Fi ${C} | wc -l | awk '{print $1}')"
+	if [ 0 -lt ${E} ] ; then
+		echo "${FFMPEG_AUDIO_ENCODER}" | grep -Fi ${C} | head -n1 | while read F G
+		do
+			echo "${G}" | head -n1 | tr -s ' ' '\n' | head -n1
+		done
+	else
+		echo "${FFMPEG_AUDIO_CODECS}" | grep -Fi ${C} | head -n1
+	fi
+done
+}
+
+# suche_audio_encoder ${A}
+
+#==============================================================================#
+
 #------------------------------------------------------------------------------#
 ### alternative Methode zur Ermittlung der FPS
 
@@ -1039,6 +1091,8 @@ if [ "${SCAN_TYPE}" != "progressive" ] ; then
 	# https://ffmpeg.org/ffmpeg-filters.html#mcdeint
         #ZEILENSPRUNG="yadif=3:1,mcdeint=2:1,"
         ZEILENSPRUNG="yadif=1/3,mcdeint=mode=extra_slow,"
+	# https://www.reddit.com/r/ffmpeg/comments/d3cwxp/comment/f01ouvs/
+        #ZEILENSPRUNG="pscrn=new:qual=fast:nns=n16:nsize=s32x4:field=af,"
     fi
 fi
 

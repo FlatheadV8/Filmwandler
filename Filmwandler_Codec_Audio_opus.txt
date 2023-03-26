@@ -1,15 +1,19 @@
-#------------------------------------------------------------------------------#
+#==============================================================================#
 #
 # Opus
 #
-#------------------------------------------------------------------------------#
+#==============================================================================#
 
-#VERSION="v2018082800"		# libopus ist noch experimentell
-#VERSION="v2019092100"		# libopus ist nicht mehr experimentell, kann jetzt auch 5.1 + 7.1
-#VERSION="v2019101400"		# ich hatte die Hoffnung, das jetzt mehr als Stereo geht
-#VERSION="v2020092400"		# libopus kann jetzt Mehrkanalton (mit mapping_family), meine Mehrkanalton-Tests waren aber stumm
-#VERSION="v2020092500"		# weitere Variable eingeführt
-VERSION="v2023032500"		# jetzt wird "opus" verwendet, wenn "libopus" nicht vorhanden ist
+#VERSION="v2018082800"			# libopus ist noch experimentell
+#VERSION="v2019092100"			# libopus ist nicht mehr experimentell, kann jetzt auch 5.1 + 7.1
+#VERSION="v2019101400"			# ich hatte die Hoffnung, das jetzt mehr als Stereo geht
+#VERSION="v2020092400"			# libopus kann jetzt Mehrkanalton (mit mapping_family), meine Mehrkanalton-Tests waren aber stumm
+#VERSION="v2020092500"			# weitere Variable eingeführt
+#VERSION="v2023032500"			# jetzt wird "opus" verwendet, wenn "libopus" nicht vorhanden ist
+VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
+
+#CODEC_PATTERN="libopus"		# Beispiel: "h265|hevc"
+#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 
 #------------------------------------------------------------------------------#
 #
@@ -27,7 +31,6 @@ VERSION="v2023032500"		# jetzt wird "opus" verwendet, wenn "libopus" nicht vorha
 
 #------------------------------------------------------------------------------#
 
-#CODEC_PATTERN="libopus"				# Beispiel: "h265|hevc"
 #Sound_ST='-af channelmap=channel_layout=stereo'	# Stereo (2.0)
 #Sound_51='-af channelmap=channel_layout=5.1'		# 5.1
 #Sound_71='-af channelmap=channel_layout=7.1'		# 7.1
@@ -86,6 +89,11 @@ AUDIOCODEC="$(for K in ${KODEKS}
 do
 	ffmpeg -h encoder=${K} 2>/dev/null | fgrep 'is not recognized by FFmpeg.' >/dev/null || echo "${K}"
 done | head -n1)"
+
+### leider ist "opus" noch experimentel und kann nur Stereo
+if [ "${AUDIOCODEC}" == "opus" ] ; then
+	AUDIOCODEC="opus -strict -2"
+fi
 
 #------------------------------------------------------------------------------#
 #AUDIOCODEC="libopus"

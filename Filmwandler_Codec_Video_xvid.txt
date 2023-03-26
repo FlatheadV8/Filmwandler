@@ -1,14 +1,17 @@
-#------------------------------------------------------------------------------#
+#==============================================================================#
 #
 # MPEG-4 Teil 2 (XviD)
 #
-#------------------------------------------------------------------------------#
+#==============================================================================#
 
-VERSION="v2018090200"
+#VERSION="v2018090200"
+VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
+
+CODEC_PATTERN="xvid"			# Beispiel: "h265|hevc"
+#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 
 #==============================================================================#
 
-CODEC_PATTERN="xvid"		# Beispiel: "h265|hevc"
 echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1
 VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 if [ "x${VIDEOCODEC}" = "x" ] ; then

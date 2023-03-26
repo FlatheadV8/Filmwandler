@@ -1,32 +1,37 @@
+#==============================================================================#
 #
 # Vorbis
 #
+#==============================================================================#
 
 #VERSION="v2018082800"
-#VERSION="v2020092500"		# weitere Variable eingeführt
-VERSION="v2020101800"		# auf libvorbis umgestellt
+#VERSION="v2020092500"			# weitere Variable eingeführt
+#VERSION="v2020101800"			# auf libvorbis umgestellt
+VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
 
-CODEC_PATTERN="vorbis"		# Beispiel: "h265|hevc"
-Sound_ST=''			# Stereo (2.0)
-Sound_51=''			# 5.1
-Sound_71=''			# 7.1
+CODEC_PATTERN="vorbis"			# Beispiel: "h265|hevc"
+#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 
-AUDIOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
-if [ "x${AUDIOCODEC}" = "x" ] ; then
-	AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
-	if [ "x${AUDIOCODEC}" = "x" ] ; then
-		echo ""
-		echo "CODEC_PATTERN='${CODEC_PATTERN}'"
-		echo "AUDIOCODEC='${AUDIOCODEC}'"
-		echo "Leider wird dieser Codec von der aktuell installierten Version"
-		echo "von FFmpeg nicht unterstützt!"
-		echo ""
-		exit 1
-	fi
-fi
+Sound_ST=''				# Stereo (2.0)
+Sound_51=''				# 5.1
+Sound_71=''				# 7.1
+
+# der oberste wird bevorzugt
+KODEKS="
+libvorbis
+vorbis
+"
+
+# der erste Treffer wird verwendet
+AUDIOCODEC="$(for K in ${KODEKS}
+do
+	ffmpeg -h encoder=${K} 2>/dev/null | fgrep 'is not recognized by FFmpeg.' >/dev/null || echo "${K}"
+done | head -n1)"
 
 ### leider ist "vorbis" noch experimentel und kann nur Stereo
-AUDIOCODEC="libvorbis"
+if [ "${AUDIOCODEC}" == "vorbis" ] ; then
+	AUDIOCODEC="vorbis -strict -2"
+fi
 
 # diese Option wird mit dem Codec zusammen, nur einmal für alle Kanäle zusammen,
 # angegeben und nicht für jeden Kanal extra

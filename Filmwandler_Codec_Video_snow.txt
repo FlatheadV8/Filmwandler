@@ -1,14 +1,17 @@
-#------------------------------------------------------------------------------#
+#==============================================================================#
 #
 # Snow (Michael Niedermayer vom FFmpeg-Projekt)
 #
-#------------------------------------------------------------------------------#
+#==============================================================================#
 
-VERSION="v2018090400"
+#VERSION="v2018090400"
+VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
+
+CODEC_PATTERN="snow"			# Beispiel: "h265|hevc"
+#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 
 #==============================================================================#
 
-CODEC_PATTERN="snow"			# Beispiel: "h265|hevc"
 echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1
 VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 if [ "x${VIDEOCODEC}" = "x" ] ; then

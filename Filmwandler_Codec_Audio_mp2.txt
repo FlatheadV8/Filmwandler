@@ -1,13 +1,16 @@
-#------------------------------------------------------------------------------#
+#==============================================================================#
 #
 # MP2 - MPEG-1 Layer 2
 #
-#------------------------------------------------------------------------------#
+#==============================================================================#
 
 #VERSION="v2018090300"
-VERSION="v2020092500"		# Fehler behoben: Bit-Raten-Abstufung korrigiert
+#VERSION="v2020092500"		# Fehler behoben: Bit-Raten-Abstufung korrigiert
+VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
 
 AUDIOCODEC="mp2"
+#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
+
 Sound_ST=''				# Stereo (2.0)
 Sound_51=''				# 5.1
 Sound_71=''				# 7.1

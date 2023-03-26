@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------#
+#==============================================================================#
 #
 # H.262 / MPEG-2 / DVD
 #
@@ -29,11 +29,14 @@
 #         - 1920x1080@30   80 Mbit/s
 #         - 1280x720@60    80 Mbit/s
 #
-#------------------------------------------------------------------------------#
+#==============================================================================#
 
-VERSION="v2018090200"
+#VERSION="v2018090200"
+VERSION="v2023032500"           	# neue Ermittlungsmethode für Encoder
 
 CODEC_PATTERN="mpeg2video"		# Beispiel: "h265|hevc"
+#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
+
 VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
 	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"

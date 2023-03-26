@@ -1,14 +1,20 @@
+#==============================================================================#
 #
 # AAC
 #
+#==============================================================================#
 
 #VERSION="v2018082900"
 #VERSION="v2019082300"
 #VERSION="v2019092500"
-#VERSION="v2020060900"		# Bit-Raten-Abstufung angepasst
-#VERSION="v2020092500"		# weitere Variable eingeführt
-#VERSION="v2020121700"		# Warning behoben
-VERSION="v2022073100"		# Bit-Raten-Abstufung etwas nach oben angepasst
+#VERSION="v2020060900"			# Bit-Raten-Abstufung angepasst
+#VERSION="v2020092500"			# weitere Variable eingeführt
+#VERSION="v2020121700"			# Warning behoben
+#VERSION="v2022073100"			# Bit-Raten-Abstufung etwas nach oben angepasst
+VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
+
+CODEC_PATTERN="aac"			# Beispiel: "h265|hevc"
+#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 
 #------------------------------------------------------------------------------#
 #
@@ -52,7 +58,6 @@ VERSION="v2022073100"		# Bit-Raten-Abstufung etwas nach oben angepasst
 #
 #------------------------------------------------------------------------------#
 
-CODEC_PATTERN="aac"			# Beispiel: "h265|hevc"
 Sound_ST=''				# Stereo (2.0)
 Sound_51=''				# 5.1
 Sound_71=''				# 7.1

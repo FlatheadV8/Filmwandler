@@ -1,9 +1,15 @@
+#==============================================================================#
 #
 # H.265
 #
+#==============================================================================#
 
 #VERSION="v2018082800"
-VERSION="v2022080400"		# mit --bluray-compat lassen sich ein paar Zusatzoptionen einsparen + VIDEO_OPTION rudimentär definiert
+#VERSION="v2022080400"		# mit --bluray-compat lassen sich ein paar Zusatzoptionen einsparen + VIDEO_OPTION rudimentär definiert
+VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
+
+CODEC_PATTERN="h265|hevc"		# Beispiel: "h265|hevc"
+#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 
 #------------------------------------------------------------------------------#
 
@@ -13,7 +19,6 @@ VERSION="v2022080400"		# mit --bluray-compat lassen sich ein paar Zusatzoptionen
 
 #------------------------------------------------------------------------------#
 
-CODEC_PATTERN="h265|hevc"		# Beispiel: "h265|hevc"
 VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
 	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"

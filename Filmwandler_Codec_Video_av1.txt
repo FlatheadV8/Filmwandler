@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------#
+#==============================================================================#
 #
 # AV1
 #
@@ -6,26 +6,27 @@
 #
 #  "libdav1d" ist kein Encoder, sondern ein "Decoder"!
 #
-#------------------------------------------------------------------------------#
+#==============================================================================#
 
-#VERSION="v2018082800"	# erste Unterstützung von AV1 eingebaut
-#VERSION="v2020060200"	# erweitert um Beispiele
-#VERSION="v2020060300"	# VIDEO_OPTION definiert, Anpassungen für FFmpeg 4.2.2
-#VERSION="v2020092300" 	# der Kodec "libaom-av1" ist nicht mehr experimentell
-#VERSION="v2020112800" 	# limitierte Kodeksuche eingebaut, bei der nur nach bestimmten Kodeks gesucht wird
-#VERSION="v2020121700" 	# Qualitätsabstufung von AOM angepasst
-#VERSION="v2023032100" 	# Optionen für "libaom-av1" so geändert, dass die Dateien etwas größer werden aber deutlich schneller encodet werden
-#VERSION="v2023032400" 	# Fehler in der Zuordnung von Parameter zu Codec behoben
-VERSION="v2023032500" 	# neuen Namen für den SVT-AV1-Coder aufgenommen: libsvtav1
+#VERSION="v2018082800"			# erste Unterstützung von AV1 eingebaut
+#VERSION="v2020060200"			# erweitert um Beispiele
+#VERSION="v2020060300"			# VIDEO_OPTION definiert, Anpassungen für FFmpeg 4.2.2
+#VERSION="v2020092300"			# der Kodec "libaom-av1" ist nicht mehr experimentell
+#VERSION="v2020112800"			# limitierte Kodeksuche eingebaut, bei der nur nach bestimmten Kodeks gesucht wird
+#VERSION="v2020121700"			# Qualitätsabstufung von AOM angepasst
+#VERSION="v2023032100"			# Optionen für "libaom-av1" so geändert, dass die Dateien etwas größer werden aber deutlich schneller encodet werden
+#VERSION="v2023032400"			# Fehler in der Zuordnung von Parameter zu Codec behoben
+#VERSION="v2023032500"			# neuen Namen für den SVT-AV1-Coder aufgenommen: libsvtav1
+VERSION="v2023032501"                   # neue Ermittlungsmethode für Encoder
+
+#CODEC_PATTERN="av1|aom"		# Beispiel: "h265|hevc"
+#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 
 #==============================================================================#
 ### vollautomatische Kodeksuche wurde in diesem Fall abgeschaltet,
 ### bei der auch nach bisher unbekannten Kodeks gesucht wird
 
-#CODEC_PATTERN="av1|aom"		# Beispiel: "h265|hevc"
-
 #VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -Fv libdav1d | grep -E "${CODEC_PATTERN}" | head -n1)"
-
 #if [ "x${VIDEOCODEC}" = "x" ] ; then
 #	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 #	if [ "x${VIDEOCODEC}" = "x" ] ; then
@@ -38,19 +39,6 @@ VERSION="v2023032500" 	# neuen Namen für den SVT-AV1-Coder aufgenommen: libsvta
 #		exit 1
 #	fi
 #fi
-
-#------------------------------------------------------------------------------#
-#
-KERNE_ZUM_KODIEREN="$(
-if [ "$(uname -o)" = "FreeBSD" ] ; then
-	sysctl -n hw.ncpu
-elif [ "$(uname -o)" = "GNU/Linux" ] ; then
-	egrep '^core id' /proc/cpuinfo | sort -u | wc -l
-else
-	echo "1"
-fi)"
-#
-#------------------------------------------------------------------------------#
 
 #==============================================================================#
 ### besten unterstützten Kodek finden

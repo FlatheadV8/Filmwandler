@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------#
+#==============================================================================#
 #
 # H.264 / AVC / MPEG-4 Part 10
 #
@@ -8,11 +8,14 @@
 # x264opts siehe:
 # x264 --fullhelp
 #
-#------------------------------------------------------------------------------#
+#==============================================================================#
 
-VERSION="v2018082900"
+#VERSION="v2018082900"
+VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
 
-CODEC_PATTERN="x264"		# Beispiel: "h264|x264" (libopenh264, libx264)
+CODEC_PATTERN="x264"			# Beispiel: "h264|x264" (libopenh264, libx264)
+#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
+
 VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
 	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"

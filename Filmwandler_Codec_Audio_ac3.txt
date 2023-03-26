@@ -1,7 +1,7 @@
+#==============================================================================#
 #
 # Dolby Digital / a52 / AC-3
 #
-
 #------------------------------------------------------------------------------#
 #
 # https://www.ffmpeg.org/ffmpeg-codecs.html#ac3-and-ac3_005ffixed
@@ -19,13 +19,16 @@
 # daher muss er explizit mit der Option -acodec ac3_fixed angegeben werden,
 # um ihn zu verwenden.
 #
-#------------------------------------------------------------------------------#
+#==============================================================================#
 
 #VERSION="v2018082800"
-#VERSION="v2020060900"		# Abstufung geändert
-VERSION="v2020092500"		# weitere Variable eingeführt
+#VERSION="v2020060900"			# Abstufung geändert
+#VERSION="v2020092500"			# weitere Variable eingeführt
+VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
 
 AUDIOCODEC="ac3"
+#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
+
 Sound_ST=''				# Stereo (2.0)
 Sound_51=''				# 5.1
 Sound_71=''				# 7.1
