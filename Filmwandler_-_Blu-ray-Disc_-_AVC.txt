@@ -129,15 +129,26 @@ AVC_LEVEL()
 	52 36864 2073600
 	"
 
-	echo "${AVCL_MBPS_MBPB}" | grep -Ev '^[ \t]*$' | while read AVC_LEVEL MAKRO_BLK_pro_BILD MAKRO_BLK_pro_SEKUNDE
+	echo "#AVC# 132:
+	ZIELPFAD='${ZIELPFAD}'
+	QUADR_MAKROBLOECKE='${QUADR_MAKROBLOECKE}'
+	IN_FPS='${IN_FPS}'
+	MAKRO_BLK_im_BILD='${MAKRO_BLK_im_BILD}'
+	MAKRO_BLK_in_SEKUNDE='${MAKRO_BLK_in_SEKUNDE}'
+	" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+	echo "${AVCL_MBPS_MBPB}" | grep -Ev '^[ \t]*$' | while read AVCLEVEL MAKRO_BLK_pro_BILD MAKRO_BLK_pro_SEKUNDE
 	do
-        	if [ "${MAKRO_BLK_pro_BILD}" -ge "${MAKRO_BLK_im_BILD}" ] ; then
-                	if [ "${MAKRO_BLK_pro_SEKUNDE}" -ge "${MAKRO_BLK_in_SEKUNDE}" ] ; then
-                        	echo "${AVC_LEVEL}"
-                	fi
+        	if [ x != "x${MAKRO_BLK_pro_BILD}" ] ; then
+        		if [ "${MAKRO_BLK_pro_BILD}" -ge "${MAKRO_BLK_im_BILD}" ] ; then
+                		if [ "${MAKRO_BLK_pro_SEKUNDE}" -ge "${MAKRO_BLK_in_SEKUNDE}" ] ; then
+                        		echo "${AVCLEVEL}"
+                		fi
+        		fi
         	fi
 	done | head -n1
 	#==============================================================#
+	echo "###-=- 149 -=-##################################################################" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 }
 
 #----------------------------------------------------------------------#
@@ -146,7 +157,7 @@ BLURAY_PARAMETER()
         VERSION="v2014010500"
         PROFILE="high"
 
-	# LEVEL="$(AVC_LEVEL ${IN_FPS} ${QUADR_MAKROBLOECKE})"
+	# LEVEL="$(AVC_LEVEL ${QUADR_MAKROBLOECKE} ${IN_FPS})"
 	# MaxFS="$(echo "${BILD_BREIT} ${BILD_HOCH}" | awk '{print $1 * $2}')"
 	# BLURAY_PARAMETER ${LEVEL} ${QUADR_MAKROBLOECKE} ${MaxFS}
         FNKLEVEL="${1}"
@@ -298,6 +309,7 @@ BLURAY_PARAMETER()
                 CRF="20"			# Qualität bzw. Kompression: 16 (sehr gut) ... 25 (gut genug)
         fi
 
+	echo "###-=- 310 -=-##################################################################" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 }
 
 #==============================================================================#
@@ -356,11 +368,25 @@ echo "#AVC# 440:
 # MBREITE/MHOEHE='${MBREITE}/${MHOEHE}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
+echo "#AVC# 441: ${ZIELPFAD}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 KEYINT="$(echo "${IN_FPS}" | awk '{printf "%.0f\n", $1 * 2}')"	# alle 2 Sekunden ein Key-Frame
+
+echo "#AVC# 442: ${ZIELPFAD}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 QUADR_MAKROBLOECKE="$(echo "${BILD_BREIT} ${BILD_HOCH}" | awk '{printf "%f %.0f %f %.0f\n",$1/16,$1/16,$2/16,$2/16}' | awk '{if ($1 > $2) $2 = $2+1 ; if ($3 > $4) $4 = $4+1 ; print $2,$4}')"
+
+echo "#AVC# 443: ${ZIELPFAD}
+# QUADR_MAKROBLOECKE='${QUADR_MAKROBLOECKE}'
+# IN_FPS='${IN_FPS}'
+# AVC_LEVEL ${QUADR_MAKROBLOECKE} ${IN_FPS}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 LEVEL="$(AVC_LEVEL ${QUADR_MAKROBLOECKE} ${IN_FPS})"
+
+echo "#AVC# 444: ${ZIELPFAD}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 MaxFS="$(echo "${BILD_BREIT} ${BILD_HOCH}" | awk '{print $1 * $2}')"
+
+echo "#AVC# 445: ${ZIELPFAD}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 BLURAY_PARAMETER ${LEVEL} ${QUADR_MAKROBLOECKE} ${MaxFS}
+
+echo "#AVC# 446: ${ZIELPFAD}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #----------------------------------------------------------------------#
 ### bei Filmen mit 10Bit Farbtiefe
