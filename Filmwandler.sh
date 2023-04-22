@@ -100,7 +100,8 @@
 #VERSION="v2023021100"			# Fehler im Container-Format bei Verwendung von -format behoben
 #VERSION="v2023021200"			# letzter Fehler in der Untertitelbeschriftung behoben
 #VERSION="v2023032100"			# Kommentare und Beschreibungen verbessert
-VERSION="v2023040900"			# HLS-Kommentare verbessert und die Kodek-Einschränkung aufgehoben, sowie Fehler in HLS-Bildauflösung repariert
+#VERSION="v2023040900"			# HLS-Kommentare verbessert und die Kodek-Einschränkung aufgehoben, sowie Fehler in HLS-Bildauflösung repariert
+VERSION="v2023042200"			# Film-Titel wird jetzt vom Original übernommen, wenn er nicht angegeben wird
 
 VERSION_METADATEN="${VERSION}"
 
@@ -955,12 +956,19 @@ BILD_DREHUNG='${BILD_DREHUNG}'
 
 #------------------------------------------------------------------------------#
 
+#FFPROBE_SHOW_DATA="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_data 2>&1)"
 ORIGINAL_TITEL="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_entries format_tags=title -of compact=p=0:nk=1)"
 
 METADATEN_TITEL="-metadata title="
 if [ "x${EIGENER_TITEL}" = x ] ; then
 	echo "# 220: EIGENER_TITEL"
-	EIGENER_TITEL="${ZIELNAME}"
+	#EIGENER_TITEL="$(echo "${FFPROBE_SHOW_DATA}" | grep -E 'title[ ]*: ' | sed 's/[ ]*title[ ]*: //' | head -n1)"
+	EIGENER_TITEL="${ORIGINAL_TITEL}"
+
+	if [ "x${EIGENER_TITEL}" = x ] ; then
+		echo "# 225:"
+		EIGENER_TITEL="${ZIELNAME}"
+	fi
 fi
 
 METADATEN_BESCHREIBUNG="-metadata description="
