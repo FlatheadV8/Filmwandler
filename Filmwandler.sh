@@ -30,7 +30,6 @@
 #
 #------------------------------------------------------------------------------#
 
-
 #VERSION="v2017102900"			# 4. Generation gestartet
 #VERSION="v2019082800"			# Entwicklung an der 4. Generation eingestellt
 #VERSION="v2019092100"			# 5. Generation gestartet
@@ -893,7 +892,7 @@ if [ x == "x${META_DATEN_STREAMS}" ] ; then
 	das deutet auf zu wenig verfügbaren RAM hin.
 	Der ffprobe-Lauf wird erneut gestartet.
 
-	starte die Funktion: meta_daten_streams" | tee "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	starte die Funktion: meta_daten_streams" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 	FFPROBE_PROBESIZE="$(du -sm "${FILMDATEI}" | awk '{print $1}')"
 	meta_daten_streams
@@ -902,7 +901,7 @@ fi
 echo "# 180
 FFPROBE_PROBESIZE='${FFPROBE_PROBESIZE}'M (letzter Versuch)
 META_DATEN_STREAMS='${META_DATEN_STREAMS}'
-" | head -n 40 | tee "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+" | head -n 40 | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 if [ x == "x${META_DATEN_STREAMS}" ] ; then
 	echo "# 190: Die probesize von '${FFPROBE_PROBESIZE}M' ist weiterhin zu groß, bitte Rechner rebooten."
