@@ -10,7 +10,8 @@
 #VERSION="v2020092400"			# libopus kann jetzt Mehrkanalton (mit mapping_family), meine Mehrkanalton-Tests waren aber stumm
 #VERSION="v2020092500"			# weitere Variable eingeführt
 #VERSION="v2023032500"			# jetzt wird "opus" verwendet, wenn "libopus" nicht vorhanden ist
-VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
+#VERSION="v2023032500"                  # neue Ermittlungsmethode für Encoder
+VERSION="v2023042400"                   # schreibt jetzt in die richtige Protokolldatei
 
 #CODEC_PATTERN="libopus"		# Beispiel: "h265|hevc"
 #VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
@@ -104,7 +105,7 @@ TS_ANZAHL=${TS_ANZAHL}
 Sound_ST='${Sound_ST}'
 Sound_51='${Sound_51}'
 Sound_71='${Sound_71}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 1001
 

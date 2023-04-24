@@ -7,7 +7,8 @@
 #
 #==============================================================================#
 
-VERSION="v2018090600"
+#VERSION="v2018090600"
+VERSION="v2023042400"			# schreibt jetzt in die richtige Protokolldatei
 
 #------------------------------------------------------------------------------#
 ### Die Option -profile:v hat nur dann Wirkung, wenn auch die Option -level angegeben wird!
@@ -63,14 +64,14 @@ VERSION="v2018090600"
 echo "
 1 BILDQUALIT='${BILDQUALIT}'
 IN_BIT_RATE='${IN_BIT_RATE}'
-" | tee -a ${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 if [ "${BILDQUALIT}" = "auto" ] ; then
 	if [ "x${IN_BIT_RATE}" != "x" ] ; then
 
 		### Bitrate je Sekunde pro Pixel
 	#	IN_BIT_je_BP="$(echo "${IN_BIT_RATE} ${IN_BREIT} ${IN_HOCH}" | awk '{printf "%.0f\n", $1 * 10000 / $2 / $3}')"
-	#	echo "IN_BIT_je_BP='${IN_BIT_je_BP}'" | tee -a ${PROTOKOLLDATEI}.txt
+	#	echo "IN_BIT_je_BP='${IN_BIT_je_BP}'" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	#	if   [ "${IN_BIT_je_BP}" -gt "26" ] ; then
 	#		BILDQUALIT="9"
 	#	elif [ "${IN_BIT_je_BP}" -gt "20" ] ; then
@@ -117,7 +118,7 @@ if [ "${BILDQUALIT}" = "auto" ] ; then
 		fi
 	fi
 	echo "2 BILDQUALIT='${BILDQUALIT}'
-	" | tee -a ${PROTOKOLLDATEI}.txt
+	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 fi
 
 #------------------------------------------------------------------------------#
