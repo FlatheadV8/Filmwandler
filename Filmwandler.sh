@@ -102,7 +102,8 @@
 #VERSION="v2023032100"			# Kommentare und Beschreibungen verbessert
 #VERSION="v2023040900"			# HLS-Kommentare verbessert und die Kodek-Einschränkung aufgehoben, sowie Fehler in HLS-Bildauflösung repariert
 #VERSION="v2023042200"			# Film-Titel wird jetzt vom Original übernommen, wenn er nicht angegeben wird
-VERSION="v2023042300"			# es können jetzt auch externe Untertitel in den Film mit eingebunden werden
+#VERSION="v2023042300"			# es können jetzt auch externe Untertitel in den Film mit eingebunden werden
+VERSION="v2023042400"			# Fehler behoben, der kam, wenn kein Untertitel vorhanden war
 
 VERSION_METADATEN="${VERSION}"
 
@@ -2406,7 +2407,7 @@ echo "# 1480
 # -map 0:s:${i} -c:s copy				# neu
 # UNTERTITEL="0,1,2,3,4"
 
-if [ "${UNTERTITEL}" == "=0" ] ; then
+if [ x == "x${UNTERTITEL}" -o "${UNTERTITEL}" == "=0" ] ; then
 	U_TITEL_FF_01="-sn"
 	U_TITEL_FF_ALT="-sn"
 	U_TITEL_FF_02="-sn"
