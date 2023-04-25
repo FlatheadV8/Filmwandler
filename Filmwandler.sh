@@ -102,7 +102,8 @@
 #VERSION="v2023040900"			# HLS-Kommentare verbessert und die Kodek-Einschränkung aufgehoben, sowie Fehler in HLS-Bildauflösung repariert
 #VERSION="v2023042200"			# Film-Titel wird jetzt vom Original übernommen, wenn er nicht angegeben wird
 #VERSION="v2023042300"			# es können jetzt auch externe Untertitel in den Film mit eingebunden werden
-VERSION="v2023042400"			# Fehler behoben, der kam, wenn kein Untertitel vorhanden war
+#VERSION="v2023042400"			# Fehler behoben, der kam, wenn kein Untertitel vorhanden war
+VERSION="v2023042500"			# Hilfe hinzugefügt, wie Untertitel-Dateien übergeben werden
 
 VERSION_METADATEN="${VERSION}"
 
@@ -583,6 +584,18 @@ while [ "${#}" -ne "0" ]; do
 
         # so wird so die 3. und 4. Untertitelspur angegeben (die Zaehlweise beginnt mit 0)
         -u 2,3
+
+        # so wird den Untertitelspuren noch eine Sprache mit angegeben
+        -u 0:deu,1:eng,2:spa,3:fra,4:ita
+
+        # so werden noch externe Untertitel-Dateien mit angegeben
+        -u 0,1,Deutsch.srt,English.srt,2,3,4
+
+        # so wird den Untertitelspuren und -dateien noch eine Sprache mit angegeben
+        -u 0:deu,1:eng,Deutsch.srt:deu,English.srt:eng,2:spa,3:fra,4:ita
+
+        # so sieht das aus, wenn die Untertitel-Dateien in einem Unterverzeichnis (Sub) liegen
+        -u 0:deu,1:eng,Sub/Deutsch.srt:deu,Sub/English.srt:eng,2:spa,3:fra,4:ita
 
 	# Wird diese Option nicht verwendet,
 	# dann wird die Einstellung aus dem Originalfilm übernommen
