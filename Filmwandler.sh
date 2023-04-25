@@ -7,14 +7,14 @@
 #
 # Das Ergebnis besteht immer aus folgendem Format:
 #  - WebM:    webm   + AV1        + Opus    (kann nur das eine Untertitelformat WebVTT) - AV1 ist einfach noch zu langsam...
-#  - MKV:     mkv    + VP9        + Vorbis  (z.Z. das beste Format, leider ist MKV aber kein HTML5-Format)
+#  - MKV:     mkv    + AV1        + Vorbis  (z.Z. das beste Format, leider ist MKV aber kein HTML5-Format)
 #  - MP4:     mp4    + H.264/AVC  + AAC     (das z.Z. mit Abstand kompatibelste Format)
 #  - AVCHD:   m2ts   + H.264/AVC  + AC-3
 #  - AVI:     avi    + DivX5      + MP3
 #  - FLV:     flv    + FLV        + MP3     (Sorenson Spark: H.263)
 #  - 3GPP:    3gp    + H.263      + AAC     (128x96 176x144 352x288 704x576 1408x1152)
 #  - 3GPP2:   3g2    + H.263      + AAC     (128x96 176x144 352x288 704x576 1408x1152)
-#  - OGG:     ogg    + Theora     + Vorbis
+#  - OGG:     ogg    + VP9        + Vorbis
 #  - MPEG:    mpg/ts + MPEG-1/2   + MP2/AC-3 (bei kleinen Bitraten ist MPEG-1 besser)
 #
 # https://de.wikipedia.org/wiki/Containerformat
