@@ -1,9 +1,10 @@
-#==============================================================================#
+==============================================================================#
 #
 # AV1
 #
 # https://trac.ffmpeg.org/wiki/Encode/AV1
 #
+#  "libsvtav1" ist ein sehr schneller AV1-Encoder
 #  "libdav1d" ist kein Encoder, sondern ein "Decoder"!
 #
 #==============================================================================#
@@ -17,7 +18,9 @@
 #VERSION="v2023032100"			# Optionen für "libaom-av1" so geändert, dass die Dateien etwas größer werden aber deutlich schneller encodet werden
 #VERSION="v2023032400"			# Fehler in der Zuordnung von Parameter zu Codec behoben
 #VERSION="v2023032500"			# neuen Namen für den SVT-AV1-Coder aufgenommen: libsvtav1
-VERSION="v2023032501"                   # neue Ermittlungsmethode für Encoder
+#VERSION="v2023032501"			# neue Ermittlungsmethode für Encoder
+#VERSION="v2023050500"			# SVT-AV1 an die neuen Optionen (seit 0.9.1) angepasst
+VERSION="v2023050900"			# Abstufung so angepasst, dass bei "-vq 5" die Codecs x264, x265, aom-av1 und svt-av1 eine änlich lange Transkodierzeit benötigen (pro Minute Spielfilm, ca. 1,5 Minuten Transkodierdauer)
 
 #CODEC_PATTERN="av1|aom"		# Beispiel: "h265|hevc"
 #VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
@@ -47,11 +50,12 @@ VERSION="v2023032501"                   # neue Ermittlungsmethode für Encoder
 # der oberste wird bevorzugt
 KODEKS="
 libsvtav1
-libsvt_av1
 libaom-av1
 librav1e
 av1
 "
+
+# "-b:v 0" => für konstante Qualität - ist nur bis FFmpeg-Version 4.3 nötig
 
 # der erste Treffer wird verwendet
 VIDEOCODEC="$(for K in ${KODEKS}
@@ -61,17 +65,81 @@ done | head -n1)"
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
-
-# AUF_KERNE_VERTEILEN="-cpu-used ${CPU_VERBRAUCH} -threads ${KERNE_ZUM_KODIEREN}"
-# CONSTANT_QUALITY="-b:v 0 -row-mt 1 -tile-columns 1 -tile-rows 0"
 # HDR_FARBRAUM="-colorspace bt2020nc -color_trc smpte2084 -color_primaries bt2020"	# diese verwendet YouTube
-
-CONSTANT_QUALITY="-b:v 0"	# für konstante Qualität
-#CONSTANT_QUALITY=""		# am schnellsten
-
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
 ### Funktionen
+
+################################################################################
+libsvtav1()
+{
+echo "libsvtav1()"
+#
+#------------------------------------------------------------------------------#
+#
+#  https://trac.ffmpeg.org/wiki/Encode/AV1#SVT-AV1
+#  https://gitlab.com/AOMediaCodec/SVT-AV1/-/blob/master/Docs/Parameters.md
+#  https://gitlab.com/AOMediaCodec/SVT-AV1/-/blob/master/Docs/Ffmpeg.md
+#  ffmpeg -h encoder=libsvt_av1
+#
+#  -c:v libsvt_av1
+#  -svtav1-params
+#	tune=0		- Standbilder sehen so besser aus / Die Abstimmung auf subjektive Qualität ("0") kann zu einem schärferen Bild und einer höheren psycho-visuellen Wiedergabetreue führen.
+#	fast-decode=1	- Endgeräte benötigen weniger Rechenleistung zum abspielen, auf Kosten einer gewissen Wiedergabetreue
+#  -preset     "-1 bis 13" (default 10) Kompromiss zwischen Codierungsgeschwindigkeit und Komprimierungseffizienz / Niedrigere Werte führen bei einer gegebenen Dateigröße zu einer Ausgabe mit besserer Qualität, die Codierung dauert jedoch länger.
+#  -crf         "0 bis 63" (default 50) Constant Rate Factor: Niedrigere Werte entsprechen einer höheren Qualität und einer größeren Dateigröße.
+#
+# Beachten Sie, dass der crf-Bereich für SVT-AV1 1-63 beträgt, was ein breiterer Bereich ist als bei einigen gängigen Open-Source-Encodern.
+# Infolgedessen sind crf-Werte, die sich der visuellen Qualität in diesen Encodern annähern, in SVT-AV1 tendenziell höher.
+# Da SVT-AV1 für eine gute Skalierung über Kerne/Prozessoren ausgelegt ist, wird eine schnelle Codierung am besten auf Computern mit einer ausreichenden Anzahl von Threads durchgeführt.
+#
+#------------------------------------------------------------------------------#
+#
+#  -preset 10 -crf 35	: Für eine schnelle Codierung muss das "preset" ausreichend hoch sein, damit Ihre CPU ohne Stottern codieren kann. Höhere Voreinstellungen sind schneller, aber weniger effizient.
+#  -preset 5 -crf 32	: Für einen Medienserver oder HTPC, sind eine höhere Effizienz und vernünftige Codierzeiten wünschenswert.
+#  -preset 2 -crf 25	: Für professionelle VOD-Anwendungen wird oft die bestmögliche Effizienz gewünscht.
+#
+#------------------------------------------------------------------------------#
+# Voreinstellung: -crf 35 -preset 10 -svtav1-params tune=1:fast-decode=1
+
+#VIDEO_OPTION="-preset 5 -svtav1-params tune=0:fast-decode=0"
+#VIDEO_QUALITAET_0="-crf 50 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+#VIDEO_QUALITAET_1="-crf 46 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+#VIDEO_QUALITAET_2="-crf 42 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+#VIDEO_QUALITAET_3="-crf 38 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+#VIDEO_QUALITAET_4="-crf 34 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+#VIDEO_QUALITAET_5="-crf 30 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+#VIDEO_QUALITAET_6="-crf 26 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+#VIDEO_QUALITAET_7="-crf 22 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+#VIDEO_QUALITAET_8="-crf 18 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+#VIDEO_QUALITAET_9="-crf 14 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+
+# ab hier ist kaum noch Artefaktbildung zu erkennen: 6
+#VIDEO_OPTION="-crf 25 -svtav1-params tune=0:fast-decode=0"
+#VIDEO_QUALITAET_0="${VIDEO_OPTION} -preset 10"		# 
+#VIDEO_QUALITAET_1="${VIDEO_OPTION} -preset 9"		# 
+#VIDEO_QUALITAET_2="${VIDEO_OPTION} -preset 8"		# 
+#VIDEO_QUALITAET_3="${VIDEO_OPTION} -preset 7"		# 
+#VIDEO_QUALITAET_4="${VIDEO_OPTION} -preset 6"		# 
+#VIDEO_QUALITAET_5="${VIDEO_OPTION} -preset 5"		# Empfehlung für einen Medienserver oder HTPC
+#VIDEO_QUALITAET_6="${VIDEO_OPTION} -preset 4"		# 
+#VIDEO_QUALITAET_7="${VIDEO_OPTION} -preset 3"		# 
+#VIDEO_QUALITAET_8="${VIDEO_OPTION} -preset 2"		# Empfehlung für professionelle VOD-Anwendungen
+#VIDEO_QUALITAET_9="${VIDEO_OPTION} -preset 1"		# langsamstes, beste Qualität
+
+# ab hier ist kaum noch Artefaktbildung zu erkennen: 6
+VIDEO_OPTION="-crf 25 -svtav1-params tune=0:fast-decode=0"
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -preset 12"		# schnellstes, schlechteste Qualität
+VIDEO_QUALITAET_1="${VIDEO_OPTION} -preset 11"		# 
+VIDEO_QUALITAET_2="${VIDEO_OPTION} -preset 10"		# 
+VIDEO_QUALITAET_3="${VIDEO_OPTION} -preset 9"		# 
+VIDEO_QUALITAET_4="${VIDEO_OPTION} -preset 8"		# 
+VIDEO_QUALITAET_5="${VIDEO_OPTION} -preset 7"		# 
+VIDEO_QUALITAET_6="${VIDEO_OPTION} -preset 6"		# 
+VIDEO_QUALITAET_7="${VIDEO_OPTION} -preset 5"		# Empfehlung für einen Medienserver oder HTPC
+VIDEO_QUALITAET_8="${VIDEO_OPTION} -preset 4"		# 
+VIDEO_QUALITAET_9="${VIDEO_OPTION} -preset 3"		# 
+}
 
 ################################################################################
 libaom_av1()
@@ -79,8 +147,6 @@ libaom_av1()
 echo "libaom_av1()"
 # libaom-av1 ist seit 23. Sep. 2020 nicht mehr experimentell
 #
-# Constant Quality
-#   ffmpeg -i input.mp4 -c:v libaom-av1 -crf 40 -b:v 0 av1_test.mkv
 #   ffmpeg -h encoder=libaom-av1
 #
 # https://ffmpeg.org/ffmpeg-codecs.html
@@ -88,9 +154,12 @@ echo "libaom_av1()"
 #  -crf "-1 bis 63"
 #  -cpu-used "0 bis 8" (1 ist default, 8 ist am schnellsten)
 #
+#------------------------------------------------------------------------------#
 ### kurz gesagt:
 # - Qualität und Dateigröße ist von "-crf" abhängig;
 # - Transkodier-Geschwindigkeit und Dateigröße ist von "-cpu-used" abhängig;
+#------------------------------------------------------------------------------#
+# AUF_KERNE_VERTEILEN="-cpu-used ${CPU_VERBRAUCH} -threads ${KERNE_ZUM_KODIEREN}"
 #------------------------------------------------------------------------------#
 #
 ### https://streaminglearningcenter.com/blogs/good-news-av1-encoding-times-drop-to-near-reasonable-levels.html
@@ -102,52 +171,77 @@ echo "libaom_av1()"
 ### -cpu-used 5 	- stark erhöhte Verarbeitsungsgeschwindigkeit (99,64%) / Verarbeitungsdauer 6,63%
 ### -cpu-used 8 	- höchste Verarbeitsungsgeschwindigkeit (99,17%) / Verarbeitungsdauer 5,32%
 #
-CPU_VERBRAUCH="8"
-#
 #------------------------------------------------------------------------------#
 #
 ### -usage 0		- gute Kompression (normal)
 ### -usage 1		- real time / streaming
+### -cpu-used 0-8
+### -aq-mode 1
+### -crf 0-63
+### -row-mt 1
+### -tune 1
+### -aom-params ...
 
-#VIDEO_OPTION="${CONSTANT_QUALITY} -cpu-used ${CPU_VERBRAUCH} -row-mt 1 -tile-columns 1 -tile-rows 0"
-VIDEO_OPTION="${CONSTANT_QUALITY} -usage 0 -cpu-used ${CPU_VERBRAUCH} -aq-mode 2 -tune 1 -lag-in-frames 5"
+#VIDEO_OPTION="-cpu-used 8 -row-mt 1 -aq-mode 1 -tune 1 -aom-params fp-mt=1"
+#VIDEO_QUALITAET_0="-crf 55 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+#VIDEO_QUALITAET_1="-crf 50 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+#VIDEO_QUALITAET_2="-crf 45 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+#VIDEO_QUALITAET_3="-crf 40 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+#VIDEO_QUALITAET_4="-crf 35 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+#VIDEO_QUALITAET_5="-crf 30 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+#VIDEO_QUALITAET_6="-crf 25 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+#VIDEO_QUALITAET_7="-crf 20 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+#VIDEO_QUALITAET_8="-crf 15 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+#VIDEO_QUALITAET_9="-crf 10 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
 
-VIDEO_QUALITAET_0="-crf 63 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_1="-crf 58 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_2="-crf 53 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_3="-crf 48 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_4="-crf 43 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_5="-crf 38 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_6="-crf 30 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_7="-crf 20 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_8="-crf 10 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_9="-crf 00 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
+##VIDEO_OPTION="-crf 20 -row-mt 1 -aq-mode 1 -tune 1 -aom-params fp-mt=1"
+#VIDEO_OPTION="-row-mt 1 -aq-mode 1 -tune 1 -aom-params fp-mt=1"
+#VIDEO_QUALITAET_0="-cpu-used 8 -crf 40 ${VIDEO_OPTION}"		# von "0" bin "8"
+#VIDEO_QUALITAET_1="-cpu-used 8 -crf 36 ${VIDEO_OPTION}"		# von "0" bin "8"
+#VIDEO_QUALITAET_2="-cpu-used 8 -crf 32 ${VIDEO_OPTION}"		# von "0" bin "8"
+#VIDEO_QUALITAET_3="-cpu-used 8 -crf 28 ${VIDEO_OPTION}"		# von "0" bin "8"
+#VIDEO_QUALITAET_4="-cpu-used 8 -crf 24 ${VIDEO_OPTION}"		# von "0" bin "8"
+#VIDEO_QUALITAET_5="-cpu-used 8 -crf 20 ${VIDEO_OPTION}"		# von "0" bin "8"
+#VIDEO_QUALITAET_6="-cpu-used 7 -crf 20 ${VIDEO_OPTION}"		# von "0" bin "8"
+#VIDEO_QUALITAET_7="-cpu-used 6 -crf 20 ${VIDEO_OPTION}"		# von "0" bin "8"
+#VIDEO_QUALITAET_8="-cpu-used 5 -crf 20 ${VIDEO_OPTION}"		# von "0" bin "8"
+#VIDEO_QUALITAET_9="-cpu-used 4 -crf 20 ${VIDEO_OPTION}"		# von "0" bin "8"
+
+VIDEO_OPTION="-row-mt 1 -aq-mode 1 -tune 1 -aom-params fp-mt=1"
+VIDEO_QUALITAET_0="-cpu-used 8 -crf 50 ${VIDEO_OPTION}"		# von "0" bin "8"
+VIDEO_QUALITAET_1="-cpu-used 8 -crf 45 ${VIDEO_OPTION}"		# von "0" bin "8"
+VIDEO_QUALITAET_2="-cpu-used 8 -crf 40 ${VIDEO_OPTION}"		# von "0" bin "8"
+VIDEO_QUALITAET_3="-cpu-used 8 -crf 36 ${VIDEO_OPTION}"		# von "0" bin "8"
+VIDEO_QUALITAET_4="-cpu-used 8 -crf 32 ${VIDEO_OPTION}"		# von "0" bin "8"
+VIDEO_QUALITAET_5="-cpu-used 8 -crf 28 ${VIDEO_OPTION}"		# von "0" bin "8"
+VIDEO_QUALITAET_6="-cpu-used 8 -crf 24 ${VIDEO_OPTION}"		# von "0" bin "8"
+VIDEO_QUALITAET_7="-cpu-used 8 -crf 20 ${VIDEO_OPTION}"		# von "0" bin "8"
+VIDEO_QUALITAET_8="-cpu-used 7 -crf 20 ${VIDEO_OPTION}"		# von "0" bin "8"
+VIDEO_QUALITAET_9="-cpu-used 6 -crf 20 ${VIDEO_OPTION}"		# von "0" bin "8"
 }
 
 ################################################################################
 librav1e()
 {
 echo "librav1e()"
-# librav1e ist deutlich schneller als interner Kodec "av1"
 #   ffmpeg -h encoder=librav1e
-#     ffmpeg -rav1e-params rav1e --help  ("?" - zeigt nicht das richtige an)
 #
 # https://ffmpeg.org/ffmpeg-codecs.html
 #  -c:v librav1e
 #  -qp            "-1 bis 255"    (default -1; kleinerer Wert steht für bessere Qualität)
-#  -speed         "-1 bis 10"     (default -1)
+#  -speed         "-1 bis 10"     (default -1) / wie "preset" bei libsvtav1
 #  -tiles         "-1 to I64_MAX" (default 0)
 #  -tile-rows     "-1 to I64_MAX" (default 0)
 #  -tile-columns  "-1 to I64_MAX" (default 0)
-#  -rav1e-params  "-1 to I64_MAX" (default 0)
+#  -rav1e-params
 #    :speed=5     "0 bis 10"
 #    :low_latency=true
 #
 #------------------------------------------------------------------------------#
 
 CPU_VERBRAUCH="5"
-
 VIDEO_OPTION="-tile-columns 1 -tile-rows 0 -rav1e-params speed=${CPU_VERBRAUCH}:low_latency=true"
+
 VIDEO_QUALITAET_0="-qp 15 ${VIDEO_OPTION}"		# von "-1" bis "255"
 VIDEO_QUALITAET_1="-qp 30 ${VIDEO_OPTION}"		# von "-1" bis "255"
 VIDEO_QUALITAET_2="-qp 45 ${VIDEO_OPTION}"		# von "-1" bis "255"
@@ -158,42 +252,6 @@ VIDEO_QUALITAET_6="-qp 95 ${VIDEO_OPTION}"		# von "-1" bis "255"
 VIDEO_QUALITAET_7="-qp 110 ${VIDEO_OPTION}"		# von "-1" bis "255"
 VIDEO_QUALITAET_8="-qp 125 ${VIDEO_OPTION}"		# von "-1" bis "255"
 VIDEO_QUALITAET_9="-qp 140 ${VIDEO_OPTION}"		# von "-1" bis "255"
-}
-
-################################################################################
-libsvt_av1()
-{
-echo "libsvt_av1()"
-#   ffmpeg -h encoder=libsvt_av1
-#
-# https://ffmpeg.org/ffmpeg-codecs.html
-#  -c:v libsvt_av1
-#  -preset     "0 bis 8" (default 8)
-#  -profile 0  "main" (default main)
-#  -profile 1  "high"
-#  -profile 2  "professional"
-#  -tier 0     "main" (default main)
-#  -tier 1     "high"
-#  -level      "von 2.0 bis 7.3"
-#  -rc 0       "cqp - Const Quantization Parameter" (default cqp)
-#  -rc 1       "Variable Bit Rate, use a target bitrate for the entire stream"
-#  -rc 2       "Constrained Variable Bit Rate, use a target bitrate for each GOP"
-#  -qp         "-1 bis 63" (default 50)
-#
-#------------------------------------------------------------------------------#
-
-#VIDEO_OPTION="-preset 8 -profile 0 -level 0 -rc 0"
-
-VIDEO_QUALITAET_0="-qp 52 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_1="-qp 48 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_2="-qp 44 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_3="-qp 40 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_4="-qp 36 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_5="-qp 32 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_6="-qp 28 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_7="-qp 24 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_8="-qp 20 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
-VIDEO_QUALITAET_9="-qp 16 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
 }
 
 ################################################################################
@@ -222,8 +280,8 @@ VIDEO_QUALITAET_9="-crf 16 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
 
-if [ libsvt_av1 = "${VIDEOCODEC}" ] ; then
-	libsvt_av1
+if [ libsvtav1 = "${VIDEOCODEC}" ] ; then
+	libsvtav1
 
 elif [ libaom-av1 = "${VIDEOCODEC}" ] ; then
 	libaom_av1

@@ -140,7 +140,7 @@ SCHNITT_OPTION='${SCHNITT_OPTION}'
 
 FFPROBE_PROBESIZE="9223372036854"       	# Maximalwert in MiB auf einem Intel(R) Core(TM) i5-10600T CPU @ 2.40GHz
 
-UNTERTITELSPUREN="$(ffprobe -v error -probesize ${FFPROBE_PROBESIZE}M -analyzeduration ${FFPROBE_PROBESIZE}M -i "${FILMDATEI}" -show_streams | grep -F codec_type=subtitle | wc -l)"
+UNTERTITELSPUREN="$(ffprobe -v error -probesize ${FFPROBE_PROBESIZE}M -analyzeduration ${FFPROBE_PROBESIZE}M -i "${FILMDATEI}" -show_streams | grep -F 'codec_type=subtitle' | wc -l)"
 echo "UNTERTITELSPUREN='${UNTERTITELSPUREN}'"
 
 #exit
@@ -188,7 +188,7 @@ echo "UNTERTITELSPUREN='${UNTERTITELSPUREN}'"
   #echo "# 1,2: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -standard_u 0"
   #${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -standard_ton 0 -standard_u 0
 
-  ### MKV (VP9 + Vorbis) => kann alle Audio-Kanäle und alle Untertitelformate
+  ### MKV (AV1 + Vorbis) => kann alle Audio-Kanäle und alle Untertitelformate
   #   Wird nur benötigt, wenn die vorhandenen Untertiten nicht in den MP4-Film übernommen werden konnten.
   echo "# 1,3: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -standard_u 0"
   ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -standard_ton 0 -standard_u 0
@@ -208,8 +208,8 @@ echo "UNTERTITELSPUREN='${UNTERTITELSPUREN}'"
 
   ### Um eine "HD ready"-Kompatibilität (max. 720p + keine Untertitel) zu erreichen, wird das MKV-Video noch einmal transkodiert.
   ### Kompatibilität: "HD ready", HTML5, HLS, MPEG-DASH
-  echo "# 1,5: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -u =0 -minihd -hls"
-  ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -standard_ton 0 -u =0 -minihd -hls
+#  echo "# 1,5: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -u =0 -minihd -hls"
+#  ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -standard_ton 0 -u =0 -minihd -hls
 
   #----------------------------------------------------------------------------#
 

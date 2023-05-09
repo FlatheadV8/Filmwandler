@@ -7,7 +7,8 @@
 #VERSION="v2018082800"
 #VERSION="v2022080400"			# mit --bluray-compat lassen sich ein paar Zusatzoptionen einsparen + VIDEO_OPTION rudimentär definiert
 #VERSION="v2023032500"                  # neue Ermittlungsmethode für Encoder
-VERSION="v2023032600"                   # Parameter für den x265-Encoder korrigiert
+#VERSION="v2023032600"                   # Parameter für den x265-Encoder korrigiert
+VERSION="v2023050900"			# Abstufung so angepasst, dass bei "-vq 5" die Codecs x264, x265, aom-av1 und svt-av1 eine änlich lange Transkodierzeit benötigen (pro Minute Spielfilm, ca. 1,5 Minuten Transkodierdauer)
 
 CODEC_PATTERN="h265|hevc"		# Beispiel: "h265|hevc"
 VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
@@ -25,27 +26,38 @@ if [ "x${VIDEOCODEC}" = "x" ] ; then
 	fi
 fi
 
+#------------------------------------------------------------------------------#
+
 # 2018-07-06: [libx265 @ 0x813618d00] Possible presets: ultrafast superfast veryfast faster fast medium slow slower veryslow placebo
 # 2018-07-06: [libx265 @ 0x813618d00] Possible tunes: psnr ssim grain zerolatency fastdecode
 # 2018-07-06: [libx265 @ 0x813618d00] Possible profiles: main main10 mainstillpicture msp main-intra main10-intra main444-8 main444-intra main444-stillpicture main422-10 main422-10-intra main444-10 main444-10-intra main12 main12-intra main422-12 main422-12-intra main444-12 main444-12-intra main444-16-intra main444-16-stillpicture
 
-KEYINT="$(echo "${IN_FPS}" | awk '{printf "%.0f\n", $1 * 2}')"			# alle 2 Sekunden ein Key-Frame
-#VIDEO_OPTION="-x265opts bluray-compat=1:slices=1:b-adapt=2:direct=auto:keyint=${KEYINT}:subme=9"
-#
-#PROFILE="main10"
-#VIDEO_OPTION="-profile:v ${PROFILE}"
-#
-PROFILE=""
-VIDEO_OPTION="-b:v 0"
-#
-VIDEO_QUALITAET_0="-preset veryfast ${VIDEO_OPTION} -crf 45"                    # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_1="-preset veryfast ${VIDEO_OPTION} -crf 41"                    # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_2="-preset fast     ${VIDEO_OPTION} -crf 37"                    # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_3="-preset fast     ${VIDEO_OPTION} -crf 33"                    # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_4="-preset medium   ${VIDEO_OPTION} -crf 29"                    # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_5="-preset medium   ${VIDEO_OPTION} -crf 25"                    # von "0" (verlustfrei) bis "51" / default: -crf 28
-VIDEO_QUALITAET_6="-preset slow     ${VIDEO_OPTION} -crf 21"                    # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_7="-preset slow     ${VIDEO_OPTION} -crf 17"                    # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_8="-preset veryslow ${VIDEO_OPTION} -crf 13"                    # von "0" (verlustfrei) bis "51"
-VIDEO_QUALITAET_9="-preset veryslow ${VIDEO_OPTION} -crf 09"                    # von "0" (verlustfrei) bis "51"
+### Werte für crf: von "0" (verlustfrei) bis "51"
+#CRF_WERT="30"							# schon gut erkennbare Artefakte
+#CRF_WERT="28"							# Voreinstellung
+#CRF_WERT="25"							# allgemeine Empfehlung für Heimkino, mit relativ ausgewogener Kodierdauer
+CRF_WERT="22"							# Artefaktbildung ist auf Standbildern kaum noch zu erkennen
+
+### Die Option "-profile:v" hat nur dann Wirkung, wenn auch die Option "-level" angegeben wird!
+#PROFILE="-profile:v main10"					# 8-10 Bit-Farben
+#PROFILE="-profile:v main"					# 8 Bit-Farben
+PROFILE=""							# wenn man sich auf ein Profil festlegt, dann sind nicht mehr alle Kombinationen der anderen Parameter möglich!
+
+KEYINT="$(echo "${IN_FPS}" | awk '{printf "%.0f\n", $1 * 2}')"	# alle 2 Sekunden ein Key-Frame
+
+### '-b:v 0' wird nur bis FFmpeg Version 4.3 benötigt
+VIDEO_OPTION="${PROFILE} -tune ssim -crf ${CRF_WERT} -x265-params keyint=${KEYINT}:psy-rd=0"
+
+VIDEO_QUALITAET_0="${VIDEO_OPTION} -preset ultrafast"		# schnellstes, schlechteste Qualität
+VIDEO_QUALITAET_1="${VIDEO_OPTION} -preset superfast"		# 
+VIDEO_QUALITAET_2="${VIDEO_OPTION} -preset veryfast"		# 
+VIDEO_QUALITAET_3="${VIDEO_OPTION} -preset faster"		# 
+VIDEO_QUALITAET_4="${VIDEO_OPTION} -preset fast"		# 
+VIDEO_QUALITAET_5="${VIDEO_OPTION} -preset medium"		# Voreinstellung, gute Qualität
+VIDEO_QUALITAET_6="${VIDEO_OPTION} -preset slow"		# ab hier werden die Bewegungsvektoren genau berechnet
+VIDEO_QUALITAET_7="${VIDEO_OPTION} -preset slower"		# 
+VIDEO_QUALITAET_8="${VIDEO_OPTION} -preset veryslow"		# 
+VIDEO_QUALITAET_9="${VIDEO_OPTION} -preset placebo"		# langsamstes, beste Qualität
+
+#exit
 

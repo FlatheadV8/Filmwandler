@@ -8,12 +8,13 @@
 #VERSION="v2019092100"
 #VERSION="v2020072700"
 #VERSION="v2022120500"			# MP4 kann doch AC-3
-VERSION="v2022121100"			# die Variable ENDUNG darf hier nicht drin stehen
+#VERSION="v2022121100"			# die Variable ENDUNG darf hier nicht drin stehen
+VERSION="v2023050600"			# von x264 auf x265 umgestellt
 
 #------------------------------------------------------------------------------#
 #
 # Leider kann eine MP4-Datei keinen AC-3 (a52) - Codec abspielen.
-# Deshalb gehen AVCHD-Filme auch nicht im MP4-Container
+# Deshalb gehen AVCHD-Filme auch nicht im MP4-Container.
 #
 #==============================================================================#
 
@@ -29,9 +30,9 @@ FORMAT="mp4"
 
 # Video
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
-. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
-. $(dirname ${0})/Filmwandler_Codec_Video_264.txt	# -> HTML5, HLS
-#. $(dirname ${0})/Filmwandler_Codec_Video_265.txt	# -> HTML5, HLS
+#. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt		# wird nur von "Codec_Video_264" verwendet
+#. $(dirname ${0})/Filmwandler_Codec_Video_264.txt	# AVC  -> HTML5, HLS
+. $(dirname ${0})/Filmwandler_Codec_Video_265.txt	# HEVC -> HTML5, HLS
 IFRAME="-keyint_min 2-8"
 
 # verschiebt den Index an den Anfang
@@ -45,7 +46,7 @@ FORMAT_BESCHREIBUNG="
 ********************************************************************************
 * Name:                 MP4                                                    *
 * ENDUNG:               .mp4                                                   *
-* Video-Kodierung:      H.264 (MPEG-4 Part 10 / AVC)                           *
+* Video-Kodierung:      H.265 (HEVC, Nachfolger von H.264/AVC)                 *
 * Audio-Kodierung:      AAC   (mehrkanalfähiger Nachfolger von MP3)            *
 * Beschreibung:                                                                *
 *       - hohe Kompatibilität mit Konsumerelektronik                           *

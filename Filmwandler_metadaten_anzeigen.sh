@@ -54,7 +54,6 @@ if [ -r "${FILM_DATEI}" ] ; then
   FILM_SCANNEN()
   {
     FILMDATEI="${1}"
-    #META_DATEN_STREAMS="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_streams 2>/dev/null)"
     META_DATEN_STREAMS="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_streams 2>&1)"
     META_DATEN_ZEILENWEISE_STREAMS="$(echo "${META_DATEN_STREAMS}" | tr -s '\r' '\n' | tr -s '\n' ';' | sed 's/;\[STREAM\]/³[STREAM]/g' | tr -s '³' '\n')"
 
@@ -62,10 +61,10 @@ if [ -r "${FILM_DATEI}" ] ; then
     if [ "x${DURATION}" != x ] ; then
 	CODEC_LONG_NAME="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^codec_long_name=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 	META_DATEN_SPURSPRACHEN="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -E 'TAG:language=' | while read Z ; do echo "${Z}" | tr -s ';' '\n' | awk -F'=' '/^index=|^codec_type=|^TAG:language=/{print $2}' | tr -s '\n' ' ' ; echo ; done)"
-	#TSNAME="$(echo "${META_DATEN_STREAMS}" | grep -F -i codec_type=audio | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
-	#TON_LANG="$(echo "${META_DATEN_STREAMS}" | grep -F -i codec_type=audio | grep -F TAG:language | awk -F'=' '{print $2}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
-	#UTNAME="$(echo "${META_DATEN_STREAMS}" | grep -Fi codec_type=subtitle | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
-	#U_LANG="$(echo "${META_DATEN_STREAMS}" | grep -F -i codec_type=subtitle | grep -F TAG:language | awk -F'=' '{print $2}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
+	#TSNAME="$(echo "${META_DATEN_STREAMS}" | grep -F codec_type=audio | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
+	#TON_LANG="$(echo "${META_DATEN_STREAMS}" | grep -F codec_type=audio | grep -F TAG:language | awk -F'=' '{print $2}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
+	#UTNAME="$(echo "${META_DATEN_STREAMS}" | grep -F codec_type=subtitle | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
+	#U_LANG="$(echo "${META_DATEN_STREAMS}" | grep -F codec_type=subtitle | grep -F TAG:language | awk -F'=' '{print $2}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
 	#BILD_DREHUNG="$(echo "${META_DATEN_STREAMS}" | sed -ne '/index=0/,/index=1/p' | awk -F'=' '/TAG:rotate=/{print $NF}' | head -n1)"	# TAG:rotate=180 -=> 180
 	#FPS_TEILE="$(echo "${META_DATEN_STREAMS}" | grep -E '^codec_type=|^r_frame_rate=' | grep -E -A1 '^codec_type=video' | awk -F'=' '/^r_frame_rate=/{print $2}' | sed 's|/| |')"
 	#IN_FPS="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^avg_frame_rate=/{print $2}' | grep -Fv 'N/A' | head -n1 | awk -F'/' '{print $1}')"
@@ -78,10 +77,10 @@ if [ -r "${FILM_DATEI}" ] ; then
 	#IN_PAR="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^sample_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 	#IN_DAR="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^display_aspect_ratio=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 
-	TSNAME="$(echo "${META_DATEN_STREAMS}" | grep -F -i codec_type=audio | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
-	TON_LANG="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F -i codec_type=audio | tr -s ';' '\n' | grep -F TAG:language | awk -F'=' '{print $2}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
-	UTNAME="$(echo "${META_DATEN_STREAMS}" | grep -Fi codec_type=subtitle | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
-	U_LANG="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F -i codec_type=subtitle | tr -s ';' '\n' | grep -F TAG:language | awk -F'=' '{print $2}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
+	TSNAME="$(echo "${META_DATEN_STREAMS}" | grep -F 'codec_type=audio' | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
+	TON_LANG="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | tr -s ';' '\n' | grep -F TAG:language | awk -F'=' '{print $2}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
+	UTNAME="$(echo "${META_DATEN_STREAMS}" | grep -F 'codec_type=subtitle' | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
+	U_LANG="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=subtitle;' | tr -s ';' '\n' | grep -F TAG:language | awk -F'=' '{print $2}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
 	BILD_DREHUNG="$(echo "${META_DATEN_STREAMS}" | sed -ne '/index=0/,/index=1/p' | awk -F'=' '/TAG:rotate=/{print $NF}' | head -n1)"	# TAG:rotate=180 -=> 180
 	FPS_TEILE="$(echo "${META_DATEN_STREAMS}" | grep -E '^codec_type=|^r_frame_rate=' | grep -E -A1 '^codec_type=video' | awk -F'=' '/^r_frame_rate=/{print $2}' | sed 's|/| |')"
 	IN_FPS="$(echo "${META_DATEN_STREAMS}" | sed -ne '/video/,/STREAM/ p' | awk -F'=' '/^avg_frame_rate=/{print $2}' | grep -Fv 'N/A' | head -n1 | awk -F'/' '{print $1}')"
