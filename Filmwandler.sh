@@ -106,7 +106,8 @@
 #VERSION="v2023042500"			# Hilfe hinzugefügt, wie Untertitel-Dateien übergeben werden
 #VERSION="v2023050600"			# neue Option: zur Begrenzung für den "FireTV Gen. 2" + von "-tune film" auf "-tune ssim" umgestellt
 #VERSION="v2023051100"			# Variable "CPU_KERNE" mit Anzahl der verfügbaren CPU-Kernen gefüllt
-VERSION="v2023051200"			# FireTV-Profil überarbeitet; hdtvmin -> hdready umbenannt; hls und hdready sind jetzt Profile wie firetv
+#VERSION="v2023051200"			# FireTV-Profil überarbeitet; hdtvmin -> hdready umbenannt; hls und hdready sind jetzt Profile wie firetv
+VERSION="v2023051300"			# ab jetzt ist das normalisieren von DAR auf einen der Standards (16/9 oder 4/3) nicht mehr die Voreinstellung
 
 
 VERSION_METADATEN="${VERSION}"
@@ -134,6 +135,7 @@ VERSION_METADATEN="${VERSION}"
 
 BILDQUALIT="auto"
 TONQUALIT="auto"
+ORIGINAL_DAR="Ja"
 
 #set -x
 PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -318,6 +320,10 @@ while [ "${#}" -ne "0" ]; do
                         ;;
                 -orig_dar)
 			ORIGINAL_DAR="Ja"			# das originale Seitenverhältnis soll beibehalten werden
+                        shift
+                        ;;
+                -std_dar)
+			ORIGINAL_DAR="Nein"			# das Seitenverhältnis wird automatisch entweder auf 16/9 oder 4/3 geändert
                         shift
                         ;;
                 -fps|-soll_fps)

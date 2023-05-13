@@ -9,7 +9,8 @@
 #VERSION="v2020072700"
 #VERSION="v2020092300"
 #VERSION="v2022121100"			# die Variable ENDUNG darf hier nicht drin stehen
-VERSION="v2023042500"			# auf VP9 umgestellt
+#VERSION="v2023042500"			# auf VP9 umgestellt
+VERSION="v2023051300"			# auf VP8 umgestellt, ogg kein VP9 mehr kann
 
 #==============================================================================#
 
@@ -25,8 +26,7 @@ FORMAT="ogg"
 # Video
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 #	. $(dirname ${0})/Filmwandler_Codec_Video_theora.txt
-#	. $(dirname ${0})/Filmwandler_Codec_Video_vp8.txt
-	. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
+	. $(dirname ${0})/Filmwandler_Codec_Video_vp8.txt
 	IFRAME="-keyint_min 2-8"
 fi
 

@@ -236,14 +236,14 @@ FORMAT_ANPASSUNG="setsar='1/1',"
 ### dann ist es ganz einfach.
 ### Aber wenn nicht, dann sind diese Berechnungen nötig.
 
-if [ "x${ORIGINAL_DAR}" != "x" ] ; then
+if [ "x${ORIGINAL_DAR}" == "xJa" ] ; then
 	echo "# 880 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	ORIG_DAR_BREITE="$(echo "${IN_DAR}" | awk -F':' '{print $1}')"
 	ORIG_DAR_HOEHE="$(echo "${IN_DAR}" | awk -F':' '{print $2}')"
 	BREITE="${ORIG_DAR_BREITE}"
 	HOEHE="${ORIG_DAR_HOEHE}"
 	FORMAT_ANPASSUNG="setdar='${BREITE}/${HOEHE}',"
-else
+elif [ "x${ORIGINAL_DAR}" == "xNein" ] ; then
 	echo "# 890 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	if [ "x${SOLL_DAR}" != "x" ] ; then
 		echo "# 900 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
