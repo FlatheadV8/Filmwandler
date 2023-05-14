@@ -4,9 +4,6 @@
 #
 # https://trac.ffmpeg.org/wiki/Encode/AV1
 #
-#  "libsvtav1" ist ein sehr schneller AV1-Encoder
-#  "libdav1d" ist kein Encoder, sondern ein "Decoder"!
-#
 #==============================================================================#
 
 #VERSION="v2018082800"			# erste Unterstützung von AV1 eingebaut
