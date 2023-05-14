@@ -239,7 +239,7 @@ PROFIL_OPTIONEN='${PROFIL_OPTIONEN}'
 SOLL_XY='${SOLL_XY}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
-exit 970
+#exit 970
 }
 
 #==============================================================================#
