@@ -133,10 +133,6 @@ VERSION_METADATEN="${VERSION}"
 # -metadata:s:a:0 language=ger
 
 
-BILDQUALIT="auto"
-TONQUALIT="auto"
-ORIGINAL_DAR="Ja"
-
 #set -x
 PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
@@ -155,6 +151,9 @@ LANG=C					# damit AWK richtig rechnet
 Film2Standardformat_OPTIONEN="${@}"
 TEST="Nein"
 STOP="Nein"
+BILDQUALIT="auto"
+TONQUALIT="auto"
+ORIGINAL_DAR="Ja"
 
 AVERZ="$(dirname ${0})"			# Arbeitsverzeichnis, hier liegen diese Dateien
 
@@ -185,13 +184,6 @@ fi
 
 #==============================================================================#
 ### Funktionen
-
-logzaehler()
-{
-        LOGZAEHLER="$(echo "0${LOGZAEHLER}" | awk '{printf("%.4u\n", $1 + 1)}')"
-        export LOGZAEHLER
-}
-# logzaehler; echo "# ${LOGZAEHLER}"
 
 #------------------------------------------------------------------------------#
 
@@ -514,27 +506,27 @@ while [ "${#}" -ne "0" ]; do
                 -h)
 			#ausgabe_hilfe
                         echo "HILFE:
-        # Video- und Audio-Spur in ein HTML5-kompatibles Format transkodieren
+	# Video- und Audio-Spur in ein HTML5-kompatibles Format transkodieren
 
-        # grundsaetzlich ist der Aufbau wie folgt,
-        # die Reihenfolge der Optionen ist unwichtig
-        ${0} [Option] -q [Filmname] -z [Neuer_Filmname.mp4]
-        ${0} -q [Filmname] -z [Neuer_Filmname.mp4] [Option]
+	# grundsaetzlich ist der Aufbau wie folgt,
+	# die Reihenfolge der Optionen ist unwichtig
+	${0} [Option] -q [Filmname] -z [Neuer_Filmname.mp4]
+	${0} -q [Filmname] -z [Neuer_Filmname.mp4] [Option]
 
-        # ein Beispiel mit minimaler Anzahl an Parametern
-        ${0} -q Film.avi -z Film.mp4
+	# ein Beispiel mit minimaler Anzahl an Parametern
+	-q Film.avi -z Film.mp4
 
-        # ein Beispiel, bei dem die erste Untertitelspur (Zählweise beginnt mit '0'!) übernommen wird
-        ${0} -q Film.avi -u 0 -z Film.mp4
-        # ein Beispiel, bei dem die zweite Untertitelspur übernommen wird
-        ${0} -q Film.avi -u 1 -z Film.mp4
-        # ein Beispiel, bei dem die erste und die zweite Untertitelspur übernommen werden
-        ${0} -q Film.avi -u 0,1 -z Film.mp4
+	# ein Beispiel, bei dem die erste Untertitelspur (Zählweise beginnt mit '0'!) übernommen wird
+	-q Film.avi -u 0 -z Film.mp4
+	# ein Beispiel, bei dem die zweite Untertitelspur übernommen wird
+	-q Film.avi -u 1 -z Film.mp4
+	# ein Beispiel, bei dem die erste und die zweite Untertitelspur übernommen werden
+	-q Film.avi -u 0,1 -z Film.mp4
 
-        # Es duerfen in den Dateinamen keine Leerzeichen, Sonderzeichen
-        # oder Klammern enthalten sein!
-        # Leerzeichen kann aber innerhalb von Klammer trotzdem verwenden
-        ${0} -q \"Filmname mit Leerzeichen.avi\" -z Film.mp4
+	# Es duerfen in den Dateinamen keine Leerzeichen, Sonderzeichen
+	# oder Klammern enthalten sein!
+	# Leerzeichen kann aber innerhalb von Klammer trotzdem verwenden
+	-q \"Filmname mit Leerzeichen.avi\" -z Film.mp4
 
 	# Titel/Name des Filmes
 	-titel \"Titel oder Name des Filmes\"
@@ -571,34 +563,34 @@ while [ "${#}" -ne "0" ]; do
 	# verschoben werden:
 	-ad 0.2
 
-        # wenn der Film mehrer Tonspuren besitzt
-        # und nicht die erste verwendet werden soll,
-        # dann wird so die 2. Tonspur angegeben (die Zaehlweise beginnt mit 0)
-        -ton 1
+	# wenn der Film mehrer Tonspuren besitzt
+	# und nicht die erste verwendet werden soll,
+	# dann wird so die 2. Tonspur angegeben (die Zaehlweise beginnt mit 0)
+	-ton 1
 
-        # so wird die 1. Tonspur angegeben (die Zaehlweise beginnt mit 0)
-        -ton 0
+	# so wird die 1. Tonspur angegeben (die Zaehlweise beginnt mit 0)
+	-ton 0
 
-        # so wird so die 3. und 4. Untertitelspur angegeben (die Zaehlweise beginnt mit 0)
-        -u 2,3
+	# so wird so die 3. und 4. Untertitelspur angegeben (die Zaehlweise beginnt mit 0)
+	-u 2,3
 
-        # so wird Untertitel komplett abgeschaltet
-        -u =0
+	# so wird Untertitel komplett abgeschaltet
+	-u =0
 
-        # so wird so die 3. und 4. Untertitelspur angegeben (die Zaehlweise beginnt mit 0)
-        -u 2,3
+	# so wird so die 3. und 4. Untertitelspur angegeben (die Zaehlweise beginnt mit 0)
+	-u 2,3
 
-        # so wird den Untertitelspuren noch eine Sprache mit angegeben
-        -u 0:deu,1:eng,2:spa,3:fra,4:ita
+	# so wird den Untertitelspuren noch eine Sprache mit angegeben
+	-u 0:deu,1:eng,2:spa,3:fra,4:ita
 
-        # so werden noch externe Untertitel-Dateien mit angegeben
-        -u 0,1,Deutsch.srt,English.srt,2,3,4
+	# so werden noch externe Untertitel-Dateien mit angegeben
+	-u 0,1,Deutsch.srt,English.srt,2,3,4
 
-        # so wird den Untertitelspuren und -dateien noch eine Sprache mit angegeben
-        -u 0:deu,1:eng,Deutsch.srt:deu,English.srt:eng,2:spa,3:fra,4:ita
+	# so wird den Untertitelspuren und -dateien noch eine Sprache mit angegeben
+	-u 0:deu,1:eng,Deutsch.srt:deu,English.srt:eng,2:spa,3:fra,4:ita
 
-        # so sieht das aus, wenn die Untertitel-Dateien in einem Unterverzeichnis (Sub) liegen
-        -u 0:deu,1:eng,Sub/Deutsch.srt:deu,Sub/English.srt:eng,2:spa,3:fra,4:ita
+	# so sieht das aus, wenn die Untertitel-Dateien in einem Unterverzeichnis (Sub) liegen
+	-u 0:deu,1:eng,Sub/Deutsch.srt:deu,Sub/English.srt:eng,2:spa,3:fra,4:ita
 
 	# Wird diese Option nicht verwendet,
 	# dann wird die Einstellung aus dem Originalfilm übernommen
@@ -620,8 +612,8 @@ while [ "${#}" -ne "0" ]; do
 	# ffprobe nach Tonspuren und Untertiteln suchen soll.
 	# Ist der Wert zu klein, dann werden beispielsweise keine
 	# Untertitel gefunden, die erst sehr spät beginnen.
-        # Der Wert sollte so groß sein wie der zu transkodierende Film ist.
-        # Die Voreinstellung ist \"9223372036854\" MiB
+	# Der Wert sollte so groß sein wie der zu transkodierende Film ist.
+	# Die Voreinstellung ist \"9223372036854\" MiB
 	# Das ist der praktisch ermittelte Maximalwert von einem
 	# \"Intel Core i5-10600T CPU @ 2.40GHz\"
 	# auf einem \"FreeBSD 13.0\"-System mit 64 GiB RAM.
@@ -646,6 +638,7 @@ while [ "${#}" -ne "0" ]; do
 	#
         # Das Profil "firetv" begrenzt die Hardware-Anforderungen auf Werte, die der "FireTV Gen 2" von Amazon verarbeiten kann.
         -profil hls
+        -profil fullhd
         -profil hdready
         -profil firetv
 
@@ -673,82 +666,82 @@ while [ "${#}" -ne "0" ]; do
 
 	# Das Format (Video-Codec + Audio-Codec) ist normalerweise durch die Dateiendung der Ziel-Datei vorgegeben.
 	# Mit dieser Option kann der Audio-Codec überschrieben werden.
-        # Audio-Codec: aac, ac3, mp2, mp3, opus, vorbis
+	# Audio-Codec: aac, ac3, mp2, mp3, opus, vorbis
 	-ca aac
 	-ca ac3
 	-ca opus
 	-ca vorbis
 
-        # Bildwiederholrate für den neuen Film festlegen,
-        # manche Geräte können nur eine begrenzte Zahl an Bildern pro Sekunde (FPS)
-        -soll_fps 15
-        -fps 20
+	# Bildwiederholrate für den neuen Film festlegen,
+	# manche Geräte können nur eine begrenzte Zahl an Bildern pro Sekunde (FPS)
+	-soll_fps 15
+	-fps 20
 
-        # wenn die Bildaufloesung des Originalfilmes nicht automatisch ermittelt
-        # werden kann, dann muss sie manuell als Parameter uebergeben werden
-        -ist_xmaly 480x270
-        -in_xmaly 480x270
+	# wenn die Bildaufloesung des Originalfilmes nicht automatisch ermittelt
+	# werden kann, dann muss sie manuell als Parameter uebergeben werden
+	-ist_xmaly 480x270
+	-in_xmaly 480x270
 
-        # die gewünschte Bildauflösung des neuen Filmes (Ausgabe)
-        -soll_xmaly 720x576		# deutscher Parametername
-        -out_xmaly 720x480		# englischer Parametername
-        -soll_xmaly 965x543		# frei wählbares Bildformat kann angegeben werden
-        -soll_xmaly VCD			# Name eines Bildformates kann angegeben werden
+	# die gewünschte Bildauflösung des neuen Filmes (Ausgabe)
+	-soll_xmaly 720x576		# deutscher Parametername
+	-out_xmaly 720x480		# englischer Parametername
+	-soll_xmaly 965x543		# frei wählbares Bildformat kann angegeben werden
+	-soll_xmaly VCD			# Name eines Bildformates kann angegeben werden
 
-        # mit dieser Option wird das originale Seitenverhältnis beibehalten,
+	# mit dieser Option wird das originale Seitenverhältnis beibehalten,
 	# sonst wird automatisch auf 4:3 oder 16:9 umgerechnet
-        -orig_dar
+	-orig_dar
 
-        # wenn das Bildformat des Originalfilmes nicht automatisch ermittelt
-        # werden kann oder falsch ermittelt wurde,
-        # dann muss es manuell als Parameter uebergeben werden;
-        # es wird nur einer der beiden Parameter DAR oder PAR benötigt
-        -dar 16:9
+	# wenn das Bildformat des Originalfilmes nicht automatisch ermittelt
+	# werden kann oder falsch ermittelt wurde,
+	# dann muss es manuell als Parameter uebergeben werden;
+	# es wird nur einer der beiden Parameter DAR oder PAR benötigt
+	-dar 16:9
 
-        # wenn die Pixelgeometrie des Originalfilmes nicht automatisch ermittelt
-        # werden kann oder falsch ermittelt wurde,
-        # dann muss es manuell als Parameter uebergeben werden;
-        # es wird nur einer der beiden Parameter DAR oder PAR benoetigt
-        -par 64:45
+	# wenn die Pixelgeometrie des Originalfilmes nicht automatisch ermittelt
+	# werden kann oder falsch ermittelt wurde,
+	# dann muss es manuell als Parameter uebergeben werden;
+	# es wird nur einer der beiden Parameter DAR oder PAR benoetigt
+	-par 64:45
 
-        # will man eine andere Video-Qualitaet, dann sie manuell als Parameter
-        # uebergeben werden
-        -vq 5
-        -soll_vq 5
+	# will man eine andere Video-Qualitaet, dann sie manuell als Parameter
+	# uebergeben werden
+	-vq 5
+	-soll_vq 5
 
-        # will man eine andere Audio-Qualitaet, dann sie manuell als Parameter
-        # uebergeben werden
-        -aq 3
-        -soll_aq 3
+	# will man eine andere Audio-Qualitaet, dann sie manuell als Parameter
+	# uebergeben werden
+	-aq 3
+	-soll_aq 3
 
-        # Video nicht übertragen
-        # das Ergebnis soll keine Video-Spur enthalten
-        -vn
+	# Video nicht übertragen
+	# das Ergebnis soll keine Video-Spur enthalten
+	-vn
 
-        # Man kann aus dem Film einige Teile entfernen, zum Beispiel Werbung.
-        # Angaben muessen in Sekunden erfolgen,
-        # Dezimaltrennzeichen ist der Punkt.
-        # Die Zeit-Angaben beschreiben die Laufzeit des Filmes,
-        # so wie der CLI-Video-Player 'MPlayer' sie
-        # in der untersten Zeile anzeigt.
-        # Hier werden zwei Teile (432-520 und 833.5-1050) aus dem vorliegenden
-        # Film entfernt bzw. drei Teile (8.5-432 und 520-833.5 und 1050-1280)
-        # aus dem vorliegenden Film zu einem neuen Film zusammengesetzt.
-        -schnitt 8.5-432,520-833.5,1050-1280
+	# Man kann aus dem Film einige Teile entfernen, zum Beispiel Werbung.
+	# Angaben muessen in Sekunden erfolgen,
+	# Dezimaltrennzeichen ist der Punkt.
+	# Die Zeit-Angaben beschreiben die Laufzeit des Filmes,
+	# so wie der CLI-Video-Player 'MPlayer' sie
+	# in der untersten Zeile anzeigt.
+	# Hier werden zwei Teile (432-520 und 833.5-1050) aus dem vorliegenden
+	# Film entfernt bzw. drei Teile (8.5-432 und 520-833.5 und 1050-1280)
+	# aus dem vorliegenden Film zu einem neuen Film zusammengesetzt.
+	-schnitt 8.5-432,520-833.5,1050-1280
 
-        # will man z.B. von einem 4/3-Film, der als 16/9-Film (720x576)
-        # mit schwarzen Balken an den Seiten, diese schwarzen Balken entfernen,
-        # dann könnte das zum Beispiel so gemacht werden:
+	# will man z.B. von einem 4/3-Film, der als 16/9-Film (720x576)
+	# mit schwarzen Balken an den Seiten, diese schwarzen Balken entfernen,
+	# dann könnte das zum Beispiel so gemacht werden:
 	# -crop Ausschnittsbreite:Ausschnittshöhe:Abstand_von_links:Abstand_von_oben
-        -crop 540:576:90:0
+	-crop 540:576:90:0
 
 	# hat man mit dem SmartPhone ein Video aufgenommen, dann kann es sein,
 	# dass es verdreht ist; mit dieser Option kann man das Video wieder
 	# in die richtige Richtung drehen
-        # es geht nur 90 (-vf transpose=1), 270 (-vf transpose=2) und 180 (-vf hflip,vflip) Grad
-        -drehen 90
-        -drehen 180
-        -drehen 270
+	# es geht nur 90 (-vf transpose=1), 270 (-vf transpose=2) und 180 (-vf hflip,vflip) Grad
+	-drehen 90
+	-drehen 180
+	-drehen 270
 
 	mögliche Namen von Grafikauflösungen anzeigen
 	=> ${0} -g
@@ -897,6 +890,8 @@ elif [ "Linux" == "${BS}" ] ; then
 fi
 
 if [ "x" == "x${CPU_KERNE}" ] ; then
+	echo "Es konnte nicht ermittelt werden, wieviele CPU-Kerne in diesem System stecken."
+	echo "Es wird nun nur ein Kern benuzt."
 	CPU_KERNE="1"
 fi
 
@@ -1303,23 +1298,8 @@ IN_DAR='${IN_DAR}'
 # Audio
 
 #------------------------------------------------------------------------------#
-### HD ready
-### Mindestanvorderungen des "HD ready"-Standards umsetzen
-### das macht bei MP4-Filmen am meisten Sinn
-
-echo "# 540
-HDTVMIN='${HDTVMIN}'
-TONSPUR='${TONSPUR}'
-" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-
-if [ "Ja" == "${HDTVMIN}" ] ; then
-	if [ "x${TONSPUR}" != "x" ] ; then
-        	TONSPUR="$(echo "${TONSPUR}" | awk -F',' '{print $1}')"
-	fi
-fi
 
 echo "# 550
-HDTVMIN='${HDTVMIN}'
 TONSPUR='${TONSPUR}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
@@ -1405,6 +1385,7 @@ META_AUDIO_SPRACHE='${META_AUDIO_SPRACHE}'
 #exit 600
 
 #==============================================================================#
+### Video
 
 #------------------------------------------------------------------------------#
 ### Seitenverhältnis des Bildes (DAR) muss hier bekannt sein!

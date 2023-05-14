@@ -7,15 +7,48 @@ X265="$(echo "${VIDEOCODEC}" | grep -E '265|hevc')"
 
 #------------------------------------------------------------------------------#
 #==============================================================================#
+### Berechnung der Display-Begrenzungen
+
+begrenzung()
+{
+HD_BREIT="$(echo "${1}" | awk -F'x' '{print $1}')"
+HD_HOCH="$( echo "${1}" | awk -F'x' '{print $2}')"
+
+TEST_BREIT="$(echo "${2}" | awk -F'x' '{print $1}')"
+TEST_HOCH="$( echo "${2}" | awk -F'x' '{print $2}')"
+
+### nur wenn bei beiden das gleiche DAR ist
+#if [ "${HD_BREIT}" -lt "${TEST_BREIT}" -o "${HD_HOCH}" -lt "${TEST_HOCH}" ] ; then
+#	echo "${HD_BREIT}x${HD_HOCH}"
+#else
+#	echo "${TEST_BREIT}x${TEST_HOCH}"
+#fi
+
+if [ "${HD_BREIT}" -le "${TEST_BREIT}" ] ; then
+	# HD_HOCH = echo "1280 720 1920 800" | awk '{printf "%.0f %.0f\n", $1,($1*$4/$3)/2}' | awk '{print $1"x"2*$2}'
+	echo "${HD_BREIT} ${HD_HOCH} ${TEST_BREIT} ${TEST_HOCH}" | awk '{printf "%.0f %.0f\n", $1,($1*$4/$3)/2}' | awk '{print $1"x"2*$2}'
+else
+	# HD_BREIT = echo "1280 720 1024 768" | awk '{print $2*$3/$4"x"$2}'
+	echo "${HD_BREIT} ${HD_HOCH} ${TEST_BREIT} ${TEST_HOCH}" | awk '{printf "%.0f %.0f\n", ($2*$3/$4)/2,$2}' | awk '{print 2*$1"x"$2}'
+fi
+}
+
+#==============================================================================#
 ### HLS (von Apple) unterstützt insgesamt nur 8 Bildauflösungen
 
-hls()
-{
-. ${AVERZ}/Filmwandler_HLS.txt
 
-HLS_AUFLOESUNGEN="$(hls_aufloesungen | awk '{print $1}')"
+if [ x == "x${BILD_BREIT}" -o x == "x${BILD_HOCH}" ] ; then
+	if [ x == "x${SOLL_XY}" ] ; then
+		BILD_BREIT="${IN_BREIT}"
+		BILD_HOCH="${IN_HOCH}"
+	else
+		BILD_BREIT="$(echo "${SOLL_XY}" | awk -F'x' '{print $1}')"
+		BILD_HOCH="$( echo "${SOLL_XY}" | awk -F'x' '{print $2}')"
+	fi
+fi
 
-echo "# 810 Profil
+
+echo "# 810 Profil:
 # IN_BREIT='${IN_BREIT}'
 # IN_HOCH='${IN_HOCH}'
 # BILD_BREIT='${BILD_BREIT}'
@@ -24,6 +57,12 @@ echo "# 810 Profil
 # SOLL_XY='${SOLL_XY}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
+
+hls()
+{
+. ${AVERZ}/Filmwandler_HLS.txt
+
+HLS_AUFLOESUNGEN="$(hls_aufloesungen | awk '{print $1}')"
 
 if [ x == "x${SOLL_XY}" ] ; then
 	if [ x == "x${BILD_BREIT}" -o x == "x${BILD_HOCH}" ] ; then
@@ -58,7 +97,7 @@ fi
 BILD_BREIT="$(echo "${SOLL_XY}" | awk -F'x' '{print $1}')"
 BILD_HOCH="$( echo "${SOLL_XY}" | awk -F'x' '{print $2}')"
 
-echo "# 840 Profil
+echo "# 840 Profil:
 # BILD_BREIT='${BILD_BREIT}'
 # BILD_HOCH='${BILD_HOCH}'
 # SOLL_XY='${SOLL_XY}'
@@ -74,35 +113,29 @@ echo "# 840 Profil
 
 hdready()
 {
-echo "# 860 Profil
+echo "# 860 Profil:
 # DAR_FAKTOR='${DAR_FAKTOR}'
 # SOLL_XY='${SOLL_XY}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 if [ "${DAR_FAKTOR}" -lt "149333" ] ; then
-	echo "# 870:  4/3 HD ready" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	if [ "1024" -lt "${BILD_BREIT}" ] ; then
-		SOLL_XY="1024x768"	#  4/3: 1024×768 → XGA
-	fi
-	if [ "768" -lt "${BILD_HOCH}" ] ; then
-		SOLL_XY="1024x768"	#  4/3: 1024×768 → XGA
-	fi
+	echo "# 870 XGA:  4/3 HD ready" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	echo "begrenzung 1024x768 ${BILD_BREIT}x${BILD_HOCH}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	SOLL_XY="$(begrenzung 1024x768 ${BILD_BREIT}x${BILD_HOCH})"
 else
-	echo "# 880: 16/9 HD ready" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	if [ "1280" -lt "${BILD_BREIT}" ] ; then
-		SOLL_XY="1280x720"	# 16/9: 1280×720 → WXGA
-	fi
-	if [ "720" -lt "${BILD_HOCH}" ] ; then
-		SOLL_XY="1280x720"	# 16/9: 1280×720 → WXGA
-	fi
+	echo "# 880 WXGA: 16/9 HD ready" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	echo "begrenzung 1280x720 ${BILD_BREIT}x${BILD_HOCH}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	SOLL_XY="$(begrenzung 1280x720 ${BILD_BREIT}x${BILD_HOCH})"
 fi
 
 BILD_BREIT="$(echo "${SOLL_XY}" | awk -F'x' '{print $1}')"
 BILD_HOCH="$( echo "${SOLL_XY}" | awk -F'x' '{print $2}')"
 
-echo "# 890 Profil
+echo "# 890 Profil:
 # DAR_FAKTOR='${DAR_FAKTOR}'
 # SOLL_XY='${SOLL_XY}'
+# BILD_BREIT='${BILD_BREIT}'
+# BILD_HOCH='${BILD_HOCH}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 1359
@@ -115,35 +148,29 @@ echo "# 890 Profil
 
 fullhd()
 {
-echo "# 900 Profil
+echo "# 900 Profil:
 # DAR_FAKTOR='${DAR_FAKTOR}'
 # SOLL_XY='${SOLL_XY}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 if [ "${DAR_FAKTOR}" -lt "149333" ] ; then
-	echo "# 910:  4/3 HD ready" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	if [ "1440" -lt "${BILD_BREIT}" ] ; then
-		SOLL_XY="1440x1080"	#  4/3: 1440×1080 → HDV
-	fi
-	if [ "1080" -lt "${BILD_HOCH}" ] ; then
-		SOLL_XY="1440x1080"	#  4/3: 1440×1080 → HDV
-	fi
+	echo "# 910 HDV:  4/3 HD ready" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	echo "begrenzung 1440x1080 ${BILD_BREIT}x${BILD_HOCH}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	SOLL_XY="$(begrenzung 1440x1080 ${BILD_BREIT}x${BILD_HOCH})"
 else
-	echo "# 920: 16/9 HD ready" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	if [ "1920" -lt "${BILD_BREIT}" ] ; then
-		SOLL_XY="1920x1080"	# 16/9: 1920×1080 → Full HD
-	fi
-	if [ "1080" -lt "${BILD_HOCH}" ] ; then
-		SOLL_XY="1920x1080"	# 16/9: 1920×1080 → Full HD
-	fi
+	echo "# 920 Full HD: 16/9 HD ready" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	echo "begrenzung 1920x1080 ${BILD_BREIT}x${BILD_HOCH}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	SOLL_XY="$(begrenzung 1920x1080 ${BILD_BREIT}x${BILD_HOCH})"
 fi
 
 BILD_BREIT="$(echo "${SOLL_XY}" | awk -F'x' '{print $1}')"
 BILD_HOCH="$( echo "${SOLL_XY}" | awk -F'x' '{print $2}')"
 
-echo "# 930 Profil
+echo "# 930 Profil:
 # DAR_FAKTOR='${DAR_FAKTOR}'
 # SOLL_XY='${SOLL_XY}'
+# BILD_BREIT='${BILD_BREIT}'
+# BILD_HOCH='${BILD_HOCH}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 940
@@ -154,6 +181,12 @@ echo "# 930 Profil
 
 firetv()
 {
+echo "# 953 Profil:
+X264='${X264}'
+X265='${X265}'
+SOLL_XY='${SOLL_XY}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
 if [ "x" != "x${X264}" ] ; then
 	PROFIL_BILDBREIT="1920"
 	PROFIL_BILDHOEHE="1080"
@@ -171,11 +204,19 @@ else
 	#PROFIL_OPTIONEN="-profile:v ${PROFIL_MPEG} -pix_fmt yuv420p -color_primaries bt709 -color_trc bt709 -colorspace bt709 -color_range tv"
 fi
 
+echo "# 957 Profil:
+SOLL_XY='${SOLL_XY}'
+PROFIL_BILDHOEHE='${PROFIL_BILDHOEHE}'
+BILD_HOCH='${BILD_HOCH}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
 if [ "${PROFIL_BILDHOEHE}" -lt "${BILD_HOCH}" ] ; then
-	echo "# 950:  FireTV Gen 2" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	echo "# 950 Profil:  FireTV Gen 2" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	if [ "x" != "x${X264}" -o "x" != "x${X265}" ] ; then
+		echo "# 951 Profil: fullhd" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 		fullhd
 	else
+		echo "# 952 Profil: hdready" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 		hdready
 	fi
 fi
@@ -183,7 +224,7 @@ fi
 BILD_BREIT="$(echo "${SOLL_XY}" | awk -F'x' '{print $1}')"
 BILD_HOCH="$( echo "${SOLL_XY}" | awk -F'x' '{print $2}')"
 
-echo "# 960: Profil
+echo "# 960 Profil:
 BILD_BREIT='${BILD_BREIT}'
 BILD_HOCH='${BILD_HOCH}'
 VIDEOCODEC='${VIDEOCODEC}'
@@ -198,7 +239,7 @@ PROFIL_OPTIONEN='${PROFIL_OPTIONEN}'
 SOLL_XY='${SOLL_XY}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
-#exit 970
+exit 970
 }
 
 #==============================================================================#

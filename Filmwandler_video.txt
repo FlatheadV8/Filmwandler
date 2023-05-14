@@ -48,6 +48,12 @@ if [ -z "${IN_XY}" ] ; then
 fi
 
 echo "# 640 Video
+# IN_XY='${IN_XY}'
+# IN_BREIT='${IN_BREIT}'
+# IN_HOCH='${IN_HOCH}'
+# O_BREIT='${O_BREIT}'
+# O_HOCH='${O_HOCH}'
+
 # IST_XY='${IST_XY}'
 # IN_DAR='${IN_DAR}'
 # IN_PAR='${IST_PAR}'
@@ -60,15 +66,19 @@ echo "# 640 Video
 #------------------------------------------------------------------------------#
 ### Seitenverhältnis des Bildes (DAR)
 
-if [ -n "${IST_DAR}" ] ; then
-	IN_DAR="${IST_DAR}"
+if [ x == "x${IN_DAR}" ] ; then
+	if [ x != "x${IST_DAR}" ] ; then
+		IN_DAR="${IST_DAR}"
+	fi
 fi
 
 #----------------------------------------------------------------------#
 ### Seitenverhältnis der Bildpunkte (PAR / SAR)
 
-if [ x == "x${IST_PAR}" ] ; then
-	IN_PAR="${IST_PAR}"
+if [ x == "x${IN_PAR}" ] ; then
+	if [ x != "x${IST_PAR}" ] ; then
+		IN_PAR="${IST_PAR}"
+	fi
 fi
 
 #----------------------------------------------------------------------#
@@ -76,9 +86,9 @@ fi
 
 ARBEITSWERTE_PAR()
 {
-if [ -n "${IN_PAR}" ] ; then
+if [ x != "x${IN_PAR}" ] ; then
 	PAR="$(echo "${IN_PAR}" | grep -E '[:/]')"
-	if [ -n "${PAR}" ] ; then
+	if [ x != "x${PAR}" ] ; then
 		PAR_KOMMA="$(echo "${PAR}" | grep -E '[:/]' | awk -F'[:/]' '{print $1/$2}')"
 		PAR_FAKTOR="$(echo "${PAR}" | grep -E '[:/]' | awk -F'[:/]' '{printf "%u\n", ($1*100000)/$2}')"
 	else

@@ -6,6 +6,7 @@
 #
 #------------------------------------------------------------------------------#
 # ffprobe -v error -select_streams v:0 -show_entries stream=width,height,duration,bit_rate -of default=noprint_wrappers=1 input.mp4
+# siehe auch Filmwandler_ffprobe-show_streams.sh
 #------------------------------------------------------------------------------#
 
 #VERSION="v2022072800"			# Version 1
@@ -142,7 +143,7 @@ if [ -r "${FILM_DATEI}" ] ; then
 
   #----------------------------------------------------------------------------#
 
-  #echo "${DATEI_GROESSE} | ${DURATION} | ${IN_BREIT}x${IN_HOCH} | ${TSNAME} | ${UTNAME} | ${FILM_DATEI}"
+  echo "# DATEI-GROESSE | Filmlänge | BreitxHoch | Ton-Spur-Name | Ton-Spur-Sprache | Untertitel-Spur-Name | Untertitel-Spur-Sprache | Film-Datei-Name"
   echo "${DATEI_GROESSE} | ${DURATION} | ${IN_BREIT}x${IN_HOCH} | ${TSNAME} | ${TON_LANG} | ${UTNAME} | ${U_LANG} | ${FILM_DATEI}"
 
   #echo "# 3
