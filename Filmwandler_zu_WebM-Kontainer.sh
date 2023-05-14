@@ -117,7 +117,7 @@ else
 	${0} ${@}
 	FILMDATEI='${FILMDATEI}'
 	FILM_NAME='${FILM_NAME}'
-	" | tee "${FILM_NAME}".${ENDUNG}.txt
+	" | tee -a "${FILM_NAME}".${ENDUNG}.txt
 fi
 
 #------------------------------------------------------------------------------#

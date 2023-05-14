@@ -898,7 +898,7 @@ fi
 echo "# 151
 BS='${BS}'
 CPU_KERNE='${CPU_KERNE}'
-" | tee "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #==============================================================================#
 #==============================================================================#
@@ -1295,125 +1295,14 @@ IN_DAR='${IN_DAR}'
 
 #==============================================================================#
 #==============================================================================#
-# Audio
-
-#------------------------------------------------------------------------------#
-
-echo "# 550
-TONSPUR='${TONSPUR}'
-" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-
-#------------------------------------------------------------------------------#
-
-if [ x == "x${TONSPUR}" ] ; then
-	TSNAME="$(echo "${META_DATEN_STREAMS}" | grep -F 'codec_type=audio' | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
-else
-	# 0:deu,1:eng,2:spa,3,4
-	TSNAME="${TONSPUR}"
-fi
-
-# 0 1 2 3 4
-TS_LISTE="$(echo "${TSNAME}" | sed 's/:[a-z]*/ /g;s/,/ /g')"
-# 5
-TS_ANZAHL="$(echo "${TSNAME}" | sed 's/,/ /g' | wc -w | awk '{print $1}')"
-
-echo "# 560
-TS_LISTE='${TS_LISTE}'
-TS_ANZAHL='${TS_ANZAHL}'
-" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-
-#------------------------------------------------------------------------------#
-### FLV unterstützt nur eine einzige Tonspur
-#   flv    + FLV        + MP3     (Sorenson Spark: H.263)
-
-if [ "flv" == "${ENDUNG}" ] ; then
-	if [ "1" -lt "${TS_ANZAHL}" ] ; then
-		echo '# 570
-		FLV unterstützt nur eine einzige Tonspur!
-		' | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-		exit 580
-	fi
-fi
-
-#------------------------------------------------------------------------------#
-### STANDARD-AUDIO-SPUR
-
-if [ x == "x${TONSPUR}" ] ; then
-	#AUDIO_SPUR_SPRACHE="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_entries stream=index:stream_tags=language -select_streams a -of compact=p=0:nk=1 | awk -F '|' '{print $1-1,$2}')"
-	AUDIO_SPUR_SPRACHE="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | tr -s ';' '\n' | grep -F 'TAG:language=' | awk -F'=' '{print $NF}' | nl | awk '{print $1-1,$2}')"
-	unset META_AUDIO_SPRACHE
-else
-	# 0 audio deu
-	# 1 audio eng
-	# 2 audio spa
-	# 3 audio und
-	# 4 audio und
-	AUDIO_SPUR_SPRACHE="$(echo "${TONSPUR}" | grep -F ':' | tr -s ',' '\n' | sed 's/:/ /g;s/.*/& und/' | awk '{print $1,"audio",$2}')"
-	META_AUDIO_SPRACHE="$(echo "${AUDIO_SPUR_SPRACHE}" | grep -Ev '^$' | while read A B C; do echo "-metadata:s:a:${A} language=${C}"; done | tr -s '\n' ' ')"
-fi
-
-### Die Bezeichnungen (Sprache) für die Audiospuren werden automatisch übernommen.
-if [ x == "x${SOLL_STANDARD_AUDIO_SPUR}" ] ; then
-	### wenn nichts angegeben wurde, dann
-	### Deutsch als Standard-Sprache voreinstellen
-	AUDIO_STANDARD_SPUR="$(echo "${AUDIO_SPUR_SPRACHE}" | grep -Ei " deu| ger" | awk '{print $1}' | head -n1)"
-
-	if [ x == "x${AUDIO_STANDARD_SPUR}" ] ; then
-		### wenn nichts angegeben wurde
-		### und es keine als deutsch gekennzeichnete Spur gibt, dann
-		### STANDARD-AUDIO-SPUR vom Originalfilm übernehmen
-		### DISPOSITION:default=1
-		AUDIO_STANDARD_SPUR="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | tr -s ';' '\n' | grep -F 'DISPOSITION:default=1' | grep -E 'default=[0-9]' | awk -F'=' '{print $2-1}')"
-		if [ x == "x${AUDIO_STANDARD_SPUR}" ] ; then
-			### wenn es keine STANDARD-AUDIO-SPUR im Originalfilm gibt, dann
-			### alternativ einfach die erste Tonspur zur STANDARD-AUDIO-SPUR machen
-			AUDIO_STANDARD_SPUR=0
-		fi
-	fi
-else
-	### STANDARD-AUDIO-SPUR manuell gesetzt
-	AUDIO_STANDARD_SPUR="${SOLL_STANDARD_AUDIO_SPUR}"
-fi
-
-echo "# 590
-TONSPUR='${TONSPUR}'
-AUDIO_SPUR_SPRACHE='${AUDIO_SPUR_SPRACHE}'
-AUDIO_STANDARD_SPUR='${AUDIO_STANDARD_SPUR}'
-META_AUDIO_SPRACHE='${META_AUDIO_SPRACHE}'
-" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-
-#exit 600
-
-#==============================================================================#
 ### Video
 
 #------------------------------------------------------------------------------#
-### Seitenverhältnis des Bildes (DAR) muss hier bekannt sein!
-
-if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
-	. ${AVERZ}/Filmwandler_video.txt
-fi
-
-#exit 601
-
-#------------------------------------------------------------------------------#
-### Format-Codecs einlesen
 
 echo "# 1240
-BILD_BREIT='${BILD_BREIT}'
-BILD_HOCH='${BILD_HOCH}'
-
 ENDUNG=${ENDUNG}
 VIDEO_FORMAT=${VIDEO_FORMAT}
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-
-#set -x
-if [ x == "x${BILD_BREIT}" -o x == "x${BILD_HOCH}" ] ; then
-	echo "# 1120: ${BILD_BREIT}x${BILD_HOCH}"
-	exit 1250
-fi
-
-#------------------------------------------------------------------------------#
 
 VIDEO_ENDUNG="$(echo "${ENDUNG}" | awk '{print tolower($1)}')"
 
@@ -1516,7 +1405,122 @@ echo "# 1350 CONSTANT_QUALITY
 CONSTANT_QUALITY='${CONSTANT_QUALITY}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
+#------------------------------------------------------------------------------#
+### Seitenverhältnis des Bildes (DAR) muss hier bekannt sein!
+
+if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
+	. ${AVERZ}/Filmwandler_video.txt
+fi
+
+#exit 601
+
+#------------------------------------------------------------------------------#
+### BILD_BREIT und BILD_HOCH prüfen
+
+echo "# 1242
+BILD_BREIT='${BILD_BREIT}'
+BILD_HOCH='${BILD_HOCH}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+#set -x
+if [ x == "x${BILD_BREIT}" -o x == "x${BILD_HOCH}" ] ; then
+	echo "# 1120: ${BILD_BREIT}x${BILD_HOCH}"
+	exit 1250
+fi
+
+#exit 1251
+
 #==============================================================================#
+#==============================================================================#
+# Audio
+
+#------------------------------------------------------------------------------#
+
+echo "# 550
+TONSPUR='${TONSPUR}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+#------------------------------------------------------------------------------#
+
+if [ x == "x${TONSPUR}" ] ; then
+	TSNAME="$(echo "${META_DATEN_STREAMS}" | grep -F 'codec_type=audio' | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//')"
+else
+	# 0:deu,1:eng,2:spa,3,4
+	TSNAME="${TONSPUR}"
+fi
+
+# 0 1 2 3 4
+TS_LISTE="$(echo "${TSNAME}" | sed 's/:[a-z]*/ /g;s/,/ /g')"
+# 5
+TS_ANZAHL="$(echo "${TSNAME}" | sed 's/,/ /g' | wc -w | awk '{print $1}')"
+
+echo "# 560
+TS_LISTE='${TS_LISTE}'
+TS_ANZAHL='${TS_ANZAHL}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+#------------------------------------------------------------------------------#
+### FLV unterstützt nur eine einzige Tonspur
+#   flv    + FLV        + MP3     (Sorenson Spark: H.263)
+
+if [ "flv" == "${ENDUNG}" ] ; then
+	if [ "1" -lt "${TS_ANZAHL}" ] ; then
+		echo '# 570
+		FLV unterstützt nur eine einzige Tonspur!
+		' | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+		exit 580
+	fi
+fi
+
+#------------------------------------------------------------------------------#
+### STANDARD-AUDIO-SPUR
+
+if [ x == "x${TONSPUR}" ] ; then
+	#AUDIO_SPUR_SPRACHE="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_entries stream=index:stream_tags=language -select_streams a -of compact=p=0:nk=1 | awk -F '|' '{print $1-1,$2}')"
+	AUDIO_SPUR_SPRACHE="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | tr -s ';' '\n' | grep -F 'TAG:language=' | awk -F'=' '{print $NF}' | nl | awk '{print $1-1,$2}')"
+	unset META_AUDIO_SPRACHE
+else
+	# 0 audio deu
+	# 1 audio eng
+	# 2 audio spa
+	# 3 audio und
+	# 4 audio und
+	AUDIO_SPUR_SPRACHE="$(echo "${TONSPUR}" | grep -F ':' | tr -s ',' '\n' | sed 's/:/ /g;s/.*/& und/' | awk '{print $1,"audio",$2}')"
+	META_AUDIO_SPRACHE="$(echo "${AUDIO_SPUR_SPRACHE}" | grep -Ev '^$' | while read A B C; do echo "-metadata:s:a:${A} language=${C}"; done | tr -s '\n' ' ')"
+fi
+
+### Die Bezeichnungen (Sprache) für die Audiospuren werden automatisch übernommen.
+if [ x == "x${SOLL_STANDARD_AUDIO_SPUR}" ] ; then
+	### wenn nichts angegeben wurde, dann
+	### Deutsch als Standard-Sprache voreinstellen
+	AUDIO_STANDARD_SPUR="$(echo "${AUDIO_SPUR_SPRACHE}" | grep -Ei " deu| ger" | awk '{print $1}' | head -n1)"
+
+	if [ x == "x${AUDIO_STANDARD_SPUR}" ] ; then
+		### wenn nichts angegeben wurde
+		### und es keine als deutsch gekennzeichnete Spur gibt, dann
+		### STANDARD-AUDIO-SPUR vom Originalfilm übernehmen
+		### DISPOSITION:default=1
+		AUDIO_STANDARD_SPUR="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | tr -s ';' '\n' | grep -F 'DISPOSITION:default=1' | grep -E 'default=[0-9]' | awk -F'=' '{print $2-1}')"
+		if [ x == "x${AUDIO_STANDARD_SPUR}" ] ; then
+			### wenn es keine STANDARD-AUDIO-SPUR im Originalfilm gibt, dann
+			### alternativ einfach die erste Tonspur zur STANDARD-AUDIO-SPUR machen
+			AUDIO_STANDARD_SPUR=0
+		fi
+	fi
+else
+	### STANDARD-AUDIO-SPUR manuell gesetzt
+	AUDIO_STANDARD_SPUR="${SOLL_STANDARD_AUDIO_SPUR}"
+fi
+
+echo "# 590
+TONSPUR='${TONSPUR}'
+AUDIO_SPUR_SPRACHE='${AUDIO_SPUR_SPRACHE}'
+AUDIO_STANDARD_SPUR='${AUDIO_STANDARD_SPUR}'
+META_AUDIO_SPRACHE='${META_AUDIO_SPRACHE}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+#exit 600
+
 #------------------------------------------------------------------------------#
 ### Audio-Codec
 

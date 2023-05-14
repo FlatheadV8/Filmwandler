@@ -17,13 +17,6 @@ HD_HOCH="$( echo "${1}" | awk -F'x' '{print $2}')"
 TEST_BREIT="$(echo "${2}" | awk -F'x' '{print $1}')"
 TEST_HOCH="$( echo "${2}" | awk -F'x' '{print $2}')"
 
-### nur wenn bei beiden das gleiche DAR ist
-#if [ "${HD_BREIT}" -lt "${TEST_BREIT}" -o "${HD_HOCH}" -lt "${TEST_HOCH}" ] ; then
-#	echo "${HD_BREIT}x${HD_HOCH}"
-#else
-#	echo "${TEST_BREIT}x${TEST_HOCH}"
-#fi
-
 if [ "${HD_BREIT}" -le "${TEST_BREIT}" ] ; then
 	# HD_HOCH = echo "1280 720 1920 800" | awk '{printf "%.0f %.0f\n", $1,($1*$4/$3)/2}' | awk '{print $1"x"2*$2}'
 	echo "${HD_BREIT} ${HD_HOCH} ${TEST_BREIT} ${TEST_HOCH}" | awk '{printf "%.0f %.0f\n", $1,($1*$4/$3)/2}' | awk '{print $1"x"2*$2}'
