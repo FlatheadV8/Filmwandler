@@ -108,7 +108,7 @@
 #VERSION="v2023051100"			# Variable "CPU_KERNE" mit Anzahl der verfügbaren CPU-Kernen gefüllt
 #VERSION="v2023051200"			# FireTV-Profil überarbeitet; hdtvmin -> hdready umbenannt; hls und hdready sind jetzt Profile wie firetv
 #VERSION="v2023051300"			# ab jetzt ist das normalisieren von DAR auf einen der Standards (16/9 oder 4/3) nicht mehr die Voreinstellung
-VERSION="v2023051900"			# PATH-Variable angepasst
+VERSION="v2023051900"			# PATH-Variable angepasst + optimiert für /bin/sh
 
 
 VERSION_METADATEN="${VERSION}"
@@ -881,11 +881,31 @@ REPARATUR_PARAMETER="-fflags +genpts"
 
 BS=$(uname -s)
 if [ "FreeBSD" == "${BS}" ] ; then
-	CPU_KERNE="$(sysctl -n hw.ncpu)"
-elif [ "Linux" == "${BS}" ] ; then
-	CPU_KERNE="$(nproc --all)"
+	CPU_KERNE="$(sysctl -n kern.smp.cores)"
 	if [ "x" == "x${CPU_KERNE}" ] ; then
-		CPU_KERNE="$(grep -F processor /proc/cpuinfo | awk '{print 1+$NF}' | tail -n1)"
+		CPU_KERNE="$(sysctl -n hw.ncpu)"
+	fi
+elif [ "Darwin" == "${BS}" ] ; then
+	CPU_KERNE="$(sysctl -n hw.physicalcpu)"
+	if [ "x" == "x${CPU_KERNE}" ] ; then
+		CPU_KERNE="$(sysctl -n hw.logicalcpu)"
+	fi
+elif [ "Linux" == "${BS}" ] ; then
+	CPU_KERNE="$(lscpu -p=CORE | grep -E '^[0-9]' | sort | uniq | wc -l)"
+	if [ "x" == "x${CPU_KERNE}" ] ; then
+		CPU_KERNE="$(awk '/^cpu cores/{print $NF}' /proc/cpuinfo | head -n1)"
+		if [ "x" == "x${CPU_KERNE}" ] ; then
+			CPU_KERNE="$(sed 's/.,//' /sys/devices/system/cpu/cpu0/topology/core_cpus_list)"
+			if [ "x" == "x${CPU_KERNE}" ] ; then
+				CPU_KERNE="$(grep -m 1 'cpu cores' /proc/cpuinfo | sed 's/.* //')"
+				if [ "x" == "x${CPU_KERNE}" ] ; then
+					CPU_KERNE="$(grep -m 1 'cpu cores' /proc/cpuinfo | awk '{print $NF}')"
+					if [ "x" == "x${CPU_KERNE}" ] ; then
+						CPU_KERNE="$(nproc --all)"
+					fi
+				fi
+			fi
+		fi
 	fi
 fi
 
@@ -1681,28 +1701,28 @@ if [ "${TS_ANZAHL}" -gt 0 ] ; then
 				if [ x == "x${AUDIO_KANAELE}" ] ; then
 					AUDIO_KANAELE=6
 				fi
-				#echo -n " -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_51}"
-				echo -n " -map 0:a:${DIE_TS} ${Sound_51}"
+				#printf " -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_51}"
+				printf " -map 0:a:${DIE_TS} ${Sound_51}"
 			elif [ "x${AKL71}" != "x" ] ; then
 				if [ x == "x${AUDIO_KANAELE}" ] ; then
 					AUDIO_KANAELE=8
 				fi
-				#echo -n " -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_71}"
-				echo -n " -map 0:a:${DIE_TS} ${Sound_71}"
+				#printf " -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_71}"
+				printf " -map 0:a:${DIE_TS} ${Sound_71}"
 			else
 				if [ x == "x${AUDIO_KANAELE}" ] ; then
 					AUDIO_KANAELE=2
 				fi
-				#echo -n " -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_ST}"
-				echo -n " -map 0:a:${DIE_TS} ${Sound_ST}"
+				#printf " -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} ${Sound_ST}"
+				printf " -map 0:a:${DIE_TS} ${Sound_ST}"
 			fi
 		else
 			AUDIO_KANAELE="2"
 			echo "# 1470
 			AUDIO_KANAELE='${AUDIO_KANAELE}'
 			" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-			#echo -n " -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} -ac 2"
-			echo -n " -map 0:a:${DIE_TS}"
+			#printf " -map 0:a:${DIE_TS} -c:a ${AUDIOCODEC} -ac 2"
+			printf " -map 0:a:${DIE_TS}"
 		fi
 	done)"
 	#----------------------------------------------------------------------#
@@ -1712,7 +1732,7 @@ if [ "${TS_ANZAHL}" -gt 0 ] ; then
 	do
 		TONSPUR_SPRACHE="$(echo "${AUDIO_SPUR_SPRACHE}" | grep -E "^${DIE_TS} " | awk '{print $NF}' | head -n1)"
 
-		echo -n " -map 0:a:${DIE_TS} -c:a copy"
+		printf " -map 0:a:${DIE_TS} -c:a copy"
 	done)"
 
 else

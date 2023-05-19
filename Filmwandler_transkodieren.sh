@@ -39,7 +39,8 @@
 #VERSION="v2022120600"		# + HLS-Kompatibilitäts-Option
 #VERSION="v2022120700"		# den alternativen Zweig (für den Fall, dass keine UUntertitel vorhanden sind) abgeschaltet, weil dort WebM mit AV1 zum Einsatz kommt, was z.Z. noch viel zu langsam ist
 #VERSION="v2022120700"		# Fehler in der MP4-Erstellung behoben
-VERSION="v2022122200"		# Fehler in der MP4-Erstellung behoben
+#VERSION="v2022122200"		# Fehler in der MP4-Erstellung behoben
+VERSION="v2023051900"		# optimiert für /bin/sh
 
 
 ALLE_OPTIONEN="${@}"
@@ -95,7 +96,7 @@ while [ "${#}" -ne "0" ]; do
                         shift
                         ;;
                 *)
-                        echo -n .
+                        printf .
 			SONSTIGE_OPTIONEN="${SONSTIGE_OPTIONEN} ${1}"
                         shift
                         ;;
