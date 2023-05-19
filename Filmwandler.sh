@@ -107,7 +107,8 @@
 #VERSION="v2023050600"			# neue Option: zur Begrenzung für den "FireTV Gen. 2" + von "-tune film" auf "-tune ssim" umgestellt
 #VERSION="v2023051100"			# Variable "CPU_KERNE" mit Anzahl der verfügbaren CPU-Kernen gefüllt
 #VERSION="v2023051200"			# FireTV-Profil überarbeitet; hdtvmin -> hdready umbenannt; hls und hdready sind jetzt Profile wie firetv
-VERSION="v2023051300"			# ab jetzt ist das normalisieren von DAR auf einen der Standards (16/9 oder 4/3) nicht mehr die Voreinstellung
+#VERSION="v2023051300"			# ab jetzt ist das normalisieren von DAR auf einen der Standards (16/9 oder 4/3) nicht mehr die Voreinstellung
+VERSION="v2023051900"			# PATH-Variable angepasst
 
 
 VERSION_METADATEN="${VERSION}"
@@ -134,7 +135,7 @@ VERSION_METADATEN="${VERSION}"
 
 
 #set -x
-PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+PATH="${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 STARTZEITPUNKT="$(date +'%s')"
 
@@ -765,11 +766,10 @@ done
 PROGRAMM="$(which ffmpeg)"
 if [ x == "x${PROGRAMM}" ] ; then
 	PROGRAMM="$(which avconv)"
-fi
-
-if [ x == "x${PROGRAMM}" ] ; then
-	echo "Weder avconv noch ffmpeg konnten gefunden werden. Abbruch!"
-	exit 90
+	if [ x == "x${PROGRAMM}" ] ; then
+		echo "Weder avconv noch ffmpeg konnten gefunden werden. Abbruch!"
+		exit 90
+	fi
 fi
 
 #==============================================================================#
@@ -2309,7 +2309,7 @@ fi
 
 #------------------------------------------------------------------------------#
 
-ls -lh "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+ls -lh "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt "${ZIELVERZ}"/${PROTOKOLLDATEI}.log | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 LAUFZEIT="$(echo "${STARTZEITPUNKT} $(date +'%s')" | awk '{print $2 - $1}')"
 echo "# 1850
