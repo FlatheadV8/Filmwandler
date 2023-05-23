@@ -108,7 +108,8 @@
 #VERSION="v2023051100"			# Variable "CPU_KERNE" mit Anzahl der verfügbaren CPU-Kernen gefüllt
 #VERSION="v2023051200"			# FireTV-Profil überarbeitet; hdtvmin -> hdready umbenannt; hls und hdready sind jetzt Profile wie firetv
 #VERSION="v2023051300"			# ab jetzt ist das normalisieren von DAR auf einen der Standards (16/9 oder 4/3) nicht mehr die Voreinstellung
-VERSION="v2023051900"			# PATH-Variable angepasst + optimiert für /bin/sh
+#VERSION="v2023051900"			# PATH-Variable angepasst + optimiert für /bin/sh
+VERSION="v2023052300"			# da es im neuen FFmpeg mcdeint nicht mehr gibt, wurde von yadif=1/3,mcdeint=mode=extra_slow auf yadif=1:-1:0 umgestellt
 
 
 VERSION_METADATEN="${VERSION}"
@@ -1125,7 +1126,8 @@ if [ "${SCAN_TYPE}" != "progressive" ] ; then
 	# https://ffmpeg.org/ffmpeg-filters.html#yadif-1
 	# https://ffmpeg.org/ffmpeg-filters.html#mcdeint
         #ZEILENSPRUNG="yadif=3:1,mcdeint=2:1,"
-        ZEILENSPRUNG="yadif=1/3,mcdeint=mode=extra_slow,"
+        #ZEILENSPRUNG="yadif=1/3,mcdeint=mode=extra_slow,"
+        ZEILENSPRUNG="yadif=1:-1:0,"
     fi
 fi
 
