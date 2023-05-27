@@ -143,7 +143,8 @@ KOMPLETT_DURCHSUCHEN="-probesize 9223372036G -analyzeduration 9223372036G"
 #------------------------------------------------------------------------------#
 ### Parameter zum reparieren defekter Container
 
-REPARATUR_PARAMETER="-fflags +genpts"
+#REPARATUR_PARAMETER="-fflags +genpts"
+REPARATUR_PARAMETER="-fflags +genpts+igndts"
 
 #==============================================================================#
 transkodieren()

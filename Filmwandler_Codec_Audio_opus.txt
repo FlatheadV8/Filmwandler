@@ -32,9 +32,10 @@ VERSION="v2023042400"                   # schreibt jetzt in die richtige Protoko
 
 #------------------------------------------------------------------------------#
 
-#Sound_ST='-af channelmap=channel_layout=stereo'	# Stereo (2.0)
-#Sound_51='-af channelmap=channel_layout=5.1'		# 5.1
-#Sound_71='-af channelmap=channel_layout=7.1'		# 7.1
+#Sound_ST='-mapping_family 0 -af channelmap=channel_layout=stereo'	# Stereo (2.0)
+#Sound_51='-mapping_family 1 -af channelmap=channel_layout=5.1(side)'	# 5.1
+#Sound_51='-mapping_family 1 -af channelmap=channel_layout=5.1'		# 5.1 mit backchannels
+#Sound_71='-mapping_family 1 -af channelmap=channel_layout=7.1'		# 7.1
 #
 #AUDIOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 #if [ "x${AUDIOCODEC}" = "x" ] ; then
@@ -91,32 +92,27 @@ do
 	ffmpeg -h encoder=${K} 2>/dev/null | fgrep 'is not recognized by FFmpeg.' >/dev/null || echo "${K}"
 done | head -n1)"
 
+#------------------------------------------------------------------------------#
 ### leider ist "opus" noch experimentel und kann nur Stereo
+
 if [ "${AUDIOCODEC}" == "opus" ] ; then
-	AUDIOCODEC="opus -strict -2"
+	AUDIO_CODEC_OPTION="-strict -2 -ac 2"		# opus
+else
+	AUDIO_CODEC_OPTION=""				# libopus
 fi
 
 #------------------------------------------------------------------------------#
 #AUDIOCODEC="libopus"
-
 
 echo "# 1001
 TS_ANZAHL=${TS_ANZAHL}
 Sound_ST='${Sound_ST}'
 Sound_51='${Sound_51}'
 Sound_71='${Sound_71}'
+AUDIO_CODEC_OPTION='${AUDIO_CODEC_OPTION}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 1001
-
-#==============================================================================#
-
-### diese Option wird mit dem Codec zusammen, nur einmal für alle Kanäle zusammen,
-### angegeben und nicht für jeden Kanal extra
-#
-### Sep. 2020: kann nur Stereo
-#AUDIO_CODEC_OPTION="-strict -2 -ac 2"		# opus
-AUDIO_CODEC_OPTION="-ac 2"			# libopus
 
 #==============================================================================#
 

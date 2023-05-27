@@ -117,7 +117,7 @@ SOLL_SCALE='${SOLL_SCALE}'
 
 # Video
 . $(dirname ${0})/Filmwandler_Codec_Video_divx.txt
-IFRAME="-keyint_min 2-8"
+IFRAME="-keyint_min 150"
 
 #------------------------------------------------------------------------------#
 ### AVI hat nicht zwingend quadratische Bildpunkte

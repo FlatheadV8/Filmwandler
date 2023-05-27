@@ -55,10 +55,11 @@ if [ -r "${FILM_DATEI}" ] ; then
   FILM_SCANNEN()
   {
     FILMDATEI="${1}"
+
     META_DATEN_STREAMS="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_streams 2>&1)"
     META_DATEN_ZEILENWEISE_STREAMS="$(echo "${META_DATEN_STREAMS}" | tr -s '\r' '\n' | tr -s '\n' ';' | sed 's/;\[STREAM\]/³[STREAM]/g' | tr -s '³' '\n')"
-
     DURATION="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^TAG:DURATION/{print $2}' | grep -Fv 'N/A' | head -n1)"
+
     if [ "x${DURATION}" != x ] ; then
 	CODEC_LONG_NAME="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n' | awk -F'=' '/^codec_long_name=/{print $2}' | grep -Fv 'N/A' | head -n1)"
 	META_DATEN_SPURSPRACHEN="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -E 'TAG:language=' | while read Z ; do echo "${Z}" | tr -s ';' '\n' | awk -F'=' '/^index=|^codec_type=|^TAG:language=/{print $2}' | tr -s '\n' ' ' ; echo ; done)"
@@ -96,9 +97,9 @@ if [ -r "${FILM_DATEI}" ] ; then
     fi
   }
 
-  #echo "# 1
+  echo "# 1
   # FILM_DATEI='${FILM_DATEI}'
-  #"
+  "
 
   #----------------------------------------------------------------------------#
 
@@ -146,7 +147,7 @@ if [ -r "${FILM_DATEI}" ] ; then
   echo "# DATEI-GROESSE | Filmlänge | BreitxHoch | Ton-Spur-Name | Ton-Spur-Sprache | Untertitel-Spur-Name | Untertitel-Spur-Sprache | Film-Datei-Name"
   echo "${DATEI_GROESSE} | ${DURATION} | ${IN_BREIT}x${IN_HOCH} | ${TSNAME} | ${TON_LANG} | ${UTNAME} | ${U_LANG} | ${FILM_DATEI}"
 
-  #echo "# 3
+  echo "# 3
   # DATEI_GROESSE='${DATEI_GROESSE}'
   # CODEC_LONG_NAME='${CODEC_LONG_NAME}'
   # IN_XY='${IN_BREIT}x${IN_HOCH}'
@@ -162,7 +163,7 @@ if [ -r "${FILM_DATEI}" ] ; then
   # IN_PAR='${IN_PAR}'
   # IN_DAR='${IN_DAR}'
   # DURATION='${DURATION}'
-  #"
+  "
 #else
 #  echo "Der Film '${FILM_DATEI}' konnte nicht gelesen werden."
 fi

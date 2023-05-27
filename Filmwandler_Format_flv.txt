@@ -35,7 +35,7 @@ FORMAT="flv"
 # Video
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 . $(dirname ${0})/Filmwandler_Codec_Video_flv.txt
-IFRAME="-keyint_min 2-8"
+IFRAME="-keyint_min 150"
 
 #------------------------------------------------------------------------------#
 ### Flash Video ignoriert im Normalfall das DAR

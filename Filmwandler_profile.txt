@@ -11,6 +11,9 @@ X265="$(echo "${VIDEOCODEC}" | grep -E '265|hevc')"
 
 begrenzung()
 {
+# -vf "scale='min(1920,iw)':-1"
+# -vf "scale=-1:'min(1080,ih)'"
+
 HD_BREIT="$(echo "${1}" | awk -F'x' '{print $1}')"
 HD_HOCH="$( echo "${1}" | awk -F'x' '{print $2}')"
 
@@ -24,6 +27,33 @@ else
 	# HD_BREIT = echo "1280 720 1024 768" | awk '{print $2*$3/$4"x"$2}'
 	echo "${HD_BREIT} ${HD_HOCH} ${TEST_BREIT} ${TEST_HOCH}" | awk '{printf "%.0f %.0f\n", ($2*$3/$4)/2,$2}' | awk '{print 2*$1"x"$2}'
 fi
+}
+
+#==============================================================================#
+### universal
+
+universal()
+{
+echo "# 200 Profil:
+# DAR_FAKTOR='${DAR_FAKTOR}'
+# SOLL_XY='${SOLL_XY}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+echo "# 210 universal: ${PROFIL_NAME}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+echo "begrenzung ${PROFIL_NAME} ${BILD_BREIT}x${BILD_HOCH}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+SOLL_XY="$(begrenzung ${PROFIL_NAME} ${BILD_BREIT}x${BILD_HOCH})"
+
+BILD_BREIT="$(echo "${SOLL_XY}" | awk -F'x' '{print $1}')"
+BILD_HOCH="$( echo "${SOLL_XY}" | awk -F'x' '{print $2}')"
+
+echo "# 230 Profil:
+# DAR_FAKTOR='${DAR_FAKTOR}'
+# SOLL_XY='${SOLL_XY}'
+# BILD_BREIT='${BILD_BREIT}'
+# BILD_HOCH='${BILD_HOCH}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+#exit 240
 }
 
 #==============================================================================#
@@ -103,6 +133,7 @@ echo "# 840 Profil:
 ### HD-ready
 ### Mindestanvorderungen des "HD ready"-Standards umsetzen
 ### das macht bei MP4-Filmen am meisten Sinn
+### FireTV
 
 hdready()
 {
@@ -136,8 +167,8 @@ echo "# 890 Profil:
 
 #==============================================================================#
 ### Full-HD
-### Mindestanvorderungen des "HD ready"-Standards umsetzen
-### das macht bei MP4-Filmen am meisten Sinn
+### Mindestanvorderungen des "Full HD"-Standards
+### Chromecast
 
 fullhd()
 {

@@ -1,5 +1,7 @@
 #------------------------------------------------------------------------------#
 
+VERSION="v2023052600"			# das Profil fullhd konnte nicht aufgerufen werden / ein neues universelles Profil ist dazu gekommen, bei dem eine Auflösung frei gewählt werden kann
+
 echo "# 610 Video
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
@@ -337,23 +339,27 @@ SOLL_XY='${SOLL_XY}'
 
 # alle Profile laden
 if [ "x" != "x${PROFIL_NAME}" ] ; then
+        # -profil hls
+        # -profil fullhd
+        # -profil hdready
+        # -profil firetv
+        # -profil 1920x1080
 	. ${AVERZ}/Filmwandler_profile.txt
-fi
 
-#------------------------------------------------------------------------------#
-### das angegebene Profil wird ausgeführt
+	#----------------------------------------------------------------------#
+	### das angegebene Profil wird ausgeführt
 
-if [ "hls" == "${PROFIL_NAME}" ] ; then
-	hls
-fi
-
-if [ "hdready" == "${PROFIL_NAME}" ] ; then
-	hdready
-fi
-
-# FireTV-Stick
-if [ "firetv" == "${PROFIL_NAME}" ] ; then
-	firetv
+	if [ "hls" == "${PROFIL_NAME}" ] ; then
+		hls
+	elif [ "fullhd" == "${PROFIL_NAME}" ] ; then
+		fullhd
+	elif [ "hdready" == "${PROFIL_NAME}" ] ; then
+		hdready
+	elif [ "firetv" == "${PROFIL_NAME}" ] ; then
+		firetv
+	else
+		universal
+	fi
 fi
 
 echo "# 1368 Video-Profil

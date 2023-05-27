@@ -33,7 +33,7 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt		# wird nur von "Codec_Video_264" verwendet
 #. $(dirname ${0})/Filmwandler_Codec_Video_264.txt	# AVC  -> HTML5, HLS
 . $(dirname ${0})/Filmwandler_Codec_Video_265.txt	# HEVC -> HTML5, HLS
-IFRAME="-keyint_min 2-8"
+IFRAME="-keyint_min 150"
 
 # verschiebt den Index an den Anfang
 # das dauert eine Weile und funktioniert nicht bei Fragmenten

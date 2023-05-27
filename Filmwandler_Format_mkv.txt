@@ -20,7 +20,7 @@ VERSION="v2023051400"			# auf VP9 + Vorbis umgestellt, weil der FireTV-Stick die
 
 # Format
 FORMAT="matroska"
-IFRAME="-keyint_min 2-8"
+IFRAME="-keyint_min 150"
 
 #==============================================================================#
 #==============================================================================#

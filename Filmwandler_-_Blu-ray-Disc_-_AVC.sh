@@ -356,7 +356,7 @@ VIDEO_QUALITAET_7="${VIDEO_OPTION} -crf 18"		# von "0" (verlustfrei) bis "51"
 VIDEO_QUALITAET_8="${VIDEO_OPTION} -crf 17"		# von "0" (verlustfrei) bis "51"
 VIDEO_QUALITAET_9="${VIDEO_OPTION} -crf 16"		# von "0" (verlustfrei) bis "51"
 
-IFRAME="-keyint_min 2-8"
+IFRAME="-keyint_min 150"
 
 #echo "# 470:
 # LEVEL='${LEVEL}'
