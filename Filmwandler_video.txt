@@ -68,7 +68,7 @@ echo "# 640 Video
 #------------------------------------------------------------------------------#
 ### Seitenverhältnis des Bildes (DAR)
 
-if [ x == "x${IN_DAR}" ] ; then
+if [ x = "x${IN_DAR}" ] ; then
 	if [ x != "x${IST_DAR}" ] ; then
 		IN_DAR="${IST_DAR}"
 	fi
@@ -77,7 +77,7 @@ fi
 #----------------------------------------------------------------------#
 ### Seitenverhältnis der Bildpunkte (PAR / SAR)
 
-if [ x == "x${IN_PAR}" ] ; then
+if [ x = "x${IN_PAR}" ] ; then
 	if [ x != "x${IST_PAR}" ] ; then
 		IN_PAR="${IST_PAR}"
 	fi
@@ -123,7 +123,7 @@ echo "# 670 Video
 #------------------------------------------------------------------------------#
 ### Kontrolle Seitenverhältnis des Bildes (DAR)
 
-if [ x == "x${IN_DAR}" ] ; then
+if [ x = "x${IN_DAR}" ] ; then
 	IN_DAR="$(echo "${IN_BREIT} ${IN_HOCH} ${PAR_KOMMA}" | awk '{printf("%.16f\n",$3/($2/$1))}')"
 
 	echo "# 690 Video
@@ -165,7 +165,7 @@ fi
 ### Seitenverhältnis des Bildes - Arbeitswerte berechnen (DAR)
 
 DAR="$(echo "${IN_DAR}" | grep -E '[:/]')"
-if [ x == "x${DAR}" ] ; then
+if [ x = "x${DAR}" ] ; then
 	echo "# 740 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	DAR="$(echo "${IN_DAR}" | grep -F '.')"
 	DAR_KOMMA="${DAR}"
@@ -180,7 +180,7 @@ fi
 #----------------------------------------------------------------------#
 ### Kontrolle Seitenverhältnis der Bildpunkte (PAR / SAR)
 
-if [ x == "x${IN_PAR}" ] ; then
+if [ x = "x${IN_PAR}" ] ; then
 	echo "# 760 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	IN_PAR="$(echo "${IN_BREIT} ${IN_HOCH} ${DAR_KOMMA}" | awk '{printf "%.16f\n", ($2*$3)/$1}')"
 fi
@@ -200,7 +200,7 @@ ARBEITSWERTE_PAR
 # von den Seiten die schwarzen Balken entfernen
 # crop=540:576:90:0
 #
-if [ x == "x${CROP}" ] ; then
+if [ x = "x${CROP}" ] ; then
 	echo "# 770 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	IN_BREIT="$(echo "${IN_XY}" | awk -F'x' '{print $1}')"
 	IN_HOCH="$(echo  "${IN_XY}" | awk -F'x' '{print $2}')"
@@ -248,14 +248,14 @@ FORMAT_ANPASSUNG="setsar='1/1',"
 ### dann ist es ganz einfach.
 ### Aber wenn nicht, dann sind diese Berechnungen nötig.
 
-if [ "x${ORIGINAL_DAR}" == "xJa" ] ; then
+if [ "x${ORIGINAL_DAR}" = "xJa" ] ; then
 	echo "# 880 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	ORIG_DAR_BREITE="$(echo "${IN_DAR}" | awk -F':' '{print $1}')"
 	ORIG_DAR_HOEHE="$(echo "${IN_DAR}" | awk -F':' '{print $2}')"
 	BREITE="${ORIG_DAR_BREITE}"
 	HOEHE="${ORIG_DAR_HOEHE}"
 	FORMAT_ANPASSUNG="setdar='${BREITE}/${HOEHE}',"
-elif [ "x${ORIGINAL_DAR}" == "xNein" ] ; then
+elif [ "x${ORIGINAL_DAR}" = "xNein" ] ; then
 	echo "# 890 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	if [ "x${SOLL_DAR}" != "x" ] ; then
 		echo "# 900 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
@@ -274,7 +274,7 @@ elif [ "x${ORIGINAL_DAR}" == "xNein" ] ; then
 		#
 		unset PIXELKORREKTUR
 
-		if [ x == "x${PIXELVERZERRUNG}" ] ; then
+		if [ x = "x${PIXELVERZERRUNG}" ] ; then
 			echo "# 920 Video
 			# PIXELVERZERRUNG='${PIXELVERZERRUNG}'
 			" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
@@ -349,13 +349,13 @@ if [ "x" != "x${PROFIL_NAME}" ] ; then
 	#----------------------------------------------------------------------#
 	### das angegebene Profil wird ausgeführt
 
-	if [ "hls" == "${PROFIL_NAME}" ] ; then
+	if [ "hls" = "${PROFIL_NAME}" ] ; then
 		hls
-	elif [ "fullhd" == "${PROFIL_NAME}" ] ; then
+	elif [ "fullhd" = "${PROFIL_NAME}" ] ; then
 		fullhd
-	elif [ "hdready" == "${PROFIL_NAME}" ] ; then
+	elif [ "hdready" = "${PROFIL_NAME}" ] ; then
 		hdready
-	elif [ "firetv" == "${PROFIL_NAME}" ] ; then
+	elif [ "firetv" = "${PROFIL_NAME}" ] ; then
 		firetv
 	else
 		universal
@@ -373,7 +373,7 @@ SOLL_XY='${SOLL_XY}'
 ### gewünschtes Rasterformat der Bildgröße (Auflösung)
 ### wenn ein bestimmtes Format gewünscht ist, dann muss es am Ende auch rauskommen
 
-if [ x == "x${SOLL_XY}" ] ; then
+if [ x = "x${SOLL_XY}" ] ; then
 	echo "# 1000 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	unset BILD_SCALE
 	unset SOLL_XY
@@ -439,10 +439,10 @@ else
 	### Übersetzung von Bildauflösungsnamen zu Bildauflösungen
 	### tritt nur bei manueller Auswahl der Bildauflösung in Kraft
 	AUFLOESUNG_ODER_NAME="$(echo "${SOLL_XY}" | grep -E '[0-9][0-9][0-9][x][0-9][0-9]')"
-	if [ x == "x${AUFLOESUNG_ODER_NAME}" ] ; then
+	if [ x = "x${AUFLOESUNG_ODER_NAME}" ] ; then
 		echo "# 1080 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 		### manuelle Auswahl der Bildauflösung per Namen
-		if [ x == "x${BILD_FORMATNAMEN_AUFLOESUNGEN}" ] ; then
+		if [ x = "x${BILD_FORMATNAMEN_AUFLOESUNGEN}" ] ; then
 			echo "# 1090 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 			echo "Die gewünschte Bildauflösung wurde als 'Name' angegeben: '${SOLL_XY}'"
 			echo "Für die Übersetzung wird die Datei 'Filmwandler_grafik.txt' benötigt."
@@ -502,12 +502,12 @@ SOLL_BILD_SCALE 	='${SOLL_BILD_SCALE}'
 #exit 1170
 
 if [ "x${BILD_DREHUNG}" != x ] ; then
-	if [ "90" == "${BILD_DREHUNG}" ] ; then
+	if [ "90" = "${BILD_DREHUNG}" ] ; then
 		BILD_DREHEN
 		BILD_DREHUNG=",transpose=1"
-	elif [ "180" == "${BILD_DREHUNG}" ] ; then
+	elif [ "180" = "${BILD_DREHUNG}" ] ; then
 		BILD_DREHUNG=",hflip,vflip"
-	elif [ "270" == "${BILD_DREHUNG}" ] ; then
+	elif [ "270" = "${BILD_DREHUNG}" ] ; then
 		BILD_DREHEN
 		BILD_DREHUNG=",transpose=2"
 	else
@@ -645,7 +645,7 @@ echo "# 1220 Video
 ### Funktionen weitere Berechningen für Modus, Bitrate u.a. errechnet werden
 ### kann
 
-if [ x == "x${SOLL_XY}" ] ; then
+if [ x = "x${SOLL_XY}" ] ; then
 	PIXELZAHL="$(echo "${IN_BREIT} ${IN_HOCH}" | awk '{print $1 * $2}')"
 	VERGLEICH_BREIT="${IN_BREIT}"
 	VERGLEICH_HOCH="${IN_HOCH}"

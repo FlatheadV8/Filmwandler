@@ -60,8 +60,8 @@ echo "# 230 Profil:
 ### HLS (von Apple) unterstützt insgesamt nur 8 Bildauflösungen
 
 
-if [ x == "x${BILD_BREIT}" -o x == "x${BILD_HOCH}" ] ; then
-	if [ x == "x${SOLL_XY}" ] ; then
+if [ x = "x${BILD_BREIT}" -o x = "x${BILD_HOCH}" ] ; then
+	if [ x = "x${SOLL_XY}" ] ; then
 		BILD_BREIT="${IN_BREIT}"
 		BILD_HOCH="${IN_HOCH}"
 	else
@@ -87,8 +87,8 @@ hls()
 
 HLS_AUFLOESUNGEN="$(hls_aufloesungen | awk '{print $1}')"
 
-if [ x == "x${SOLL_XY}" ] ; then
-	if [ x == "x${BILD_BREIT}" -o x == "x${BILD_HOCH}" ] ; then
+if [ x = "x${SOLL_XY}" ] ; then
+	if [ x = "x${BILD_BREIT}" -o x = "x${BILD_HOCH}" ] ; then
 		HLS_BREIT="${IN_BREIT}"
 		HLS_HOCH="${IN_HOCH}"
 	else

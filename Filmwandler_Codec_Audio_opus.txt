@@ -95,7 +95,7 @@ done | head -n1)"
 #------------------------------------------------------------------------------#
 ### leider ist "opus" noch experimentel und kann nur Stereo
 
-if [ "${AUDIOCODEC}" == "opus" ] ; then
+if [ "${AUDIOCODEC}" = "opus" ] ; then
 	AUDIO_CODEC_OPTION="-strict -2 -ac 2"		# opus
 else
 	AUDIO_CODEC_OPTION=""				# libopus

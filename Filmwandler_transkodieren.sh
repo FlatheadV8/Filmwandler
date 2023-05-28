@@ -64,7 +64,7 @@ ENDUNG_2="mkv"
 ENDUNG_3="webm"
 
 #==============================================================================#
-if [ "x${1}" == x ] ; then
+if [ x = "x${1}" ] ; then
 	echo "${0} OPTIONEN"
 	echo "siehe: ${AVERZ}/Filmwandler.sh -h"
 	echo "${0} -q [Quelle] -z [Ziel]"

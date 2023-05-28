@@ -98,11 +98,11 @@ done
 ### Programm
 
 PROGRAMM="$(which ffmpeg)"
-if [ "x${PROGRAMM}" == "x" ] ; then
+if [ "x${PROGRAMM}" = "x" ] ; then
 	PROGRAMM="$(which avconv)"
 fi
 
-if [ "x${PROGRAMM}" == "x" ] ; then
+if [ "x${PROGRAMM}" = "x" ] ; then
 	echo "Weder avconv noch ffmpeg konnten gefunden werden. Abbruch!"
 	exit 40
 fi
@@ -117,11 +117,11 @@ else
         exit 60
 fi
 
-if [ x == "x${ZIELDATEI}" ] ; then
+if [ x = "x${ZIELDATEI}" ] ; then
 	ZIEL_DATEI="${FILM_NAME}.${ENDUNG}"
 else
 	MKV="$(echo "${ZIELDATEI}" | grep -E '[.]mkv$')"
-	if [ x == "x${MKV}" ] ; then
+	if [ x = "x${MKV}" ] ; then
 		ZIEL_DATEI="${ZIELDATEI}.${ENDUNG}"
 	else
 		ZIEL_DATEI="${ZIELDATEI}"

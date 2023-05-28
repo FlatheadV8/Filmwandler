@@ -29,7 +29,7 @@ do
 done | head -n1)"
 
 ### leider ist "vorbis" noch experimentel und kann nur Stereo
-if [ "${AUDIOCODEC}" == "vorbis" ] ; then
+if [ "${AUDIOCODEC}" = "vorbis" ] ; then
 	AUDIOCODEC="vorbis -strict -2"
 fi
 

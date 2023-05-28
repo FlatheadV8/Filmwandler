@@ -144,7 +144,7 @@ AVC_LEVEL()
         	if [ x != "x${MAKRO_BLK_pro_BILD}" ] ; then
         		if [ "${MAKRO_BLK_pro_BILD}" -ge "${MAKRO_BLK_im_BILD}" ] ; then
                 		if [ "${MAKRO_BLK_pro_SEKUNDE}" -ge "${MAKRO_BLK_in_SEKUNDE}" ] ; then
-					if [ "firetv" == "${PROFIL_NAME}" ] ; then
+					if [ "firetv" = "${PROFIL_NAME}" ] ; then
 						if [ "40" -lt "${AVCLEVEL}" ] ; then
                         				echo "40"
                 				else

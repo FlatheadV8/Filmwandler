@@ -91,11 +91,11 @@ done
 ### Programm
 
 PROGRAMM="$(which ffmpeg)"
-if [ "x${PROGRAMM}" == "x" ] ; then
+if [ "x${PROGRAMM}" = "x" ] ; then
 	PROGRAMM="$(which avconv)"
 fi
 
-if [ "x${PROGRAMM}" == "x" ] ; then
+if [ "x${PROGRAMM}" = "x" ] ; then
 	echo "Weder avconv noch ffmpeg konnten gefunden werden. Abbruch!"
 	exit 40
 fi

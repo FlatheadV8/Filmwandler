@@ -9,7 +9,7 @@ AVERZ="$(dirname ${0})"			# Arbeitsverzeichnis, hier liegen diese Dateien
 
 #------------------------------------------------------------------------------#
 
-if [ "x${1}" == x ] ; then
+if [ "x${1}" = x ] ; then
 	echo "Es muss diesem Skript eine Liste übergeben werden."
 	echo ""
 	echo "${AVERZ}/Filmwandler_metadaten_anzeigen.sh > Liste.txt"
@@ -42,13 +42,13 @@ do
 
 	#echo "'${GR}' / '${DAUER}' / '${AUFL}' / '${TONSPUREN}' / '${UNTERTITELSP}' / '${DATEINAME}'"
 
-	if [ "x${TONSPUREN}" == x ] ; then
+	if [ "x${TONSPUREN}" = x ] ; then
 		TON_TON_SPUREN=""
 	else
 		TON_TON_SPUREN="-ton ${TONSPUREN}"
 	fi
 
-	if [ "x${UNTERTITELSP}" == x ] ; then
+	if [ "x${UNTERTITELSP}" = x ] ; then
 		U_UNTERTITEL_SP=""
 	else
 		U_UNTERTITEL_SP="-u ${UNTERTITELSP}"

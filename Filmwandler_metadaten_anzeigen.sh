@@ -120,7 +120,7 @@ if [ -r "${FILM_DATEI}" ] ; then
   unset IN_DAR
 
   FILM_SCANNEN "${FILM_DATEI}"
-  if [ "x${DURATION}" == x ] ; then
+  if [ "x${DURATION}" = x ] ; then
 	${AVERZ}/Filmwandler_zu_MKV-Kontainer.sh -q "${FILM_DATEI}" -z MKV-Testdatei.mkv >/dev/null 2>/dev/null
 	FILM_SCANNEN MKV-Testdatei.mkv
 	rm -f MKV-Testdatei.mkv MKV-Testdatei.mkv.txt

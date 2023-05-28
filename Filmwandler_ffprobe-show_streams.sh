@@ -96,7 +96,7 @@ fi
 #------------------------------------------------------------------------------#
 
 (
-if [ "video" == "${VIDEO_INFOS}" ] ; then
+if [ "video" = "${VIDEO_INFOS}" ] ; then
 #	BILD_DREHUNG:
 #		echo "${META_DATEN_STREAMS}" | sed -ne '/index=0/,/index=1/p' | awk -F'=' '/TAG:rotate=/{print $NF}' | head -n1
 #	FPS_TEILE:
@@ -123,7 +123,7 @@ if [ "video" == "${VIDEO_INFOS}" ] ; then
 	echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=video;' | tr -s ';' '\n'
 fi
 
-if [ "audio" == "${AUDIO_INFOS}" ] ; then
+if [ "audio" = "${AUDIO_INFOS}" ] ; then
 #	TSNAME:
 #		echo "${META_DATEN_STREAMS}" | grep -F 'codec_type=audio' | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//'
 #	TON_LANG
@@ -132,7 +132,7 @@ if [ "audio" == "${AUDIO_INFOS}" ] ; then
 	echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | tr -s ';' '\n'
 fi
 
-if [ "untertitel" == "${UNTERTITEL_INFOS}" ] ; then
+if [ "untertitel" = "${UNTERTITEL_INFOS}" ] ; then
 #	UTNAME:
 #		echo "${META_DATEN_STREAMS}" | grep -F 'codec_type=subtitle' | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//'
 #	U_LANG:
@@ -141,7 +141,7 @@ if [ "untertitel" == "${UNTERTITEL_INFOS}" ] ; then
 	echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=subtitle;' | tr -s ';' '\n'
 fi
 
-if [ "metadaten" == "${META_DATEN}" ] ; then
+if [ "metadaten" = "${META_DATEN}" ] ; then
 #	META:
 #		echo "${META_DATEN_STREAMS}" | grep -F 'codec_type=subtitle' | nl | awk '{print $1 - 1}' | tr -s '\n' ',' | sed 's/^,//;s/,$//'
 
@@ -151,7 +151,7 @@ if [ "metadaten" == "${META_DATEN}" ] ; then
 	ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_entries format_tags=description -of compact=p=0:nk=1
 fi
 
-if [ "Ja" == "${ALLE_DATEN}" ] ; then
+if [ "Ja" = "${ALLE_DATEN}" ] ; then
 	echo "${META_DATEN_STREAMS}"
 fi
 ) | sed 's/=/:\t/g;s/\[[/]*STREAM\]//'
