@@ -4,9 +4,10 @@
 #
 #==============================================================================#
 
-VERSION="v2018090200"
+#VERSION="v2018090200"
 VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
 
+TWO_PASS="Nein"				# 2-Pass encoding
 CODEC_PATTERN="vp8|vpx"			# Beispiel: "h265|hevc"
 #VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 

@@ -17,6 +17,7 @@ CODEC_PATTERN="h263"			# Beispiel: "h265|hevc"
 #
 #------------------------------------------------------------------------------#
 
+TWO_PASS="Nein"				# 2-Pass encoding
 VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
 	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"

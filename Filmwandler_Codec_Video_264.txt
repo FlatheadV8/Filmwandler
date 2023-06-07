@@ -15,6 +15,7 @@
 #VERSION="v2023050800"			# umgestellt auf einfache Parameterberechnung ohne Bluray-Kompatibilität und Makroblockberechnung
 VERSION="v2023050900"			# Abstufung so angepasst, dass bei "-vq 5" die Codecs x264, x265, aom-av1 und svt-av1 eine änlich lange Transkodierzeit benötigen (pro Minute Spielfilm, ca. 1,5 Minuten Transkodierdauer)
 
+TWO_PASS="Nein"				# 2-Pass encoding
 CODEC_PATTERN="x264"			# Beispiel: "h264|x264" (libopenh264, libx264)
 #VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 

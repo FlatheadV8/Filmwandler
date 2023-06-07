@@ -26,7 +26,8 @@
 #VERSION="v2022112900"			# auf AV1 + Opus umgestellt, weil WebM nicht HLS-kompatibel ist, wohl aber MP4
 #VERSION="v2022120400"			# auf VP9 + Opus umgestellt, weil AV1 einfach viel zu langsam ist
 #VERSION="v2022120500"			# auf AV1 + Opus umgestellt, weil mit dem neuen Skript Filmwandler_zu_WebM-Kontainer.sh bequem und schnell aus einem MKV ein WebM gemacht werden kann
-VERSION="v2022121100"			# die Variable ENDUNG darf hier nicht drin stehen
+#VERSION="v2022121100"			# die Variable ENDUNG darf hier nicht drin stehen
+VERSION="v2023060700"			# auf VP9 + Opus umgestellt, weil WebM keine officielle Unterstützung für AV1 bietet
 
 #==============================================================================#
 
@@ -42,8 +43,9 @@ FORMAT="webm"
 
 # Video
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
-#	. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
-	. $(dirname ${0})/Filmwandler_Codec_Video_av1.txt
+#	. $(dirname ${0})/Filmwandler_Codec_Video_vp8.txt
+	. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
+#	. $(dirname ${0})/Filmwandler_Codec_Video_av1.txt
 	IFRAME="-keyint_min 150"
 fi
 
@@ -53,7 +55,7 @@ FORMAT_BESCHREIBUNG="
 ********************************************************************************
 * Name:                 WebM                                                   *
 * ENDUNG:               .webm                                                  *
-* Video-Kodierung:      AV1  (freie Alternative zu H.265 für 4K)               *
+* Video-Kodierung:      VP9  (freie Alternative zu H.265 für 4K)               *
 * Audio-Kodierung:      Opus (freie Alternative zu AAC)                        *
 * Beschreibung:                                                                *
 *       - mit HTML5-Unterstützung                                              *

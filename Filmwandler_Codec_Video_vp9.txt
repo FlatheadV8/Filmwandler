@@ -10,6 +10,7 @@
 #VERSION="v2023032500"			# neue Ermittlungsmethode für Encoder
 VERSION="v2023051400"			# Voreinstellungen angepasst
 
+TWO_PASS="Nein"				# 2-Pass encoding
 CODEC_PATTERN="vp9"			# Beispiel: "h265|hevc"
 #VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 

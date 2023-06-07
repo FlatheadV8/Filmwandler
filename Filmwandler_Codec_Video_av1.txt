@@ -21,6 +21,7 @@
 #VERSION="v2023051100"			# Die Abstufung von librav1e besser abgestimmt
 VERSION="v2023051300"			# da libaom-av1 und av1 identisch sind, wurde die Funktion "intern_av1" entfernt
 
+TWO_PASS="Nein"				# 2-Pass encoding
 #CODEC_PATTERN="av1|aom"		# Beispiel: "h265|hevc"
 #VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 

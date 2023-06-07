@@ -10,6 +10,7 @@
 #VERSION="v2020092500"			# C&P-Fehler von 2018 behoben
 VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
 
+TWO_PASS="Nein"				# 2-Pass encoding
 CODEC_PATTERN="flv"			# Beispiel: "h265|hevc"
 #VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 

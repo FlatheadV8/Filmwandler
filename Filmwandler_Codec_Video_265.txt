@@ -10,6 +10,7 @@
 #VERSION="v2023032600"                   # Parameter für den x265-Encoder korrigiert
 VERSION="v2023050900"			# Abstufung so angepasst, dass bei "-vq 5" die Codecs x264, x265, aom-av1 und svt-av1 eine änlich lange Transkodierzeit benötigen (pro Minute Spielfilm, ca. 1,5 Minuten Transkodierdauer)
 
+TWO_PASS="Nein"				# 2-Pass encoding
 CODEC_PATTERN="h265|hevc"		# Beispiel: "h265|hevc"
 VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 
