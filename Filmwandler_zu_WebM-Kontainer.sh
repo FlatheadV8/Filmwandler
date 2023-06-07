@@ -35,6 +35,9 @@ STARTZEITPUNKT="$(date +'%s')"
 AVERZ="$(dirname ${0})"		# Arbeitsverzeichnis, hier liegen diese Dateien
 
 #------------------------------------------------------------------------------#
+# ffmpeg -i in.mkv -map 0 -c copy -sn out.webm
+# ffmpeg -i in.mkv -map 0:v -map 0:a -map 0:s? -c:v copy -c:a copy -c:s webvtt out.webm
+#------------------------------------------------------------------------------#
 
 # Format
 ENDUNG="webm"
