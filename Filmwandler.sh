@@ -112,7 +112,8 @@
 #VERSION="v2023052300"			# da es im neuen FFmpeg mcdeint nicht mehr gibt, wurde von yadif=1/3,mcdeint=mode=extra_slow auf yadif=1:-1:0 umgestellt + Fehler bei Abbruch von ffmpeg behoben
 #VERSION="v2023052600"			# das Profil fullhd konnte nicht aufgerufen werden / ein neues universelles Profil ist dazu gekommen, bei dem eine Auflösung frei gewählt werden kann
 #VERSION="v2023060300"			# 2-Pass aktivieren
-VERSION="v2023060700"			# 2-Pass Aktivierung als Option eingebaut
+#VERSION="v2023060700"			# 2-Pass Aktivierung als Option eingebaut
+VERSION="v2023060800"			# Fehler bei Untertitelbehandlung behoben
 
 
 VERSION_METADATEN="${VERSION}"
@@ -1807,7 +1808,14 @@ echo "# 1480
 # -map 0:s:${i} -c:s copy				# neu
 # UNTERTITEL="0,1,2,3,4"
 
-if [ x = "x${UNTERTITEL}" -o "${UNTERTITEL}" = "=0" ] ; then
+if [ x = "x${UNTERTITEL}" ] ; then
+	IST_UT_ANZAHL="$(echo "${META_DATEN_STREAMS}" | grep -F 'codec_type=subtitle' | wc -l)"
+	if [ 0 -eq ${IST_UT_ANZAHL} ] ; then
+		UNTERTITEL="=0"
+	fi
+fi
+
+if [ "${UNTERTITEL}" = "=0" ] ; then
 	U_TITEL_FF_01="-sn"
 	U_TITEL_FF_ALT="-sn"
 	U_TITEL_FF_02="-sn"
