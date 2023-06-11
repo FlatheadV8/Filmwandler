@@ -12,9 +12,6 @@ VERSION="v2022121100"			# die Variable ENDUNG darf hier nicht drin stehen
 
 #==============================================================================#
 
-# Format
-FORMAT="mpeg"
-
 #------------------------------------------------------------------------------#
 #
 # 2018-08-31
@@ -49,6 +46,11 @@ FORMAT="mpeg"
 # bei einer höheren Auflösung als VCD wird MPEG-2 eingesetzt
 #
 
+echo "# 1: -gt 352x288
+VERGLEICH_BREIT='${VERGLEICH_BREIT}'
+VERGLEICH_HOCH='${VERGLEICH_HOCH}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
 if [ "${VERGLEICH_BREIT}" -gt 352 -o "${VERGLEICH_HOCH}" -gt 288 ] ; then
 	###------------------------------------------------------------------###
 	###
@@ -58,7 +60,11 @@ if [ "${VERGLEICH_BREIT}" -gt 352 -o "${VERGLEICH_HOCH}" -gt 288 ] ; then
 	#FFMPEG_KODEK="mpeg2video -bufsize 1835k"
 	FFMPEG_TARGET="dvd"
 
+	# Format
+	FORMAT="dvd"
+
 	# Audio
+	#. $(dirname ${0})/Filmwandler_Codec_Audio_mp2.txt
 	. $(dirname ${0})/Filmwandler_Codec_Audio_ac3.txt
 
 	# Video
@@ -72,6 +78,9 @@ else
 	#FFMPEG_KODEK="mpeg1video"
 	FFMPEG_TARGET="vcd"
 
+	# Format
+	FORMAT="mpeg"
+
 	# Audio
 	. $(dirname ${0})/Filmwandler_Codec_Audio_mp2.txt
 
@@ -79,8 +88,16 @@ else
 	#. $(dirname ${0})/Filmwandler_Codec_Video_261.txt
 fi
 
+echo "# 2: -gt 352x288
+FORMAT='${FORMAT}'
+VIDEOCODEC='${VIDEOCODEC}'
+AUDIOCODEC='${AUDIOCODEC}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
+
+echo "# 3: Format MPG" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 if [ "${SOLL_FPS_RUND}" -gt 0 ] ; then
         TARGET_FPS="${SOLL_FPS_RUND}"
@@ -95,6 +112,8 @@ else
                 fi
         fi
 fi
+
+echo "# 4: Format MPG" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 ### TARGET_PREFIX: film- (24 fps), pal- (25/50 fps), ntsc- (30/60 fps)
 TARGET_PREFIX="pal"
@@ -115,6 +134,8 @@ if [ "${TARGET_FPS}" -eq 24 ] ; then
 fi
 FF_TARGET="-target ${TARGET_PREFIX}-${FFMPEG_TARGET}"
 
+echo "# 5: Format MPG" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
 #------------------------------------------------------------------------------#
  
 ### VCD ignoriert in einigen Fällen das DAR
@@ -129,13 +150,15 @@ else
 	echo "##==-- DVD --==##"
 fi
 
+echo "# 6: Format MPG" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
 #------------------------------------------------------------------------------#
 
 VIDEOCODEC="${FF_TARGET}"
 
 #------------------------------------------------------------------------------#
 
-echo "
+echo "# 7: Format MPG
 SOLL_FPS_RUND='${SOLL_FPS_RUND}'
 IN_FPS_RUND='${IN_FPS_RUND}'
 R_FPS_RUND='${R_FPS_RUND}'
@@ -147,7 +170,7 @@ FORMAT='${FORMAT}'
 BREITE='${BREITE}'
 HOEHE='${HOEHE}'
 VIDEOCODEC='${VIDEOCODEC}'
-"
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #==============================================================================#
 

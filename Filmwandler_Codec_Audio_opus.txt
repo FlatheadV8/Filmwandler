@@ -11,10 +11,8 @@
 #VERSION="v2020092500"			# weitere Variable eingeführt
 #VERSION="v2023032500"			# jetzt wird "opus" verwendet, wenn "libopus" nicht vorhanden ist
 #VERSION="v2023032500"                  # neue Ermittlungsmethode für Encoder
-VERSION="v2023042400"                   # schreibt jetzt in die richtige Protokolldatei
-
-#CODEC_PATTERN="libopus"		# Beispiel: "h265|hevc"
-#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
+#VERSION="v2023042400"			# schreibt jetzt in die richtige Protokolldatei
+VERSION="v2023061000"			# jetzt wird für jeden Audio-Kanal separat die Bit-Rate berechnet
 
 #------------------------------------------------------------------------------#
 #
@@ -32,29 +30,31 @@ VERSION="v2023042400"                   # schreibt jetzt in die richtige Protoko
 
 #------------------------------------------------------------------------------#
 
-#Sound_ST='-mapping_family 0 -af channelmap=channel_layout=stereo'	# Stereo (2.0)
-#Sound_51='-mapping_family 1 -af channelmap=channel_layout=5.1(side)'	# 5.1
-#Sound_51='-mapping_family 1 -af channelmap=channel_layout=5.1'		# 5.1 mit backchannels
-#Sound_71='-mapping_family 1 -af channelmap=channel_layout=7.1'		# 7.1
-#
-#AUDIOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
-#if [ "x${AUDIOCODEC}" = "x" ] ; then
-#	AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -F "opus" | head -n1)"
-#	if [ "x${AUDIOCODEC}" = "x" ] ; then
-#		echo ""
-#		echo "CODEC_PATTERN='${CODEC_PATTERN}'"
-#		echo "AUDIOCODEC='${AUDIOCODEC}'"
-#		echo "Leider wird dieser Codec von der aktuell installierten Version"
-#		echo "von FFmpeg nicht unterstützt!"
-#		echo ""
-#		exit 1
-#	fi
-#else
-#	AUDIOCODEC="${AUDIOCODEC}"
-#fi
+CODEC_PATTERN="opus"			# Beispiel: "h265|hevc"
 
-#AUDIOCODEC="opus"		# ist noch experimentell und gibt grundsätzlich nur Stereo aus
+AUDIOCODEC="$(suche_audio_encoder "libopus")"
+if [ "x${AUDIOCODEC}" = "x" ] ; then
+	AUDIOCODEC="$(suche_audio_encoder "${CODEC_PATTERN}")"
+	if [ "x${AUDIOCODEC}" = "x" ] ; then
+		AUDIOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+		if [ "x${AUDIOCODEC}" = "x" ] ; then
+			AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+			if [ "x${AUDIOCODEC}" = "x" ] ; then
+				echo ""
+				echo "CODEC_PATTERN='${CODEC_PATTERN}'"
+				echo "AUDIOCODEC='${AUDIOCODEC}'"
+				echo "Leider wird dieser Codec von der aktuell installierten Version"
+				echo "von FFmpeg nicht unterstützt!"
+				echo ""
+#				exit 1
 
+				AUDIOCODEC="opus"
+			fi
+		fi
+	fi
+fi
+
+#------------------------------------------------------------------------------#
 # https://ffmpeg.org/pipermail/ffmpeg-devel/2016-June/195178.html
 #
 # Example usage:
@@ -76,29 +76,17 @@ VERSION="v2023042400"                   # schreibt jetzt in die richtige Protoko
 #
 #------------------------------------------------------------------------------#
 
-#==============================================================================#
-### besten unterstützten Kodek finden
-### es wird nur nach bestimmten Kodeks gesucht, die bereits bekannt sind
-
-# der oberste wird bevorzugt
-KODEKS="
-libopus
-opus
-"
-
-# der erste Treffer wird verwendet
-AUDIOCODEC="$(for K in ${KODEKS}
-do
-	ffmpeg -h encoder=${K} 2>/dev/null | fgrep 'is not recognized by FFmpeg.' >/dev/null || echo "${K}"
-done | head -n1)"
-
 #------------------------------------------------------------------------------#
 ### leider ist "opus" noch experimentel und kann nur Stereo
 
 if [ "${AUDIOCODEC}" = "opus" ] ; then
-	AUDIO_CODEC_OPTION="-strict -2 -ac 2"		# opus
+	# diese Option wird mit dem Codec zusammen, nur einmal für alle Kanäle zusammen,
+	# angegeben und nicht für jeden Kanal extra
+	AUDIO_OPTION_GLOBAL="-strict -2 -ac 2"		# opus
 else
-	AUDIO_CODEC_OPTION=""				# libopus
+	# diese Option wird mit dem Codec zusammen, nur einmal für alle Kanäle zusammen,
+	# angegeben und nicht für jeden Kanal extra
+	AUDIO_OPTION_GLOBAL="-compression_level 10"	# libopus
 fi
 
 #------------------------------------------------------------------------------#
@@ -106,38 +94,44 @@ fi
 
 echo "# 1001
 TS_ANZAHL=${TS_ANZAHL}
-Sound_ST='${Sound_ST}'
-Sound_51='${Sound_51}'
-Sound_71='${Sound_71}'
-AUDIO_CODEC_OPTION='${AUDIO_CODEC_OPTION}'
+AUDIO_OPTION_GLOBAL='${AUDIO_OPTION_GLOBAL}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 1001
 
 #==============================================================================#
 
-### opus
-#AUDIO_OPTION="-compression_level 10"
-
 ### libopus
 ## -vbr 0 (Use constant bit rate)
 ## -vbr 1 (Use variable bit rate)
 ## -vbr 2 (Use constrained VBR)
-## Mehrkanalton kann libopus aber nur mit mapping_family (-1, 1, 255), war bis jetzt aber immer stumm
-#AUDIO_OPTION="-vbr 1 -compression_level 10 -mapping_family 255"
-AUDIO_OPTION="-vbr 1 -compression_level 10"
+## Mehrkanalton kann libopus aber nur mit mapping_family (-1, 1, 255)
 
 F_AUDIO_QUALITAET()
 {
-AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 64k"
-AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 80k"
-AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 104k"
-AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 128k"
-AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 160k"
-AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 200k"
-AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 256k"
-AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 320k"
-AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 408k"
-AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 512k"
+	AUDIO_BIT_kBIT_PRO_KANAL="
+	24
+	32
+	40
+	48
+	56
+	64
+	64
+	64
+	64
+	64
+	"
+
+	if [ "${AUDIOCODEC}" = "libopus" ] ; then
+		AUDIO_BIT_RATE="$(echo "${AUDIO_KANAELE} $(echo "${AUDIO_BIT_kBIT_PRO_KANAL}" | grep -Ev '#|^[ \t]*$' | head -n${AUDIO_VON_OBEN} | tail -n1) 64 2" | awk '{print $1 * $2}')k"
+		if [ "${AUDIO_KANAELE}" -gt 2 ] ; then
+        		echo "-b:a:${1} ${AUDIO_BIT_RATE} -vbr:a:${1} on -mapping_family:a:${1} 1 -filter:a:0 aformat=channel_layouts='7.1|6.1|5.1|5.0|quad|3.0'"
+		else
+        		echo "-b:a:${1} ${AUDIO_BIT_RATE} -vbr:a:${1} on -mapping_family:a:${1} 0 -filter:a:0 aformat=channel_layouts='stereo|mono'"
+		fi
+	else
+		AUDIO_BIT_RATE="$(echo "2 $(echo "${AUDIO_BIT_kBIT_PRO_KANAL}" | grep -Ev '#|^[ \t]*$' | head -n${AUDIO_VON_OBEN} | tail -n1) 64 2" | awk '{print $1 * $2}')k"
+        	echo "-b:a:${1} ${AUDIO_BIT_RATE} "
+	fi
 }
 

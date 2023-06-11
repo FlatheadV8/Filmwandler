@@ -60,7 +60,7 @@ AVERZ="$(dirname ${0})"			# Arbeitsverzeichnis, hier liegen diese Dateien
 ZUFALL="$(head -c 100 /dev/urandom | base64 | tr -d '\n' | tr -cd '[:alnum:]' | cut -b-12)"
 
 ### Basismaterial zum testen erstellen
-ffmpeg -i ${FILMDATEI} -map 0:v:0 -c:v ffv1 -b:v 3600k -vf scale=640x480 -map 0:a:0 -c:a ac3 -b:a 640k -ss 10 -to 70 -f avi -y ${ZUFALL}_Basisfilm.avi
+ffmpeg -i ${FILMDATEI} -map 0:v:0 -c:v ffv1 -b:v 3600k -vf scale=640x480 -map 0:a:0 -c:a ac3 -b:a 640k -sn -ss 10 -to 70 -f avi -y ${ZUFALL}_Basisfilm.avi
 
 ### Testumfang festlegen
 ENDUNGEN="$(ls ${AVERZ}/Filmwandler_Format_*.txt | awk '{gsub("[_.]"," "); print $(NF-1)}')"
@@ -70,7 +70,7 @@ echo "${ENDUNGEN}" > ${ZUFALL}_ENDUNGEN.txt
 for TEST in ${ENDUNGEN}
 do
 	echo "${AVERZ}/Filmwandler.sh -q ${ZUFALL}_Basisfilm.avi -z ${ZUFALL}_Testfilm.${TEST}"
-	${AVERZ}/Filmwandler.sh -q ${ZUFALL}_Basisfilm.avi -z ${ZUFALL}_Testfilm.${TEST} 2>&1 | tee ${ZUFALL}_Testfilm.${TEST}.log
+	${AVERZ}/Filmwandler.sh -q ${ZUFALL}_Basisfilm.avi -z ${ZUFALL}_Testfilm.${TEST} -titel "TEST ${TEST}" -k "TEST ${TEST} ${ZUFALL}" 2>&1 | tee ${ZUFALL}_Testfilm.${TEST}.log
 done
 
 ls -rtlha ${ZUFALL}_*

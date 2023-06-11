@@ -5,38 +5,41 @@
 #==============================================================================#
 
 #VERSION="v2018090200"
-VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
+#VERSION="v2023032500"			# neue Ermittlungsmethode für Encoder
+VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
 
 TWO_PASS="Nein"				# 2-Pass encoding
 CODEC_PATTERN="vp8|vpx"			# Beispiel: "h265|hevc"
-#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 
-VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
-	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+	VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 	if [ "x${VIDEOCODEC}" = "x" ] ; then
-		echo ""
-		echo "CODEC_PATTERN='${CODEC_PATTERN}'"
-		echo "VIDEOCODEC='${VIDEOCODEC}'"
-		echo "Leider wird dieser Codec von der aktuell installierten Version"
-		echo "von FFmpeg nicht unterstützt!"
-		echo ""
-		exit 1
+		VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+		if [ "x${VIDEOCODEC}" = "x" ] ; then
+			echo ""
+			echo "CODEC_PATTERN='${CODEC_PATTERN}'"
+			echo "VIDEOCODEC='${VIDEOCODEC}'"
+			echo "Leider wird dieser Codec von der aktuell installierten Version"
+			echo "von FFmpeg nicht unterstützt!"
+			echo ""
+			exit 1
+		fi
 	fi
 fi
 
-VIDEO_OPTION=""
+VIDEO_OPTION="-tune 1 -deadline 0 -quality 0 -qmin 0 -qmax 50"
 
 Z="4"
 N="1"
-VIDEO_QUALITAET_0="-crf 25 -b:v $(echo "0.3 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${Z} ${N}" | awk '{print $1 * $2 * $3 * $4 / $5}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_1="-crf 24 -b:v $(echo "0.5 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${Z} ${N}" | awk '{print $1 * $2 * $3 * $4 / $5}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_2="-crf 23 -b:v $(echo "0.7 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${Z} ${N}" | awk '{print $1 * $2 * $3 * $4 / $5}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_3="-crf 22 -b:v $(echo "1.1 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${Z} ${N}" | awk '{print $1 * $2 * $3 * $4 / $5}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_4="-crf 21 -b:v $(echo "1.6 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${Z} ${N}" | awk '{print $1 * $2 * $3 * $4 / $5}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_5="-crf 20 -b:v $(echo "2.4 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${Z} ${N}" | awk '{print $1 * $2 * $3 * $4 / $5}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_6="-crf 19 -b:v $(echo "3.7 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${Z} ${N}" | awk '{print $1 * $2 * $3 * $4 / $5}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_7="-crf 18 -b:v $(echo "5.7 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${Z} ${N}" | awk '{print $1 * $2 * $3 * $4 / $5}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_8="-crf 17 -b:v $(echo "8.6 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${Z} ${N}" | awk '{print $1 * $2 * $3 * $4 / $5}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_9="-crf 16 -b:v 0 ${VIDEO_OPTION}"
+VIDEO_QUALITAET_0="-crf 25 -b:v $(echo  "0.3 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${Z} ${N}" | awk '{print $1 * $2 * $3 * $4 / $5}') -cpu-used 0 ${VIDEO_OPTION}"
+VIDEO_QUALITAET_1="-crf 24 -b:v $(echo  "0.5 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${Z} ${N}" | awk '{print $1 * $2 * $3 * $4 / $5}') -cpu-used 0 ${VIDEO_OPTION}"
+VIDEO_QUALITAET_2="-crf 23 -b:v $(echo  "0.7 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${Z} ${N}" | awk '{print $1 * $2 * $3 * $4 / $5}') -cpu-used 1 ${VIDEO_OPTION}"
+VIDEO_QUALITAET_3="-crf 22 -b:v $(echo  "1.1 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${Z} ${N}" | awk '{print $1 * $2 * $3 * $4 / $5}') -cpu-used 2 ${VIDEO_OPTION}"
+VIDEO_QUALITAET_4="-crf 21 -b:v $(echo  "1.6 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${Z} ${N}" | awk '{print $1 * $2 * $3 * $4 / $5}') -cpu-used 3 ${VIDEO_OPTION}"
+VIDEO_QUALITAET_5="-crf 20 -b:v $(echo  "2.4 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${Z} ${N}" | awk '{print $1 * $2 * $3 * $4 / $5}') -cpu-used 4 ${VIDEO_OPTION}"
+VIDEO_QUALITAET_6="-crf 19 -b:v $(echo  "3.7 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${Z} ${N}" | awk '{print $1 * $2 * $3 * $4 / $5}') -cpu-used 5 ${VIDEO_OPTION}"
+VIDEO_QUALITAET_7="-crf 18 -b:v $(echo  "5.7 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${Z} ${N}" | awk '{print $1 * $2 * $3 * $4 / $5}') -cpu-used 6 ${VIDEO_OPTION}"
+VIDEO_QUALITAET_8="-crf 17 -b:v $(echo  "8.6 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${Z} ${N}" | awk '{print $1 * $2 * $3 * $4 / $5}') -cpu-used 7 ${VIDEO_OPTION}"
+VIDEO_QUALITAET_9="-crf 16 -b:v $(echo "11.0 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${Z} ${N}" | awk '{print $1 * $2 * $3 * $4 / $5}') -cpu-used 8 ${VIDEO_OPTION}"
 

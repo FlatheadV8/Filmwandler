@@ -5,11 +5,11 @@
 #==============================================================================#
 
 #VERSION="v2018090400"
-VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
+#VERSION="v2023032500"			# neue Ermittlungsmethode für Encoder
+VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
 
 TWO_PASS="Nein"				# 2-Pass encoding
 CODEC_PATTERN="ffv1"			# Beispiel: "h265|hevc"
-#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 
 #==============================================================================#
 #
@@ -18,21 +18,24 @@ CODEC_PATTERN="ffv1"			# Beispiel: "h265|hevc"
 #
 #------------------------------------------------------------------------------#
 
-VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
-	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+	VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 	if [ "x${VIDEOCODEC}" = "x" ] ; then
-		echo ""
-		echo "CODEC_PATTERN='${CODEC_PATTERN}'"
-		echo "VIDEOCODEC='${VIDEOCODEC}'"
-		echo "Leider wird dieser Codec von der aktuell installierten Version"
-		echo "von FFmpeg nicht unterstützt!"
-		echo ""
-#		exit 1
+		VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+		if [ "x${VIDEOCODEC}" = "x" ] ; then
+			echo ""
+			echo "CODEC_PATTERN='${CODEC_PATTERN}'"
+			echo "VIDEOCODEC='${VIDEOCODEC}'"
+			echo "Leider wird dieser Codec von der aktuell installierten Version"
+			echo "von FFmpeg nicht unterstützt!"
+			echo ""
+#			exit 1
 
-		### dieser Codec wird leider mit "-formats" nicht ausgegeben
-		### deshalb muss er fest eingetragen werden
-		VIDEOCODEC="ffv1"
+			### dieser Codec wird leider mit "-formats" nicht ausgegeben
+			### deshalb muss er fest eingetragen werden
+			VIDEOCODEC="ffv1"
+		fi
 	fi
 fi
 

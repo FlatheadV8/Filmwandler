@@ -6,10 +6,11 @@
 
 #VERSION="v2018083000"
 #VERSION="v2020100100"			# Fehler behoben
-VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
+#VERSION="v2023032500"			# neue Ermittlungsmethode für Encoder
+VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
 
+TWO_PASS="Nein"				# 2-Pass encoding
 CODEC_PATTERN="h263"			# Beispiel: "h265|hevc"
-#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 
 #------------------------------------------------------------------------------#
 #
@@ -17,18 +18,20 @@ CODEC_PATTERN="h263"			# Beispiel: "h265|hevc"
 #
 #------------------------------------------------------------------------------#
 
-TWO_PASS="Nein"				# 2-Pass encoding
-VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
-	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+	VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 	if [ "x${VIDEOCODEC}" = "x" ] ; then
-		echo ""
-		echo "CODEC_PATTERN='${CODEC_PATTERN}'"
-		echo "VIDEOCODEC='${VIDEOCODEC}'"
-		echo "Leider wird dieser Codec von der aktuell installierten Version"
-		echo "von FFmpeg nicht unterstützt!"
-		echo ""
-		exit 1
+		VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+		if [ "x${VIDEOCODEC}" = "x" ] ; then
+			echo ""
+			echo "CODEC_PATTERN='${CODEC_PATTERN}'"
+			echo "VIDEOCODEC='${VIDEOCODEC}'"
+			echo "Leider wird dieser Codec von der aktuell installierten Version"
+			echo "von FFmpeg nicht unterstützt!"
+			echo ""
+			exit 1
+		fi
 	fi
 fi
 
@@ -69,14 +72,25 @@ h263_BILD_FORMAT='scale=${SOLL_XY}'
 
 #==============================================================================#
 
-VIDEO_QUALITAET_0="-q:v 10"             # H.263 ASP
-VIDEO_QUALITAET_1="-q:v 9"              # H.263 ASP
-VIDEO_QUALITAET_2="-q:v 8"              # H.263 ASP
-VIDEO_QUALITAET_3="-q:v 7"              # H.263 ASP
-VIDEO_QUALITAET_4="-q:v 6"              # H.263 ASP
-VIDEO_QUALITAET_5="-q:v 5"              # H.263 ASP
-VIDEO_QUALITAET_6="-q:v 4"              # H.263 ASP
-VIDEO_QUALITAET_7="-q:v 3"              # H.263 ASP
-VIDEO_QUALITAET_8="-q:v 2"              # H.263 ASP
-VIDEO_QUALITAET_9="-q:v 1"              # H.263 ASP
+#VIDEO_QUALITAET_0="-q:v 10"		# H.263 ASP
+#VIDEO_QUALITAET_1="-q:v 9"		# H.263 ASP
+#VIDEO_QUALITAET_2="-q:v 8"		# H.263 ASP
+#VIDEO_QUALITAET_3="-q:v 7"		# H.263 ASP
+#VIDEO_QUALITAET_4="-q:v 6"		# H.263 ASP
+#VIDEO_QUALITAET_5="-q:v 5"		# H.263 ASP
+#VIDEO_QUALITAET_6="-q:v 4"		# H.263 ASP
+#VIDEO_QUALITAET_7="-q:v 3"		# H.263 ASP
+#VIDEO_QUALITAET_8="-q:v 2"		# H.263 ASP
+#VIDEO_QUALITAET_9="-q:v 1"		# H.263 ASP
+
+VIDEO_QUALITAET_0="-q:v 8"		# H.263 ASP
+VIDEO_QUALITAET_1="-q:v 7"		# H.263 ASP
+VIDEO_QUALITAET_2="-q:v 6"		# H.263 ASP
+VIDEO_QUALITAET_3="-q:v 5"		# H.263 ASP
+VIDEO_QUALITAET_4="-q:v 4"		# H.263 ASP
+VIDEO_QUALITAET_5="-q:v 3"		# H.263 ASP
+VIDEO_QUALITAET_6="-q:v 2"		# H.263 ASP
+VIDEO_QUALITAET_7="-q:v 1"		# H.263 ASP
+VIDEO_QUALITAET_8="-q:v 1"		# H.263 ASP
+VIDEO_QUALITAET_9="-q:v 1"		# H.263 ASP
 

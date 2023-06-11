@@ -5,62 +5,73 @@
 #==============================================================================#
 
 #VERSION="v2018090300"
-#VERSION="v2020092500"		# weitere Variable eingeführt
-VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
+#VERSION="v2020092500"			# weitere Variable eingeführt
+#VERSION="v2023032500"			# neue Ermittlungsmethode für Encoder
+VERSION="v2023061000"			# jetzt wird für jeden Audio-Kanal separat die Bit-Rate berechnet
 
-CODEC_PATTERN="mp3"		# Beispiel: "h265|hevc"
-#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
+CODEC_PATTERN="mp3"			# Beispiel: "h265|hevc"
 
-Sound_ST=''			# Stereo (2.0)
-Sound_51=''			# 5.1
-Sound_71=''			# 7.1
-
-AUDIOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+AUDIOCODEC="$(suche_audio_encoder "${CODEC_PATTERN}")"
 if [ "x${AUDIOCODEC}" = "x" ] ; then
-	AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+	AUDIOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 	if [ "x${AUDIOCODEC}" = "x" ] ; then
-		echo ""
-		echo "CODEC_PATTERN='${CODEC_PATTERN}'"
-		echo "AUDIOCODEC='${AUDIOCODEC}'"
-		echo "Leider wird dieser Codec von der aktuell installierten Version"
-		echo "von FFmpeg nicht unterstützt!"
-		echo ""
-		exit 1
+		AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+		if [ "x${AUDIOCODEC}" = "x" ] ; then
+			echo ""
+			echo "CODEC_PATTERN='${CODEC_PATTERN}'"
+			echo "AUDIOCODEC='${AUDIOCODEC}'"
+			echo "Leider wird dieser Codec von der aktuell installierten Version"
+			echo "von FFmpeg nicht unterstützt!"
+			echo ""
+			exit 1
+		fi
 	fi
 fi
 
 # diese Option wird mit dem Codec zusammen, nur einmal für alle Kanäle zusammen,
 # angegeben und nicht für jeden Kanal extra
-AUDIO_CODEC_OPTION=""
+AUDIO_OPTION_GLOBAL=""
 
-# MP3 kann nur Stereo
-AUDIO_OPTION="-ac 2"
+echo "# 1001
+TS_ANZAHL=${TS_ANZAHL}
+AUDIO_OPTION_GLOBAL='${AUDIO_OPTION_GLOBAL}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 # https://trac.ffmpeg.org/wiki/Encode/MP3
 F_AUDIO_QUALITAET()
 {
-if [ "${AUDIOCODEC}" = "libmp3lame" ] ; then
-        AUDIO_QUALITAET_0="-q:a 9 ${AUDIO_OPTION}"
-        AUDIO_QUALITAET_1="-q:a 8 ${AUDIO_OPTION}"
-        AUDIO_QUALITAET_2="-q:a 7 ${AUDIO_OPTION}"
-        AUDIO_QUALITAET_3="-q:a 6 ${AUDIO_OPTION}"
-        AUDIO_QUALITAET_4="-q:a 5 ${AUDIO_OPTION}"
-        AUDIO_QUALITAET_5="-q:a 4 ${AUDIO_OPTION}"
-        AUDIO_QUALITAET_6="-q:a 3 ${AUDIO_OPTION}"
-        AUDIO_QUALITAET_7="-q:a 2 ${AUDIO_OPTION}"
-        AUDIO_QUALITAET_8="-q:a 1 ${AUDIO_OPTION}"
-        AUDIO_QUALITAET_9="-q:a 1 ${AUDIO_OPTION}"
-else
-        AUDIO_QUALITAET_0="-b:a 64k ${AUDIO_OPTION}"
-        AUDIO_QUALITAET_1="-b:a 80k ${AUDIO_OPTION}"
-        AUDIO_QUALITAET_2="-b:a 88k ${AUDIO_OPTION}"
-        AUDIO_QUALITAET_3="-b:a 112k ${AUDIO_OPTION}"
-        AUDIO_QUALITAET_4="-b:a 128k ${AUDIO_OPTION}"
-        AUDIO_QUALITAET_5="-b:a 160k ${AUDIO_OPTION}"
-        AUDIO_QUALITAET_6="-b:a 184k ${AUDIO_OPTION}"
-        AUDIO_QUALITAET_7="-b:a 224k ${AUDIO_OPTION}"
-        AUDIO_QUALITAET_8="-b:a 264k ${AUDIO_OPTION}"
-        AUDIO_QUALITAET_9="-b:a 320k ${AUDIO_OPTION}"
-fi
+    if [ "${AUDIOCODEC}" = "libmp3lame" ] ; then
+	AUDIO_Q_PRO_KANAL="
+	9
+	8
+	7
+	6
+	5
+	4
+	3
+	2
+	1
+	1
+	"
+
+	AUDIO_Q_WERT="$(echo "$(echo "${AUDIO_Q_PRO_KANAL}" | grep -Ev '#|^[ \t]*$' | head -n${AUDIO_VON_OBEN} | tail -n1) 4" | awk '{print $1}')"
+	echo "-q:a:${1} ${AUDIO_Q_WERT}"
+    else
+	AUDIO_BIT_kBIT_PRO_KANAL="
+	32
+	40
+	44
+	56
+	64
+	80
+	96
+	112
+	136
+	160
+	"
+
+	AUDIO_BIT_RATE="$(echo "${AUDIO_KANAELE} $(echo "${AUDIO_BIT_kBIT_PRO_KANAL}" | grep -Ev '#|^[ \t]*$' | head -n${AUDIO_VON_OBEN} | tail -n1) 64 2" | awk '{print $1 * $2}')"
+	echo "-b:a:${1} ${AUDIO_BIT_RATE}k"
+    fi
 }
 

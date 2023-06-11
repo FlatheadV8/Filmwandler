@@ -24,45 +24,55 @@
 #VERSION="v2018082800"
 #VERSION="v2020060900"			# Abstufung geändert
 #VERSION="v2020092500"			# weitere Variable eingeführt
-VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
+#VERSION="v2023032500"			# neue Ermittlungsmethode für Encoder
+VERSION="v2023061000"			# jetzt wird für jeden Audio-Kanal separat die Bit-Rate berechnet
 
-AUDIOCODEC="ac3"
-#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
+CODEC_PATTERN="ac3"
 
-Sound_ST=''				# Stereo (2.0)
-Sound_51=''				# 5.1
-Sound_71=''				# 7.1
+AUDIOCODEC="$(suche_audio_encoder "${CODEC_PATTERN}")"
+if [ "x${AUDIOCODEC}" = "x" ] ; then
+	AUDIOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+	if [ "x${AUDIOCODEC}" = "x" ] ; then
+		AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+		if [ "x${AUDIOCODEC}" = "x" ] ; then
+			echo ""
+			echo "CODEC_PATTERN='${CODEC_PATTERN}'"
+			echo "AUDIOCODEC='${AUDIOCODEC}'"
+			echo "Leider wird dieser Codec von der aktuell installierten Version"
+			echo "von FFmpeg nicht unterstützt!"
+			echo ""
+#			exit 1
+
+			AUDIOCODEC="ac3"
+		fi
+	fi
+fi
 
 # diese Option wird mit dem Codec zusammen, nur einmal für alle Kanäle zusammen,
 # angegeben und nicht für jeden Kanal extra
-AUDIO_CODEC_OPTION=""
+AUDIO_OPTION_GLOBAL=""
 
-AUDIO_OPTION=""
+echo "# 1001
+TS_ANZAHL=${TS_ANZAHL}
+AUDIO_OPTION_GLOBAL='${AUDIO_OPTION_GLOBAL}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 F_AUDIO_QUALITAET()
 {
-if [ "${AUDIO_KANAELE}" -gt 2 ] ; then
-        AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 192k"
-        AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 224k"
-        AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 256k"
-        AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 288k"
-        AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 320k"
-        AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 384k"
-        AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 448k"
-        AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 512k"
-        AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 576k"                                          
-        AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 640k"                                          
-else
-        AUDIO_QUALITAET_0="${AUDIO_OPTION} -b:a 96k"                                           
-        AUDIO_QUALITAET_1="${AUDIO_OPTION} -b:a 112k"                                           
-        AUDIO_QUALITAET_2="${AUDIO_OPTION} -b:a 128k"
-        AUDIO_QUALITAET_3="${AUDIO_OPTION} -b:a 144k"                                          
-        AUDIO_QUALITAET_4="${AUDIO_OPTION} -b:a 160k"
-        AUDIO_QUALITAET_5="${AUDIO_OPTION} -b:a 192k"
-        AUDIO_QUALITAET_6="${AUDIO_OPTION} -b:a 224k"
-        AUDIO_QUALITAET_7="${AUDIO_OPTION} -b:a 256k"
-        AUDIO_QUALITAET_8="${AUDIO_OPTION} -b:a 288k"
-        AUDIO_QUALITAET_9="${AUDIO_OPTION} -b:a 320k"
-fi
+	AUDIO_BIT_kBIT_PRO_KANAL="
+	32
+	40
+	48
+	56
+	64
+	72
+	80
+	88
+	96
+	104
+	"
+
+	AUDIO_BIT_RATE="$(echo "${AUDIO_KANAELE} $(echo "${AUDIO_BIT_kBIT_PRO_KANAL}" | grep -Ev '#|^[ \t]*$' | head -n${AUDIO_VON_OBEN} | tail -n1) 64 2" | awk '{print $1 * $2}')"
+	echo "-b:a:${1} ${AUDIO_BIT_RATE}k"
 }
 

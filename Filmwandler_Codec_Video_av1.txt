@@ -19,49 +19,39 @@
 #VERSION="v2023050500"			# SVT-AV1 an die neuen Optionen (seit 0.9.1) angepasst
 #VERSION="v2023050900"			# Abstufung so angepasst, dass bei "-vq 5" die Codecs x264, x265, aom-av1 und svt-av1 eine änlich lange Transkodierzeit benötigen (pro Minute Spielfilm, ca. 1,5 Minuten Transkodierdauer)
 #VERSION="v2023051100"			# Die Abstufung von librav1e besser abgestimmt
-VERSION="v2023051300"			# da libaom-av1 und av1 identisch sind, wurde die Funktion "intern_av1" entfernt
+#VERSION="v2023051300"			# da libaom-av1 und av1 identisch sind, wurde die Funktion "intern_av1" entfernt
+VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
 
 TWO_PASS="Nein"				# 2-Pass encoding
-#CODEC_PATTERN="av1|aom"		# Beispiel: "h265|hevc"
-#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
+CODEC_PATTERN="av1|aom"			# Beispiel: "h265|hevc"
 
 #==============================================================================#
 ### vollautomatische Kodeksuche wurde in diesem Fall abgeschaltet,
 ### bei der auch nach bisher unbekannten Kodeks gesucht wird
 
-#VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -Fv libdav1d | grep -E "${CODEC_PATTERN}" | head -n1)"
-#if [ "x${VIDEOCODEC}" = "x" ] ; then
-#	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
-#	if [ "x${VIDEOCODEC}" = "x" ] ; then
-#		echo ""
-#		echo "CODEC_PATTERN='${CODEC_PATTERN}'"
-#		echo "VIDEOCODEC='${VIDEOCODEC}'"
-#		echo "Leider wird dieser Codec von der aktuell installierten Version"
-#		echo "von FFmpeg nicht unterstützt!"
-#		echo ""
-#		exit 1
-#	fi
-#fi
+VIDEOCODEC="$(suche_video_encoder "svtav1")"
+if [ "x${VIDEOCODEC}" = "x" ] ; then
+	VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
+	if [ "x${VIDEOCODEC}" = "x" ] ; then
+		VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -Fv libdav1d | grep -E "${CODEC_PATTERN}" | head -n1)"
+		if [ "x${VIDEOCODEC}" = "x" ] ; then
+			VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+			if [ "x${VIDEOCODEC}" = "x" ] ; then
+				echo ""
+				echo "CODEC_PATTERN='${CODEC_PATTERN}'"
+				echo "VIDEOCODEC='${VIDEOCODEC}'"
+				echo "Leider wird dieser Codec von der aktuell installierten Version"
+				echo "von FFmpeg nicht unterstützt!"
+				echo ""
+#				exit 1
+
+				VIDEOCODEC="av1"
+			fi
+		fi
+	fi
+fi
 
 #==============================================================================#
-### besten unterstützten Kodek finden
-### es wird nur nach bestimmten Kodeks gesucht, die bereits bekannt sind
-
-# der oberste wird bevorzugt
-KODEKS="
-libsvtav1
-libaom-av1
-av1
-librav1e
-"
-
-# "-b:v 0" => für konstante Qualität - ist nur bis FFmpeg-Version 4.3 nötig
-
-# der erste Treffer wird verwendet
-VIDEOCODEC="$(for K in ${KODEKS}
-do
-	ffmpeg -h encoder=${K} 2>/dev/null | fgrep 'is not recognized by FFmpeg.' >/dev/null || echo "${K}"
-done | head -n1)"
 
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#

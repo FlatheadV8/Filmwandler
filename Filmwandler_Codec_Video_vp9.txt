@@ -8,11 +8,11 @@
 #VERSION="v2019101400"
 #VERSION="v2020060300"
 #VERSION="v2023032500"			# neue Ermittlungsmethode für Encoder
-VERSION="v2023051400"			# Voreinstellungen angepasst
+#VERSION="v2023051400"			# Voreinstellungen angepasst
+VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
 
-TWO_PASS="Nein"				# 2-Pass encoding
+TWO_PASS="Nein"				# 2-Pass
 CODEC_PATTERN="vp9"			# Beispiel: "h265|hevc"
-#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 
 #------------------------------------------------------------------------------#
 #  https://trac.ffmpeg.org/wiki/Encode/AV1#SVT-AV1
@@ -38,27 +38,38 @@ CODEC_PATTERN="vp9"			# Beispiel: "h265|hevc"
 #               empfohlen: 15-35
 
 #------------------------------------------------------------------------------#
+# vp9_metadata_bsf AVOptions:
+#   -color_space       <int>        ...V....B.. Set colour space (section 7.2.2) (from -1 to 7) (default -1)
+#      unknown         0            ...V....B.. Unknown/unspecified
+#      bt601           1            ...V....B.. ITU-R BT.601-7
+#      bt709           2            ...V....B.. ITU-R BT.709-6
+#      smpte170        3            ...V....B.. SMPTE-170
+#      smpte240        4            ...V....B.. SMPTE-240
+#      bt2020          5            ...V....B.. ITU-R BT.2020-2
+#      rgb             7            ...V....B.. sRGB / IEC 61966-2-1
+#   -color_range       <int>        ...V....B.. Set colour range (section 7.2.2) (from -1 to 1) (default -1)
+#      tv              0            ...V....B.. TV (limited) range
+#      pc              1            ...V....B.. PC (full) range
+#------------------------------------------------------------------------------#
 
-#VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
-#if [ "x${VIDEOCODEC}" = "x" ] ; then
-#	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
-#	if [ "x${VIDEOCODEC}" = "x" ] ; then
-#		echo ""
-#		echo "CODEC_PATTERN='${CODEC_PATTERN}'"
-#		echo "VIDEOCODEC='${VIDEOCODEC}'"
-#		echo "Leider wird dieser Codec von der aktuell installierten Version"
-#		echo "von FFmpeg nicht unterstützt!"
-#		echo ""
-#		exit 1
-#	fi
-#fi
+VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
+if [ "x${VIDEOCODEC}" = "x" ] ; then
+	VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+	if [ "x${VIDEOCODEC}" = "x" ] ; then
+		VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+		if [ "x${VIDEOCODEC}" = "x" ] ; then
+			echo ""
+			echo "CODEC_PATTERN='${CODEC_PATTERN}'"
+			echo "VIDEOCODEC='${VIDEOCODEC}'"
+			echo "Leider wird dieser Codec von der aktuell installierten Version"
+			echo "von FFmpeg nicht unterstützt!"
+			echo ""
+#			exit 1
 
-### dieser Codec wird leider mit "-formats" nicht ausgegeben
-### deshalb muss er fest eingetragen werden
-#   encoders: libsvt_vp9 libvpx-vp9
-VIDEOCODEC="libvpx-vp9"		# z.Z. (Okt. 2019) funktioniert libvpx-vp9 am besten
-#VIDEOCODEC="libsvt-vp9"  	# SVT-Version
-#VIDEOCODEC="vp9"		# im FFmpeg interner Codec
+			VIDEOCODEC="vp9"		# im FFmpeg interner Codec
+		fi
+	fi
+fi
 
 
 # bei "-b:v 0" ergibt eine "konstante Qualität" => bestes Ergebnis, wenn die Dateigröße egal ist

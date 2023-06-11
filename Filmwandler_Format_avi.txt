@@ -9,7 +9,8 @@
 
 #VERSION="v2018090300"
 #VERSION="v2020072700"
-VERSION="v2022121100"			# die Variable ENDUNG darf hier nicht drin stehen
+#VERSION="v2022121100"			# die Variable ENDUNG darf hier nicht drin stehen
+VERSION="v2023061000"			# erzwungene Anpassung auf den BD420 entfernt
 
 #------------------------------------------------------------------------------#
 # Format
@@ -44,80 +45,20 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 #
 
 echo "# Filmwandler_Format_avi.txt
-IN_BREIT='${IN_BREIT}'
-IN_HOCH='${IN_HOCH}'
-SOLL_SCALE='${SOLL_SCALE}'
-R_FPS_RUND='${R_FPS_RUND}'
-IN_FPS_RUND='${IN_FPS_RUND}'
-SOLL_FPS_RUND='${SOLL_FPS_RUND}'
-VERGLEICH_FPS_RUND='${VERGLEICH_FPS_RUND}'
+# IN_BREIT='${IN_BREIT}'
+# IN_HOCH='${IN_HOCH}'
+# SOLL_SCALE='${SOLL_SCALE}'
+# R_FPS_RUND='${R_FPS_RUND}'
+# IN_FPS_RUND='${IN_FPS_RUND}'
+# SOLL_FPS_RUND='${SOLL_FPS_RUND}'
 "
 
-### Im Benutzerhandbuch vom LG BD-P1580 steht auf Seite 14
-### dass er AVI (DivX + MP3/AC-3) mur bis NTSC- bzw. PAL-Auflösung
-### abspielen kann.
-### weiterhin kann der Codec keine so hohen Bitraten, dass ein Film
-### mit Full-HD-Auflösung gestochen scharf dargestellt wird.
-### Aus dem Grund sollte AVI/DivX auch nur max. PAL bekommen.
-### getestet mit dem LG BP420 Blu-ray Player
-###
-### gibt man manuel eine gewünschte Auflösung an,
-### dann wird nicht auf PAL begrenzt
-
-if [ "x${SOLL_SCALE}" = x ] ; then
-	if [ "${IN_BREIT}" -gt 720 -o "${IN_HOCH}" -gt 480 ] ; then
-		if [ "${VERGLEICH_FPS_RUND}" -gt 50 ] ; then
-			# NTSC i
-			if [ "${IN_HOCH}" -gt 480 ] ; then
-				AVI_HOEHE="480"
-				SOLL_SCALE="scale=720x480,"
-				VERGLEICH_BREIT="720"
-				VERGLEICH_HOCH="480"
-			fi
-		else
-			if [ "${VERGLEICH_FPS_RUND}" -gt 30 ] ; then
-				# PAL i
-				if [ "${IN_HOCH}" -gt 576 ] ; then
-					AVI_HOEHE="576"
-					SOLL_SCALE="scale=720x576,"
-					VERGLEICH_BREIT="720"
-					VERGLEICH_HOCH="576"
-				fi
-			else
-				if [ "${VERGLEICH_FPS_RUND}" -gt 25 ] ; then
-					# NTSC p
-					if [ "${IN_HOCH}" -gt 480 ] ; then
-						AVI_HOEHE="480"
-						SOLL_SCALE="scale=720x480,"
-						VERGLEICH_BREIT="720"
-						VERGLEICH_HOCH="480"
-					fi
-				else
-					# PAL p
-					if [ "${IN_HOCH}" -gt 576 ] ; then
-						AVI_HOEHE="576"
-						SOLL_SCALE="scale=720x576,"
-						VERGLEICH_BREIT="720"
-						VERGLEICH_HOCH="576"
-					fi
-				fi
-			fi
-		fi
-	fi
-fi
-
-echo "
-AVI_HOEHE='${AVI_HOEHE}'
-SOLL_SCALE='${SOLL_SCALE}'
-"
 #exit
-
 
 #==============================================================================#
 
 # Video
 . $(dirname ${0})/Filmwandler_Codec_Video_divx.txt
-IFRAME="-keyint_min 150"
 
 #------------------------------------------------------------------------------#
 ### AVI hat nicht zwingend quadratische Bildpunkte

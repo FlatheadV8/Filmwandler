@@ -13,23 +13,26 @@
 #VERSION="v2018082900"
 #VERSION="v2023032500"			# neue Ermittlungsmethode für Encoder
 #VERSION="v2023050800"			# umgestellt auf einfache Parameterberechnung ohne Bluray-Kompatibilität und Makroblockberechnung
-VERSION="v2023050900"			# Abstufung so angepasst, dass bei "-vq 5" die Codecs x264, x265, aom-av1 und svt-av1 eine änlich lange Transkodierzeit benötigen (pro Minute Spielfilm, ca. 1,5 Minuten Transkodierdauer)
+#VERSION="v2023050900"			# Abstufung so angepasst, dass bei "-vq 5" die Codecs x264, x265, aom-av1 und svt-av1 eine änlich lange Transkodierzeit benötigen (pro Minute Spielfilm, ca. 1,5 Minuten Transkodierdauer)
+VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
 
 TWO_PASS="Nein"				# 2-Pass encoding
 CODEC_PATTERN="x264"			# Beispiel: "h264|x264" (libopenh264, libx264)
-#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 
-VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
-	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+	VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
 	if [ "x${VIDEOCODEC}" = "x" ] ; then
-		echo ""
-		echo "CODEC_PATTERN='${CODEC_PATTERN}'"
-		echo "VIDEOCODEC='${VIDEOCODEC}'"
-		echo "Leider wird dieser Codec von der aktuell installierten Version"
-		echo "von FFmpeg nicht unterstützt!"
-		echo ""
-		exit 1
+		VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+		if [ "x${VIDEOCODEC}" = "x" ] ; then
+			echo ""
+			echo "CODEC_PATTERN='${CODEC_PATTERN}'"
+			echo "VIDEOCODEC='${VIDEOCODEC}'"
+			echo "Leider wird dieser Codec von der aktuell installierten Version"
+			echo "von FFmpeg nicht unterstützt!"
+			echo ""
+			exit 1
+		fi
 	fi
 fi
 
@@ -51,32 +54,32 @@ x264-parameter_mit_makroblöcke_berechnen()
 x264-parameter_ohne_makroblöcke_berechnen()
 {
 	### Werte für crf: von "0" (verlustfrei) bis "51"
-	#CRF_WERT="25"							# allgemeine Empfehlung für Heimkino, mit relativ ausgewogener Kodierdauer
-	#CRF_WERT="23"							# Voreinstellung
-	CRF_WERT="20"							# Artefaktbildung ist auf Standbildern kaum noch zu erkennen
-	#CRF_WERT="16"							# Empfehlung vom x264-Team für gute Qualität, erzeugt sehr große Datein
+	#CRF_WERT="25"									# allgemeine Empfehlung für Heimkino, mit relativ ausgewogener Kodierdauer
+	#CRF_WERT="23"									# Voreinstellung
+	CRF_WERT="20"									# Artefaktbildung ist auf Standbildern kaum noch zu erkennen
+	#CRF_WERT="16"									# Empfehlung vom x264-Team für gute Qualität, erzeugt sehr große Datein
 
 	### Die Option "-profile:v" hat nur dann Wirkung, wenn auch die Option "-level" angegeben wird!
-	#PROFILE="-profile:v main"					# 8 Bit-Farben
-	#PROFILE="-profile:v high"					# 8 Bit-Farben
-	PROFILE=""							# wenn man sich auf ein Profil festlegt, dann sind nicht mehr alle Kombinationen der anderen Parameter möglich!
+	#PROFILE="-profile:v main"							# 8 Bit-Farben
+	#PROFILE="-profile:v high"							# 8 Bit-Farben
+	PROFILE=""									# wenn man sich auf ein Profil festlegt, dann sind nicht mehr alle Kombinationen der anderen Parameter möglich!
 
-	KEYINT="$(echo "${IN_FPS}" | awk '{printf "%.0f\n", $1 * 2}')"	# alle 2 Sekunden ein Key-Frame
+	KEYINT="$(echo "${IN_FPS}" | awk '{printf "%.0f\n", $1 * 2}')"			# alle 2 Sekunden ein Key-Frame
 
 	### '-b:v 0' wird nur bis FFmpeg Version 4.3 benötigt
-	VIDEO_OPTION="${PROFILE} -tune ssim -crf ${CRF_WERT} -x264opts keyint=${KEYINT}:bluray-compat=1:no-psy"
-	#VIDEO_QUALITAET_0="${VIDEO_OPTION} -preset ultrafast"		# schnellstes, schlechteste Qualität
-	#VIDEO_QUALITAET_1="${VIDEO_OPTION} -preset superfast"		# 
-	#VIDEO_QUALITAET_2="${VIDEO_OPTION} -preset veryfast"		# 
-	#VIDEO_QUALITAET_3="${VIDEO_OPTION} -preset faster"		# 
-	#VIDEO_QUALITAET_4="${VIDEO_OPTION} -preset fast"		# 
-	#VIDEO_QUALITAET_5="${VIDEO_OPTION} -preset medium"		# Voreinstellung, gute Qualität
-	#VIDEO_QUALITAET_6="${VIDEO_OPTION} -preset slow"		# 
-	#VIDEO_QUALITAET_7="${VIDEO_OPTION} -preset slower"		# ab hier werden die Bewegungsvektoren genau berechnet
-	#VIDEO_QUALITAET_8="${VIDEO_OPTION} -preset veryslow"		# 
-	#VIDEO_QUALITAET_9="${VIDEO_OPTION} -preset placebo"		# langsamstes, beste Qualität
+	VIDEO_OPTION="${PROFILE} -tune ssim -x264opts keyint=${KEYINT}:bluray-compat=1:no-psy"
 
-	VIDEO_OPTION="-tune ssim -crf ${CRF_WERT} -x264opts keyint=${KEYINT}:bluray-compat=1:no-psy"
+	#VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf ${CRF_WERT} -preset ultrafast"		# schnellstes, schlechteste Qualität
+	#VIDEO_QUALITAET_1="${VIDEO_OPTION} -crf ${CRF_WERT} -preset superfast"		# 
+	#VIDEO_QUALITAET_2="${VIDEO_OPTION} -crf ${CRF_WERT} -preset veryfast"		# 
+	#VIDEO_QUALITAET_3="${VIDEO_OPTION} -crf ${CRF_WERT} -preset faster"		# 
+	#VIDEO_QUALITAET_4="${VIDEO_OPTION} -crf ${CRF_WERT} -preset fast"		# 
+	#VIDEO_QUALITAET_5="${VIDEO_OPTION} -crf ${CRF_WERT} -preset medium"		# Voreinstellung, gute Qualität
+	#VIDEO_QUALITAET_6="${VIDEO_OPTION} -crf ${CRF_WERT} -preset slow"		# 
+	#VIDEO_QUALITAET_7="${VIDEO_OPTION} -crf ${CRF_WERT} -preset slower"		# ab hier werden die Bewegungsvektoren genau berechnet
+	#VIDEO_QUALITAET_8="${VIDEO_OPTION} -crf ${CRF_WERT} -preset veryslow"		# 
+	#VIDEO_QUALITAET_9="${VIDEO_OPTION} -crf ${CRF_WERT} -preset placebo"		# langsamstes, beste Qualität
+
 	VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf ${CRF_WERT} -preset veryfast"		# 
 	VIDEO_QUALITAET_1="${VIDEO_OPTION} -crf ${CRF_WERT} -preset faster"		# 
 	VIDEO_QUALITAET_2="${VIDEO_OPTION} -crf ${CRF_WERT} -preset fast"		# 
@@ -84,11 +87,11 @@ x264-parameter_ohne_makroblöcke_berechnen()
 	VIDEO_QUALITAET_4="${VIDEO_OPTION} -crf ${CRF_WERT} -preset slow"		# 
 	VIDEO_QUALITAET_5="${VIDEO_OPTION} -crf ${CRF_WERT} -preset slower"		# ab hier werden die Bewegungsvektoren genau berechnet
 	VIDEO_QUALITAET_6="${VIDEO_OPTION} -crf ${CRF_WERT} -preset veryslow"		# 
-	VIDEO_QUALITAET_7="${VIDEO_OPTION} -crf ${CRF_WERT} -preset placebo"		# 
-	VIDEO_QUALITAET_8="${VIDEO_OPTION} -crf 18 -preset placebo"			# 
+	VIDEO_QUALITAET_7="${VIDEO_OPTION} -crf 18 -preset veryslow"			# 
+	VIDEO_QUALITAET_8="${VIDEO_OPTION} -crf 16 -preset veryslow"			# 
 	VIDEO_QUALITAET_9="${VIDEO_OPTION} -crf 16 -preset placebo"			# langsamstes, beste Qualität
 
-	IFRAME="-keyint_min 150"
+	IFRAME="-keyint_min 2-8"							# --keyint in Frames
 
 	echo "# 475:
 	# IN_FPS='${IN_FPS}'

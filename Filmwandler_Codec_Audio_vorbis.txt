@@ -7,52 +7,70 @@
 #VERSION="v2018082800"
 #VERSION="v2020092500"			# weitere Variable eingeführt
 #VERSION="v2020101800"			# auf libvorbis umgestellt
-VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
+#VERSION="v2023032500"			# neue Ermittlungsmethode für Encoder
+VERSION="v2023061000"			# jetzt wird für jeden Audio-Kanal separat die Bit-Rate berechnet
 
 CODEC_PATTERN="vorbis"			# Beispiel: "h265|hevc"
-#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 
-Sound_ST=''				# Stereo (2.0)
-Sound_51=''				# 5.1
-Sound_71=''				# 7.1
+AUDIOCODEC="$(suche_audio_encoder "libvorbis")"
+if [ "x${AUDIOCODEC}" = "x" ] ; then
+	AUDIOCODEC="$(suche_audio_encoder "${CODEC_PATTERN}")"
+	if [ "x${AUDIOCODEC}" = "x" ] ; then
+		AUDIOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+		if [ "x${AUDIOCODEC}" = "x" ] ; then
+			AUDIOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+			if [ "x${AUDIOCODEC}" = "x" ] ; then
+				echo ""
+				echo "CODEC_PATTERN='${CODEC_PATTERN}'"
+				echo "AUDIOCODEC='${AUDIOCODEC}'"
+				echo "Leider wird dieser Codec von der aktuell installierten Version"
+				echo "von FFmpeg nicht unterstützt!"
+				echo ""
+#				exit 1
 
-# der oberste wird bevorzugt
-KODEKS="
-libvorbis
-vorbis
-"
-
-# der erste Treffer wird verwendet
-AUDIOCODEC="$(for K in ${KODEKS}
-do
-	ffmpeg -h encoder=${K} 2>/dev/null | fgrep 'is not recognized by FFmpeg.' >/dev/null || echo "${K}"
-done | head -n1)"
+				AUDIOCODEC="vorbis"
+			fi
+		fi
+	fi
+fi
 
 ### leider ist "vorbis" noch experimentel und kann nur Stereo
 if [ "${AUDIOCODEC}" = "vorbis" ] ; then
-	AUDIOCODEC="vorbis -strict -2"
+	# diese Option wird mit dem Codec zusammen, nur einmal für alle Kanäle zusammen,
+	# angegeben und nicht für jeden Kanal extra
+	AUDIO_OPTION_GLOBAL="-strict -2"
+else
+	# libvorbis
+	# diese Option wird mit dem Codec zusammen, nur einmal für alle Kanäle zusammen,
+	# angegeben und nicht für jeden Kanal extra
+	AUDIO_OPTION_GLOBAL=""
 fi
 
-# diese Option wird mit dem Codec zusammen, nur einmal für alle Kanäle zusammen,
-# angegeben und nicht für jeden Kanal extra
-AUDIO_CODEC_OPTION=""
-
-AUDIO_OPTION=""
+echo "# 1001
+TS_ANZAHL=${TS_ANZAHL}
+AUDIO_OPTION_GLOBAL='${AUDIO_OPTION_GLOBAL}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 # https://www.ffmpeg.org/ffmpeg-codecs.html#libvorbis
 # -c:a libvorbis -b:a 384k (5.1: 128k * Kanäle / 2 = 384k)
 # -c:a libvorbis -q:a 3 (Standard)
 F_AUDIO_QUALITAET()
 {
-AUDIO_QUALITAET_0="${AUDIO_OPTION} -q:a 1"      # 0-10, 10 ist am besten
-AUDIO_QUALITAET_1="${AUDIO_OPTION} -q:a 2"      # 0-10, 10 ist am besten
-AUDIO_QUALITAET_2="${AUDIO_OPTION} -q:a 3"      # 0-10, 10 ist am besten
-AUDIO_QUALITAET_3="${AUDIO_OPTION} -q:a 4"      # 0-10, 10 ist am besten
-AUDIO_QUALITAET_4="${AUDIO_OPTION} -q:a 5"      # 0-10, 10 ist am besten
-AUDIO_QUALITAET_5="${AUDIO_OPTION} -q:a 6"      # 0-10, 10 ist am besten
-AUDIO_QUALITAET_6="${AUDIO_OPTION} -q:a 7"      # 0-10, 10 ist am besten
-AUDIO_QUALITAET_7="${AUDIO_OPTION} -q:a 8"      # 0-10, 10 ist am besten
-AUDIO_QUALITAET_8="${AUDIO_OPTION} -q:a 9"      # 0-10, 10 ist am besten
-AUDIO_QUALITAET_9="${AUDIO_OPTION} -q:a 10"     # 0-10, 10 ist am besten
+	# 0-10, 10 ist am besten
+	AUDIO_Q_PRO_KANAL="
+	1
+	2
+	3
+	4
+	5
+	6
+	7
+	8
+	9
+	10
+	"
+
+	AUDIO_Q_WERT="$(echo "$(echo "${AUDIO_Q_PRO_KANAL}" | grep -Ev '#|^[ \t]*$' | head -n${AUDIO_VON_OBEN} | tail -n1) 4" | awk '{print $1}')"
+	echo "-q:a:${1} ${AUDIO_Q_WERT}"
 }
 

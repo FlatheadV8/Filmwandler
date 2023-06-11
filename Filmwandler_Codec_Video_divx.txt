@@ -6,11 +6,8 @@
 #==============================================================================#
 
 #VERSION="v2018090200"
-VERSION="v2023032500"                   # neue Ermittlungsmethode für Encoder
-
-TWO_PASS="Nein"				# 2-Pass encoding
-CODEC_PATTERN="mpeg4"			# Beispiel: "h265|hevc"
-#VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
+#VERSION="v2023032500"			# neue Ermittlungsmethode für Encoder
+VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
 
 #==============================================================================#
 # getestet auf LG BP420 Blu-ray Player (kann keine variable Bitrate bei DivX)
@@ -21,25 +18,36 @@ CODEC_PATTERN="mpeg4"			# Beispiel: "h265|hevc"
 #
 #------------------------------------------------------------------------------#
 
-echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1
-VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
-if [ "x${VIDEOCODEC}" = "x" ] ; then
-	VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
-	if [ "x${VIDEOCODEC}" = "x" ] ; then
-		echo ""
-		echo "CODEC_PATTERN='${CODEC_PATTERN}'"
-		echo "VIDEOCODEC='${VIDEOCODEC}'"
-		echo "Leider wird dieser Codec von der aktuell installierten Version"
-		echo "von FFmpeg nicht unterstützt!"
-		echo ""
-#		exit 1
+TWO_PASS="Nein"				# 2-Pass encoding
+CODEC_PATTERN="mpeg4"			# Beispiel: "h265|hevc"
 
-		### dieser Codec wird leider mit "-formats" nicht ausgegeben
-		### deshalb muss er fest eingetragen werden
-		VIDEOCODEC="mpeg4"
+VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
+if [ "x${VIDEOCODEC}" = "x" ] ; then
+	VIDEOCODEC="$(echo "${FFMPEG_LIB}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+	if [ "x${VIDEOCODEC}" = "x" ] ; then
+		VIDEOCODEC="$(echo "${FFMPEG_FORMATS}" | grep -E "${CODEC_PATTERN}" | head -n1)"
+		if [ "x${VIDEOCODEC}" = "x" ] ; then
+			echo ""
+			echo "CODEC_PATTERN='${CODEC_PATTERN}'"
+			echo "VIDEOCODEC='${VIDEOCODEC}'"
+			echo "Leider wird dieser Codec von der aktuell installierten Version"
+			echo "von FFmpeg nicht unterstützt!"
+			echo ""
+			exit 1
+
+			### dieser Codec wird leider mit "-formats" nicht ausgegeben
+			### deshalb muss er fest eingetragen werden
+			VIDEOCODEC="mpeg4"
+		fi
 	fi
 fi
 
+echo "# 1001
+CODEC_PATTERN=${CODEC_PATTERN}
+VIDEOCODEC='${VIDEOCODEC}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+#exit
 
 VIDEO_TAG="-vtag DX50"					# DivX 5
 VIDEO_OPTION="${VIDEO_TAG}"
@@ -48,14 +56,14 @@ VIDEO_OPTION="${VIDEO_TAG}"
 
 #T="3.7"
 T="3"
-VIDEO_QUALITAET_0="-b:v $(echo "12 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_1="-b:v $(echo "14 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_2="-b:v $(echo "16 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_3="-b:v $(echo "18 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_4="-b:v $(echo "20 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_5="-b:v $(echo "22 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_6="-b:v $(echo "24 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_7="-b:v $(echo "26 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_8="-b:v $(echo "28 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
-VIDEO_QUALITAET_9="-b:v $(echo "30 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_0="-b:v $(echo "12 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}')k ${VIDEO_OPTION}"
+VIDEO_QUALITAET_1="-b:v $(echo "14 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}')k ${VIDEO_OPTION}"
+VIDEO_QUALITAET_2="-b:v $(echo "16 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}')k ${VIDEO_OPTION}"
+VIDEO_QUALITAET_3="-b:v $(echo "18 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}')k ${VIDEO_OPTION}"
+VIDEO_QUALITAET_4="-b:v $(echo "20 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}')k ${VIDEO_OPTION}"
+VIDEO_QUALITAET_5="-b:v $(echo "22 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}')k ${VIDEO_OPTION}"
+VIDEO_QUALITAET_6="-b:v $(echo "24 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}')k ${VIDEO_OPTION}"
+VIDEO_QUALITAET_7="-b:v $(echo "26 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}')k ${VIDEO_OPTION}"
+VIDEO_QUALITAET_8="-b:v $(echo "28 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}')k ${VIDEO_OPTION}"
+VIDEO_QUALITAET_9="-b:v $(echo "30 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}')k ${VIDEO_OPTION}"
 

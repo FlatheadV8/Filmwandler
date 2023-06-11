@@ -25,7 +25,6 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   # Qualität
 . ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 . $(dirname ${0})/Filmwandler_Codec_Video_264.txt
-IFRAME="-keyint_min 150"
 
 fi
 #==============================================================================#

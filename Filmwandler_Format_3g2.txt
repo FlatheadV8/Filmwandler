@@ -26,7 +26,6 @@ FORMAT="3g2"
 # Video
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 . $(dirname ${0})/Filmwandler_Codec_Video_263.txt
-IFRAME="-keyint_min 150"
 
 #------------------------------------------------------------------------------#
 ### 3GPP2 ignoriert in einigen Fällen das DAR

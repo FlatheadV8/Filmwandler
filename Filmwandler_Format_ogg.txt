@@ -27,7 +27,6 @@ FORMAT="ogg"
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 #	. $(dirname ${0})/Filmwandler_Codec_Video_theora.txt
 	. $(dirname ${0})/Filmwandler_Codec_Video_vp8.txt
-	IFRAME="-keyint_min 150"
 fi
 
 #==============================================================================#
