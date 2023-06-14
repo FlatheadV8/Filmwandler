@@ -20,7 +20,8 @@
 #VERSION="v2023050900"			# Abstufung so angepasst, dass bei "-vq 5" die Codecs x264, x265, aom-av1 und svt-av1 eine änlich lange Transkodierzeit benötigen (pro Minute Spielfilm, ca. 1,5 Minuten Transkodierdauer)
 #VERSION="v2023051100"			# Die Abstufung von librav1e besser abgestimmt
 #VERSION="v2023051300"			# da libaom-av1 und av1 identisch sind, wurde die Funktion "intern_av1" entfernt
-VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
+#VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
+VERSION="v2023061400"			# enable-tf=0 für eine verbesserte Schärfe
 
 TWO_PASS="Nein"				# 2-Pass encoding
 CODEC_PATTERN="av1|aom"			# Beispiel: "h265|hevc"
@@ -92,7 +93,7 @@ echo "libsvtav1()"
 #------------------------------------------------------------------------------#
 # Voreinstellung: -crf 35 -preset 10 -svtav1-params tune=1:fast-decode=1
 
-#VIDEO_OPTION="-preset 5 -svtav1-params tune=0:fast-decode=0"
+#VIDEO_OPTION="-preset 5 -svtav1-params tune=0:fast-decode=0:enable-tf=0"
 #VIDEO_QUALITAET_0="-crf 50 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
 #VIDEO_QUALITAET_1="-crf 46 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
 #VIDEO_QUALITAET_2="-crf 42 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
@@ -104,7 +105,7 @@ echo "libsvtav1()"
 #VIDEO_QUALITAET_8="-crf 18 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
 #VIDEO_QUALITAET_9="-crf 14 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
 
-VIDEO_OPTION="-crf 25 -svtav1-params tune=0:fast-decode=0"
+VIDEO_OPTION="-crf 25 -svtav1-params tune=0:fast-decode=0:enable-tf=0"
 VIDEO_QUALITAET_0="${VIDEO_OPTION} -preset 12"		# schnellstes, schlechteste Qualität
 VIDEO_QUALITAET_1="${VIDEO_OPTION} -preset 11"		# 
 VIDEO_QUALITAET_2="${VIDEO_OPTION} -preset 10"		# 

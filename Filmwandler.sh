@@ -115,7 +115,8 @@
 #VERSION="v2023060300"			# 2-Pass aktivieren
 #VERSION="v2023060700"			# 2-Pass Aktivierung als Option eingebaut
 #VERSION="v2023060800"			# Fehler bei Untertitelbehandlung behoben
-VERSION="v2023061000"			# jetzt wird für jeden Audio-Kanal separat die Bit-Rate berechnet
+#VERSION="v2023061000"			# jetzt wird für jeden Audio-Kanal separat die Bit-Rate berechnet
+VERSION="v2023061400"			# von IFRAME="-g 1" auf IFRAME="-g 5" umgestellt
 
 
 VERSION_METADATEN="${VERSION}"
@@ -153,7 +154,7 @@ STARTZEITPUNKT="$(date +'%s')"
 # ffmpeg -h full 2>/dev/null | grep -F keyint
 # -keyint_min        <int>        E..V.... minimum interval between IDR-frames (from INT_MIN to INT_MAX) (default 25)
 #IFRAME="-keyint_min 2-8"		# --keyint in Frames
-IFRAME="-g 1"				# -g in Sekunden
+IFRAME="-g 5"				# -g in Sekunden
 
 LANG=C					# damit AWK richtig rechnet
 Film2Standardformat_OPTIONEN="${@}"
