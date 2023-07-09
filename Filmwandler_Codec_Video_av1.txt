@@ -21,7 +21,8 @@
 #VERSION="v2023051100"			# Die Abstufung von librav1e besser abgestimmt
 #VERSION="v2023051300"			# da libaom-av1 und av1 identisch sind, wurde die Funktion "intern_av1" entfernt
 #VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
-VERSION="v2023061400"			# enable-tf=0 für eine verbesserte Schärfe
+#VERSION="v2023061400"			# enable-tf=0 für eine verbesserte Schärfe
+VERSION="v2023061800"			# -crf ${CRF} -preset ${PRESET} -svtav1-params:v:0 enable-overlays=1:enable-tf=0:film-grain=0:film-grain-denoise=0:keyint=5s:scd=1:tune=0:fast-decode=0
 
 TWO_PASS="Nein"				# 2-Pass encoding
 CODEC_PATTERN="av1|aom"			# Beispiel: "h265|hevc"
@@ -105,7 +106,8 @@ echo "libsvtav1()"
 #VIDEO_QUALITAET_8="-crf 18 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
 #VIDEO_QUALITAET_9="-crf 14 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
 
-VIDEO_OPTION="-crf 25 -svtav1-params tune=0:fast-decode=0:enable-tf=0"
+#VIDEO_OPTION="-crf 25 -svtav1-params tune=0:fast-decode=0:enable-tf=0"
+VIDEO_OPTION="-crf 25 -svtav1-params enable-overlays=1:enable-tf=0:film-grain=0:film-grain-denoise=0:keyint=5s:scd=1:tune=0:fast-decode=0"
 VIDEO_QUALITAET_0="${VIDEO_OPTION} -preset 12"		# schnellstes, schlechteste Qualität
 VIDEO_QUALITAET_1="${VIDEO_OPTION} -preset 11"		# 
 VIDEO_QUALITAET_2="${VIDEO_OPTION} -preset 10"		# 

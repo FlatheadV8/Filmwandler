@@ -9,7 +9,8 @@
 #VERSION="v2020060300"
 #VERSION="v2023032500"			# neue Ermittlungsmethode für Encoder
 #VERSION="v2023051400"			# Voreinstellungen angepasst
-VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
+#VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
+VERSION="v2023061800"			# -cpu-used sets how efficient the compression will be. For legacy reasons, the option is also accessible with -speed in ffmpeg.
 
 TWO_PASS="Nein"				# 2-Pass
 CODEC_PATTERN="vp9"			# Beispiel: "h265|hevc"
@@ -75,8 +76,17 @@ fi
 # bei "-b:v 0" ergibt eine "konstante Qualität" => bestes Ergebnis, wenn die Dateigröße egal ist
 # bei "-b:v 2000k" ergibt eine "begrente Qualität" => konstante Qualität mit einer Bit-Raten-Obergrenze
 
+### https://trac.ffmpeg.org/wiki/Encode/VP9
+### -deadline can be set to realtime, good, or best. For legacy reasons, the option is also accessible with -quality in ffmpeg.
+# -deadline good     - is the default and recommended for most applications.
+# -deadline best     - is recommended if you have lots of time and want the best compression efficiency.
+# -deadline realtime - is recommended for live / fast encoding.
+
+### https://trac.ffmpeg.org/wiki/Encode/VP9#speed
+### -cpu-used sets how efficient the compression will be. For legacy reasons, the option is also accessible with -speed in ffmpeg.
+
 CONSTANT_QUALITY="-b:v 0"	# Um den Modus "Konstante Qualität" auszulösen, müssen Sie eine Kombination aus -crf und -b:v 0 verwenden. Beachten Sie, dass -b:v 0 sein MUSS. Wenn Sie den Wert auf einen höheren Wert festlegen oder ganz weglassen, wird stattdessen der Modus „Eingeschränkte Qualität“ aufgerufen.
-VIDEO_OPTION="-crf 32 ${CONSTANT_QUALITY} -tune ssim -aq-mode 1 -row-mt 1 -speed 4"
+VIDEO_OPTION="-crf 32 ${CONSTANT_QUALITY} -deadline good -tune ssim -aq-mode 1 -row-mt 1"
 VIDEO_QUALITAET_0="-cpu-used 0 -sharpness 1 ${VIDEO_OPTION}"		# -cpu-used von "0" bis "8"
 VIDEO_QUALITAET_1="-cpu-used 0 -sharpness 0 ${VIDEO_OPTION}"		# -cpu-used von "0" bis "8"
 VIDEO_QUALITAET_2="-cpu-used 1 -sharpness 0 ${VIDEO_OPTION}"		# -cpu-used von "0" bis "8"
