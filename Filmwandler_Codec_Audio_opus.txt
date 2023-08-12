@@ -12,7 +12,8 @@
 #VERSION="v2023032500"			# jetzt wird "opus" verwendet, wenn "libopus" nicht vorhanden ist
 #VERSION="v2023032500"                  # neue Ermittlungsmethode für Encoder
 #VERSION="v2023042400"			# schreibt jetzt in die richtige Protokolldatei
-VERSION="v2023061000"			# jetzt wird für jeden Audio-Kanal separat die Bit-Rate berechnet
+#VERSION="v2023061000"			# jetzt wird für jeden Audio-Kanal separat die Bit-Rate berechnet
+VERSION="v2023081200"			# -filter:a: repariert
 
 #------------------------------------------------------------------------------#
 #
@@ -125,9 +126,9 @@ F_AUDIO_QUALITAET()
 	if [ "${AUDIOCODEC}" = "libopus" ] ; then
 		AUDIO_BIT_RATE="$(echo "${AUDIO_KANAELE} $(echo "${AUDIO_BIT_kBIT_PRO_KANAL}" | grep -Ev '#|^[ \t]*$' | head -n${AUDIO_VON_OBEN} | tail -n1) 64 2" | awk '{print $1 * $2}')k"
 		if [ "${AUDIO_KANAELE}" -gt 2 ] ; then
-        		echo "-b:a:${1} ${AUDIO_BIT_RATE} -vbr:a:${1} on -mapping_family:a:${1} 1 -filter:a:0 aformat=channel_layouts='7.1|6.1|5.1|5.0|quad|3.0'"
+        		echo "-b:a:${1} ${AUDIO_BIT_RATE} -vbr:a:${1} on -mapping_family:a:${1} 1 -filter:a:${1} aformat=channel_layouts='7.1|6.1|5.1|5.0|quad|3.0'"
 		else
-        		echo "-b:a:${1} ${AUDIO_BIT_RATE} -vbr:a:${1} on -mapping_family:a:${1} 0 -filter:a:0 aformat=channel_layouts='stereo|mono'"
+        		echo "-b:a:${1} ${AUDIO_BIT_RATE} -vbr:a:${1} on -mapping_family:a:${1} 0 -filter:a:${1} aformat=channel_layouts='stereo|mono'"
 		fi
 	else
 		AUDIO_BIT_RATE="$(echo "2 $(echo "${AUDIO_BIT_kBIT_PRO_KANAL}" | grep -Ev '#|^[ \t]*$' | head -n${AUDIO_VON_OBEN} | tail -n1) 64 2" | awk '{print $1 * $2}')k"
