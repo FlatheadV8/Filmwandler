@@ -118,7 +118,8 @@
 #VERSION="v2023061000"			# jetzt wird für jeden Audio-Kanal separat die Bit-Rate berechnet
 #VERSION="v2023061400"			# von IFRAME="-g 1" auf IFRAME="-g 5" umgestellt
 #VERSION="v2023061600"			# von IFRAME="-g 5" auf IFRAME="-g 300" umgestellt
-VERSION="v2023061600"			# ffmpeg -benchmark -report
+#VERSION="v2023061600"			# ffmpeg -benchmark -report
+VERSION="v2023082900"			# AUDIO_SPUR_SPRACHE für den Fall repariert, dass die Sprache der Tonspur mit übergeben wird
 
 
 VERSION_METADATEN="${VERSION}"
@@ -1569,7 +1570,7 @@ else
 	# 2 audio spa
 	# 3 audio und
 	# 4 audio und
-	AUDIO_SPUR_SPRACHE="$(echo "${TONSPUR}" | grep -F ':' | tr -s ',' '\n' | sed 's/:/ /g;s/.*/& und/' | awk '{print $1,"audio",$2}')"
+	AUDIO_SPUR_SPRACHE="$(echo "${TONSPUR}" | grep -F ':' | tr -s ',' '\n' | sed 's/:/ /g;s/.*/& und/' | nl | awk '{print $1-1,"audio",$3}')"
 	META_AUDIO_SPRACHE="$(echo "${AUDIO_SPUR_SPRACHE}" | grep -Ev '^$' | while read A B C; do echo "-metadata:s:a:${A} language=${C}"; done | tr -s '\n' ' ')"
 fi
 
