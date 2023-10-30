@@ -2479,7 +2479,7 @@ fi
 
 #------------------------------------------------------------------------------#
 
-ls -lh "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt "${ZIELVERZ}"/${PROTOKOLLDATEI}.log | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+ls -lh "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 LAUFZEIT="$(echo "${STARTZEITPUNKT} $(date +'%s')" | awk '{print $2 - $1}')"
 echo "# 1380

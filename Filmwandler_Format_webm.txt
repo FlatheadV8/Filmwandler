@@ -39,7 +39,7 @@ FORMAT="webm"
 
 # Audio
 #. $(dirname ${0})/Filmwandler_Codec_Audio_vorbis.txt	# nur libvorbis funktioniert
-. $(dirname ${0})/Filmwandler_Codec_Audio_opus.txt	# kann z.Z. leider nur Stereo (Sep. 2020)
+. $(dirname ${0})/Filmwandler_Codec_Audio_opus.txt	# kann jetzt auch Mehrkanalton
 
 
 # Video

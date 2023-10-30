@@ -3,13 +3,9 @@
 
 #------------------------------------------------------------------------------#
 #
-# Durch dieses Skript wird es möglich, mit einem einzigen Aufruf Filme in zwei
-# Formate zu erzeugen: MP4 (das z.Z. kompatibelste) und MKV (ein freies).
-#
-# Das Skript erzeugt zwei neue Filme:
-#  - MP4:     mp4    + H.264/AVC  + AAC / nur kompatible Untertitel
-#  - MKV:     mkv    + VP9        + Vorbis / alle Untertitel
-#  - WebM:    webm   + VP9        + Vorbis / ohne Untertitel
+# Wenn im Film Untertitel keine Untertitel oder Untertitel in einem Textformat
+# vorhanden sind, dann wird das WebM-Container-Format verwendet,
+# sonst das MKV-Container-Format.
 #
 # Es werden folgende Programme bzw. Skripte verwendet:
 #  - /${AVERZ}/Filmwandler*.sh
@@ -40,7 +36,9 @@
 #VERSION="v2022120700"		# den alternativen Zweig (für den Fall, dass keine UUntertitel vorhanden sind) abgeschaltet, weil dort WebM mit AV1 zum Einsatz kommt, was z.Z. noch viel zu langsam ist
 #VERSION="v2022120700"		# Fehler in der MP4-Erstellung behoben
 #VERSION="v2022122200"		# Fehler in der MP4-Erstellung behoben
-VERSION="v2023051900"		# optimiert für /bin/sh
+#VERSION="v2023051900"		# optimiert für /bin/sh
+#VERSION="v2023100900"		# WebM favorisieren und MKV als Alternative, wenn es im Quell-Film Untertitel im nicht-Text-Format gibt
+VERSION="v2023103000"		# "mov_text" ist auch ein Untertitel-Format im Text-Format
 
 
 ALLE_OPTIONEN="${@}"
@@ -50,18 +48,6 @@ PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 STOP="Nein"
 
 AVERZ="$(dirname ${0})"				# Arbeitsverzeichnis, hier liegen diese Dateien
-
-#------------------------------------------------------------------------------#
-### Endung anpassen
-
-# dieses Format immer zusätzlich, wenn mit Untertitel
-ENDUNG_1="mp4"
-
-# bevorzugtes freies Format, mit Untertitel
-ENDUNG_2="mkv"
-
-# bevorzugtes freies Format, ohne Untertitel
-ENDUNG_3="webm"
 
 #==============================================================================#
 if [ x = "x${1}" ] ; then
@@ -140,83 +126,31 @@ SCHNITT_OPTION='${SCHNITT_OPTION}'
 # hier wird geprüft, ob im Film kein Untertitel vorhanden sind
 
 FFPROBE_PROBESIZE="9223372036854"       	# Maximalwert in MiB auf einem Intel(R) Core(TM) i5-10600T CPU @ 2.40GHz
-
-UNTERTITELSPUREN="$(ffprobe -v error -probesize ${FFPROBE_PROBESIZE}M -analyzeduration ${FFPROBE_PROBESIZE}M -i "${FILMDATEI}" -show_streams | grep -F 'codec_type=subtitle' | wc -l)"
-echo "UNTERTITELSPUREN='${UNTERTITELSPUREN}'"
+KOMPLETT_DURCHSUCHEN="-probesize ${FFPROBE_PROBESIZE} -analyzeduration ${FFPROBE_PROBESIZE}"
+FFPROBE_SHOW_DATA="$(ffprobe ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_data 2>&1)"
 
 #exit
 #==============================================================================#
 # Die Frage lautet: "Sind Untertitel vorhanden?".
 
-### das WEBM-Format verwenden wir hier nur dann, wenn keine Untertitel im Film sind und als Video-Codec "VP9" zum Einsatz kommt!
-#if [ 0 -eq ${UNTERTITELSPUREN} ] ; then
+UNTERTITEL_SPUREN="$(echo "${FFPROBE_SHOW_DATA}" | grep -F 'Stream #' | grep -Fi ' Subtitle:' | wc -l | awk '{print $1}' | head -n1)"
 
-  #----------------------------------------------------------------------------#
-  # Wenn im Film kein Untertitel vorhanden ist, dann wird nur in ein sehr kompatibles Fotmat (HD ready, HTML5 oder HLS) transkodiert.
+ENDUNG="webm"
+if [ 0 -lt "${UNTERTITEL_SPUREN}" ] ; then
+	UNTER_CODEC="$(echo "${FFPROBE_SHOW_DATA}" | grep -Fi ' Subtitle: ' | sed 's/^.* Subtitle: //;s/,.*$//' | awk '{print $1}' | sort | uniq | head -n1)"
 
-  ### MP4 (AVC + AAC) => für DLNA- und HLS-Kompatibilität
-  #echo "# 0,1: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -u =0"
-  #${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -standard_ton 0 -u =0
+	# WebVTT ist eine Weiterentwicklung von SRT
+	UNTERTITEL_TEXT_CODEC="$(echo "${UNTER_CODEC}" | grep -Ei 'SRT|VTT|SSA|ASS|SMIL|TTML|DFXP|SBV|irc|cap|SCC|itt|DFXP|mov_text')"
+	if [ x = "x${UNTERTITEL_TEXT_CODEC}" ] ; then
+		ENDUNG="mkv"
+	fi
 
-  ### WEBM (VP9 + Vorbis) => HTML5-kompatibel
-  ### WEBM (AV1 + Opus) => HTML5-kompatibel, transkodiert viel zu langsam
-  ### der Kontainer "WebM" schränkt zu stark ein, weil er nur seltene Untertitelformate unterstützt
-#  echo "# 0,2: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_3}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -u =0"
-#  ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_3}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -standard_ton 0 -u =0
-
-#  ls -lha "${ZIELPFAD}"*
-
-  #----------------------------------------------------------------------------#
-
-#else
-
-  #----------------------------------------------------------------------------#
-
-  ### MP4 (AVC + AAC) => HD ready (preiswerte DVD- und BD-Player unterstützen nur diesen Standard
-  ###
-  ### der Kompatibilitäts-Standard "HD ready" schränkt zu stark ein, weil er die Auflösung und die Bit-Rate begrenzt
-  ### Mindestanvorderungen des "HD ready"-Standards umsetzen
-  ### Das bedeutet in diesem Fall:
-  ###   - Auflösung begrenzt auf:
-  ###     -  4/3:  1024×768 → XGA  (EVGA)
-  ###     - 16/9:  1280×720 → WXGA (HDTV)
-  ###   - nur eine Tonspur (wegen Bit-Raten-Begrenzung)
-  ###   - keine Untertitelspur (wegen Bit-Raten-Begrenzung)
-  #echo "# 1,1: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -u =0 -minihd"
-  #${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -standard_ton 0 -u =0 -minihd
-
-  ### MP4 (AVC + AAC) => für DLNA- und HLS-Kompatibilität
-  #echo "# 1,2: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -standard_u 0"
-  #${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -standard_ton 0 -standard_u 0
-
-  ### MKV (AV1 + Vorbis) => kann alle Audio-Kanäle und alle Untertitelformate
-  #   Wird nur benötigt, wenn die vorhandenen Untertiten nicht in den MP4-Film übernommen werden konnten.
-  echo "# 1,3: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -standard_u 0"
-  ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -standard_ton 0 -standard_u 0
-
-  ### WEBM (VP9 + Vorbis) => HTML5-kompatibel
-  ### WEBM (AV1 + Opus) => HTML5-kompatibel
-  ### der Kontainer "WebM" schränkt zu stark ein, weil er nur seltene Untertitelformate unterstützt
-  #echo "# 1,4: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_3}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -u =0"
-  #${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_3}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -standard_ton 0 -u =0
-
-  #----------------------------------------------------------------------------#
-
-  ### konvertiert den MKV-Film in einen WebM-Konterner und entfernt dabei die Untertitel
-  ### Kompatibilität: teilweise HTML5, teilweise HLS, teilweise MPEG-DASH
-  echo "# 1,6: ${AVERZ}/Filmwandler_zu_WebM-Kontainer.sh -q \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}\""
-  ${AVERZ}/Filmwandler_zu_WebM-Kontainer.sh -q "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_2}"
-
-  ### Um eine "HD ready"-Kompatibilität (max. 720p + keine Untertitel) zu erreichen, wird das MKV-Video noch einmal transkodiert.
-  ### Kompatibilität: "HD ready", HTML5, HLS, MPEG-DASH
-#  echo "# 1,5: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -u =0 -minihd -hls"
-#  ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG_1}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -standard_ton 0 -u =0 -minihd -hls
-
-  #----------------------------------------------------------------------------#
-
-  ls -lha "${ZIELPFAD}"*
-
-#fi
+	echo "# 2: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -standard_u 0"
+	${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -standard_ton 0 -standard_u 0
+else
+	echo "# 1: ${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q \"${FILMDATEI}\" -z \"${ZIELVERZ}/${ZIELNAME}.${ENDUNG}\" ${SCHNITT_OPTION} -titel \"${TITEL}\" -k \"${KOMMENTAR}\" -standard_ton 0 -u =0"
+	${AVERZ}/Filmwandler.sh ${SONSTIGE_OPTIONEN} -q "${FILMDATEI}" -z "${ZIELVERZ}/${ZIELNAME}.${ENDUNG}" ${SCHNITT_OPTION} -titel "${TITEL}" -k "${KOMMENTAR}" -standard_ton 0 -u =0
+fi
 
 #==============================================================================#
 
