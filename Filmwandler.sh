@@ -120,7 +120,8 @@
 #VERSION="v2023061600"			# von IFRAME="-g 5" auf IFRAME="-g 300" umgestellt
 #VERSION="v2023061600"			# ffmpeg -benchmark -report
 #VERSION="v2023082900"			# AUDIO_SPUR_SPRACHE für den Fall repariert, dass die Sprache der Tonspur mit übergeben wird
-VERSION="v2023112100"			# Reihenfolge der Audio- und Untertiteloptionen geordnet
+#VERSION="v2023112100"			# Reihenfolge der Audio- und Untertiteloptionen geordnet
+VERSION="v2023112300"			# AUDIO_STANDARD_SPUR und UNTERTITEL_STANDARD_SPUR repariert
 
 
 VERSION_METADATEN="${VERSION}"
@@ -419,7 +420,7 @@ while [ "${#}" -ne "0" ]; do
                         # dann wird die Einstellung aus dem Originalfilm übernommen
                         # "0" für die erste Tonspur
                         # "5" für die sechste Tonspur
-                        SOLL_STANDARD_AUDIO_SPUR="${2}"		# -standard_ton 5
+                        AUDIO_STANDARD_SPUR="${2}"		# -standard_ton 5
                         shift
                         ;;
                 -standard_u)
@@ -427,7 +428,7 @@ while [ "${#}" -ne "0" ]; do
                         # dann wird die Einstellung aus dem Originalfilm übernommen
                         # "0" für die erste Untertitelspur
                         # "5" für die sechste Untertitelspur
-                        SOLL_STANDARD_UNTERTITEL_SPUR="${2}"	# -standard_u 5
+                        UNTERTITEL_STANDARD_SPUR="${2}" 	# -standard_u 5
                         shift
                         ;;
                 -ton)
@@ -1125,7 +1126,7 @@ EIGENER_TITEL='${EIGENER_TITEL}'
 METADATEN_BESCHREIBUNG=${METADATEN_BESCHREIBUNG}
 KOMMENTAR='${KOMMENTAR}'
 
-SOLL_STANDARD_AUDIO_SPUR='${SOLL_STANDARD_AUDIO_SPUR}'
+AUDIO_STANDARD_SPUR='${AUDIO_STANDARD_SPUR}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #--- VIDEO_SPUR ---------------------------------------------------------------#
@@ -1573,19 +1574,19 @@ UNTERTITEL_SPUR_SPRACHE='${UNTERTITEL_SPUR_SPRACHE}'
 # -metadata:s:a:${A} language=${C}
 if [ x = "x${TON_SPUR_SPRACHE}" ] ; then
 	echo "# 750" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	AUDIO_SPUR_SPRACHE="$(echo "${META_DATEN_SPURSPRACHEN}" | grep -F ' audio ' | nl | awk '{print $1 - 1,$4}')"
+	AUDIO_SPUR_SPRACHE="$(echo "${META_DATEN_SPURSPRACHEN}" | grep -F ' audio ' | nl | awk '{print $1 - 1,$4}' | grep -E '^[0-9]')"
 else
 	echo "# 760" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	AUDIO_SPUR_SPRACHE="$(echo "${TON_SPUR_SPRACHE}" | grep -Ev '^$'  | tr -s ',' '\n' | sed 's/:/ /g;s/.*/& und/' | awk '{print $1,$2}')"
+	AUDIO_SPUR_SPRACHE="$(echo "${TON_SPUR_SPRACHE}" | grep -Ev '^$'  | tr -s ',' '\n' | sed 's/:/ /g;s/.*/& und/' | awk '{print $1,$2}' | grep -E '^[0-9]')"
 fi
 
 # -metadata:s:s:${A} language=${C}
 if [ x = "x${UNTERTITEL_SPUR_SPRACHE}" ] ; then
 	echo "# 770" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	NOTA_SPUR_SPRACHE="$(echo "${META_DATEN_SPURSPRACHEN}" | grep -F ' subtitle ' | nl | awk '{print $1 - 1,$4}')"
+	NOTA_SPUR_SPRACHE="$(echo "${META_DATEN_SPURSPRACHEN}" | grep -F ' subtitle ' | nl | awk '{print $1 - 1,$4}' | grep -E '^[0-9]')"
 else
 	echo "# 780" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	NOTA_SPUR_SPRACHE="$(echo "${UNTERTITEL_SPUR_SPRACHE}" | grep -Ev '^$'  | tr -s ',' '\n' | sed 's/:/ /g;s/.*/& und/' | awk '{print $1,$2}')"
+	NOTA_SPUR_SPRACHE="$(echo "${UNTERTITEL_SPUR_SPRACHE}" | grep -Ev '^$'  | tr -s ',' '\n' | sed 's/:/ /g;s/.*/& und/' | awk '{print $1,$2}' | grep -E '^[0-9]')"
 fi
 
 echo "# 790
@@ -1601,7 +1602,7 @@ NOTA_SPUR_SPRACHE='${NOTA_SPUR_SPRACHE}'
 ### STANDARD-AUDIO-SPUR
 
 ### Die Bezeichnungen (Sprache) für die Audiospuren werden automatisch übernommen.
-if [ x = "x${SOLL_STANDARD_AUDIO_SPUR}" ] ; then
+if [ x = "x${AUDIO_STANDARD_SPUR}" ] ; then
 	### wenn nichts angegeben wurde, dann
 	### Deutsch als Standard-Sprache voreinstellen
 	AUDIO_STANDARD_SPUR="$(echo "${AUDIO_SPUR_SPRACHE}" | grep -Ei " deu| ger" | awk '{print $1}' | head -n1)"
@@ -1618,9 +1619,6 @@ if [ x = "x${SOLL_STANDARD_AUDIO_SPUR}" ] ; then
 			AUDIO_STANDARD_SPUR=0
 		fi
 	fi
-else
-	### STANDARD-AUDIO-SPUR manuell gesetzt
-	AUDIO_STANDARD_SPUR="${SOLL_STANDARD_AUDIO_SPUR}"
 fi
 
 echo "# 810
@@ -1690,6 +1688,7 @@ AUDIO_VON_OBEN="$(echo "${TONQUALIT}" | awk '{print $1 + 1}')"
 echo "# 870
 TONQUALIT='${TONQUALIT}'
 AUDIO_OPTION_GLOBAL='${AUDIO_OPTION_GLOBAL}'
+AUDIO_SPUR_SPRACHE='${AUDIO_SPUR_SPRACHE}'
 AUDIOCODEC='${AUDIOCODEC}'
 AUDIO_QUALITAET_5='${AUDIO_QUALITAET_5}'
 TS_ANZAHL='${TS_ANZAHL}'
@@ -1781,7 +1780,7 @@ if [ 0 -lt "${TS_ANZAHL}" ] ; then
 			#------------------------------------------------------#
 
 			if [ x != "x${AUDIO_STANDARD_SPUR}" ] ; then
-				if [ "${TS_NR}" = "${AUDIO_STANDARD_SPUR}" ] ; then
+				if [ "${LFD_NR}" = "${AUDIO_STANDARD_SPUR}" ] ; then
 					echo "# 950" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 					echo "-disposition:a:${LFD_NR} default" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 				else
@@ -1821,6 +1820,7 @@ echo "# 990
 # BEREITS_AK2='${BEREITS_AK2}'
 # TS_LISTE='${TS_LISTE}'
 # TS_KOPIE='${TS_KOPIE}'
+# AUDIO_STANDARD_SPUR='${AUDIO_STANDARD_SPUR}'
 # AUDIO_VERARBEITUNG_01='${AUDIO_VERARBEITUNG_01}'
 # AUDIO_VERARBEITUNG_02='${AUDIO_VERARBEITUNG_02}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
@@ -1899,7 +1899,7 @@ else
 		#----------------------------------------------------------------------#
 
 		### Die Bezeichnungen (Sprache) für die Audiospuren werden automatisch übernommen.
-		if [ x = "x${SOLL_STANDARD_UNTERTITEL_SPUR}" ] ; then
+		if [ x = "x${UNTERTITEL_STANDARD_SPUR}" ] ; then
 			### wenn nichts angegeben wurde, dann
 			### Deutsch als Standard-Sprache voreinstellen
 			UNTERTITEL_STANDARD_SPUR="$(echo "${NOTA_SPUR_SPRACHE}" | grep -Ei " de| ger" | awk '{print $1}' | head -n1)"
@@ -1917,16 +1917,13 @@ else
 				fi
 			fi
 		else
-			### STANDARD-UNTERTITEL-SPUR manuell gesetzt
-			UNTERTITEL_STANDARD_SPUR="${SOLL_STANDARD_UNTERTITEL_SPUR}"
-
 			#----------------------------------------------------------------------#
 			### Die Werte für "Disposition" für die Untertitelspur werden nach dem eigenen Wunsch gesetzt.
 			# -disposition:s:0 default
 			# -disposition:s:1 0
 			# -disposition:s:2 0
 
-			if [ "${US}" = "${UNTERTITEL_STANDARD_SPUR}" ] ; then
+			if [ "${UN}" = "${UNTERTITEL_STANDARD_SPUR}" ] ; then
 				echo "-disposition:s:${UN} default"
 			else
 				echo "-disposition:s:${UN} 0"
