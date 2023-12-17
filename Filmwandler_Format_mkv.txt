@@ -15,7 +15,8 @@
 #VERSION="v2022121100"			# die Variable ENDUNG darf hier nicht drin stehen
 #VERSION="v2023032400"			# auf AV1 + Vorbis umgestellt
 #VERSION="v2023051400"			# auf VP9 + Vorbis umgestellt, weil der FireTV-Stick dieses Format am besten abspielen kann
-VERSION="v2023060700"			# auf AV1 + Vorbis umgestellt, weil WebM keine officielle Unterstützung für AV1 bietet
+#VERSION="v2023060700"			# auf AV1 + Vorbis umgestellt, weil WebM keine officielle Unterstützung für AV1 bietet
+VERSION="v2023112800"			# auf AV1 + Opus umgestellt, weil Vorbis keine 8-Kanal-Unterstützung bietet
 
 #==============================================================================#
 
@@ -39,17 +40,18 @@ FORMAT="matroska"
 #
 
 ### Audio
+# [libvorbis @ 0x872070c00] 8 channels (FL+FR+FC+LFE+SL+SR+ not supported by Vorbis: output stream will have incorrect channel layout.
 #. $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt
-. $(dirname ${0})/Filmwandler_Codec_Audio_vorbis.txt	# nur libvorbis funktioniert
-#. $(dirname ${0})/Filmwandler_Codec_Audio_opus.txt	# kann jetzt auch Mehrkanalton
+#. $(dirname ${0})/Filmwandler_Codec_Audio_vorbis.txt	# * Audio-Kodierung:      Vorbis (freie Alternative zu MP3)                      *
+. $(dirname ${0})/Filmwandler_Codec_Audio_opus.txt	# * Audio-Kodierung:      Opus (freie Alternative zu AAC)                        *
 
 
 ### Video
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 #	. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt
 #	. $(dirname ${0})/Filmwandler_Codec_Video_vp8.txt
-#	. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
-	. $(dirname ${0})/Filmwandler_Codec_Video_av1.txt
+#	. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt	# * Video-Kodierung:      VP9  (freie Alternative zu H.265 für 4K)               *
+	. $(dirname ${0})/Filmwandler_Codec_Video_av1.txt	# * Video-Kodierung:      AV1  (freie Alternative zu H.265 für 4K)               *
 fi
 
 #==============================================================================#
@@ -59,7 +61,7 @@ FORMAT_BESCHREIBUNG="
 * Name:                 free MKV                                               *
 * ENDUNG:               .mkv                                                   *
 * Video-Kodierung:      AV1  (freie Alternative zu H.265 für 4K)               *
-* Audio-Kodierung:      Vorbis (freie Alternative zu MP3)                      *
+* Audio-Kodierung:      Opus (freie Alternative zu AAC)                        *
 * Beschreibung:                                                                *
 *       - freies Format mit guter Unterstützung durch Android                  *
 *       - 'Royalty free' (komplett frei von patentierten Technologien)         *

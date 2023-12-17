@@ -121,7 +121,8 @@
 #VERSION="v2023061600"			# ffmpeg -benchmark -report
 #VERSION="v2023082900"			# AUDIO_SPUR_SPRACHE für den Fall repariert, dass die Sprache der Tonspur mit übergeben wird
 #VERSION="v2023112100"			# Reihenfolge der Audio- und Untertiteloptionen geordnet
-VERSION="v2023112300"			# AUDIO_STANDARD_SPUR und UNTERTITEL_STANDARD_SPUR repariert
+#VERSION="v2023112300"			# AUDIO_STANDARD_SPUR und UNTERTITEL_STANDARD_SPUR repariert
+VERSION="v2023121700"			# Fehler behoben: bei undefinierten Audio-Spuren wurden keine Audio-Optionen für FFmpeg generiert
 
 
 VERSION_METADATEN="${VERSION}"
@@ -1041,10 +1042,19 @@ META_DATEN_ZEILENWEISE_STREAMS="$(echo "${META_DATEN_STREAMS}" | tr -s '\r' '\n'
 # codec_type=subtitle
 # TAG:language=eng
 #
+#   0 video eng 
 #   1 audio ger 
 #   2 audio eng 
 #   3 subtitle eng 
-META_DATEN_SPURSPRACHEN="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -E 'TAG:language=' | while read Z ; do echo "${Z}" | tr -s ';' '\n' | awk -F'=' '/^index=|^codec_type=|^TAG:language=/{print $2}' | tr -s '\n' ' ' ; echo ; done)"
+META_DATEN_SPURSPRACHEN_01="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -E 'TAG:language=' | while read Z ; do echo "${Z}" | tr -s ';' '\n' | awk -F'=' '/^index=|^codec_type=|^TAG:language=/{print $2}' | tr -s '\n' ' ' ; echo ; done)"
+META_DATEN_SPURSPRACHEN="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F 'codec_type=' | nl | while read ZNR M_DATEN
+do
+	SP_DATEN="$(echo "${M_DATEN}" | grep -E 'TAG:language=' | tr -s ';' '\n' | awk -F'=' '/^index=|^codec_type=|^TAG:language=/{print $2}' | tr -s '\n' ' ')"
+	if [ x = "x${SP_DATEN}" ] ; then
+		SP_DATEN="$( (echo "${M_DATEN}" | tr -s ';' '\n' | awk -F'=' '/^index=|^codec_type=/{print $2}'; echo "und") | tr -s '\n' ' ')"
+	fi
+	echo "${SP_DATEN}"
+done)"
 
 # https://techbeasts.com/fmpeg-commands/
 # Video um 90° drehen: ffmpeg -i input.mp4 -filter:v 'transpose=1' ouput.mp4
@@ -1699,6 +1709,7 @@ STEREO='${STEREO}'
 #exit 880
 
 if [ 0 -lt "${TS_ANZAHL}" ] ; then
+	echo "# 881: Es sind im Film Tonspuren vorhanden, die jetzt ausgewertet werden..." | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	#----------------------------------------------------------------------#
 	# AUDIO_SPUR_SPRACHE='0 de'
 	AUDIO_VERARBEITUNG_01="${AUDIO_OPTION_GLOBAL} $(echo "${AUDIO_SPUR_SPRACHE}" | grep -Ev '^$' | nl | while read AKN TS_NR TS_SP
