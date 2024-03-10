@@ -81,11 +81,23 @@ echo "# 810 Profil:
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 
+#------------------------------------------------------------------------------#
+### HLS
+### AVI, MP4
+### H.264, H.265
+### MP3, AAC
+### Untertitel: nur WebVTT und IMSC1
+### nur 8 bestimmte Auflösungen
+### Format nur 4/3 und 16/9
+
 hls()
 {
 . ${AVERZ}/Filmwandler_HLS.txt
 
 HLS_AUFLOESUNGEN="$(hls_aufloesungen | awk '{print $1}')"
+
+#------------------------------------------------------------------------------#
+### Auflösung anpassen
 
 if [ x = "x${SOLL_XY}" ] ; then
 	if [ x = "x${BILD_BREIT}" -o x = "x${BILD_HOCH}" ] ; then
@@ -119,6 +131,7 @@ fi
 
 BILD_BREIT="$(echo "${SOLL_XY}" | awk -F'x' '{print $1}')"
 BILD_HOCH="$( echo "${SOLL_XY}" | awk -F'x' '{print $2}')"
+#------------------------------------------------------------------------------#
 
 echo "# 840 Profil:
 # BILD_BREIT='${BILD_BREIT}'

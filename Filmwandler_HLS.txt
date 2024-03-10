@@ -115,3 +115,36 @@ echo "
 "
 }
 
+if [ "avi" = "${ENDUNG}" ] ; then
+	echo "ENDUNG=avi"
+elif [ "mp4" = "${ENDUNG}" ] ; then
+	echo "ENDUNG=mp4"
+else
+	ENDUNG="mp4"
+fi
+
+ALT_CODEC_VIDEO="264"
+ALT_CODEC_AUDIO="aac"
+HLS_SCALE="scale=${O_BREIT}x${O_HOCH},"
+FORMAT_ANPASSUNG="setdar='${BREITE}/${HOEHE}',"
+
+if [ x != "x${UT_VORHANDEN}" ] ; then
+	UNTERTITEL_TEXT_CODEC="$(echo "${IST_UT_FORMAT}" | grep -Ei 'SRT|VTT|SSA|ASS|SMIL|TTML|DFXP|SBV|irc|cap|SCC|itt|DFXP|mov_text')"
+	if [ x = "x${UNTERTITEL_TEXT_CODEC}" ] ; then
+		UT_HLS="kein Text"
+		UT_FORMAT=""
+	else
+		UT_HLS=""
+		UT_FORMAT="webvtt"
+	fi
+fi
+
+echo "# HLS
+HLS_SCALE='${O_BREIT}x${O_HOCH},'
+FORMAT_ANPASSUNG='setdar='${BREITE}/${HOEHE}','
+HLS: UT_VORHANDEN='${UT_VORHANDEN}'
+HLS: UNTERTITEL_TEXT_CODEC='${UNTERTITEL_TEXT_CODEC}'
+HLS: UT_FORMAT='${UT_FORMAT}'
+HLS: UT_HLS='${UT_HLS}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+

@@ -22,7 +22,8 @@
 #VERSION="v2023051300"			# da libaom-av1 und av1 identisch sind, wurde die Funktion "intern_av1" entfernt
 #VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
 #VERSION="v2023061400"			# enable-tf=0 für eine verbesserte Schärfe
-VERSION="v2023061800"			# -crf ${CRF} -preset ${PRESET} -svtav1-params:v:0 enable-overlays=1:enable-tf=0:film-grain=0:film-grain-denoise=0:keyint=5s:scd=1:tune=0:fast-decode=0
+#VERSION="v2023061800"			# -crf ${CRF} -preset ${PRESET} -svtav1-params:v:0 enable-overlays=1:enable-tf=0:film-grain=0:film-grain-denoise=0:keyint=5s:scd=1:tune=0:fast-decode=0
+VERSION="v2024022400"			# av1_nvenc - muß aber noch konfiguriert werden
 
 TWO_PASS="Nein"				# 2-Pass encoding
 CODEC_PATTERN="av1|aom"			# Beispiel: "h265|hevc"
@@ -31,6 +32,7 @@ CODEC_PATTERN="av1|aom"			# Beispiel: "h265|hevc"
 ### vollautomatische Kodeksuche wurde in diesem Fall abgeschaltet,
 ### bei der auch nach bisher unbekannten Kodeks gesucht wird
 
+#VIDEOCODEC="$(suche_video_encoder "libaom")"
 VIDEOCODEC="$(suche_video_encoder "svtav1")"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
 	VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
@@ -106,8 +108,10 @@ echo "libsvtav1()"
 #VIDEO_QUALITAET_8="-crf 18 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
 #VIDEO_QUALITAET_9="-crf 14 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
 
-#VIDEO_OPTION="-crf 25 -svtav1-params tune=0:fast-decode=0:enable-tf=0"
-VIDEO_OPTION="-crf 25 -svtav1-params enable-overlays=1:enable-tf=0:film-grain=0:film-grain-denoise=0:keyint=5s:scd=1:tune=0:fast-decode=0"
+##VIDEO_OPTION="-crf 25 -svtav1-params tune=0:fast-decode=0:enable-tf=0"
+#VIDEO_OPTION="-crf 25 -svtav1-params enable-overlays=1:enable-tf=0:film-grain=0:film-grain-denoise=0:keyint=5s:scd=1:tune=0:fast-decode=0"
+# -crf 26 damit "Unsere kleine Farm" auf einen USB-Stick passt
+VIDEO_OPTION="-crf 29 -svtav1-params enable-overlays=1:enable-tf=0:film-grain=0:film-grain-denoise=0:keyint=5s:scd=1:tune=0:fast-decode=0"
 VIDEO_QUALITAET_0="${VIDEO_OPTION} -preset 12"		# schnellstes, schlechteste Qualität
 VIDEO_QUALITAET_1="${VIDEO_OPTION} -preset 11"		# 
 VIDEO_QUALITAET_2="${VIDEO_OPTION} -preset 10"		# 
@@ -115,7 +119,7 @@ VIDEO_QUALITAET_3="${VIDEO_OPTION} -preset 9"		#
 VIDEO_QUALITAET_4="${VIDEO_OPTION} -preset 8"		# 
 VIDEO_QUALITAET_5="${VIDEO_OPTION} -preset 7"		# 
 VIDEO_QUALITAET_6="${VIDEO_OPTION} -preset 6"		# 
-VIDEO_QUALITAET_7="${VIDEO_OPTION} -preset 5"		# Empfehlung für einen Medienserver oder HTPC
+VIDEO_QUALITAET_7="${VIDEO_OPTION} -preset 5"		# Empfehlung für einen Medienserver oder HTPC / es macht kleinere Dateien als preset 6 oder preset 4
 VIDEO_QUALITAET_8="${VIDEO_OPTION} -preset 4"		# 
 VIDEO_QUALITAET_9="${VIDEO_OPTION} -preset 3"		# 
 }
@@ -244,6 +248,24 @@ VIDEO_QUALITAET_9="${VIDEO_OPTION} -rav1e-params speed=0:low_latency=false"	# sp
 }
 
 ################################################################################
+av1_nvenc()
+{
+echo "av1_nvenc()"
+
+VIDEO_OPTION=""
+VIDEO_QUALITAET_0="-qp 15 ${VIDEO_OPTION}"		# von "-1" bis "255"
+VIDEO_QUALITAET_1="-qp 30 ${VIDEO_OPTION}"		# von "-1" bis "255"
+VIDEO_QUALITAET_2="-qp 45 ${VIDEO_OPTION}"		# von "-1" bis "255"
+VIDEO_QUALITAET_3="-qp 50 ${VIDEO_OPTION}"		# von "-1" bis "255"
+VIDEO_QUALITAET_4="-qp 65 ${VIDEO_OPTION}"		# von "-1" bis "255"
+VIDEO_QUALITAET_5="-qp 80 ${VIDEO_OPTION}"		# von "-1" bis "255"
+VIDEO_QUALITAET_6="-qp 95 ${VIDEO_OPTION}"		# von "-1" bis "255"
+VIDEO_QUALITAET_7="-qp 110 ${VIDEO_OPTION}"		# von "-1" bis "255"
+VIDEO_QUALITAET_8="-qp 125 ${VIDEO_OPTION}"		# von "-1" bis "255"
+VIDEO_QUALITAET_9="-qp 140 ${VIDEO_OPTION}"		# von "-1" bis "255"
+}
+
+################################################################################
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
 
@@ -255,6 +277,10 @@ elif [ libaom-av1 = "${VIDEOCODEC}" -o av1 = "${VIDEOCODEC}" ] ; then
 
 elif [ librav1e = "${VIDEOCODEC}" ] ; then
 	librav1e
+
+#elif [ av1_nvenc = "${VIDEOCODEC}" ] ; then
+#	av1_nvenc
+
 fi
 
 #------------------------------------------------------------------------------#
