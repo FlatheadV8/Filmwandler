@@ -83,9 +83,11 @@ echo "# 810 Profil:
 
 #------------------------------------------------------------------------------#
 ### HLS
-### AVI, MP4
-### H.264, H.265
-### MP3, AAC
+### https://developer.apple.com/documentation/http-live-streaming/hls-authoring-specification-for-apple-devices
+### fMP4 (fragmentiertes MP4), MPEG-TS
+### H.264 (fMP4, TS), H.265 (fMP4)
+### single color space: Rec. 601, Rec. 709, DCI-P3, or Rec. 2020
+### nur Stereo: AC-3, AAC, Apple Lossless, FLAC
 ### Untertitel: nur WebVTT und IMSC1
 ### nur 8 bestimmte Auflösungen
 ### Format nur 4/3 und 16/9

@@ -109,9 +109,7 @@ echo "libsvtav1()"
 #VIDEO_QUALITAET_9="-crf 14 ${VIDEO_OPTION}"		# von "0" (verlustfrei) bis "63"
 
 ##VIDEO_OPTION="-crf 25 -svtav1-params tune=0:fast-decode=0:enable-tf=0"
-#VIDEO_OPTION="-crf 25 -svtav1-params enable-overlays=1:enable-tf=0:film-grain=0:film-grain-denoise=0:keyint=5s:scd=1:tune=0:fast-decode=0"
-# -crf 26 damit "Unsere kleine Farm" auf einen USB-Stick passt
-VIDEO_OPTION="-crf 29 -svtav1-params enable-overlays=1:enable-tf=0:film-grain=0:film-grain-denoise=0:keyint=5s:scd=1:tune=0:fast-decode=0"
+VIDEO_OPTION="-crf 25 -svtav1-params enable-overlays=1:enable-tf=0:film-grain=0:film-grain-denoise=0:keyint=5s:scd=1:tune=0:fast-decode=0"
 VIDEO_QUALITAET_0="${VIDEO_OPTION} -preset 12"		# schnellstes, schlechteste Qualität
 VIDEO_QUALITAET_1="${VIDEO_OPTION} -preset 11"		# 
 VIDEO_QUALITAET_2="${VIDEO_OPTION} -preset 10"		# 
