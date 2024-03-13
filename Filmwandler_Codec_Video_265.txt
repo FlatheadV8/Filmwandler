@@ -10,6 +10,7 @@
 #VERSION="v2023032600"			# Parameter für den x265-Encoder korrigiert
 #VERSION="v2023050900"			# Abstufung so angepasst, dass bei "-vq 5" die Codecs x264, x265, aom-av1 und svt-av1 eine änlich lange Transkodierzeit benötigen (pro Minute Spielfilm, ca. 1,5 Minuten Transkodierdauer)
 VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
+VERSION="v2024031200"			# von "-tune ssim" auf "-tune fastdecode" umgestellt
 
 TWO_PASS="Nein"				# 2-Pass encoding
 CODEC_PATTERN="x265|hevc"		# Beispiel: "h265|hevc"
@@ -51,7 +52,7 @@ PROFILE=""							# wenn man sich auf ein Profil festlegt, dann sind nicht mehr a
 KEYINT="$(echo "${IN_FPS}" | awk '{printf "%.0f\n", $1 * 2}')"	# alle 2 Sekunden ein Key-Frame
 
 ### '-b:v 0' wird nur bis FFmpeg Version 4.3 benötigt
-VIDEO_OPTION="${PROFILE} -tune ssim -crf ${CRF_WERT} -x265-params keyint=${KEYINT}:psy-rd=0"
+VIDEO_OPTION="${PROFILE} -tune fastdecode -crf ${CRF_WERT} -x265-params keyint=${KEYINT}:psy-rd=0"
 
 VIDEO_QUALITAET_0="${VIDEO_OPTION} -preset ultrafast"		# schnellstes, schlechteste Qualität
 VIDEO_QUALITAET_1="${VIDEO_OPTION} -preset superfast"		# 

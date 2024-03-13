@@ -24,7 +24,8 @@
 #VERSION="v2022121900"			# Log-Pfad korrigiert
 #VERSION="v2023032600"			# kann jetzt auch Filme mit 10Bit Farbtiefe
 #VERSION="v2023050600"			# von "-tune film" auf "-tune ssim" umgestellt + Level-Begrenzung auf 4.0 für "firetv" + Qualitätsabstufung von CRF auf PRESET umgestellt
-VERSION="v2023050800"			# eigenen Tests nach, sind ab "CRF 24" keine Artefakte mehr erkennbar; CRF=24 fest eingestellt
+#VERSION="v2023050800"			# eigenen Tests nach, sind ab "CRF 24" keine Artefakte mehr erkennbar; CRF=24 fest eingestellt
+VERSION="v2024031200"			# von "-tune ssim" auf "-tune film" umgestellt
 
 #------------------------------------------------------------------------------#
 ### Kompatibilität zur Blu-ray
@@ -33,7 +34,7 @@ VERSION="v2023050800"			# eigenen Tests nach, sind ab "CRF 24" keine Artefakte m
 ### 2010-03-27 - Neuigkeiten vom x264-Team:
 # x264 can now generate Blu-ray-compliant streams for authoring Blu-ray Discs!
 # Compliance tested using Sony BD-ROM Verifier 1.21.
-# x264 --crf 16 --preset veryslow --tune ssim --weightp 0 --bframes 3 \
+# x264 --crf 16 --preset veryslow --tune film --weightp 0 --bframes 3 \
 #         --nal-hrd vbr --vbv-maxrate 40000 --vbv-bufsize 30000 --level 4.1 \
 #         --keyint 24 --b-pyramid strict --slices 4 --aud --colorprim "bt709" \
 #         --transfer "bt709" --colormatrix "bt709" --sar 1:1 <input> -o <output>
@@ -492,14 +493,14 @@ if [ "x${MaxBR}" = "x" -o "x${MaxCPB}" = "x" ] ; then
 else
 	### https://forum.doom9.org/showthread.php?t=154533
 	### --bluray-compat: Enforce x264 to create BD compliant stream, that will reduce x264 settings to BD compatible: bframe<=3, ref<=4 for 1080, ref<=6 for 720/576/480, bpyramid<=strict, weightp<=1, aud=1, nalhrd=vbr
-	#VIDEO_OPTION="-profile:v ${PROFILE} -preset veryslow -tune ssim -x264opts ref=4:b-pyramid=strict:bluray-compat=1:weightp=0:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=4:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:aud:subme=9:nal-hrd=vbr"
-	#VIDEO_OPTION="-profile:v ${PROFILE} -preset veryslow -tune ssim -x264opts bluray-compat=1:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=${SLICES}:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:subme=9"
+	#VIDEO_OPTION="-profile:v ${PROFILE} -preset veryslow -tune film -x264opts ref=4:b-pyramid=strict:bluray-compat=1:weightp=0:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=4:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:aud:subme=9:nal-hrd=vbr"
+	#VIDEO_OPTION="-profile:v ${PROFILE} -preset veryslow -tune film -x264opts bluray-compat=1:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=${SLICES}:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:subme=9"
 	#
 	# Bei Filmen mit 10-Bit-Farbtiefe muss "profile high" => "profile high10";
 	# leider kann die Farbtiefe aber mit ffprobe nicht zuverlässig ausgelesen werden;
 	# deshalb wird die Angabe für ein Profil weggelassen, FFmpeg wählt es auf Basis von "Level" selber
-	#VIDEO_OPTION="-preset veryslow -tune ssim -x264opts bluray-compat=1:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=${SLICES}:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:subme=9"
-	VIDEO_OPTION="-crf ${CRF_WERT} -tune ssim -x264opts bluray-compat=1:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=${SLICES}:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:subme=9"
+	#VIDEO_OPTION="-preset veryslow -tune film -x264opts bluray-compat=1:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=${SLICES}:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:subme=9"
+	VIDEO_OPTION="-crf ${CRF_WERT} -tune film -x264opts bluray-compat=1:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=${SLICES}:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:subme=9"
 fi
 
 VIDEO_QUALITAET_0="${VIDEO_OPTION} -preset ultrafast"		# schnellstes, schlechteste Qualität

@@ -13,7 +13,8 @@
 #VERSION="v2022080300"			# Funktion AVC_LEVEL neu geschrieben + Fehlerausgabe und Info verbessert
 #VERSION="v2022080400"			# Fehler in Farbraum-Kodierung behoben
 #VERSION="v2022080401"			# mit --bluray-compat lassen sich ein paar Zusatzoptionen einsparen
-VERSION="v2023050600"			# von "-tune film" auf "-tune ssim" umgestellt
+#VERSION="v2023050600"			# von "-tune film" auf "-tune ssim" umgestellt
+VERSION="v2024031200"			# von "-tune ssim" auf "-tune film" umgestellt
 
 if [ "x${2}" = "x" ] ; then
 	echo "${0} [Bildbreite] [Bildhöhe] [Bildwiederholrate]"
@@ -341,8 +342,8 @@ if [ "x${MaxBR}" = "x" -o "x${MaxCPB}" = "x" ] ; then
 else
 	### https://forum.doom9.org/showthread.php?t=154533
 	### --bluray-compat: Enforce x264 to create BD compliant stream, that will reduce x264 settings to BD compatible: bframe<=3, ref<=4 for 1080, ref<=6 for 720/576/480, bpyramid<=strict, weightp<=1, aud=1, nalhrd=vbr
-	#VIDEO_OPTION="-profile:v ${PROFILE} -preset veryslow -tune ssim -x264opts ref=4:b-pyramid=strict:bluray-compat=1:weightp=0:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=4:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:aud:subme=9:nal-hrd=vbr"
-	VIDEO_OPTION="-profile:v ${PROFILE} -preset veryslow -tune ssim -x264opts bluray-compat=1:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=1:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:subme=9"
+	#VIDEO_OPTION="-profile:v ${PROFILE} -preset veryslow -tune film -x264opts ref=4:b-pyramid=strict:bluray-compat=1:weightp=0:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=4:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:aud:subme=9:nal-hrd=vbr"
+	VIDEO_OPTION="-profile:v ${PROFILE} -preset veryslow -tune film -x264opts bluray-compat=1:vbv-maxrate=${MaxBR}:vbv-bufsize=${MaxCPB}:level=${LEVEL}:slices=1:b-adapt=2:direct=auto:colorprim=${FARBCOD}:transfer=${FARBCOD}:colormatrix=${FARBCOD}:keyint=${KEYINT}:subme=9"
 fi
 
 VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf 30"		# von "0" (verlustfrei) bis "51"
