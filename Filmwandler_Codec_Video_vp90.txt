@@ -1,0 +1,27 @@
+#==============================================================================#
+#
+# VP9 / -lossless 1 (verlustfrei)
+#
+#------------------------------------------------------------------------------#
+#
+# für verlustfreies transkodieren
+#
+#==============================================================================#
+
+VERSION="v2024031700"			# erstellt
+
+. ${AVERZ}/Filmwandler_Codec_Video_vp9.txt
+
+### -lossless 1 -> verlustfrei
+VIDEO_OPTION="${CONSTANT_QUALITY} -aq-mode 1 -row-mt 1 -lossless 1"
+VIDEO_QUALITAET_0="-crf 0 -sharpness 0 ${VIDEO_OPTION}" 		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_1="-crf 0 -sharpness 0 ${VIDEO_OPTION}" 		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_2="-crf 0 -sharpness 0 ${VIDEO_OPTION}" 		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_3="-crf 0 -sharpness 0 ${VIDEO_OPTION}" 		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_4="-crf 0 -sharpness 0 ${VIDEO_OPTION}" 		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_5="-crf 0 -sharpness 0 ${VIDEO_OPTION}" 		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_6="-crf 0 -sharpness 0 ${VIDEO_OPTION}" 		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_7="-crf 0 -sharpness 0 ${VIDEO_OPTION}" 		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_8="-crf 0 -sharpness 0 ${VIDEO_OPTION}" 		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_9="-crf 0 -sharpness 0 ${VIDEO_OPTION}" 		# -crf 15-35 - recommended values range
+

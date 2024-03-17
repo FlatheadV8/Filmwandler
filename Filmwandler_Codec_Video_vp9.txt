@@ -82,19 +82,20 @@ fi
 # -deadline best     - is recommended if you have lots of time and want the best compression efficiency.
 # -deadline realtime - is recommended for live / fast encoding.
 
-### https://trac.ffmpeg.org/wiki/Encode/VP9#speed
+### legacy: https://trac.ffmpeg.org/wiki/Encode/VP9
 ### -cpu-used sets how efficient the compression will be. For legacy reasons, the option is also accessible with -speed in ffmpeg.
+### -deadline can be set to realtime, good, or best. For legacy reasons, the option is also accessible with -quality in ffmpeg.
 
 CONSTANT_QUALITY="-b:v 0"	# Um den Modus "Konstante Qualität" auszulösen, müssen Sie eine Kombination aus -crf und -b:v 0 verwenden. Beachten Sie, dass -b:v 0 sein MUSS. Wenn Sie den Wert auf einen höheren Wert festlegen oder ganz weglassen, wird stattdessen der Modus „Eingeschränkte Qualität“ aufgerufen.
-VIDEO_OPTION="-crf 32 ${CONSTANT_QUALITY} -deadline good -aq-mode 1 -row-mt 1"
-VIDEO_QUALITAET_0="-cpu-used 0 -sharpness 1 ${VIDEO_OPTION}"		# -cpu-used von "0" bis "8"
-VIDEO_QUALITAET_1="-cpu-used 0 -sharpness 0 ${VIDEO_OPTION}"		# -cpu-used von "0" bis "8"
-VIDEO_QUALITAET_2="-cpu-used 1 -sharpness 0 ${VIDEO_OPTION}"		# -cpu-used von "0" bis "8"
-VIDEO_QUALITAET_3="-cpu-used 2 -sharpness 0 ${VIDEO_OPTION}"		# -cpu-used von "0" bis "8"
-VIDEO_QUALITAET_4="-cpu-used 3 -sharpness 0 ${VIDEO_OPTION}"		# -cpu-used von "0" bis "8"
-VIDEO_QUALITAET_5="-cpu-used 4 -sharpness 0 ${VIDEO_OPTION}"		# -cpu-used von "0" bis "8"
-VIDEO_QUALITAET_6="-cpu-used 5 -sharpness 0 ${VIDEO_OPTION}"		# -cpu-used von "0" bis "8"
-VIDEO_QUALITAET_7="-cpu-used 6 -sharpness 0 ${VIDEO_OPTION}"		# -cpu-used von "0" bis "8"
-VIDEO_QUALITAET_8="-cpu-used 7 -sharpness 0 ${VIDEO_OPTION}"		# -cpu-used von "0" bis "8"
-VIDEO_QUALITAET_9="-cpu-used 8 -sharpness 0 ${VIDEO_OPTION}"		# -cpu-used von "0" bis "8"
+VIDEO_OPTION="${CONSTANT_QUALITY} -aq-mode 1 -row-mt 1"
+VIDEO_QUALITAET_0="-crf 36 -sharpness 1 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_1="-crf 35 -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_2="-crf 34 -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_3="-crf 33 -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_4="-crf 32 -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_5="-crf 31 -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_6="-crf 27 -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_7="-crf 23 -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_8="-crf 19 -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_9="-crf 15 -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
 
