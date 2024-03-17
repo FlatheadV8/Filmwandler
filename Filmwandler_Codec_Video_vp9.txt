@@ -10,7 +10,8 @@
 #VERSION="v2023032500"			# neue Ermittlungsmethode für Encoder
 #VERSION="v2023051400"			# Voreinstellungen angepasst
 #VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
-VERSION="v2023061800"			# -cpu-used sets how efficient the compression will be. For legacy reasons, the option is also accessible with -speed in ffmpeg.
+#VERSION="v2023061800"			# -cpu-used sets how efficient the compression will be. For legacy reasons, the option is also accessible with -speed in ffmpeg.
+VERSION="v2024031700"			# CRF ist jetzt in Abhängigkeit von der Bildhöhe
 
 TWO_PASS="Nein"				# 2-Pass
 CODEC_PATTERN="vp9"			# Beispiel: "h265|hevc"
@@ -86,16 +87,25 @@ fi
 ### -cpu-used sets how efficient the compression will be. For legacy reasons, the option is also accessible with -speed in ffmpeg.
 ### -deadline can be set to realtime, good, or best. For legacy reasons, the option is also accessible with -quality in ffmpeg.
 
+### https://developers.google.com/media/vp9/settings/vod?hl=de
+### CRF = 39,75-(Bildhöhe / 87,273)
+CRF="$(echo "${BILD_HOCH}" | awk '{printf "%.0f\n", (39750/1000)-($1 / (87273/1000))}')"
+
 CONSTANT_QUALITY="-b:v 0"	# Um den Modus "Konstante Qualität" auszulösen, müssen Sie eine Kombination aus -crf und -b:v 0 verwenden. Beachten Sie, dass -b:v 0 sein MUSS. Wenn Sie den Wert auf einen höheren Wert festlegen oder ganz weglassen, wird stattdessen der Modus „Eingeschränkte Qualität“ aufgerufen.
 VIDEO_OPTION="${CONSTANT_QUALITY} -aq-mode 1 -row-mt 1"
-VIDEO_QUALITAET_0="-crf 36 -sharpness 1 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
-VIDEO_QUALITAET_1="-crf 35 -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
-VIDEO_QUALITAET_2="-crf 34 -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
-VIDEO_QUALITAET_3="-crf 33 -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
-VIDEO_QUALITAET_4="-crf 32 -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
-VIDEO_QUALITAET_5="-crf 31 -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
-VIDEO_QUALITAET_6="-crf 27 -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
-VIDEO_QUALITAET_7="-crf 23 -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
-VIDEO_QUALITAET_8="-crf 19 -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
-VIDEO_QUALITAET_9="-crf 15 -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_0="-crf ${CRF} -sharpness 1 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_1="-crf ${CRF} -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_2="-crf ${CRF} -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_3="-crf ${CRF} -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_4="-crf ${CRF} -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_5="-crf ${CRF} -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_6="-crf ${CRF} -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_7="-crf ${CRF} -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_8="-crf ${CRF} -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
+VIDEO_QUALITAET_9="-crf ${CRF} -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
+
+echo "# VP9
+CRF='${CRF}'
+VIDEO_OPTION='${VIDEO_OPTION}'
+" | tee "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
