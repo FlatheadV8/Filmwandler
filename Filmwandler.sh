@@ -123,7 +123,8 @@
 #VERSION="v2023112100"			# Reihenfolge der Audio- und Untertiteloptionen geordnet
 #VERSION="v2023112300"			# AUDIO_STANDARD_SPUR und UNTERTITEL_STANDARD_SPUR repariert
 #VERSION="v2023121700"			# Fehler behoben: bei undefinierten Audio-Spuren wurden keine Audio-Optionen für FFmpeg generiert
-VERSION="v2024031000"			# Fehler im Profil HLS behoben
+#VERSION="v2024031000"			# Fehler im Profil HLS behoben
+VERSION="v2024031600"			# ab jetzt wird bei Fehlschlag bedingungslos abgebrochen und nicht mehr mit automatisch veränderten Untertiteleinstellungen weiter probiert
 
 
 VERSION_METADATEN="${VERSION}"
@@ -1503,6 +1504,8 @@ $(date +'%F %T')
 # VIDEOCODEC='${VIDEOCODEC}'
 # AUDIOCODEC='${AUDIOCODEC}'
 # FORMAT='${FORMAT}'
+# IST_CODEC_VIDEO='${IST_CODEC_VIDEO}'
+# ALT_CODEC_VIDEO='${ALT_CODEC_VIDEO}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 670
@@ -1536,6 +1539,8 @@ if [ x != "x${ALT_CODEC_VIDEO}" ] ; then
 fi
 
 echo "# 690 CONSTANT_QUALITY
+# IST_CODEC_VIDEO='${IST_CODEC_VIDEO}'
+# ALT_CODEC_VIDEO='${ALT_CODEC_VIDEO}'
 # VIDEOCODEC='${VIDEOCODEC}'
 # AUDIOCODEC='${AUDIOCODEC}'
 # CONSTANT_QUALITY='${CONSTANT_QUALITY}'
@@ -1881,13 +1886,11 @@ echo "# 1005
 
 if [ "kein Text" = "${UT_HLS}" ] ; then
 	U_TITEL_FF_01="-sn"
-	U_TITEL_FF_ALT="-sn"
 	U_TITEL_FF_02="-sn"
 	UNTERTITEL_STANDARD_SPUR=""
 else
     if [ "=0" = "${UNTERTITEL_SPUR_SPRACHE}" ] ; then
 	U_TITEL_FF_01="-sn"
-	U_TITEL_FF_ALT="-sn"
 	U_TITEL_FF_02="-sn"
 	UNTERTITEL_STANDARD_SPUR=""
     else
@@ -1995,45 +1998,64 @@ else
 	fi
 
 	#----------------------------------------------------------------------#
-	### Wenn der Untertitel in einem Text-Format vorliegt, dann muss er ggf. auch transkodiert werden.
+	### Untertitel im Text-Format identifizieren
 
-	if [ "mp4" = "${ENDUNG}" ] ; then
-		UT_FORMAT="mov_text"
-	elif [ "mkv" = "${ENDUNG}" ] ; then
-		UT_FORMAT="webvtt"
-	elif [ "webm" = "${ENDUNG}" ] ; then
-		UT_FORMAT="webvtt"
-	else
-		unset UT_FORMAT
-	fi
-
-	U_TITEL_FF_01="-c:s ${UT_FORMAT}"
-
-	#----------------------------------------------------------------------#
-	### wenn kein alternatives Untertitelformat vorgesehen ist, dann weiter ohne Untertitel als "Alternative bei Fehlschlag"
-
-	if [ x = "x${ENDUNG}" ] ; then
-		unset U_TITEL_FF_ALT
-	else
-		if [ x != "x${UT_FORMAT}" ] ; then
-			U_TITEL_FF_ALT="-c:s copy"
-		fi
-	fi
-
-	if [ x = "x${UT_LISTE}" ] ; then
-		echo "# 1030
-		x = x${UT_LISTE}
+	if [ x = "x${UT_VORHANDEN}" ] ; then
+		echo "# 1025
+		# Es gibt in diesem Film keine Untertitel.
 		" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+		unset UT_LISTE
 		unset UT_ANZAHL
 		unset UT_KOPIE
+		unset UT_FORMAT
+		unset U_TITEL_FF_01
 		unset U_TITEL_FF_02
+		U_TITEL_FF_01="-sn"
+		U_TITEL_FF_02="-sn"
 	else
-		echo "# 1040
-		x = x${UT_LISTE}
-		" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-		UT_KOPIE="$(echo "${NOTA_SPUR_SPRACHE}" | nl | awk '{print $1}')"
-#		U_TITEL_FF_02="-c:s copy"
+		UNTERTITEL_TEXT_CODEC="$(echo "${IST_UT_FORMAT}" | grep -Ei 'SRT|VTT|SSA|ASS|SMIL|TTML|DFXP|SBV|irc|cap|SCC|itt|DFXP|mov_text')"
+		if [ x = "x${UNTERTITEL_TEXT_CODEC}" ] ; then
+			#------------------------------------------------------#
+			### unveränderliches Untertitelformat kann nur kopiert
+			### werden oder man muß ohne Untertitel weiter arbeiten
+			echo "# 1030
+			# Untertitel liegen im Bild-Format vor.
+			# Diese können mit diesem Skript nicht verändert werden
+			# und müssen entweder kopiert werden (ffmpeg ... -c:s copy)
+			# oder können nicht in den neuen Film mit übertragen werden (${0} -u =0).
+			" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+			### Film bzw. Filmteile transkodieren
+			U_TITEL_FF_01="-c:s copy"
+			#------------------------------------------------------#
+		else
+			#------------------------------------------------------#
+			### Wenn der Untertitel in einem Text-Format vorliegt, dann muss er ggf. auch transkodiert werden.
+			echo "# 1035
+			# Untertitel liegen im Text-Format vor.
+			" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+			if [ "mp4" = "${ENDUNG}" ] ; then
+				UT_FORMAT="mov_text"
+			else
+				UT_FORMAT="webvtt"
+			fi
+
+			### Film bzw. Filmteile transkodieren
+			U_TITEL_FF_01="-c:s ${UT_FORMAT}"
+			#------------------------------------------------------#
+		fi
+
+		### ffmpeg -f concat
+		U_TITEL_FF_02="-c:s copy"
 	fi
+
+	echo "# 1040
+	# Untertitel im Text-Format identifizieren
+	# UT_VORHANDEN='${UT_VORHANDEN}'
+	# UNTERTITEL_TEXT_CODEC='${UNTERTITEL_TEXT_CODEC}'
+	# UT_FORMAT='${UT_FORMAT}'
+	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
     fi
 fi
 
@@ -2046,7 +2068,6 @@ echo "# 1050
 # UT_LISTE='${UT_LISTE}'
 # UT_FORMAT='${UT_FORMAT}'
 # U_TITEL_FF_01='${U_TITEL_FF_01}'
-# U_TITEL_FF_ALT='${U_TITEL_FF_ALT}'
 # U_TITEL_FF_02='${U_TITEL_FF_02}'
 # UNTERTITEL_VERARBEITUNG_01='${UNTERTITEL_VERARBEITUNG_01}'
 # UNTERTITEL_VERARBEITUNG_02='${UNTERTITEL_VERARBEITUNG_02}'
@@ -2191,7 +2212,6 @@ if [ "0" = "${VIDEO_NICHT_UEBERTRAGEN}" ] ; then
 	VIDEO_PARAMETER_TRANS="-vn"
 	VIDEO_PARAMETER_KOPIE="-vn"
 	U_TITEL_FF_01="-sn"
-	U_TITEL_FF_ALT="-sn"
 	U_TITEL_FF_02="-sn"
 fi
 
@@ -2212,78 +2232,18 @@ transkodieren_1_1()
 		echo "# 1120 TWO_PASS='${TWO_PASS}'
 		2-Pass: pass 1
 		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} -pass 1 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass -an -sn ${FPS} -y -f null /dev/null && \
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".${ENDUNG}" 2>&1
+		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.out
 
 		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} -pass 1 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass -an -sn ${FPS} -y -f null /dev/null && \
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=ALT
+		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=Fehler
 		rm -f "${ZIELVERZ}"/"${ZIEL_FILM}".pass*
 	else
 		echo "# 1130 TWO_PASS='${TWO_PASS}'
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}'${KOMMENTAR}' ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".${ENDUNG}" 2>&1
+		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}'${KOMMENTAR}' ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.out
 
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=ALT
+		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=Fehler
 	fi
 	echo "# 1140
-	WEITER='${WEITER}'
-	"
-}
-
-#------------------------------------------------------------------------------#
-# Es wird nur ein einziges Stück transkodiert
-# aber der erste Versuch ist fehlgeschlagen
-# deshalb wird jetzt mit alternativem Untertitelformat probiert
-transkodieren_2_1()
-{
-	### 1002
-	echo "# 1150
-	TWO_PASS='${TWO_PASS}'"
-
-	if [ Ja = "${TWO_PASS}" ] ; then
-		echo "# 1160 TWO_PASS='${TWO_PASS}'
-		2-Pass: pass 1
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} -pass 1 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass -an -sn ${FPS} -f null /dev/null && \
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${UNTERTITEL_VERARBEITUNG_01} ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".${ENDUNG}" 2>&1
-
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} -pass 1 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass -an -sn ${FPS} -f null /dev/null && \
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${UNTERTITEL_VERARBEITUNG_01} ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=OHNE
-		rm -f "${ZIELVERZ}"/"${ZIEL_FILM}".pass*
-	else
-		echo "# 1170 TWO_PASS='${TWO_PASS}'
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${UNTERTITEL_VERARBEITUNG_01} ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".${ENDUNG}" 2>&1
-
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${UNTERTITEL_VERARBEITUNG_01} ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=OHNE
-	fi
-	echo "# 1180
-	WEITER='${WEITER}'
-	"
-}
-
-#------------------------------------------------------------------------------#
-# Es wird nur ein einziges Stück transkodiert
-# aber der zweite Versuch ist auch fehlgeschlagen
-# darum wird jetzt zum letzten Mal ohne Untertitel probiert
-transkodieren_3_1()
-{
-	### 1003
-	echo "# 1190
-	TWO_PASS='${TWO_PASS}'"
-
-	if [ Ja = "${TWO_PASS}" ] ; then
-		echo "# 1200 TWO_PASS='${TWO_PASS}'
-		2-Pass: pass 1
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} -pass 1 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass -an -sn ${FPS} -y -f null /dev/null && \
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass ${AUDIO_VERARBEITUNG_01} -sn ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".${ENDUNG}" 2>&1
-
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} -pass 1 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass -an -sn ${FPS} -y -f null /dev/null && \
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass ${AUDIO_VERARBEITUNG_01} -sn ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=NEIN
-		rm -f "${ZIELVERZ}"/"${ZIEL_FILM}".pass*
-	else
-		echo "# 1210 TWO_PASS='${TWO_PASS}'
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} -sn ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".${ENDUNG}" 2>&1
-
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} -sn ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=NEIN
-	fi
-	echo "# 1220
 	WEITER='${WEITER}'
 	"
 }
@@ -2300,76 +2260,18 @@ transkodieren_4_1()
 		echo "# 1240 TWO_PASS='${TWO_PASS}'
 		2-Pass: pass 1 + Schnitt
        		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} -pass 1 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass -an -sn -ss ${VON} -to ${BIS} ${FPS} -y -f null /dev/null && \
-        	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG}" 2>&1
+        	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.out
 
        		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} -pass 1 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass -an -sn -ss ${VON} -to ${BIS} ${FPS} -y -f null /dev/null && \
-        	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=ALT
+        	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=Fehler
 		rm -f "${ZIELVERZ}"/"${ZIEL_FILM}".pass*
 	else
 		echo "# 1250 TWO_PASS='${TWO_PASS}'
-        	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG}" 2>&1
+        	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.out
 
-        	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=ALT
+        	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=Fehler
 	fi
 	echo "# 1260
-	WEITER='${WEITER}'
-	"
-}
-
-#------------------------------------------------------------------------------#
-# leider ist der erste Versuch auch fehlgeschlagen,
-# deshalb wird jetzt mit alternativem Untertitelformat probiert
-transkodieren_5_1()
-{
-	### 1005
-	echo "# 1270
-	TWO_PASS='${TWO_PASS}'"
-
-	if [ Ja = "${TWO_PASS}" ] ; then
-		echo "# 1280 TWO_PASS='${TWO_PASS}'
-		2-Pass: pass 1 + Schnitt
-       		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} -pass 1 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass -an -sn -ss ${VON} -to ${BIS} ${FPS} -y -f null /dev/null && \
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG}" 2>&1
-
-       		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} -pass 1 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass -an -sn -ss ${VON} -to ${BIS} ${FPS} -y -f null /dev/null && \
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=OHNE
-		rm -f "${ZIELVERZ}"/"${ZIEL_FILM}".pass*
-	else
-		echo "# 1290 TWO_PASS='${TWO_PASS}'
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG}" 2>&1
-
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_ALT} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=OHNE
-	fi
-	echo "# 1300
-	WEITER='${WEITER}'
-	"
-}
-
-#------------------------------------------------------------------------------#
-# leider ist der zweite Versuch auch fehlgeschlagen,
-# darum wird jetzt zum letzten Mal ohne Untertitel probiert
-transkodieren_6_1()
-{
-	### 1006
-	echo "# 1310
-	TWO_PASS='${TWO_PASS}'"
-
-	if [ Ja = "${TWO_PASS}" ] ; then
-		echo "# 1320 TWO_PASS='${TWO_PASS}'
-		2-Pass: pass 1 + Schnitt
-       		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} -pass 1 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass -an -sn -ss ${VON} -to ${BIS} ${FPS} -y -f null /dev/null && \
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass ${AUDIO_VERARBEITUNG_01} -sn -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG}" 2>&1
-
-       		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} -pass 1 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass -an -sn -ss ${VON} -to ${BIS} ${FPS} -y -f null /dev/null && \
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass ${AUDIO_VERARBEITUNG_01} -sn -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=NEIN
-		rm -f "${ZIELVERZ}"/"${ZIEL_FILM}".pass*
-	else
-		echo "# 1330 TWO_PASS='${TWO_PASS}'
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} -sn -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG}" 2>&1
-
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} -sn -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=NEIN
-	fi
-	echo "# 1340
 	WEITER='${WEITER}'
 	"
 }
@@ -2380,7 +2282,7 @@ transkodieren_7_1()
 {
 	### 1007
 	echo "# 1350
-	${PROGRAMM} ${FFMPEG_OPTIONEN} -f concat -i \"${ZIELVERZ}\"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt ${I_SUB} ${VIDEO_PARAMETER_KOPIE} ${AUDIO_VERARBEITUNG_02} ${SCHNELLSTART} ${U_TITEL_FF_02} ${UNTERTITEL_VERARBEITUNG_02} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}'${KOMMENTAR}' ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".${ENDUNG}" 2>&1
+	${PROGRAMM} ${FFMPEG_OPTIONEN} -f concat -i \"${ZIELVERZ}\"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt ${I_SUB} ${VIDEO_PARAMETER_KOPIE} ${AUDIO_VERARBEITUNG_02} ${SCHNELLSTART} ${U_TITEL_FF_02} ${UNTERTITEL_VERARBEITUNG_02} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}'${KOMMENTAR}' ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.out
 
 	${PROGRAMM} ${FFMPEG_OPTIONEN} -f concat -i "${ZIELVERZ}"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt ${I_SUB} ${VIDEO_PARAMETER_KOPIE} ${AUDIO_VERARBEITUNG_02} ${SCHNELLSTART} ${U_TITEL_FF_02} ${UNTERTITEL_VERARBEITUNG_02} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=kaputt
 	echo "# 1360
@@ -2406,28 +2308,6 @@ if [ ${SCHNITT_ANZAHL} -lt 1 ] ; then
 	echo
 	### 1001
 	transkodieren_1_1 | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	sync
-	WEITER="$(tail "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | awk -F"'" '/WEITER=/{print $2}' | tail -n1)"
-
-	if [ ALT = "${WEITER}" ] ; then
-		echo
-		### 1002
-		transkodieren_2_1 | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	sync
-	WEITER="$(tail "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | awk -F"'" '/WEITER=/{print $2}' | tail -n1)"
-	fi
-
-	if [ OHNE = "${WEITER}" ] ; then
-		rm -vf "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-		#if [ "=0" != "${UNTERTITEL_SPUR_SPRACHE}" ] ; then
-		#	ZIEL_FILM="${ZIELNAME}_-_ohne_Untertitel"
-		#fi
-		echo
-		### 1003
-		transkodieren_3_1 | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-		sync
-		WEITER="$(tail "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | awk -F"'" '/WEITER=/{print $2}' | tail -n1)"
-	fi
 
 else
 
@@ -2448,27 +2328,6 @@ else
 		echo
 		### 1004
 		transkodieren_4_1 | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-		sync
-		WEITER="$(tail "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | awk -F"'" '/WEITER=/{print $2}' | tail -n1)"
-
-		if [ ALT = "${WEITER}" ] ; then
-			echo
-			### 1005
-			transkodieren_5_1 | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-			sync
-			WEITER="$(tail "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | awk -F"'" '/WEITER=/{print $2}' | tail -n1)"
-		fi
-
-		if [ OHNE = "${WEITER}" ] ; then
-			#if [ "=0" != "${UNTERTITEL_SPUR_SPRACHE}" ] ; then
-			#	ZIEL_FILM="${ZIELNAME}_-_ohne_Untertitel"
-			#fi
-			echo
-			### 1006
-			transkodieren_6_1 | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-			sync
-			WEITER="$(tail "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | awk -F"'" '/WEITER=/{print $2}' | tail -n1)"
-		fi
 
 		ffprobe -v error -i "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI} | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
