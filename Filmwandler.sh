@@ -1574,7 +1574,7 @@ echo "# 690 CONSTANT_QUALITY
 # VIDEO_OPTION_00='${VIDEO_OPTION_00}'
 # VIDEOOPTION='${VIDEOOPTION}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-exit 692
+#exit 692
 
 #==============================================================================#
 #==============================================================================#
