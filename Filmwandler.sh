@@ -124,7 +124,8 @@
 #VERSION="v2023112300"			# AUDIO_STANDARD_SPUR und UNTERTITEL_STANDARD_SPUR repariert
 #VERSION="v2023121700"			# Fehler behoben: bei undefinierten Audio-Spuren wurden keine Audio-Optionen für FFmpeg generiert
 #VERSION="v2024031000"			# Fehler im Profil HLS behoben
-VERSION="v2024031600"			# ab jetzt wird bei Fehlschlag bedingungslos abgebrochen und nicht mehr mit automatisch veränderten Untertiteleinstellungen weiter probiert
+#VERSION="v2024031600"			# ab jetzt wird bei Fehlschlag bedingungslos abgebrochen und nicht mehr mit automatisch veränderten Untertiteleinstellungen weiter probiert
+VERSION="v2024031900"			# für die wichtigsten 4 Codecs gibt es jetzt eine Option zum verlusstfreien transkodieren
 
 
 VERSION_METADATEN="${VERSION}"
@@ -135,7 +136,7 @@ VERSION_METADATEN="${VERSION}"
 #
 # Bild mit Tonspur
 # -shortest
-# ffmpeg -framerate 1/1988 -i kein_Fachbuch_beantwortet_die_Frage_warum_Schwangere_Verrueckt_werden.png -i kein_Fachbuch_beantwortet_die_Frage_warum_Schwangere_Verrueckt_werden.mp4 -map 0:v:0 -c:v libx264 -preset veryslow -tune film -x264opts ref=4:b-pyramid=strict:bluray-compat=1:weightp=0:vbv-maxrate=12500:vbv-bufsize=12500:level=3:slices=4:b-adapt=2:direct=auto:colorprim=bt709:transfer=bt709:colormatrix=bt709:keyint=50:aud:subme=9:nal-hrd=vbr -crf 20 -vf yadif,scale=856x480,pad='max(iw\,ih*(16/9)):ow/(16/9):(ow-iw)/2:(oh-ih)/2',setdar='16/9',fps='25' -keyint_min 2-8 -map 1:a:0 -c:a aac -b:a 336k -ac 2 -disposition:a:0 default -ss 1 -to 79 -movflags faststart -f mp4 -y Maenner_haben_es_schwer.mp4
+# ffmpeg -framerate 1/1988 -i kein_Fachbuch_beantwortet_die_Frage_warum_Schwangere_Verrueckt_werden.png -i kein_Fachbuch_beantwortet_die_Frage_warum_Schwangere_Verrueckt_werden.mp4 -map 0:v:0 -c:v libx264 -preset veryslow -tune film -x264opts ref=4:b-pyramid=strict:bluray-compat=1:weightp=0:vbv-maxrate=12500:vbv-bufsize=12500:level=3:slices=4:b-adapt=2:direct=auto:colorprim=bt709:transfer=bt709:colormatrix=bt709:keyint=50:aud:subme=9:nal-hrd=vbr -crf 20 -vf yadif,scale=856x480,pad='max(iw\,ih*(16/9)):ow/(16/9):(ow-iw)/2:(oh-ih)/2',setdar='16/9',fps='25' -keyint_min 150 -map 1:a:0 -c:a aac -b:a 336k -ac 2 -disposition:a:0 default -ss 1 -to 79 -movflags faststart -f mp4 -y Maenner_haben_es_schwer.mp4
 #
 # https://techbeasts.com/fmpeg-commands/
 # Video um 90° drehen: ffmpeg -i input.mp4 -filter:v 'transpose=1' ouput.mp4
@@ -163,6 +164,7 @@ STARTZEITPUNKT="$(date +'%s')"
 # ffmpeg -h full 2>/dev/null | grep -F keyint
 # -keyint_min        <int>        E..V.... minimum interval between IDR-frames (from INT_MIN to INT_MAX) (default 25)
 #IFRAME="-keyint_min 2-8"		# --keyint in Frames
+#IFRAME="-keyint_min 150"		# --keyint in Frames
 IFRAME="-g 300"				# Keyframe interval: -g in Frames
 
 LANG=C					# damit AWK richtig rechnet
@@ -481,7 +483,7 @@ while [ "${#}" -ne "0" ]; do
                 -cv)
                         # Das Format (Video-Codec + Audio-Codec) ist normalerweise durch die Dateiendung der Ziel-Datei vorgegeben.
 			# Mit dieser Option kann der Video-Codec überschrieben werden.
-                        ALT_CODEC_VIDEO="${2}"			# Video-Codec: 261, 262, 263, 264, 265, av1, divx, ffv1, flv, snow, theora, vc2, vp8, vp9, xvid
+                        ALT_CODEC_VIDEO="${2}"			# Video-Codec: 261, 262, 263, 264, 2640, 265, 2650, av1, av10, divx, ffv1, flv, snow, theora, vc2, vp8, vp9, vp90, xvid
                         shift
                         ;;
                 -ca)
@@ -707,11 +709,16 @@ while [ "${#}" -ne "0" ]; do
 
 	# Das Format (Video-Codec + Audio-Codec) ist normalerweise durch die Dateiendung der Ziel-Datei vorgegeben.
 	# Mit dieser Option kann der Video-Codec überschrieben werden.
-        # Video-Codec: 261, 262, 263, 264, 265, av1, divx, ffv1, flv, snow, theora, vc2, vp8, vp9, xvid
+        # Video-Codec: 261, 262, 263, 264, 2640, 265, 2650, av1, av10, divx, ffv1, flv, snow, theora, vc2, vp8, vp9, vp90, xvid
 	-cv theora
 	-cv 264
+	-cv 2640    # verllustfrei
+	-cv 265
+	-cv 2650    # verllustfrei
 	-cv vp9
+	-cv vp90    # verllustfrei
 	-cv av1
+	-cv av10    # verllustfrei
 
 	# Das Format (Video-Codec + Audio-Codec) ist normalerweise durch die Dateiendung der Ziel-Datei vorgegeben.
 	# Mit dieser Option kann der Audio-Codec überschrieben werden.
@@ -1505,6 +1512,10 @@ $(date +'%F %T')
 # AUDIOCODEC='${AUDIOCODEC}'
 # FORMAT='${FORMAT}'
 # ALT_CODEC_VIDEO='${ALT_CODEC_VIDEO}'
+# VIDEO_OPTION='${VIDEO_OPTION}'
+# VIDEO_OPTION_BD='${VIDEO_OPTION_BD}'
+# VIDEO_OPTION_00='${VIDEO_OPTION_00}'
+# VIDEOOPTION='${VIDEOOPTION}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 670
@@ -1514,14 +1525,29 @@ $(date +'%F %T')
 
 if [ x != "x${ALT_CODEC_VIDEO}" ] ; then
 	if [ -r ${AVERZ}/Filmwandler_Codec_Video_${ALT_CODEC_VIDEO}.txt ] ; then
+		echo "# 672
+		# VIDEO_OPTION='${VIDEO_OPTION}'
+		# VIDEO_OPTION_BD='${VIDEO_OPTION_BD}'
+		# VIDEO_OPTION_00='${VIDEO_OPTION_00}'
+		# VIDEOOPTION='${VIDEOOPTION}'
+		" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 		. ${AVERZ}/Filmwandler_Codec_Video_${ALT_CODEC_VIDEO}.txt
+		echo "# 674
+		# VIDEO_OPTION='${VIDEO_OPTION}'
+		# VIDEO_OPTION_BD='${VIDEO_OPTION_BD}'
+		# VIDEO_OPTION_00='${VIDEO_OPTION_00}'
+		# VIDEOOPTION='${VIDEOOPTION}'
+		" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	else
 		# -cv 261
 		# -cv 262
 		# -cv 263
 		# -cv 264
+		# -cv 2640
 		# -cv 265
+		# -cv 2650
 		# -cv av1
+		# -cv av10
 		# -cv divx
 		# -cv ffv1
 		# -cv flv
@@ -1530,6 +1556,7 @@ if [ x != "x${ALT_CODEC_VIDEO}" ] ; then
 		# -cv vc2
 		# -cv vp8
 		# -cv vp9
+		# -cv vp90
 		# -cv xvid
 		echo "Es sind zur Zeit die Möglichkeiten verfügbar:"
 		ls ${AVERZ}/Filmwandler_Codec_Video_*.txt | awk -F'[_.]' '{print "-cv",$(NF-1)}'
@@ -1542,7 +1569,12 @@ echo "# 690 CONSTANT_QUALITY
 # VIDEOCODEC='${VIDEOCODEC}'
 # AUDIOCODEC='${AUDIOCODEC}'
 # CONSTANT_QUALITY='${CONSTANT_QUALITY}'
+# VIDEOOPTION='${VIDEOOPTION}'
+# VIDEO_OPTION_BD='${VIDEO_OPTION_BD}'
+# VIDEO_OPTION_00='${VIDEO_OPTION_00}'
+# VIDEOOPTION='${VIDEOOPTION}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+exit 692
 
 #==============================================================================#
 #==============================================================================#
