@@ -7,7 +7,8 @@
 #VERSION="v2018090300"
 #VERSION="v2020092500"			# weitere Variable eingeführt
 #VERSION="v2023032500"			# neue Ermittlungsmethode für Encoder
-VERSION="v2023061000"			# jetzt wird für jeden Audio-Kanal separat die Bit-Rate berechnet
+#VERSION="v2023061000"			# jetzt wird für jeden Audio-Kanal separat die Bit-Rate berechnet
+VERSION="v2024040200"			# -ar 48000 -ac 2
 
 CODEC_PATTERN="mp3"			# Beispiel: "h265|hevc"
 
@@ -30,7 +31,7 @@ fi
 
 # diese Option wird mit dem Codec zusammen, nur einmal für alle Kanäle zusammen,
 # angegeben und nicht für jeden Kanal extra
-AUDIO_OPTION_GLOBAL=""
+AUDIO_OPTION_GLOBAL="-ar 48000 -ac 2"
 
 echo "# 1001
 TS_ANZAHL=${TS_ANZAHL}
