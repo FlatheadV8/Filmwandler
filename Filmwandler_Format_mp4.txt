@@ -26,8 +26,8 @@ FORMAT="mp4"
 #==============================================================================#
 
 # Audio
-#. $(dirname ${0})/Filmwandler_Codec_Audio_ac3.txt
-. $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt	# -> HTML5
+#. $(dirname ${0})/Filmwandler_Codec_Audio_ac3.txt	# HLS
+. $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt	# -> HTML5, HLS
 #. $(dirname ${0})/Filmwandler_Codec_Audio_aac.txt	# -> HTML5, HLS
 
 
