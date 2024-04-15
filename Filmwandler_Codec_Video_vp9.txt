@@ -11,7 +11,8 @@
 #VERSION="v2023051400"			# Voreinstellungen angepasst
 #VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
 #VERSION="v2023061800"			# -cpu-used sets how efficient the compression will be. For legacy reasons, the option is also accessible with -speed in ffmpeg.
-VERSION="v2024031700"			# CRF ist jetzt in Abhängigkeit von der Bildhöhe
+#VERSION="v2024031700"			# CRF ist jetzt in Abhängigkeit von der Bildhöhe
+VERSION="v2024041500"			# Abstufungen überarbeitet, jetzt funktioniert auch -vq wieder und sehr kleine sowie sehr große Auflösungen bekommen jetzt einen gültigen CRF-Wert
 
 TWO_PASS="Nein"				# 2-Pass
 CODEC_PATTERN="vp9"			# Beispiel: "h265|hevc"
@@ -87,9 +88,31 @@ fi
 ### -cpu-used sets how efficient the compression will be. For legacy reasons, the option is also accessible with -speed in ffmpeg.
 ### -deadline can be set to realtime, good, or best. For legacy reasons, the option is also accessible with -quality in ffmpeg.
 
+#------------------------------------------------------------------------------#
 ### https://developers.google.com/media/vp9/settings/vod?hl=de
 ### CRF = 39,75-(Bildhöhe / 87,273)
-CRF="$(echo "${BILD_HOCH}" | awk '{printf "%.0f\n", (39750/1000)-($1 / (87273/1000))}')"
+#   400 -> CFR 35
+#   480 -> CFR 34
+#   540 -> CFR 34
+#   576 -> CFR 33
+#   600 -> CFR 33
+#   800 -> CFR 31
+#   950 -> CFR 29
+#   1080 -> CFR 27
+#   1600 -> CFR 21
+#   2160 -> CFR 15
+
+KORREKTURWERT="5"
+
+if [ 400 -gt "${BILD_HOCH}" ] ; then
+	CRF="$(echo "400 ${BILDQUALIT} ${KORREKTURWERT}" | awk '{printf "%.0f\n", ((39750/1000)-($1 / (87273/1000)))+$2-$3}')"
+elif [ 2200 -lt "${BILD_HOCH}" ] ; then
+	CRF="$(echo "2200 ${BILDQUALIT} ${KORREKTURWERT}" | awk '{printf "%.0f\n", ((39750/1000)-($1 / (87273/1000)))+$2-$3}')"
+else
+	CRF="$(echo "${BILD_HOCH} ${BILDQUALIT} ${KORREKTURWERT}" | awk '{printf "%.0f\n", ((39750/1000)-($1 / (87273/1000)))+$2-$3}')"
+fi
+
+#------------------------------------------------------------------------------#
 
 CONSTANT_QUALITY="-b:v 0"	# Um den Modus "Konstante Qualität" auszulösen, müssen Sie eine Kombination aus -crf und -b:v 0 verwenden. Beachten Sie, dass -b:v 0 sein MUSS. Wenn Sie den Wert auf einen höheren Wert festlegen oder ganz weglassen, wird stattdessen der Modus „Eingeschränkte Qualität“ aufgerufen.
 VIDEO_OPTION="${CONSTANT_QUALITY} -aq-mode 1 -row-mt 1"
