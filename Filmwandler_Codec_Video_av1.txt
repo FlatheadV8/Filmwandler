@@ -24,7 +24,8 @@
 #VERSION="v2023061400"			# enable-tf=0 für eine verbesserte Schärfe
 #VERSION="v2023061800"			# -crf ${CRF} -preset ${PRESET} -svtav1-params:v:0 enable-overlays=1:enable-tf=0:film-grain=0:film-grain-denoise=0:keyint=5s:scd=1:tune=0:fast-decode=0
 #VERSION="v2024022400"			# av1_nvenc - muß aber noch konfiguriert werden
-VERSION="v2024041500"			# Abstufungen für svtav1 komplett überarbeitet
+#VERSION="v2024041500"			# Abstufungen für svtav1 komplett überarbeitet
+VERSION="v2024041600"			# Fehler in der CRF-Berechnung von AV1 behoben
 
 TWO_PASS="Nein"				# 2-Pass encoding
 CODEC_PATTERN="av1|aom"			# Beispiel: "h265|hevc"
