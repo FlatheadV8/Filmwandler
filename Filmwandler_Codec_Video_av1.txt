@@ -85,9 +85,9 @@ if [ libsvtav1 = "${VIDEOCODEC}" ] ; then
 	# Voreinstellung: -crf 35 -preset 10 -svtav1-params tune=1:fast-decode=1
 
 	KORREKTURWERT1="5"
-	KORREKTURWERT2="25"
+	KORREKTURWERT2="245"
 	#CRF="$(echo "${BILD_HOCH} 4320 60 ${BILDQUALIT} ${KORREKTURWERT}" | awk '{printf "%.0f\n", ($3/(($2/$1)^(1/2)))+$5-$4}')"
-	CRF="$(echo "${BILD_HOCH} 4320 60 ${BILDQUALIT} ${KORREKTURWERT1} ${KORREKTURWERT2}" | awk '{printf "%.0f\n", ($3/(($2/$1)^(1/($6/10))))+$5-$4}')"; done
+	CRF="$(echo "${BILD_HOCH} 4320 60 ${BILDQUALIT} ${KORREKTURWERT1} ${KORREKTURWERT2}" | awk '{printf "%.0f\n", ($3/(($2/$1)^(1/($6/100))))+$5-$4}')"; done
 	VIDEO_OPTION="-svtav1-params enable-overlays=1:enable-tf=0:film-grain=0:film-grain-denoise=0:keyint=5s:scd=1:tune=0:fast-decode=0"
 
 	VIDEO_QUALITAET_0="${VIDEO_OPTION} -crf ${CRF} -preset 8"		# schnellstes, schlechteste Qualität
