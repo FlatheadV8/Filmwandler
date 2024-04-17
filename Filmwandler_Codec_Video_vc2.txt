@@ -8,7 +8,7 @@
 #VERSION="v2023032500"			# neue Ermittlungsmethode für Encoder
 VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
 
-TWO_PASS="Nein"				# 2-Pass encoding
+TWO_PASS="Nein"				# 2-Pass deaktiviert, es ist hier nicht vorgesehen
 CODEC_PATTERN="dirac"			# Beispiel: "h265|hevc"
 
 #------------------------------------------------------------------------------#

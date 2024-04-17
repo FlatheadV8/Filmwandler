@@ -17,7 +17,7 @@
 #VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
 VERSION="v2024031200"			# von "-tune ssim" auf "-tune film" umgestellt
 
-TWO_PASS="Nein"				# 2-Pass encoding
+TWO_PASS="Nein"				# 2-Pass deaktiviert, es ist hier nicht vorgesehen
 CODEC_PATTERN="x264"			# Beispiel: "h264|x264" (libopenh264, libx264)
 
 VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"

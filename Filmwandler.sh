@@ -1,4 +1,4 @@
-#fo!/bin/sh
+#!/bin/sh
 
 #------------------------------------------------------------------------------#
 #!/usr/bin/env bash
@@ -125,7 +125,8 @@
 #VERSION="v2023121700"			# Fehler behoben: bei undefinierten Audio-Spuren wurden keine Audio-Optionen für FFmpeg generiert
 #VERSION="v2024031000"			# Fehler im Profil HLS behoben
 #VERSION="v2024031600"			# ab jetzt wird bei Fehlschlag bedingungslos abgebrochen und nicht mehr mit automatisch veränderten Untertiteleinstellungen weiter probiert
-VERSION="v2024031900"			# für die wichtigsten 4 Codecs gibt es jetzt eine Option zum verlusstfreien transkodieren
+#VERSION="v2024031900"			# für die wichtigsten 4 Codecs gibt es jetzt eine Option zum verlusstfreien transkodieren
+VERSION="v2024041700"			# Fehler im 2-Pass-Bereich behoben
 
 
 VERSION_METADATEN="${VERSION}"
@@ -176,6 +177,7 @@ STOP="Nein"
 BILDQUALIT="auto"
 TONQUALIT="auto"
 ORIGINAL_DAR="Ja"
+TWO_PASS="Nein"
 
 AVERZ="$(dirname ${0})"			# Arbeitsverzeichnis, hier liegen diese Dateien
 
@@ -359,7 +361,7 @@ while [ "${#}" -ne "0" ]; do
                         shift
                         ;;
                 -pass)
-			TWO_PASS="Ja"				# 2-Pass aktivieren
+			TWOPASS="Ja"				# 2-Pass aktivieren (funktioniert z.Z. nur bei VP9)
                         shift
                         ;;
                 -par)
@@ -728,6 +730,9 @@ while [ "${#}" -ne "0" ]; do
 	-ca opus
 	-ca vorbis
 
+	# 2-Pass aktivieren (funktioniert z.Z. nur bei VP9)
+        -pass
+
 	# Bildwiederholrate für den neuen Film festlegen,
 	# manche Geräte können nur eine begrenzte Zahl an Bildern pro Sekunde (FPS)
 	-soll_fps 15
@@ -921,19 +926,19 @@ fi
 PROTOKOLLDATEI="$(echo "${ZIELNAME}.${ENDUNG}" | sed 's/[ ][ ]*/_/g;')"
 
 echo "# 140
-$(date +'%F %T')
-${0} ${Film2Standardformat_OPTIONEN}
-
-ZIEL_BASIS_NAME='${ZIEL_BASIS_NAME}'
-QUELL_DATEI='${QUELL_DATEI}'
-ZIELVERZ='${ZIELVERZ}'
-ZIELDATEI='${ZIELDATEI}'
-
-ZIELNAME='${ZIELNAME}'
-ZIEL_FILM='${ZIEL_FILM}'
-
-ENDUNG='${ENDUNG}'
-VIDEO_FORMAT='${VIDEO_FORMAT}'
+# $(date +'%F %T')
+# ${0} ${Film2Standardformat_OPTIONEN}
+#
+# ZIEL_BASIS_NAME='${ZIEL_BASIS_NAME}'
+# QUELL_DATEI='${QUELL_DATEI}'
+# ZIELVERZ='${ZIELVERZ}'
+# ZIELDATEI='${ZIELDATEI}'
+#
+# ZIELNAME='${ZIELNAME}'
+# ZIEL_FILM='${ZIEL_FILM}'
+#
+# ENDUNG='${ENDUNG}'
+# VIDEO_FORMAT='${VIDEO_FORMAT}'
 " | tee "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 150
@@ -1026,9 +1031,9 @@ if [ x = "x${META_DATEN_STREAMS}" ] ; then
 fi
 
 echo "# 190
-FFPROBE_PROBESIZE='${FFPROBE_PROBESIZE}'M (letzter Versuch)
-META_DATEN_STREAMS='${META_DATEN_STREAMS}'
+# FFPROBE_PROBESIZE='${FFPROBE_PROBESIZE}'M (letzter Versuch)
 " | head -n 40 | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+#exit 209
 
 if [ x = "x${META_DATEN_STREAMS}" ] ; then
 	echo "# 200: Die probesize von '${FFPROBE_PROBESIZE}M' ist weiterhin zu groß, bitte Rechner rebooten."
@@ -1101,10 +1106,9 @@ fi
 # TAG:rotate=180
 # rotation=-180
 
-#META_DATEN_STREAMS='${META_DATEN_STREAMS}'
 echo "# 230
-META_DATEN_SPURSPRACHEN='${META_DATEN_SPURSPRACHEN}'
-BILD_DREHUNG='${BILD_DREHUNG}'
+# META_DATEN_SPURSPRACHEN='${META_DATEN_SPURSPRACHEN}'
+# BILD_DREHUNG='${BILD_DREHUNG}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 240
@@ -1157,8 +1161,8 @@ if [ "${VIDEO_SPUR}" != "codec_type=video" ] ; then
 fi
 
 echo "# 300
-VIDEO_SPUR='${VIDEO_SPUR}'
-VIDEO_NICHT_UEBERTRAGEN='${VIDEO_NICHT_UEBERTRAGEN}'
+# VIDEO_SPUR='${VIDEO_SPUR}'
+# VIDEO_NICHT_UEBERTRAGEN='${VIDEO_NICHT_UEBERTRAGEN}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 310
@@ -1217,11 +1221,11 @@ O_BREIT="${IN_BREIT}"
 O_HOCH="${IN_HOCH}"
 
 echo "# 330
-1 IN_XY='${IN_XY}'
-1 IN_BREIT='${IN_BREIT}'
-1 IN_HOCH='${IN_HOCH}'
-1 O_BREIT='${O_BREIT}'
-1 O_HOCH='${O_HOCH}'
+# 1 IN_XY='${IN_XY}'
+# 1 IN_BREIT='${IN_BREIT}'
+# 1 IN_HOCH='${IN_HOCH}'
+# 1 O_BREIT='${O_BREIT}'
+# 1 O_HOCH='${O_HOCH}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 340
@@ -1345,19 +1349,19 @@ case "${IN_BIT_EINH}" in
 esac
 
 echo "# 470
-IN_XY='${IN_XY}'
-BILD_DREHUNG='${BILD_DREHUNG}'
-IN_BREIT='${IN_BREIT}'
-IN_HOCH='${IN_HOCH}'
-IN_PAR='${IN_PAR}'
-IN_DAR='${IN_DAR}'
-IN_FPS='${IN_FPS}'
-IN_FPS_RUND='${IN_FPS_RUND}'
-IN_BIT_RATE='${IN_BIT_RATE}'
-IN_BIT_EINH='${IN_BIT_EINH}'
-IN_BITRATE_KB='${IN_BITRATE_KB}'
-BILDQUALIT='${BILDQUALIT}'
-TONQUALIT='${TONQUALIT}'
+# IN_XY='${IN_XY}'
+# BILD_DREHUNG='${BILD_DREHUNG}'
+# IN_BREIT='${IN_BREIT}'
+# IN_HOCH='${IN_HOCH}'
+# IN_PAR='${IN_PAR}'
+# IN_DAR='${IN_DAR}'
+# IN_FPS='${IN_FPS}'
+# IN_FPS_RUND='${IN_FPS_RUND}'
+# IN_BIT_RATE='${IN_BIT_RATE}'
+# IN_BIT_EINH='${IN_BIT_EINH}'
+# IN_BITRATE_KB='${IN_BITRATE_KB}'
+# BILDQUALIT='${BILDQUALIT}'
+# TONQUALIT='${TONQUALIT}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 unset IN_BIT_RATE
@@ -1387,8 +1391,8 @@ if [ x = "x${INDAR}" ] ; then
 fi
 
 echo "# 530
-ORIGINAL_DAR='${ORIGINAL_DAR}'
-IN_DAR='${IN_DAR}'
+# ORIGINAL_DAR='${ORIGINAL_DAR}'
+# IN_DAR='${IN_DAR}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 540
@@ -1403,8 +1407,8 @@ UT_VORHANDEN="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F codec_type=su
 IST_UT_FORMAT="$(echo "${UT_VORHANDEN}" | tr -s ';' '\n' | awk -F'=' '/^codec_name=/{print $2}')"
 
 echo "# 545
-UT_VORHANDEN='${UT_VORHANDEN}'
-IST_UT_FORMAT='${IST_UT_FORMAT}'
+# UT_VORHANDEN='${UT_VORHANDEN}'
+# IST_UT_FORMAT='${IST_UT_FORMAT}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #------------------------------------------------------------------------------#
@@ -1420,9 +1424,9 @@ fi
 ### BILD_BREIT und BILD_HOCH prüfen
 
 echo "# 560
-ORIGINAL_DAR='${ORIGINAL_DAR}'
-BILD_BREIT='${BILD_BREIT}'
-BILD_HOCH='${BILD_HOCH}'
+# ORIGINAL_DAR='${ORIGINAL_DAR}'
+# BILD_BREIT='${BILD_BREIT}'
+# BILD_HOCH='${BILD_HOCH}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #set -x
@@ -1436,8 +1440,8 @@ fi
 #------------------------------------------------------------------------------#
 
 echo "# 590
-ENDUNG=${ENDUNG}
-VIDEO_FORMAT=${VIDEO_FORMAT}
+# ENDUNG=${ENDUNG}
+# VIDEO_FORMAT=${VIDEO_FORMAT}
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 VIDEO_ENDUNG="$(echo "${ENDUNG}" | awk '{print tolower($1)}')"
@@ -1450,6 +1454,8 @@ echo "# 600 CONSTANT_QUALITY
 # VIDEOCODEC='${VIDEOCODEC}'
 # AUDIOCODEC='${AUDIOCODEC}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+#exit 601
 
 # laut Endung
 if [ -r ${AVERZ}/Filmwandler_Format_${VIDEO_ENDUNG}.txt ] ; then
@@ -1473,7 +1479,14 @@ echo "# 630 CONSTANT_QUALITY
 # CONSTANT_QUALITY='${CONSTANT_QUALITY}'
 # VIDEOCODEC='${VIDEOCODEC}'
 # AUDIOCODEC='${AUDIOCODEC}'
+# VIDEO_FORMAT='${VIDEO_FORMAT}'
+#
+# ALT_CODEC_VIDEO='${ALT_CODEC_VIDEO}'
+# TWOPASS='${TWOPASS}'
+# TWO_PASS='${TWO_PASS}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+#exit 631
 
 # laut Wunsch-Kodecs
 if [ -r ${AVERZ}/Filmwandler_Format_${VIDEO_FORMAT}.txt ] ; then
@@ -1502,7 +1515,7 @@ START_ZIEL_FORMAT="-f ${FORMAT}"
 #------------------------------------------------------------------------------#
 
 echo "# 660
-$(date +'%F %T')
+# $(date +'%F %T')
 #
 # CONSTANT_QUALITY='${CONSTANT_QUALITY}'
 # ENDUNG='${ENDUNG}'
@@ -1511,11 +1524,14 @@ $(date +'%F %T')
 # VIDEOCODEC='${VIDEOCODEC}'
 # AUDIOCODEC='${AUDIOCODEC}'
 # FORMAT='${FORMAT}'
-# ALT_CODEC_VIDEO='${ALT_CODEC_VIDEO}'
 # VIDEO_OPTION='${VIDEO_OPTION}'
 # VIDEO_OPTION_BD='${VIDEO_OPTION_BD}'
 # VIDEO_OPTION_00='${VIDEO_OPTION_00}'
 # VIDEOOPTION='${VIDEOOPTION}'
+#
+# ALT_CODEC_VIDEO='${ALT_CODEC_VIDEO}'
+# TWOPASS='${TWOPASS}'
+# TWO_PASS='${TWO_PASS}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 670
@@ -1573,7 +1589,10 @@ echo "# 690 CONSTANT_QUALITY
 # VIDEO_OPTION_BD='${VIDEO_OPTION_BD}'
 # VIDEO_OPTION_00='${VIDEO_OPTION_00}'
 # VIDEOOPTION='${VIDEOOPTION}'
+#
+# TWO_PASS='${TWO_PASS}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
 #exit 692
 
 #==============================================================================#
@@ -2198,6 +2217,8 @@ echo "# 1090
 # VIDEOOPTION='${VIDEOOPTION}'
 # FORMAT='${FORMAT}'
 # START_ZIEL_FORMAT='${START_ZIEL_FORMAT}'
+#
+# TWO_PASS='${TWO_PASS}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 1100
@@ -2231,14 +2252,17 @@ fi
 
 CODEC_ODER_TARGET="$(echo "${VIDEOCODEC}" | grep -F -- '-target ')"
 if [ x = "x${CODEC_ODER_TARGET}" ] ; then
+	VIDEO_PARAMETER_PASS_1="-map 0:v -c:v ${VIDEOCODEC} ${VIDEO_OPTION_PASS_1}"
 	VIDEO_PARAMETER_TRANS="-map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME}"
 else
+	VIDEO_PARAMETER_PASS_1="-map 0:v ${VIDEOCODEC} ${VIDEO_OPTION_PASS_1}"
 	VIDEO_PARAMETER_TRANS="-map 0:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME}"
 fi
 
 VIDEO_PARAMETER_KOPIE="-map 0:v -c:v copy"
 
 if [ "0" = "${VIDEO_NICHT_UEBERTRAGEN}" ] ; then
+	VIDEO_PARAMETER_PASS_1=""
 	VIDEO_PARAMETER_TRANS="-vn"
 	VIDEO_PARAMETER_KOPIE="-vn"
 	U_TITEL_FF_01="-sn"
@@ -2261,15 +2285,22 @@ transkodieren_1_1()
 	if [ Ja = "${TWO_PASS}" ] ; then
 		echo "# 1120 TWO_PASS='${TWO_PASS}'
 		2-Pass: pass 1
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} -pass 1 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass -an -sn ${FPS} -y -f null /dev/null && \
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.out
+		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_PASS_1} -pass 1 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass -an -sn ${FPS} -f null /dev/null" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} -pass 1 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass -an -sn ${FPS} -y -f null /dev/null && \
+		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${VIDEO_PARAMETER_PASS_1} -pass 1 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass -an -sn ${FPS} -f null /dev/null
+
+		echo "# 1121 TWO_PASS='${TWO_PASS}'
+		2-Pass: pass 2
+		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+		ls -lha "${ZIELVERZ}"/"${ZIEL_FILM}".pass* | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=Fehler
-		rm -f "${ZIELVERZ}"/"${ZIEL_FILM}".pass*
+
+		ls -lha "${ZIELVERZ}"/"${ZIEL_FILM}".pass*
+		rm -fv "${ZIELVERZ}"/"${ZIEL_FILM}".pass*
 	else
 		echo "# 1130 TWO_PASS='${TWO_PASS}'
-		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}'${KOMMENTAR}' ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.out
+		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}'${KOMMENTAR}' ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} ${FPS} ${SCHNELLSTART} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=Fehler
 	fi
@@ -2289,15 +2320,22 @@ transkodieren_4_1()
 	if [ Ja = "${TWO_PASS}" ] ; then
 		echo "# 1240 TWO_PASS='${TWO_PASS}'
 		2-Pass: pass 1 + Schnitt
-       		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_TRANS} -pass 1 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass -an -sn -ss ${VON} -to ${BIS} ${FPS} -y -f null /dev/null && \
-        	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.out
+       		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_PASS_1} -pass 1 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass -an -sn -ss ${VON} -to ${BIS} ${FPS} -f null /dev/null" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
-       		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${VIDEO_PARAMETER_TRANS} -pass 1 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass -an -sn -ss ${VON} -to ${BIS} ${FPS} -y -f null /dev/null && \
+       		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${VIDEO_PARAMETER_PASS_1} -pass 1 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass -an -sn -ss ${VON} -to ${BIS} ${FPS} -f null /dev/null
+
+		echo "# 1241 TWO_PASS='${TWO_PASS}'
+		2-Pass: pass 2 + Schnitt
+        	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+		ls -lha "${ZIELVERZ}"/"${ZIEL_FILM}".pass* | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
         	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=Fehler
-		rm -f "${ZIELVERZ}"/"${ZIEL_FILM}".pass*
+
+		ls -lha "${ZIELVERZ}"/"${ZIEL_FILM}".pass*
+		rm -fv "${ZIELVERZ}"/"${ZIEL_FILM}".pass*
 	else
 		echo "# 1250 TWO_PASS='${TWO_PASS}'
-        	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.out
+        	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
         	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=Fehler
 	fi
@@ -2312,7 +2350,7 @@ transkodieren_7_1()
 {
 	### 1007
 	echo "# 1350
-	${PROGRAMM} ${FFMPEG_OPTIONEN} -f concat -i \"${ZIELVERZ}\"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt ${I_SUB} ${VIDEO_PARAMETER_KOPIE} ${AUDIO_VERARBEITUNG_02} ${SCHNELLSTART} ${U_TITEL_FF_02} ${UNTERTITEL_VERARBEITUNG_02} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}'${KOMMENTAR}' ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.out
+	${PROGRAMM} ${FFMPEG_OPTIONEN} -f concat -i \"${ZIELVERZ}\"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt ${I_SUB} ${VIDEO_PARAMETER_KOPIE} ${AUDIO_VERARBEITUNG_02} ${SCHNELLSTART} ${U_TITEL_FF_02} ${UNTERTITEL_VERARBEITUNG_02} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}'${KOMMENTAR}' ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".${ENDUNG}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 	${PROGRAMM} ${FFMPEG_OPTIONEN} -f concat -i "${ZIELVERZ}"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt ${I_SUB} ${VIDEO_PARAMETER_KOPIE} ${AUDIO_VERARBEITUNG_02} ${SCHNELLSTART} ${U_TITEL_FF_02} ${UNTERTITEL_VERARBEITUNG_02} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=kaputt
 	echo "# 1360

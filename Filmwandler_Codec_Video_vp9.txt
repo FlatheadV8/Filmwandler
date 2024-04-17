@@ -12,10 +12,20 @@
 #VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
 #VERSION="v2023061800"			# -cpu-used sets how efficient the compression will be. For legacy reasons, the option is also accessible with -speed in ffmpeg.
 #VERSION="v2024031700"			# CRF ist jetzt in Abhängigkeit von der Bildhöhe
-VERSION="v2024041500"			# Abstufungen überarbeitet, jetzt funktioniert auch -vq wieder und sehr kleine sowie sehr große Auflösungen bekommen jetzt einen gültigen CRF-Wert
+#VERSION="v2024041500"			# Abstufungen überarbeitet, jetzt funktioniert auch -vq wieder und sehr kleine sowie sehr große Auflösungen bekommen jetzt einen gültigen CRF-Wert
+VERSION="v2024041700"			# 2-Pass erzwungen, weil einige qualitätssteigernde Encoderfunktionen nur im 2-Pass-Modus verfügbar sind
 
-TWO_PASS="Nein"				# 2-Pass
+# die Option '-pass' gesetzt wurde + ein anderer als der Std-Codec gewünscht ist, dann greift dieser Code
+if [ Ja = "${TWOPASS}" ] ; then
+	TWO_PASS="Ja"			# 2-Pass aktivieren, einige qualitätssteigernde Encoderfunktionen nur im 2-Pass-Modus verfügbar sind
+fi
+
 CODEC_PATTERN="vp9"			# Beispiel: "h265|hevc"
+
+echo "# VP9
+CODEC_PATTERN='${CODEC_PATTERN}'
+TWO_PASS='${TWO_PASS}'
+" | tee "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #------------------------------------------------------------------------------#
 #  https://trac.ffmpeg.org/wiki/Encode/AV1#SVT-AV1
@@ -115,6 +125,7 @@ fi
 #------------------------------------------------------------------------------#
 
 CONSTANT_QUALITY="-b:v 0"	# Um den Modus "Konstante Qualität" auszulösen, müssen Sie eine Kombination aus -crf und -b:v 0 verwenden. Beachten Sie, dass -b:v 0 sein MUSS. Wenn Sie den Wert auf einen höheren Wert festlegen oder ganz weglassen, wird stattdessen der Modus „Eingeschränkte Qualität“ aufgerufen.
+VIDEO_OPTION_PASS_1="-crf ${CRF} ${CONSTANT_QUALITY}"
 VIDEO_OPTION="${CONSTANT_QUALITY} -aq-mode 1 -row-mt 1"
 VIDEO_QUALITAET_0="-crf ${CRF} -sharpness 1 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
 VIDEO_QUALITAET_1="-crf ${CRF} -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - recommended values range
@@ -130,5 +141,6 @@ VIDEO_QUALITAET_9="-crf ${CRF} -sharpness 0 ${VIDEO_OPTION}"		# -crf 15-35 - rec
 echo "# VP9
 CRF='${CRF}'
 VIDEO_OPTION='${VIDEO_OPTION}'
+TWO_PASS='${TWO_PASS}'
 " | tee "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 

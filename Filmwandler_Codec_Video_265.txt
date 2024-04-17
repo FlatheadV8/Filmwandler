@@ -9,10 +9,10 @@
 #VERSION="v2023032500"			# neue Ermittlungsmethode für Encoder
 #VERSION="v2023032600"			# Parameter für den x265-Encoder korrigiert
 #VERSION="v2023050900"			# Abstufung so angepasst, dass bei "-vq 5" die Codecs x264, x265, aom-av1 und svt-av1 eine änlich lange Transkodierzeit benötigen (pro Minute Spielfilm, ca. 1,5 Minuten Transkodierdauer)
-VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
+#VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
 VERSION="v2024031200"			# von "-tune ssim" auf "-tune fastdecode" umgestellt
 
-TWO_PASS="Nein"				# 2-Pass encoding
+TWO_PASS="Nein"				# 2-Pass deaktiviert, es ist hier nicht vorgesehen
 CODEC_PATTERN="x265|hevc"		# Beispiel: "h265|hevc"
 
 VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
