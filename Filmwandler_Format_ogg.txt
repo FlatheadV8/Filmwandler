@@ -20,13 +20,17 @@ FORMAT="ogg"
 #==============================================================================#
 
 # Audio
-. $(dirname ${0})/Filmwandler_Codec_Audio_vorbis.txt	# nur libvorbis funktioniert (Vorbis hat keine 8-Kanal-Unterstützung)
+# theoretische Unterstützung: FLAC, Opus, Vorbis, Speex
+. $(dirname ${0})/Filmwandler_Codec_Audio_vorbis.txt	# Vorbis hat keine 8-Kanal-Unterstützung (freie Alternative zu MP3)
+#. $(dirname ${0})/Filmwandler_Codec_Audio_opus.txt	# Opus (freie Alternative zu AAC)
 
 
 # Video
+# theoretische Unterstützung: Theora, VP8, VP9
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 #	. $(dirname ${0})/Filmwandler_Codec_Video_theora.txt
 	. $(dirname ${0})/Filmwandler_Codec_Video_vp8.txt
+#	. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
 fi
 
 #==============================================================================#

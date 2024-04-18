@@ -14,9 +14,11 @@ VERSION="v2022121100"			# die Variable ENDUNG darf hier nicht drin stehen
 FORMAT="mpegts"
 
 # Audio
+# theoretische Unterstützung: AC3
 . $(dirname ${0})/Filmwandler_Codec_Audio_ac3.txt
 
 # Video
+# theoretische Unterstützung: H.264
 . $(dirname ${0})/Filmwandler_Codec_Video_264.txt
 
 #==============================================================================#

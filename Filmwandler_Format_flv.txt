@@ -29,10 +29,13 @@ FORMAT="flv"
 #==============================================================================#
 
 # Audio
+# theoretische Unterstützung: MP3, AAC
 . $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt
+#. $(dirname ${0})/Filmwandler_Codec_Audio_aac.txt	# -> HTML5, HLS
 
 
 # Video
+# theoretische Unterstützung: FLV
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 . $(dirname ${0})/Filmwandler_Codec_Video_flv.txt
 

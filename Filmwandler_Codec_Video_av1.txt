@@ -26,7 +26,8 @@
 #VERSION="v2024022400"			# av1_nvenc - muß aber noch konfiguriert werden
 #VERSION="v2024041500"			# Abstufungen für svtav1 komplett überarbeitet
 #VERSION="v2024041600"			# Fehler in der CRF-Berechnung von AV1 behoben
-VERSION="v2024041700"			# Abstufungen für svtav1 etwas angepasst
+#VERSION="v2024041700"			# Abstufungen für svtav1 etwas angepasst
+VERSION="v2024041800"			# 2-Pass für AOM hinzugefügt
 
 TWO_PASS="Nein"				# 2-Pass deaktiviert, es ist hier nicht vorgesehen
 CODEC_PATTERN="av1|aom"			# Beispiel: "h265|hevc"
@@ -104,6 +105,11 @@ if [ libsvtav1 = "${VIDEOCODEC}" ] ; then
 elif [ libaom-av1 = "${VIDEOCODEC}" -o av1 = "${VIDEOCODEC}" ] ; then
 	echo "# libaom_av1"
 
+	# die Option '-pass' gesetzt wurde + ein anderer als der Std-Codec gewünscht ist, dann greift dieser Code
+	if [ Ja = "${TWOPASS}" ] ; then
+		TWO_PASS="Ja"			# 2-Pass aktivieren
+	fi
+
 	# https://ffmpeg.org/ffmpeg-codecs.html
 	#   ffmpeg -h encoder=libaom-av1
 	#   ffmpeg -h encoder=av1
@@ -122,6 +128,7 @@ elif [ libaom-av1 = "${VIDEOCODEC}" -o av1 = "${VIDEOCODEC}" ] ; then
 	### -cpu-used 8 	- höchste Verarbeitsungsgeschwindigkeit (99,17%) / Verarbeitungsdauer 5,32%
 	#------------------------------------------------------------------------------#
 
+	VIDEO_OPTION_PASS_1="-crf 28 ${CONSTANT_QUALITY}"
 	VIDEO_OPTION="-crf 28 -row-mt 1 -aq-mode 1 -tune 1 -threads ${CPU_KERNE} -aom-params fp-mt=1"
 	VIDEO_QUALITAET_0="-cpu-used 9 ${VIDEO_OPTION}"		# von "0" bin "9"
 	VIDEO_QUALITAET_1="-cpu-used 8 ${VIDEO_OPTION}"		# von "0" bin "9"

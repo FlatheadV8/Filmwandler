@@ -17,10 +17,12 @@ FORMAT="mpegts"
 #==============================================================================#
 
 # Audio
+# theoretische Unterstützung: AC3
 . $(dirname ${0})/Filmwandler_Codec_Audio_ac3.txt
 
 
 # Video
+# theoretische Unterstützung: H.264
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
   # Qualität
 . ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt

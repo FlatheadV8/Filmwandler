@@ -13,7 +13,7 @@
 #VERSION="v2023061800"			# -cpu-used sets how efficient the compression will be. For legacy reasons, the option is also accessible with -speed in ffmpeg.
 #VERSION="v2024031700"			# CRF ist jetzt in Abhängigkeit von der Bildhöhe
 #VERSION="v2024041500"			# Abstufungen überarbeitet, jetzt funktioniert auch -vq wieder und sehr kleine sowie sehr große Auflösungen bekommen jetzt einen gültigen CRF-Wert
-VERSION="v2024041700"			# 2-Pass erzwungen, weil einige qualitätssteigernde Encoderfunktionen nur im 2-Pass-Modus verfügbar sind
+VERSION="v2024041700"			# 2-Pass hinzugefügt, weil einige qualitätssteigernde Encoderfunktionen nur im 2-Pass-Modus verfügbar sind
 
 # die Option '-pass' gesetzt wurde + ein anderer als der Std-Codec gewünscht ist, dann greift dieser Code
 if [ Ja = "${TWOPASS}" ] ; then

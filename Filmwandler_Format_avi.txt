@@ -1,9 +1,7 @@
 
 #==============================================================================#
 #
-# AVI -> Microsoft
-#
-# Subtitle streams other than DivX XSUB is not implemented.
+# AVI / Audio Video Interleave
 #
 #==============================================================================#
 
@@ -13,13 +11,35 @@
 VERSION="v2023061000"			# erzwungene Anpassung auf den BD420 entfernt
 
 #------------------------------------------------------------------------------#
+#
+# Microsoft, 10. November 1992
+# Matrox OpenDML group, 1996 (AVI 2.0)
+# Im Jahr 2010 definierte die National Archives and Records Administration der US-Regierung AVI als offiziellen Container für die Aufbewahrung digitaler Videos.
+#
+# Subtitle streams other than DivX XSUB is not implemented.
+#
+# Nachteile von AVI:
+# kein standardisierter Weg um das Seitenverhältnis zu speichern, wodurch Abspielsoftware nicht automatisch das richtige auswählen kann
+# kein standardisierter Weg um die Halbbildreihenfolge (oberes oder unteres Halbbild zuerst) zu speichern, wodurch Schnitt- oder Abspielsoftware nicht automatisch das richtige auswählen kann
+# nicht für Video- und Audio-Formate ausgelegt, die mit variabler Bildrate (VFR) arbeiten
+# nicht für Videokompressionen gedacht, die auf Bilder zugreifen, die vor dem momentan angezeigten liegen (MPEG-4, …)
+# schlechte Unterstützung für Untertitel (Untertitel als Bilder, wie auf DVDs, sind nicht möglich)
+# keine Unterstützung von Menüs oder Kapiteln
+# keine einheitliche Möglichkeit zur Angabe von Zeitstempeln (Timecodes)
+#
+#==============================================================================#
+
 # Format
 FORMAT="avi"
 
 #==============================================================================#
 
 # Audio
+# theoretische Unterstützung: MP2, MP3, AC3, AAC, FLAC, PCM (pcm_alaw, pcm_f32le, pcm_f64le, pcm_mulaw, pcm_s16le, pcm_s24le, pcm_s32le, pcm_s64le, pcm_u8), adpcm_g722, adpcm_ima_wav, adpcm_ms, adpcm_yamaha, dfpwm, eac3, speex, wmav1, wmav2
+#. $(dirname ${0})/Filmwandler_Codec_Audio_mp2.txt
+#. $(dirname ${0})/Filmwandler_Codec_Audio_ac3.txt	# HLS
 . $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt	# Mono/Stereo
+#. $(dirname ${0})/Filmwandler_Codec_Audio_aac.txt	# -> HTML5, HLS
 
 
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
@@ -58,7 +78,15 @@ echo "# Filmwandler_Format_avi.txt
 #==============================================================================#
 
 # Video
+# theoretische Unterstützung: H.261, H.262, H.263, H.264, H.265, VP8, VP9, DV, M-JPEG, VC1, Cinepak, YCbCr/YUV
+#. $(dirname ${0})/Filmwandler_Codec_Video_261.txt
+#. $(dirname ${0})/Filmwandler_Codec_Video_262.txt
+#. $(dirname ${0})/Filmwandler_Codec_Video_263.txt
 . $(dirname ${0})/Filmwandler_Codec_Video_divx.txt
+#. $(dirname ${0})/Filmwandler_Codec_Video_264.txt
+#. $(dirname ${0})/Filmwandler_Codec_Video_265.txt
+#. $(dirname ${0})/Filmwandler_Codec_Video_vp8.txt
+#. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt
 
 #------------------------------------------------------------------------------#
 ### AVI hat nicht zwingend quadratische Bildpunkte

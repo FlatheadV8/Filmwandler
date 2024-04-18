@@ -35,6 +35,12 @@ VERSION="v2022121100"			# die Variable ENDUNG darf hier nicht drin stehen
 #
 #------------------------------------------------------------------------------#
 
+# Audio
+# theoretische Unterstützung: MP2, AC3
+
+# Video
+# theoretische Unterstützung: H.261, H.262
+
 ### http://www.ffmpeg.org/ffmpeg.html#Video-Options
 # FFMPEG_TARGET: vcd, svcd, dvd, dv, dv50
 

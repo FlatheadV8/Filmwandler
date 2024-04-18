@@ -41,12 +41,14 @@ FORMAT="webm"
 #==============================================================================#
 
 # Audio
+# theoretische Unterstützung: Opus, Vorbis
 # [libvorbis @ 0x872070c00] 8 channels (FL+FR+FC+LFE+SL+SR+ not supported by Vorbis: output stream will have incorrect channel layout.
 #. $(dirname ${0})/Filmwandler_Codec_Audio_vorbis.txt	# * Audio-Kodierung:      Vorbis hat keine 8-Kanal-Unterstützung
 . $(dirname ${0})/Filmwandler_Codec_Audio_opus.txt	# * Audio-Kodierung:      Opus (freie Alternative zu AAC)                        *
 
 
 # Video
+# theoretische Unterstützung: VP8, VP9, AV1
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 #	. $(dirname ${0})/Filmwandler_Codec_Video_vp8.txt
 #	. $(dirname ${0})/Filmwandler_Codec_Video_vp9.txt	# * Video-Kodierung:      VP9  (freie Alternative zu H.265 für 4K)               *

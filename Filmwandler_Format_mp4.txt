@@ -1,7 +1,7 @@
 
 #==============================================================================#
 #
-# MP4
+# MP4 / MPEG-4
 #
 #==============================================================================#
 
@@ -10,8 +10,7 @@
 #VERSION="v2022120500"			# MP4 kann doch AC-3
 #VERSION="v2022121100"			# die Variable ENDUNG darf hier nicht drin stehen
 #VERSION="v2023050600"			# von x264 auf x265 umgestellt
-#VERSION="v2024032800"			# von x265 auf x264 umgestellt
-VERSION="v2024040200"			# aus Kompatibilitätsgründen von AAC auf MP3 umgestellt
+VERSION="v2024032800"			# aus Kompatibilitätsgründen wieder von x265 auf x264 umgestellt
 
 #------------------------------------------------------------------------------#
 #
@@ -26,13 +25,19 @@ FORMAT="mp4"
 #==============================================================================#
 
 # Audio
+# theoretische Unterstützung: aac, ac3, alac, eac3, flac, mp2, mp3, opus, pcm_f32be, pcm_f32le, pcm_f64be, pcm_f64le, pcm_s16be, pcm_s16le, pcm_s24be, pcm_s24le, pcm_s32be, pcm_s32le, vorbis
+#. $(dirname ${0})/Filmwandler_Codec_Audio_mp2.txt
 #. $(dirname ${0})/Filmwandler_Codec_Audio_ac3.txt	# HLS
-. $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt	# -> HTML5, HLS
-#. $(dirname ${0})/Filmwandler_Codec_Audio_aac.txt	# -> HTML5, HLS
+#. $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt	# -> HTML5, HLS
+. $(dirname ${0})/Filmwandler_Codec_Audio_aac.txt	# -> HTML5, HLS
+#. $(dirname ${0})/Filmwandler_Codec_Audio_vorbis.txt	# * Audio-Kodierung:      Vorbis hat keine 8-Kanal-Unterstützung
+#. $(dirname ${0})/Filmwandler_Codec_Audio_opus.txt	# * Audio-Kodierung:      Opus (freie Alternative zu AAC)                        *
 
 
 # Video
+# theoretische Unterstützung: H.263, H.264, H.265, MJ2, VC1, VP9, AV1
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
+#. $(dirname ${0})/Filmwandler_Codec_Video_263.txt
 #. ${AVERZ}/Filmwandler_-_in-bit-per-pixel.txt		# wird nur von "Codec_Video_264" verwendet
 . $(dirname ${0})/Filmwandler_Codec_Video_264.txt	# AVC  -> HTML5, HLS
 #. $(dirname ${0})/Filmwandler_Codec_Video_265.txt	# HEVC -> ist kein HTML5-Standard
@@ -48,7 +53,7 @@ FORMAT_BESCHREIBUNG="
 ********************************************************************************
 * Name:                 MP4                                                    *
 * ENDUNG:               .mp4                                                   *
-* Video-Kodierung:      H.265 (HEVC, Nachfolger von H.264/AVC)                 *
+* Video-Kodierung:      H.264 (AVC)                                            *
 * Audio-Kodierung:      AAC   (mehrkanalfähiger Nachfolger von MP3)            *
 * Beschreibung:                                                                *
 *       - hohe Kompatibilität mit Konsumerelektronik                           *
