@@ -361,7 +361,7 @@ while [ "${#}" -ne "0" ]; do
                         shift
                         ;;
                 -pass)
-			TWOPASS="Ja"				# 2-Pass aktivieren (funktioniert z.Z. nur bei VP9)
+			TWOPASS="Ja"				# 2-Pass aktivieren (funktioniert z.Z. nur bei VP9 und AOM-AV1)
                         shift
                         ;;
                 -par)

@@ -5,6 +5,12 @@
 # https://trac.ffmpeg.org/wiki/Encode/AV1
 #
 #==============================================================================#
+#
+# https://ffmpeg.org/ffmpeg-codecs.html
+#   ffmpeg -h encoder=libaom-av1
+#   ffmpeg -h encoder=av1
+#
+#==============================================================================#
 
 #VERSION="v2018082800"			# erste Unterstützung von AV1 eingebaut
 #VERSION="v2020060200"			# erweitert um Beispiele
@@ -110,9 +116,6 @@ elif [ libaom-av1 = "${VIDEOCODEC}" -o av1 = "${VIDEOCODEC}" ] ; then
 		TWO_PASS="Ja"			# 2-Pass aktivieren
 	fi
 
-	# https://ffmpeg.org/ffmpeg-codecs.html
-	#   ffmpeg -h encoder=libaom-av1
-	#   ffmpeg -h encoder=av1
 	#------------------------------------------------------------------------------#
 	### kurz gesagt:
 	# - Qualität und Dateigröße ist von "-crf" abhängig;
@@ -129,7 +132,8 @@ elif [ libaom-av1 = "${VIDEOCODEC}" -o av1 = "${VIDEOCODEC}" ] ; then
 	#------------------------------------------------------------------------------#
 
 	VIDEO_OPTION_PASS_1="-crf 28 ${CONSTANT_QUALITY}"
-	VIDEO_OPTION="-crf 28 -row-mt 1 -aq-mode 1 -tune 1 -threads ${CPU_KERNE} -aom-params fp-mt=1"
+	#VIDEO_OPTION="-crf 28 -row-mt 1 -aq-mode 1 -tune 1 -threads ${CPU_KERNE} -aom-params fp-mt=1"
+	VIDEO_OPTION="-crf 28 -row-mt 1 -aq-mode 1 -tune 1 -threads ${CPU_KERNE}"	# -aom-params fp-mt=1 geht mit 2-Pass nicht
 	VIDEO_QUALITAET_0="-cpu-used 9 ${VIDEO_OPTION}"		# von "0" bin "9"
 	VIDEO_QUALITAET_1="-cpu-used 8 ${VIDEO_OPTION}"		# von "0" bin "9"
 	VIDEO_QUALITAET_2="-cpu-used 7 ${VIDEO_OPTION}"		# von "0" bin "9"
