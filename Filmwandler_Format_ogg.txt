@@ -20,7 +20,7 @@ FORMAT="ogg"
 #==============================================================================#
 
 # Audio
-. $(dirname ${0})/Filmwandler_Codec_Audio_vorbis.txt	# nur libvorbis funktioniert
+. $(dirname ${0})/Filmwandler_Codec_Audio_vorbis.txt	# nur libvorbis funktioniert (Vorbis hat keine 8-Kanal-Unterstützung)
 
 
 # Video

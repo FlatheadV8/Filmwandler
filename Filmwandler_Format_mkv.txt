@@ -42,7 +42,7 @@ FORMAT="matroska"
 ### Audio
 # [libvorbis @ 0x872070c00] 8 channels (FL+FR+FC+LFE+SL+SR+ not supported by Vorbis: output stream will have incorrect channel layout.
 #. $(dirname ${0})/Filmwandler_Codec_Audio_mp3.txt
-#. $(dirname ${0})/Filmwandler_Codec_Audio_vorbis.txt	# * Audio-Kodierung:      Vorbis (freie Alternative zu MP3)                      *
+#. $(dirname ${0})/Filmwandler_Codec_Audio_vorbis.txt	# * Audio-Kodierung:      Vorbis hat keine 8-Kanal-Unterstützung
 . $(dirname ${0})/Filmwandler_Codec_Audio_opus.txt	# * Audio-Kodierung:      Opus (freie Alternative zu AAC)                        *
 
 
