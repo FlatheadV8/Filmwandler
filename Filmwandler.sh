@@ -360,7 +360,7 @@ while [ "${#}" -ne "0" ]; do
                         SOLL_FPS="${2}"				# FPS (Bilder pro Sekunde) für den neuen Film festlegen
                         shift
                         ;;
-                -pass)
+                -2pass)
 			TWOPASS="Ja"				# 2-Pass aktivieren (funktioniert z.Z. nur bei VP9 und AOM-AV1)
                         shift
                         ;;
@@ -731,7 +731,7 @@ while [ "${#}" -ne "0" ]; do
 	-ca vorbis
 
 	# 2-Pass aktivieren (funktioniert z.Z. nur bei VP9)
-        -pass
+        -2pass
 
 	# Bildwiederholrate für den neuen Film festlegen,
 	# manche Geräte können nur eine begrenzte Zahl an Bildern pro Sekunde (FPS)
