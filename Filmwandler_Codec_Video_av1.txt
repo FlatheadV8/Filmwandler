@@ -84,7 +84,7 @@ if [ libaom-av1 = "${VIDEOCODEC}" -o av1 = "${VIDEOCODEC}" ] ; then
 	# die Option '-pass' gesetzt wurde + ein anderer als der Std-Codec gewünscht ist, dann greift dieser Code
 	if [ Ja = "${TWOPASS}" ] ; then
 		TWO_PASS="Ja"			# 2-Pass aktivieren
-		VIDEO_OPTION_PASS_1="-crf 28 ${CONSTANT_QUALITY}"
+		VIDEO_OPTION_PASS_1="-crf 38 ${CONSTANT_QUALITY}"
 	fi
 
 	#------------------------------------------------------------------------------#
@@ -102,8 +102,7 @@ if [ libaom-av1 = "${VIDEOCODEC}" -o av1 = "${VIDEOCODEC}" ] ; then
 	### -cpu-used 8 	- höchste Verarbeitsungsgeschwindigkeit (99,17%) / Verarbeitungsdauer 5,32%
 	#------------------------------------------------------------------------------#
 
-	#VIDEO_OPTION="-crf 28 -row-mt 1 -aq-mode 1 -tune 1 -threads ${CPU_KERNE} -aom-params fp-mt=1"
-	VIDEO_OPTION="-crf 28 -row-mt 1 -aq-mode 1 -tune 1 -threads ${CPU_KERNE}"	# -aom-params fp-mt=1 geht mit 2-Pass nicht
+	VIDEO_OPTION="-crf 38 -row-mt 1 -aq-mode 1 -tune 1 -threads ${CPU_KERNE}"	# -aom-params fp-mt=1 geht mit 2-Pass nicht
 	VIDEO_QUALITAET_0="-cpu-used 9 ${VIDEO_OPTION}"		# von "0" bin "9"
 	VIDEO_QUALITAET_1="-cpu-used 8 ${VIDEO_OPTION}"		# von "0" bin "9"
 	VIDEO_QUALITAET_2="-cpu-used 7 ${VIDEO_OPTION}"		# von "0" bin "9"
