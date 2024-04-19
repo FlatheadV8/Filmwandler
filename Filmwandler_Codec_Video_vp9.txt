@@ -25,7 +25,7 @@ CODEC_PATTERN="vp9"			# Beispiel: "h265|hevc"
 echo "# VP9
 CODEC_PATTERN='${CODEC_PATTERN}'
 TWO_PASS='${TWO_PASS}'
-" | tee "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #------------------------------------------------------------------------------#
 #  https://trac.ffmpeg.org/wiki/Encode/AV1#SVT-AV1
