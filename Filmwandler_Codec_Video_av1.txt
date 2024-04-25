@@ -80,7 +80,7 @@ echo "# AV1 01
 
 #VIDEOCODEC="av1"		# AOM-AV1 erzwingen / ist der langsamste und bietet die beste Qualität
 #VIDEOCODEC="libsvtav1"		# SVT-AV1 erzwingen / ist der schnellste und bietet ausreichende Qualität
-VIDEOCODEC="librav1e"		# Rav1E erzwingen (Version < 1) / ist mittelmäßig schnell bietet aber schnellerer Einstellung, bessere Qualität als AOM-AV1
+#VIDEOCODEC="librav1e"		# Rav1E erzwingen (Version < 1) / ist mittelmäßig schnell bietet aber schnellerer Einstellung, bessere Qualität als AOM-AV1
 
 ################################################################################
 if [ libaom-av1 = "${VIDEOCODEC}" -o av1 = "${VIDEOCODEC}" ] ; then
@@ -116,10 +116,11 @@ elif [ libsvtav1 = "${VIDEOCODEC}" ] ; then
 	echo "# libsvtav1"
 
 	#------------------------------------------------------------------------------#
-	#  https://trac.ffmpeg.org/wiki/Encode/AV1#SVT-AV1
-	#  ffmpeg -h encoder=libsvt_av1
+	# https://trac.ffmpeg.org/wiki/Encode/AV1#SVT-AV1
+	# ffmpeg -h encoder=libsvt_av1
 	#------------------------------------------------------------------------------#
 	#
+	# https://gitlab.com/AOMediaCodec/SVT-AV1/-/blob/master/Docs/CommonQuestions.md#what-presets-do
 	#  -preset 10 -crf 35	: Für eine schnelle Codierung muss das "preset" ausreichend hoch sein, damit Ihre CPU ohne Stottern codieren kann. Höhere Voreinstellungen sind schneller, aber weniger effizient.
 	#  -preset 5 -crf 32	: Für einen Medienserver oder HTPC, sind eine höhere Effizienz und vernünftige Codierzeiten wünschenswert.
 	#  -preset 2 -crf 25	: Für professionelle VOD-Anwendungen wird oft die bestmögliche Effizienz gewünscht.
@@ -133,7 +134,8 @@ elif [ libsvtav1 = "${VIDEOCODEC}" ] ; then
 	# > for BILD_HOCH in $(seq 1 36 | awk '{print $1*120}'); do echo -e "9 1\n$(seq 0 44 | nl | awk '{printf "%.0f %.0f\n", $1+18,120*((36^(1/44))^$2)}')" | awk -v b="${BILD_HOCH}" '{if ($2 >= b) crf=$1 ; if ($2 < b) crf="#" ; print crf,b" | "$1,$2}' | grep -Ev '^#' | head -n1; done
 	#------------------------------------------------------------------------------#
 
-	CRF="$(echo -e "9 1\n$(seq 0 44 | nl | awk '{printf "%.0f %.0f\n", $1+18,120*((36^(1/44))^$2)}')" | awk -v b="${BILD_HOCH}" -v q="${BILDQUALIT}" '{if ($2 >= b) crf=$1-q ; if ($2 < b) crf="#" ; print crf}' | grep -Ev '^#' | head -n1)"
+	KORREKTUR="9"
+	CRF="$(echo -e "9 1\n$(seq 0 44 | nl | awk '{printf "%.0f %.0f\n", $1+18,120*((36^(1/44))^$2)}')" | awk -v b="${BILD_HOCH}" -v q="${BILDQUALIT}" '{if ($2 >= b) crf=$1-q ; if ($2 < b) crf="#" ; print crf}' | grep -Ev '^#' | head -n1 | awk -v k="${KORREKTUR}" '{crf=$1; if ((10+k) >= $1) crf=(10+k) ; if ((60+k) <= $1) crf=(60+k) ; print crf-k}')"
 	echo "# -crf ${CRF}"
 	VIDEO_OPTION="-svtav1-params enable-overlays=1:enable-tf=0:film-grain=0:film-grain-denoise=0:keyint=5s:scd=1:tune=0:fast-decode=0"
 
@@ -142,23 +144,17 @@ elif [ libsvtav1 = "${VIDEOCODEC}" ] ; then
 	VIDEO_QUALITAET_2="-crf ${CRF} -preset 8 ${VIDEO_OPTION}"		# 
 	VIDEO_QUALITAET_3="-crf ${CRF} -preset 7 ${VIDEO_OPTION}"		# 
 	VIDEO_QUALITAET_4="-crf ${CRF} -preset 6 ${VIDEO_OPTION}"		# 
-	VIDEO_QUALITAET_5="-crf ${CRF} -preset 5 ${VIDEO_OPTION}"		# Standard
+	VIDEO_QUALITAET_5="-crf ${CRF} -preset 5 ${VIDEO_OPTION}"		# "-vq 5 ist" Standard
 	VIDEO_QUALITAET_6="-crf ${CRF} -preset 4 ${VIDEO_OPTION}"		# 
 	VIDEO_QUALITAET_7="-crf ${CRF} -preset 3 ${VIDEO_OPTION}"		# 
 	VIDEO_QUALITAET_8="-crf ${CRF} -preset 2 ${VIDEO_OPTION}"		# 
 	VIDEO_QUALITAET_9="-crf ${CRF} -preset 1 ${VIDEO_OPTION}"		# kleinste Datei, langsamstes, beste Qualität
 elif [ librav1e = "${VIDEOCODEC}" ] ; then
 	echo "# librav1e"
-	# VIDEOCODEC="librav1e"
 
-	#------------------------------------------------------------------------------#
-	# ffmpeg -h encoder=librav1e
+	#   ffmpeg -h encoder=librav1e
 	#
-	#    Supported pixel formats: yuv420p yuvj420p yuv420p10le yuv420p12le yuv422p yuvj422p yuv422p10le yuv422p12le yuv444p yuvj444p yuv444p10le yuv444p12le
-	#
-	#------------------------------------------------------------------------------#
 	# https://ffmpeg.org/ffmpeg-codecs.html
-	#
 	#  -c:v librav1e
 	#  -qp            "-1 bis 255"    (default 100; kleinerer Wert steht für bessere Qualität)
 	#  -speed         "-1 bis 10"     (default -1) / wie "preset" bei libsvtav1
