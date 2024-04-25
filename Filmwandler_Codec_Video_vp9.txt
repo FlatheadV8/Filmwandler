@@ -139,5 +139,5 @@ echo "# VP9
 CRF='${CRF}'
 VIDEO_OPTION='${VIDEO_OPTION}'
 TWO_PASS='${TWO_PASS}'
-" | tee "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
