@@ -128,7 +128,7 @@
 #VERSION="v2024031900"			# für die wichtigsten 4 Codecs gibt es jetzt eine Option zum verlusstfreien transkodieren
 #VERSION="v2024041700"			# Fehler im 2-Pass-Bereich behoben
 #VERSION="v2024041900"			# Fehler im Schnitt-Bereich behoben
-VERSION="v2024042700"			# Fehler im Transkodierkommando beim maskieren des Filmnamens behoben
+VERSION="v2024042700"			# Fehler im Transkodierkommando beim maskieren des Filmnamens behoben + Schutz vor unsicheren Dateinamen
 
 
 VERSION_METADATEN="${VERSION}"
@@ -2352,6 +2352,7 @@ transkodieren_4_1()
 transkodieren_7_1()
 {
 	### 1007
+	# https://hatchjs.com/ffmpeg-unsafe-file-name/
 	pwd
 	echo "# 1350
 	${PROGRAMM} ${FFMPEG_OPTIONEN} -f concat -i ${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt ${I_SUB} ${VIDEO_PARAMETER_KOPIE} ${AUDIO_VERARBEITUNG_02} ${SCHNELLSTART} ${U_TITEL_FF_02} ${UNTERTITEL_VERARBEITUNG_02} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}'${KOMMENTAR}' ${START_ZIEL_FORMAT} -y \"${ZIEL_FILM}\".${ENDUNG}"
@@ -2383,6 +2384,18 @@ if [ ${SCHNITT_ANZAHL} -lt 1 ] ; then
 
 else
 
+	echo '
+	### 1002
+	#----------------------------------------------------------------------#
+	# Quelle: https://hatchjs.com/ffmpeg-unsafe-file-name/
+	# unsichere Dateinamen sind Dateinamen, die folgende Eigenschaften aufweisen:
+	# - Dateinamen enthalten Leerzeichen
+	# - Dateinamen enthalten einen Punkt
+	# - Dateinamen die mit einem "$" oder "!" enden
+	# - Dateinamen die ".exe", ".bat", oder ".cmd" enthalten
+	#----------------------------------------------------------------------#'
+	echo "${ZIEL_FILM}" | grep -E '[ ]|[$]|[.]exe|[.]bat|[.]cmd' && exit 1
+	echo "${ZIEL_FILM}" | grep -F '!' && exit 1
 	#----------------------------------------------------------------------#
 	rm -f "${ZIELVERZ}"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt
 	NUMMER="0"
@@ -2401,13 +2414,13 @@ else
 		### 1004
 		transkodieren_4_1 | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
-		ffprobe -v error -i "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI} | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+		ffprobe -v error -i "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_"${ZIEL_FILM}".${ENDUNG} | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
                 ### den Film in die Filmliste eintragen
 		### CONCAT akzeptiert nur Dateinamen, keine Pfadnamen:
 		### [concat @ 0x2d36e484c000] Unsafe file name '/daten/mm/oeffentlich/Video/Test/tTt7OsNf5PJ5_01_Test.mp4'
-                echo "echo \"file '${ZUFALL}_${NUMMER}_${ZIEL_FILM}'\" >> \"${ZIELVERZ}\"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-                echo "file '${ZUFALL}_${NUMMER}_${ZIEL_FILM}'" >> "${ZIELVERZ}"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt
+                echo "echo \"file '${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG}'\" >> \"${ZIELVERZ}\"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+                echo "file '${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG}'" >> "${ZIELVERZ}"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt
 
 		echo "---------------------------------------------------------" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	done
@@ -2422,7 +2435,7 @@ else
 	ffprobe -v error -i "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 	#ls -lh ${ZUFALL}_*.${ENDUNG}
-#	rm -f "${ZIELVERZ}"/${ZUFALL}_*.${ENDUNG} ffmpeg2pass-0.log
+	rm -f "${ZIELVERZ}"/${ZUFALL}_*.${ENDUNG} ffmpeg2pass-0.log
 
 fi
 
