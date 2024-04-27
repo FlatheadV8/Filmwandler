@@ -2406,8 +2406,8 @@ else
                 ### den Film in die Filmliste eintragen
 		### CONCAT akzeptiert nur Dateinamen, keine Pfadnamen:
 		### [concat @ 0x2d36e484c000] Unsafe file name '/daten/mm/oeffentlich/Video/Test/tTt7OsNf5PJ5_01_Test.mp4'
-                echo "echo \"file '${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}'\" >> \"${ZIELVERZ}\"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-                echo "file '${ZUFALL}_${NUMMER}_${PROTOKOLLDATEI}'" >> "${ZIELVERZ}"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt
+                echo "echo \"file '${ZUFALL}_${NUMMER}_${ZIEL_FILM}'\" >> \"${ZIELVERZ}\"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+                echo "file '${ZUFALL}_${NUMMER}_${ZIEL_FILM}'" >> "${ZIELVERZ}"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt
 
 		echo "---------------------------------------------------------" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	done
@@ -2422,7 +2422,7 @@ else
 	ffprobe -v error -i "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 	#ls -lh ${ZUFALL}_*.${ENDUNG}
-	rm -f "${ZIELVERZ}"/${ZUFALL}_*.${ENDUNG} ffmpeg2pass-0.log
+#	rm -f "${ZIELVERZ}"/${ZUFALL}_*.${ENDUNG} ffmpeg2pass-0.log
 
 fi
 
