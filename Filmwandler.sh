@@ -128,7 +128,7 @@
 #VERSION="v2024031900"			# für die wichtigsten 4 Codecs gibt es jetzt eine Option zum verlusstfreien transkodieren
 #VERSION="v2024041700"			# Fehler im 2-Pass-Bereich behoben
 #VERSION="v2024041900"			# Fehler im Schnitt-Bereich behoben
-VERSION="v2024042700"			# Fehler im Transkodierkommando beim maskieren des Filmnamens behoben + Schutz vor unsicheren Dateinamen
+VERSION="v2024042700"			# Fehler im Transkodierkommando beim maskieren des Filmnamens behoben + Schutz vor unsicheren Dateinamen, das Leerzeichen erlaube ich aber
 
 
 VERSION_METADATEN="${VERSION}"
@@ -2355,9 +2355,9 @@ transkodieren_7_1()
 	# https://hatchjs.com/ffmpeg-unsafe-file-name/
 	pwd
 	echo "# 1350
-	${PROGRAMM} ${FFMPEG_OPTIONEN} -f concat -i ${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt ${I_SUB} ${VIDEO_PARAMETER_KOPIE} ${AUDIO_VERARBEITUNG_02} ${SCHNELLSTART} ${U_TITEL_FF_02} ${UNTERTITEL_VERARBEITUNG_02} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}'${KOMMENTAR}' ${START_ZIEL_FORMAT} -y \"${ZIEL_FILM}\".${ENDUNG}"
+	${PROGRAMM} ${FFMPEG_OPTIONEN} -f concat -safe 0 -i ${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt ${I_SUB} ${VIDEO_PARAMETER_KOPIE} ${AUDIO_VERARBEITUNG_02} ${SCHNELLSTART} ${U_TITEL_FF_02} ${UNTERTITEL_VERARBEITUNG_02} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}'${KOMMENTAR}' ${START_ZIEL_FORMAT} -y \"${ZIEL_FILM}\".${ENDUNG}"
 
-	${PROGRAMM} ${FFMPEG_OPTIONEN} -f concat -i ${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt ${I_SUB} ${VIDEO_PARAMETER_KOPIE} ${AUDIO_VERARBEITUNG_02} ${SCHNELLSTART} ${U_TITEL_FF_02} ${UNTERTITEL_VERARBEITUNG_02} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIEL_FILM}".${ENDUNG} >> ${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=kaputt
+	${PROGRAMM} ${FFMPEG_OPTIONEN} -f concat -safe 0 -i ${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt ${I_SUB} ${VIDEO_PARAMETER_KOPIE} ${AUDIO_VERARBEITUNG_02} ${SCHNELLSTART} ${U_TITEL_FF_02} ${UNTERTITEL_VERARBEITUNG_02} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIEL_FILM}".${ENDUNG} >> ${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=kaputt
 	echo "# 1360
 	WEITER='${WEITER}'
 	"
@@ -2389,12 +2389,16 @@ else
 	#----------------------------------------------------------------------#
 	# Quelle: https://hatchjs.com/ffmpeg-unsafe-file-name/
 	# unsichere Dateinamen sind Dateinamen, die folgende Eigenschaften aufweisen:
-	# - Dateinamen enthalten Leerzeichen
+	# - Dateinamen enthalten Leerzeichen oder andere Sonderzeichen
 	# - Dateinamen enthalten einen Punkt
 	# - Dateinamen die mit einem "$" oder "!" enden
 	# - Dateinamen die ".exe", ".bat", oder ".cmd" enthalten
+	# - Dateinamen enthalten einen absoluten Pfad
+	# [concat @ 0x2d36e484c000] Unsafe file name '/Test/tTt7OsNf5PJ5_01_Test.mp4'
 	#----------------------------------------------------------------------#'
-	echo "${ZIEL_FILM}" | grep -E '[ ]|[$]|[.]exe|[.]bat|[.]cmd' && exit 1
+	# Leerzeichen will ich mal erlauben... :-)
+	#echo "${ZIEL_FILM}" | grep -E '[ ]|[$]|[.]exe|[.]bat|[.]cmd' && exit 1
+	echo "${ZIEL_FILM}" | grep -E '[$]|[.]exe|[.]bat|[.]cmd' && exit 1
 	echo "${ZIEL_FILM}" | grep -F '!' && exit 1
 	#----------------------------------------------------------------------#
 	rm -f "${ZIELVERZ}"/${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt
