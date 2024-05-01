@@ -88,8 +88,8 @@ ARBEITSWERTE_PAR()
 if [ x != "x${IN_PAR}" ] ; then
 	PAR="$(echo "${IN_PAR}" | grep -E '[:/]')"
 	if [ x != "x${PAR}" ] ; then
-		PAR_KOMMA="$(echo "${PAR}" | grep -E '[:/]' | awk -F'[:/]' '{print $1/$2}')"
-		PAR_FAKTOR="$(echo "${PAR}" | grep -E '[:/]' | awk -F'[:/]' '{printf "%u\n", ($1*100000)/$2}')"
+		PAR_KOMMA="$(echo "${PAR}" | grep -E '[:/]' | awk '{gsub("[:/]"," ");print $1/$2}')"
+		PAR_FAKTOR="$(echo "${PAR}" | grep -E '[:/]' | awk '{gsub("[:/]"," ");printf "%u\n", ($1*100000)/$2}')"
 	else
 		PAR="$(echo "${IN_PAR}" | grep -F '.')"
 		PAR_KOMMA="${PAR}"
@@ -117,11 +117,25 @@ echo "# 60 Video
 
 #exit 70
 
+#----------------------------------------------------------------------#
+### Wenn das Seitenverhältnis der Bildpunkte (PAR / SAR) korrigiert wurde,
+### dann muß auch das Seitenverhältnis des Bildes (DAR) korrigiert werden.
+
+#BASISWERTE="${O_BREIT} ${O_HOCH} ${O_DAR_1} ${O_DAR_2} ${IN_BREIT} ${IN_HOCH} ${TEILER}"
+#BREIT_QUADRATISCH="$(echo "${BASISWERTE}" | awk '{gsub("[:/]"," ") ; printf "%.0f %.0f\n", $2 * $3 * $5 / $1 / $4 / $NF, $NF}' | awk '{printf "%.0f\n", $1*$2}')"
+#HOCH_QUADRATISCH="$( echo "${BASISWERTE}" | awk '{gsub("[:/]"," ") ; printf "%.0f %.0f\n", $1 * $4 * $6 / $2 / $3 / $NF, $NF}' | awk '{printf "%.0f\n", $1*$2}')"
+#
+#if [ x != "x${IST_PAR}" ] ; then
+#	IN_DAR="${IST_DAR}"
+#fi
+
 #------------------------------------------------------------------------------#
+
+#----------------------------------------------------------------------#
 ### Kontrolle Seitenverhältnis des Bildes (DAR)
 
-if [ x = "x${IN_DAR}" ] ; then
-	IN_DAR="$(echo "${IN_BREIT} ${IN_HOCH} ${PAR_KOMMA}" | awk '{printf("%.16f\n",$3/($2/$1))}')"
+if [ x = "x${IN_DAR}" -o x != "x${IST_PAR}" ] ; then
+	IN_DAR="$(echo "${IN_BREIT} ${IN_HOCH} ${PAR_KOMMA}" | awk '{printf("%.16f\n",($1*$3)/$2)}')"
 
 	echo "# 80 Video
 	IN_BREIT='${IN_BREIT}'
@@ -130,13 +144,32 @@ if [ x = "x${IN_DAR}" ] ; then
 	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 fi
 
+INDAR="$(echo "${IN_DAR}" | grep -E '[:/]')"
+if [ x = "x${INDAR}" ] ; then
+	IN_DAR="${IN_DAR}/1"
+fi
+
+if [ x != "x${IST_PAR}" ] ; then
+	IST_DAR="${IN_DAR}"
+fi
+
 O_DAR="${IN_DAR}"
+ODAR="$(echo "${O_DAR}" | grep -E '[:/]')"
+if [ -n "${ODAR}" ] ; then
+	O_DAR_1="$(echo "${O_DAR}" | grep -E '[:/]' | awk '{gsub("[:/]"," ");print $1}')"
+	O_DAR_2="$(echo "${O_DAR}" | grep -E '[:/]' | awk '{gsub("[:/]"," ");print $2}')"
+else
+	O_DAR_1="${O_DAR}"
+	O_DAR_2="1"
+fi
 
 echo "# 90 Video
 O_BREIT=${O_BREIT}
 O_HOCH=${O_HOCH}
 O_DAR=${O_DAR}
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+#exit 91
 
 if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
     echo "# 100 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
@@ -169,8 +202,8 @@ if [ x = "x${DAR}" ] ; then
 	DAR_FAKTOR="$(echo "${DAR}" | grep -F '.' | awk '{printf "%u\n", $1*100000}')"
 else
 	echo "# 140 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	DAR_KOMMA="$(echo "${DAR}" | grep -E '[:/]' | awk -F'[:/]' '{print $1/$2}')"
-	DAR_FAKTOR="$(echo "${DAR}" | grep -E '[:/]' | awk -F'[:/]' '{printf "%u\n", ($1*100000)/$2}')"
+	DAR_KOMMA="$(echo "${DAR}" | grep -E '[:/]' | awk '{gsub("[:/]"," ");print $1/$2}')"
+	DAR_FAKTOR="$(echo "${DAR}" | grep -E '[:/]' | awk '{gsub("[:/]"," ");printf "%u\n", ($1*100000)/$2}')"
 fi
 
 
@@ -207,20 +240,23 @@ else
 	echo "# 170 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	# -vf crop=width:height:x:y
 	# -vf crop=in_w-100:in_h-100:100:100
-	IN_BREIT="$(echo "${CROP}" | awk -F'[:/]' '{print $1}')"
-	IN_HOCH="$(echo "${CROP}" | awk -F'[:/]' '{print $2}')"
-	#X="$(echo "${CROP}" | awk -F'[:/]' '{print $3}')"
-	#Y="$(echo "${CROP}" | awk -F'[:/]' '{print $4}')"
+	IN_BREIT="$(echo "${CROP}" | awk '{gsub("[:/]"," ");print $1}')"
+	IN_HOCH="$(echo "${CROP}" | awk '{gsub("[:/]"," ");print $2}')"
+	#X="$(echo "${CROP}" | awk '{gsub("[:/]"," ");print $3}')"
+	#Y="$(echo "${CROP}" | awk '{gsub("[:/]"," ");print $4}')"
 
 	### Display-Seiten-Format
 	DAR_FAKTOR="$(echo "${PAR_FAKTOR} ${IN_BREIT} ${IN_HOCH}" | awk '{printf "%u\n", ($1*$2)/$3}')"
 	DAR_KOMMA="$(echo "${DAR_FAKTOR}" | awk '{print $1/100000}')"
-	IN_DAR="$(echo "${O_BREIT} ${O_HOCH} ${O_DAR} ${IN_BREIT} ${IN_HOCH}" | awk '{gsub("[:/]"," ");print $2 * $3 * $5 / $1 / $4 / $6}'):1"
+	IN_DAR="$(echo "${O_BREIT} ${O_HOCH} ${O_DAR_1} ${O_DAR_2} ${IN_BREIT} ${IN_HOCH}" | awk '{gsub("[:/]"," ");print $2 * $3 * $5 / $1 / $4 / $6}'):1"
 
 	CROP="crop=${CROP},"
 fi
 
 echo "# 180 Video
+O_BREIT='${O_BREIT}'
+O_HOCH='${O_HOCH}'
+O_DAR='${O_DAR}'
 IN_DAR='${IN_DAR}'
 PAR_FAKTOR='${PAR_FAKTOR}'
 IN_BREIT='${IN_BREIT}'
@@ -265,8 +301,8 @@ if [ "x${ORIGINAL_DAR}" = "xNein" ] ; then
 		echo "# 230 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 		# hier sind Modifikationen nötig, weil viele der auswählbaren Bildformate
 		# keine quadratischen Pixel vorsehen
-		INBREITE_DAR="$(echo "${IN_DAR}" | awk -F'[/:]' '{print $1}')"
-		INHOEHE_DAR="$(echo "${IN_DAR}" | awk -F'[/:]' '{print $2}')"
+		INBREITE_DAR="$(echo "${IN_DAR}" | awk '{gsub("[:/]"," ");print $1}')"
+		INHOEHE_DAR="$(echo "${IN_DAR}" | awk '{gsub("[:/]"," ");print $2}')"
 		echo "# 240 Video
 		# SOLL_DAR='${SOLL_DAR}'
 		# INBREITE_DAR='${INBREITE_DAR}'
@@ -351,8 +387,20 @@ else
 	HOEHE="${ORIG_DAR_HOEHE}"
 	FORMAT_ANPASSUNG="setdar='${BREITE}/${HOEHE}',"
 fi
-echo "# 331 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
+if [ x != "x${BREITE}" -a x = "x${HOEHE}" ] ; then
+	HOEHE="1"
+fi
+
+echo "# 331 Video
+IN_DAR=${IN_DAR}
+ORIG_DAR_BREITE="${ORIG_DAR_BREITE}"
+ORIG_DAR_HOEHE="${ORIG_DAR_HOEHE}"
+BREITE="${BREITE}"
+HOEHE="${HOEHE}"
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+#exit 332
 #==============================================================================#
 ### Profile werden hier ausgeführt
 
@@ -360,6 +408,8 @@ echo "# 340 Video
 PROFIL_NAME='${PROFIL_NAME}'
 SOLL_XY='${SOLL_XY}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+#exit 341
 
 # alle Profile laden
 if [ "x" != "x${PROFIL_NAME}" ] ; then
@@ -415,11 +465,12 @@ if [ x = "x${SOLL_XY}" ] ; then
 		O_DAR=${O_DAR}
 		IN_BREIT=${IN_BREIT}
 		IN_HOCH=${IN_HOCH}
+		IN_DAR=${IN_DAR}
 		" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 		#exit 390
 
-		IN_DAR="$(echo "${O_BREIT} ${O_HOCH} ${O_DAR} ${IN_BREIT} ${IN_HOCH}" | awk '{gsub(":"," ");print $2 * $3 * $5 / $1 / $4 / $6}')"
+		IN_DAR="$(echo "${O_BREIT} ${O_HOCH} ${O_DAR_1} ${O_DAR_2} ${IN_BREIT} ${IN_HOCH}" | awk '{gsub(":"," ");print $2 * $3 * $5 / $1 / $4 / $6}')"
 		DARFAKTOR_0="$(echo "${IN_DAR}" | awk '{printf "%u\n", ($1*100000)}')"
 		#TEIL_HOEHE="$(echo "${IN_BREIT} ${IN_HOCH} ${IN_DAR} ${TEILER}" | awk '{gsub(":"," ");printf "%.0f\n", sqrt($1 * $2 * $3 / $4) / $3 / $5, $5}' | awk '{print $1 * $2}')"
 		if [ "${DARFAKTOR_0}" -lt "149333" ] ; then
@@ -436,6 +487,7 @@ if [ x = "x${SOLL_XY}" ] ; then
 		BILD_SCALE="scale=${BILD_BREIT}x${BILD_HOCH},"
 
 		echo "# 420 Video
+		DARFAKTOR_0=${DARFAKTOR_0}
 		BREITE='${BREITE}'
 		HOEHE='${HOEHE}'
 		O_BREIT='${O_BREIT}'
@@ -450,6 +502,8 @@ if [ x = "x${SOLL_XY}" ] ; then
 		BILD_HOCH='${BILD_HOCH}'
 		BILD_SCALE='${BILD_SCALE}'
 		" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+		#exit 421
 	else
 		### wenn die Pixel bereits quadratisch sind
 		BILD_BREIT="${IN_BREIT}"
@@ -608,14 +662,6 @@ BILD_SCALE		='${BILD_SCALE}'
 # BluRay        (1920x1080): DAR 16/9, SAR  1:1  = 1,0
 #
 
-O_DAR="$(echo "${O_DAR}" | grep -E '[:/]')"
-if [ -n "${PAR}" ] ; then
-	O_DAR_1="$(echo "${O_DAR}" | grep -E '[:/]' | awk -F'[:/]' '{print $1}')"
-	O_DAR_2="$(echo "${O_DAR}" | grep -E '[:/]' | awk -F'[:/]' '{print $2}')"
-else
-	O_DAR_1="${O_DAR}"
-	O_DAR_2="1"
-fi
 BASISWERTE="${O_BREIT} ${O_HOCH} ${O_DAR_1} ${O_DAR_2} ${IN_BREIT} ${IN_HOCH} ${TEILER}"
 BREIT_QUADRATISCH="$(echo "${BASISWERTE}" | awk '{gsub("[:/]"," ") ; printf "%.0f %.0f\n", $2 * $3 * $5 / $1 / $4 / $NF, $NF}' | awk '{printf "%.0f\n", $1*$2}')"
 HOCH_QUADRATISCH="$( echo "${BASISWERTE}" | awk '{gsub("[:/]"," ") ; printf "%.0f %.0f\n", $1 * $4 * $6 / $2 / $3 / $NF, $NF}' | awk '{printf "%.0f\n", $1*$2}')"
