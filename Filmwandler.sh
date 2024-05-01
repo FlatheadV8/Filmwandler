@@ -759,13 +759,18 @@ while [ "${#}" -ne "0" ]; do
 	# werden kann oder falsch ermittelt wurde,
 	# dann muss es manuell als Parameter uebergeben werden;
 	# es wird nur einer der beiden Parameter DAR oder PAR benötigt
+	-dar 4:3
 	-dar 16:9
 
 	# wenn die Pixelgeometrie des Originalfilmes nicht automatisch ermittelt
 	# werden kann oder falsch ermittelt wurde,
 	# dann muss es manuell als Parameter uebergeben werden;
 	# es wird nur einer der beiden Parameter DAR oder PAR benoetigt
-	-par 64:45
+	-par 16:15		# PAL
+	-par 9:10		# NTSC
+	-par 8:9		# NTSC-DVD
+	-par 64:45		# NTSC / DVD / DVB
+	-par 1:1		# BluRay
 
 	# will man eine andere Video-Qualitaet, dann sie manuell als Parameter
 	# uebergeben werden

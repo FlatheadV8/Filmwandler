@@ -1,6 +1,7 @@
 #------------------------------------------------------------------------------#
 
-VERSION="v2023052600"			# das Profil fullhd konnte nicht aufgerufen werden / ein neues universelles Profil ist dazu gekommen, bei dem eine Auflösung frei gewählt werden kann
+#VERSION="v2023052600"			# das Profil fullhd konnte nicht aufgerufen werden / ein neues universelles Profil ist dazu gekommen, bei dem eine Auflösung frei gewählt werden kann
+VERSION="v2024040100"			# Fehler bei der Verarbeitung mit IST_PAR, IST_DAR, ORIG_DAR_BREITE und ORIG_DAR_HOEHE behoben
 
 echo "# 10 Video
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
@@ -68,19 +69,15 @@ echo "# 40 Video
 #------------------------------------------------------------------------------#
 ### Seitenverhältnis des Bildes (DAR)
 
-if [ x = "x${IN_DAR}" ] ; then
-	if [ x != "x${IST_DAR}" ] ; then
-		IN_DAR="${IST_DAR}"
-	fi
+if [ x != "x${IST_DAR}" ] ; then
+	IN_DAR="${IST_DAR}"
 fi
 
 #----------------------------------------------------------------------#
 ### Seitenverhältnis der Bildpunkte (PAR / SAR)
 
-if [ x = "x${IN_PAR}" ] ; then
-	if [ x != "x${IST_PAR}" ] ; then
-		IN_PAR="${IST_PAR}"
-	fi
+if [ x != "x${IST_PAR}" ] ; then
+	IN_PAR="${IST_PAR}"
 fi
 
 #----------------------------------------------------------------------#
@@ -205,6 +202,7 @@ if [ x = "x${CROP}" ] ; then
 	IN_BREIT="$(echo "${IN_XY}" | awk -F'x' '{print $1}')"
 	IN_HOCH="$(echo  "${IN_XY}" | awk -F'x' '{print $2}')"
 else
+	#set -x
 	### CROP-Seiten-Format
 	echo "# 170 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	# -vf crop=width:height:x:y
@@ -217,7 +215,7 @@ else
 	### Display-Seiten-Format
 	DAR_FAKTOR="$(echo "${PAR_FAKTOR} ${IN_BREIT} ${IN_HOCH}" | awk '{printf "%u\n", ($1*$2)/$3}')"
 	DAR_KOMMA="$(echo "${DAR_FAKTOR}" | awk '{print $1/100000}')"
-	IN_DAR="$(echo "${O_BREIT} ${O_HOCH} ${O_DAR} ${IN_BREIT} ${IN_HOCH}" | awk '{gsub(":"," ");print $2 * $3 * $5 / $1 / $4 / $6}'):1"
+	IN_DAR="$(echo "${O_BREIT} ${O_HOCH} ${O_DAR} ${IN_BREIT} ${IN_HOCH}" | awk '{gsub("[:/]"," ");print $2 * $3 * $5 / $1 / $4 / $6}'):1"
 
 	CROP="crop=${CROP},"
 fi
@@ -260,6 +258,7 @@ FORMAT_ANPASSUNG="setsar='1/1',"
 ### dann ist es ganz einfach.
 ### Aber wenn nicht, dann sind diese Berechnungen nötig.
 
+echo "# 219 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 if [ "x${ORIGINAL_DAR}" = "xNein" ] ; then
 	echo "# 220 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	if [ "x${SOLL_DAR}" != "x" ] ; then
@@ -285,32 +284,38 @@ if [ "x${ORIGINAL_DAR}" = "xNein" ] ; then
 			" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 			exit 260
 		elif [ "${PIXELVERZERRUNG}" -eq 1 ] ; then
+			BREITE="$(echo "${SOLL_DAR}" | awk '{gsub("[:/]"," ");print $1}')"
+			HOEHE="$(echo "${SOLL_DAR}" | awk '{gsub("[:/]"," ");print $2}')"
 			echo "# 270 Video
 			# quadratische Pixel
 			# PIXELVERZERRUNG = 1 : ${PIXELVERZERRUNG}
+			# BREITE='${BREITE}'
+			# HOEHE='${HOEHE}'
 			" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-			BREITE="$(echo "${SOLL_DAR}" | awk '{gsub("/"," ");print $1}')"
-			HOEHE="$(echo "${SOLL_DAR}" | awk '{gsub("/"," ");print $2}')"
 			#
 			unset PIXELKORREKTUR
 		elif [ "${PIXELVERZERRUNG}" -le 1 ] ; then
+			BREITE="$(echo "${SOLL_DAR} ${INBREITE_DAR} ${INHOEHE_DAR} ${BILD_BREIT} ${BILD_HOCH}" | awk '{gsub("[:/]"," ");print $2 * $2 * $5 / $1 / $6}')"
+			HOEHE="$(echo "${SOLL_DAR}" | awk '{gsub("[:/]"," ");print $2}')"
 			echo "# 280 Video
 			# lange Pixel: breit ziehen
 			# 4CIF (Test 2)
 			# PIXELVERZERRUNG < 1 : ${PIXELVERZERRUNG}
+			# BREITE='${BREITE}'
+			# HOEHE='${HOEHE}'
 			" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-			BREITE="$(echo "${SOLL_DAR} ${INBREITE_DAR} ${INHOEHE_DAR} ${BILD_BREIT} ${BILD_HOCH}" | awk '{gsub("/"," ");print $2 * $2 * $5 / $1 / $6}')"
-			HOEHE="$(echo "${SOLL_DAR}" | awk '{gsub("/"," ");print $2}')"
 			#
 			PIXELKORREKTUR="scale=${BILD_BREIT}x${BILD_HOCH},"
 		elif [ "${PIXELVERZERRUNG}" -ge 1 ] ; then
+			BREITE="$(echo "${SOLL_DAR}" | awk '{gsub("[:/]"," ");print $1}')"
+			HOEHE="$(echo "${SOLL_DAR} ${INBREITE_DAR} ${INHOEHE_DAR} ${BILD_BREIT} ${BILD_HOCH}" | awk '{gsub("[:/]"," ");print $1 * $1 * $6 / $2 / $5}')"
 			echo "# 290 Video
 			# breite Pixel: lang ziehen
 			# 2CIF (Test 1)
 			# PIXELVERZERRUNG > 1 : ${PIXELVERZERRUNG}
+			# BREITE='${BREITE}'
+			# HOEHE='${HOEHE}'
 			" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-			BREITE="$(echo "${SOLL_DAR}" | awk '{gsub("/"," ");print $1}')"
-			HOEHE="$(echo "${SOLL_DAR} ${INBREITE_DAR} ${INHOEHE_DAR} ${BILD_BREIT} ${BILD_HOCH}" | awk '{gsub("/"," ");print $1 * $1 * $6 / $2 / $5}')"
 			#
 			PIXELKORREKTUR="scale=${BILD_BREIT}x${BILD_HOCH},"
 		fi
@@ -318,11 +323,17 @@ if [ "x${ORIGINAL_DAR}" = "xNein" ] ; then
 		if [ "${DAR_FAKTOR}" -lt "149333" ] ; then
 			BREITE="4"
 			HOEHE="3"
-			echo "# 300: 4/3" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+			echo "# 300: 4/3"
+			# BREITE='${BREITE}'
+			# HOEHE='${HOEHE}'
+			" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 		else
 			BREITE="16"
 			HOEHE="9"
-			echo "# 310: 16/9" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+			echo "# 310: 16/9"
+			# BREITE='${BREITE}'
+			# HOEHE='${HOEHE}'
+			" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 		fi
 		FORMAT_ANPASSUNG="setdar='${BREITE}/${HOEHE}',"
 
@@ -334,12 +345,13 @@ if [ "x${ORIGINAL_DAR}" = "xNein" ] ; then
 	fi
 else
 	echo "# 330 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	ORIG_DAR_BREITE="$(echo "${IN_DAR}" | awk -F':' '{print $1}')"
-	ORIG_DAR_HOEHE="$(echo "${IN_DAR}" | awk -F':' '{print $2}')"
+	ORIG_DAR_BREITE="$(echo "${IN_DAR}" | awk '{gsub("[:/]"," "); print $1}')"
+	ORIG_DAR_HOEHE="$(echo "${IN_DAR}" | awk '{gsub("[:/]"," "); print $2}')"
 	BREITE="${ORIG_DAR_BREITE}"
 	HOEHE="${ORIG_DAR_HOEHE}"
 	FORMAT_ANPASSUNG="setdar='${BREITE}/${HOEHE}',"
 fi
+echo "# 331 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #==============================================================================#
 ### Profile werden hier ausgeführt
