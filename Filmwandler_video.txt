@@ -1,7 +1,8 @@
 #------------------------------------------------------------------------------#
 
 #VERSION="v2023052600"			# das Profil fullhd konnte nicht aufgerufen werden / ein neues universelles Profil ist dazu gekommen, bei dem eine Auflösung frei gewählt werden kann
-VERSION="v2024040100"			# Fehler bei der Verarbeitung mit IST_PAR, IST_DAR, ORIG_DAR_BREITE und ORIG_DAR_HOEHE behoben
+#VERSION="v2024040100"			# Fehler bei der Verarbeitung mit IST_PAR, IST_DAR, ORIG_DAR_BREITE und ORIG_DAR_HOEHE behoben
+VERSION="v2024050100"			# Chrom-Leisten poliert
 
 echo "# 10 Video
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
@@ -180,6 +181,7 @@ if [ "${VIDEO_NICHT_UEBERTRAGEN}" != "0" ] ; then
 	echo "-in_dar"
 	echo "z.B. (Röhre)   : -in_dar 4:3"
 	echo "z.B. (Flat)    : -in_dar 16:9"
+	echo "z.B. (BluRay)  : -in_dar 480:201"
 	echo "-in_par"
 	echo "z.B. (PAL)     : -in_par 16:15"
 	echo "z.B. (NTSC)    : -in_par  9:10"

@@ -128,7 +128,8 @@
 #VERSION="v2024031900"			# für die wichtigsten 4 Codecs gibt es jetzt eine Option zum verlusstfreien transkodieren
 #VERSION="v2024041700"			# Fehler im 2-Pass-Bereich behoben
 #VERSION="v2024041900"			# Fehler im Schnitt-Bereich behoben
-VERSION="v2024042700"			# Fehler im Transkodierkommando beim maskieren des Filmnamens behoben + Schutz vor unsicheren Dateinamen, das Leerzeichen erlaube ich aber
+#VERSION="v2024042700"			# Fehler im Transkodierkommando beim maskieren des Filmnamens behoben + Schutz vor unsicheren Dateinamen, das Leerzeichen erlaube ich aber
+VERSION="v2024050100"			# Chrom-Leisten poliert
 
 
 VERSION_METADATEN="${VERSION}"
@@ -759,8 +760,9 @@ while [ "${#}" -ne "0" ]; do
 	# werden kann oder falsch ermittelt wurde,
 	# dann muss es manuell als Parameter uebergeben werden;
 	# es wird nur einer der beiden Parameter DAR oder PAR benötigt
-	-dar 4:3
-	-dar 16:9
+	-dar 4:3		# TV (Röhre)
+	-dar 16:9		# TV (Flat)
+	-dar 480:201		# BluRay
 
 	# wenn die Pixelgeometrie des Originalfilmes nicht automatisch ermittelt
 	# werden kann oder falsch ermittelt wurde,
@@ -1140,7 +1142,8 @@ fi
 METADATEN_BESCHREIBUNG="-metadata description="
 if [ x = "x${KOMMENTAR}" ] ; then
 	echo "# 270: KOMMENTAR"
-	KOMMENTAR="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_entries format_tags=comment -of compact=p=0:nk=1) $(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_entries format_tags=description -of compact=p=0:nk=1)"
+	COMMENT_DESCRIPTION="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_entries format_tags=comment -of compact=p=0:nk=1) $(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILMDATEI}" -show_entries format_tags=description -of compact=p=0:nk=1)"
+	KOMMENTAR="$(echo "${COMMENT_DESCRIPTION}" | sed 's/^[ \t]*//')"
 
 	if [ x = "x${KOMMENTAR}" ] ; then
 		echo "# 280: github.com"
@@ -2286,6 +2289,7 @@ fi
 transkodieren_1_1()
 {
 	### 1001
+	pwd
 	echo "# 1110
 	TWO_PASS='${TWO_PASS}'"
 
