@@ -159,8 +159,6 @@ VERSION_METADATEN="${VERSION}"
 #set -x
 PATH="${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
-STARTZEITPUNKT="$(date +'%s')"
-
 #
 # https://sites.google.com/site/linuxencoding/x264-ffmpeg-mapping
 # -keyint <int>
@@ -1161,6 +1159,8 @@ KOMMENTAR='${KOMMENTAR}'
 
 AUDIO_STANDARD_SPUR='${AUDIO_STANDARD_SPUR}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+STARTZEITPUNKT="$(date +'%s')"
 
 #--- VIDEO_SPUR ---------------------------------------------------------------#
 #------------------------------------------------------------------------------#
@@ -2263,10 +2263,10 @@ fi
 CODEC_ODER_TARGET="$(echo "${VIDEOCODEC}" | grep -F -- '-target ')"
 if [ x = "x${CODEC_ODER_TARGET}" ] ; then
 	VIDEO_PARAMETER_PASS_1="-map 0:v -c:v ${VIDEOCODEC} ${VIDEO_OPTION_PASS_1}"
-	VIDEO_PARAMETER_TRANS="-map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME}"
+	VIDEO_PARAMETER_TRANS="${IFRAME} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION}"
 else
 	VIDEO_PARAMETER_PASS_1="-map 0:v ${VIDEOCODEC} ${VIDEO_OPTION_PASS_1}"
-	VIDEO_PARAMETER_TRANS="-map 0:v ${VIDEOCODEC} ${VIDEOOPTION} ${IFRAME}"
+	VIDEO_PARAMETER_TRANS="${IFRAME} -map 0:v ${VIDEOCODEC} ${VIDEOOPTION}"
 fi
 
 VIDEO_PARAMETER_KOPIE="-map 0:v -c:v copy"
