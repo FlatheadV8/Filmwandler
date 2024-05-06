@@ -883,6 +883,8 @@ QUELL_BASIS_NAME="$(echo "${QUELL_DATEI}" | awk '{print tolower($0)}')"
 ZIEL_BASIS_NAME="$(echo "${ZIELDATEI}" | awk '{print tolower($0)}')"
 
 ### leider kommt (Stand 2021) ffmpeg mit Umlauten nicht richtig zurecht
+### sie werden als Sonderzeichen identifiziert und somit gilt soein
+### Dateiname als "unsicher"
 #
 # [concat @ 0x80664f000] Unsafe file name 'iWRoMVJd7uIg_01_Jesus_war_Vegetarier_und_die_Texte_über_die_Opfergaben_im_AT_sind_Fälschungen.mp4'
 #
