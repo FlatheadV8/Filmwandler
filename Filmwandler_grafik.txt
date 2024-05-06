@@ -3,7 +3,8 @@
 #VERSION="v2022073100"
 #VERSION="v2022080100"		# Auflösung HDV hinzugefügt + Auflösungen nach Anzahl der Bildpunkte sortiert + AVC-Profil-Level dabei geschrieben
 #VERSION="v2022080200"		# AVC-Profil-Level korrigiert (ist nur ein Beispiel für eine Bildwiederholrate von 25 Hz!)
-VERSION="v2022080300"		# alle VHS und VHS-ähnlichen (analoge) Auflösungen korrigiert, die haben alle 576 Zeilen!
+#VERSION="v2022080300"		# alle VHS und VHS-ähnlichen (analoge) Auflösungen korrigiert, die haben alle 576 Zeilen!
+VERSION="v2024050600"		# 192x108 - kleinste 16:9-Auflüsung, die ganzzahlig ist
 
 bildaufloesungen_namen()
 {
@@ -11,6 +12,7 @@ bildaufloesungen_namen()
 echo "
 	-soll_xmaly SQCIF		# 128x96 4/3         ; Level 1.0 - es ist ein h263-Format
 	-soll_xmaly QQVGA		# 160x120 4/3        ; Level 1.1
+	-soll_xmaly 192x108		# 192x108 16/9       ; Level 1.1
 	-soll_xmaly GB			# 160x144 4/3        ; Level 1.1
 	-soll_xmaly QCIF		# 176x144 4/3        ; Level 1.1 - es ist ein h263-Format
 	-soll_xmaly Palm_LoRes		# 160x160 1/1        ; Level 1.1

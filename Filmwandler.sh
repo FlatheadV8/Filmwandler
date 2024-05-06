@@ -2262,14 +2262,14 @@ fi
 
 CODEC_ODER_TARGET="$(echo "${VIDEOCODEC}" | grep -F -- '-target ')"
 if [ x = "x${CODEC_ODER_TARGET}" ] ; then
-	VIDEO_PARAMETER_PASS_1="-map 0:v -c:v ${VIDEOCODEC} ${VIDEO_OPTION_PASS_1}"
-	VIDEO_PARAMETER_TRANS="${IFRAME} -map 0:v -c:v ${VIDEOCODEC} ${VIDEOOPTION}"
+	VIDEO_PARAMETER_PASS_1="-map 0:v:0 -c:v ${VIDEOCODEC} ${VIDEO_OPTION_PASS_1}"
+	VIDEO_PARAMETER_TRANS="${IFRAME} -map 0:v:0 -c:v ${VIDEOCODEC} ${VIDEOOPTION}"
 else
-	VIDEO_PARAMETER_PASS_1="-map 0:v ${VIDEOCODEC} ${VIDEO_OPTION_PASS_1}"
-	VIDEO_PARAMETER_TRANS="${IFRAME} -map 0:v ${VIDEOCODEC} ${VIDEOOPTION}"
+	VIDEO_PARAMETER_PASS_1="-map 0:v:0 ${VIDEOCODEC} ${VIDEO_OPTION_PASS_1}"
+	VIDEO_PARAMETER_TRANS="${IFRAME} -map 0:v:0 ${VIDEOCODEC} ${VIDEOOPTION}"
 fi
 
-VIDEO_PARAMETER_KOPIE="-map 0:v -c:v copy"
+VIDEO_PARAMETER_KOPIE="-map 0:v:0 -c:v copy"
 
 if [ "0" = "${VIDEO_NICHT_UEBERTRAGEN}" ] ; then
 	VIDEO_PARAMETER_PASS_1=""
@@ -2443,12 +2443,12 @@ else
 	(cd "${ZIELVERZ}"/ && transkodieren_7_1 | tee -a ${PROTOKOLLDATEI}.txt)
 	echo "### 1008"
 
-	rm -f "${ZIELVERZ}"/${ZUFALL}_*.txt
+#	rm -f "${ZIELVERZ}"/${ZUFALL}_*.txt
 
 	ffprobe -v error -i "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 	#ls -lh ${ZUFALL}_*.${ENDUNG}
-	rm -f "${ZIELVERZ}"/${ZUFALL}_*.${ENDUNG} ffmpeg2pass-0.log
+#	rm -f "${ZIELVERZ}"/${ZUFALL}_*.${ENDUNG} ffmpeg2pass-0.log
 
 fi
 
