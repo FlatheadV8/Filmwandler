@@ -2443,12 +2443,12 @@ else
 	(cd "${ZIELVERZ}"/ && transkodieren_7_1 | tee -a ${PROTOKOLLDATEI}.txt)
 	echo "### 1008"
 
-#	rm -f "${ZIELVERZ}"/${ZUFALL}_*.txt
+	rm -f "${ZIELVERZ}"/${ZUFALL}_*.txt
 
 	ffprobe -v error -i "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 	#ls -lh ${ZUFALL}_*.${ENDUNG}
-#	rm -f "${ZIELVERZ}"/${ZUFALL}_*.${ENDUNG} ffmpeg2pass-0.log
+	rm -f "${ZIELVERZ}"/${ZUFALL}_*.${ENDUNG} ffmpeg2pass-0.log
 
 fi
 
