@@ -6,7 +6,7 @@
 # Dieses Skript verändert NICHT die Bildwiederholrate!
 #
 # Das Ergebnis besteht immer aus folgendem Format:
-#  - WebM:    webm   + VP9        + Opus    (kann nur das eine Untertitelformat WebVTT)
+#  - WebM:    webm   + AV1        + Opus    (kann nur das eine Untertitelformat WebVTT)
 #  - MKV:     mkv    + AV1        + Vorbis  (das z.Z. beste Format, leider aber kein HTML5-Standard)
 #  - MP4:     mp4    + H.264/AVC  + AAC     (das z.Z. mit Abstand kompatibelste Format)
 #  - MP4:     mp4    + H.265/HEVC + AAC
