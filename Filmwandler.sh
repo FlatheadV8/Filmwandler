@@ -129,7 +129,9 @@
 #VERSION="v2024041700"			# Fehler im 2-Pass-Bereich behoben
 #VERSION="v2024041900"			# Fehler im Schnitt-Bereich behoben
 #VERSION="v2024042700"			# Fehler im Transkodierkommando beim maskieren des Filmnamens behoben + Schutz vor unsicheren Dateinamen, das Leerzeichen erlaube ich aber
-VERSION="v2024050100"			# Chrom-Leisten poliert
+#VERSION="v2024050100"			# Chrom-Leisten poliert
+#VERSION="v2024051500"			# mit "-soll_dar" kann jetzt das Display-Format, des zu erstellenden Videos angegeben werden
+VERSION="v2024051800"			# mit "-ton =0" kann man jetzt Filme ohne Tonspur erzeugen
 
 
 VERSION_METADATEN="${VERSION}"
@@ -320,76 +322,80 @@ if [ x = "x${1}" ] ; then
 fi
 
 while [ "${#}" -ne "0" ]; do
-        case "${1}" in
-                -q)
-                        FILMDATEI="${2}"			# Name für die Quelldatei
-                        shift
-                        ;;
-                -z)
-                        ZIELPFAD="${2}"				# Name für die Zieldatei
-                        shift
-                        ;;
-                -titel)
-                        EIGENER_TITEL="${2}"			# Titel/Name des Filmes
-                        shift
-                        ;;
-                -k)
-                        KOMMENTAR="${2}"			# Kommentar/Beschreibung des Filmes
-                        shift
-                        ;;
-                -c|-crop)
-                        CROP="${2}"				# zum entfernen der schwarzen Balken: -vf crop=width:height:x:y
-                        shift
-                        ;;
-                -drehen)
-                        BILD_DREHUNG="${2}"			# es geht nur 90 (-vf transpose=1), 270 (-vf transpose=2) und 180 (-vf hflip,vflip) Grad
-                        shift
-                        ;;
-                -dar)
-                        IST_DAR="${2}"				# Display-Format, wenn ein anderes gewünscht wird als automatisch erkannt wurde
-                        shift
-                        ;;
-                -std_dar)
+	case "${1}" in
+		-q)
+			FILMDATEI="${2}"			# Name für die Quelldatei
+			shift
+			;;
+		-z)
+			ZIELPFAD="${2}"				# Name für die Zieldatei
+			shift
+			;;
+		-titel)
+			EIGENER_TITEL="${2}"			# Titel/Name des Filmes
+			shift
+			;;
+		-k)
+			KOMMENTAR="${2}"			# Kommentar/Beschreibung des Filmes
+			shift
+			;;
+		-c|-crop)
+			CROP="${2}"				# zum entfernen der schwarzen Balken: -vf crop=width:height:x:y
+			shift
+			;;
+		-drehen)
+			BILD_DREHUNG="${2}"			# es geht nur 90 (-vf transpose=1), 270 (-vf transpose=2) und 180 (-vf hflip,vflip) Grad
+			shift
+			;;
+		-dar)
+			IST_DAR="${2}"				# Display-Format, wenn ein anderes gewünscht wird als automatisch erkannt wurde
+			shift
+			;;
+		-soll_dar)
+			SOLL_DAR="${2}"				# Display-Format, des zu erstellenden Videos
+			shift
+			;;
+		-std_dar)
 			ORIGINAL_DAR="Nein"			# das Seitenverhältnis wird automatisch entweder auf 16/9 oder 4/3 geändert
-                        shift
-                        ;;
-                -orig_dar)
+			shift
+			;;
+		-orig_dar)
 			ORIGINAL_DAR="Ja"			# das originale Seitenverhältnis soll beibehalten werden
-                        shift
-                        ;;
-                -fps|-soll_fps)
-                        SOLL_FPS="${2}"				# FPS (Bilder pro Sekunde) für den neuen Film festlegen
-                        shift
-                        ;;
-                -2pass)
+			shift
+			;;
+		-fps|-soll_fps)
+			SOLL_FPS="${2}"				# FPS (Bilder pro Sekunde) für den neuen Film festlegen
+			shift
+			;;
+      		-2pass)
 			TWOPASS="Ja"				# 2-Pass aktivieren (funktioniert z.Z. nur bei VP9 und AOM-AV1)
-                        shift
-                        ;;
-                -par)
-                        IST_PAR="${2}"				# Pixel-Format
-                        shift
-                        ;;
-                -in_xmaly|-ist_xmaly)
-                        IST_XY="${2}"				# Bildauflösung/Rasterformat der Quelle
-                        shift
-                        ;;
-                -out_xmaly|-soll_xmaly)
-                        SOLL_XY="${2}"				# Bildauflösung/Rasterformat der Ausgabe
-                        shift
-                        ;;
-                -aq|-soll_aq)
-                        TONQUALIT="${2}"			# Audio-Qualität
-                        shift
-                        ;;
-                -vq|-soll_vq)
-                        BILDQUALIT="${2}"			# Video-Qualität
-                        shift
-                        ;;
-                -vn)
-                        VIDEO_NICHT_UEBERTRAGEN="0"		# Video nicht übertragen
-                        shift
-                        ;;
-                -vd)
+			shift
+			;;
+		-par)
+			IST_PAR="${2}"				# Pixel-Format
+			shift
+			;;
+		-in_xmaly|-ist_xmaly)
+			IST_XY="${2}"				# Bildauflösung/Rasterformat der Quelle
+			shift
+			;;
+		-out_xmaly|-soll_xmaly)
+			SOLL_XY="${2}"				# Bildauflösung/Rasterformat der Ausgabe
+			shift
+			;;
+		-aq|-soll_aq)
+			TONQUALIT="${2}"			# Audio-Qualität
+			shift
+			;;
+		-vq|-soll_vq)
+			BILDQUALIT="${2}"			# Video-Qualität
+			shift
+			;;
+		-vn)
+			VIDEO_NICHT_UEBERTRAGEN="0"		# Video nicht übertragen
+			shift
+			;;
+		-vd)
 			# Wenn Audio- und Video-Spur nicht synchron sind,
 			# dann muss das korrigiert werden.
 			#
@@ -403,10 +409,10 @@ while [ "${#}" -ne "0" ]; do
 			# dann kann das Bild wie folgt um 0,2 Sekunden nach hinten
 			# verschoben werden:
 			# -vd 0.2
-                        VIDEO_SPAETER="${2}"			# Video-Delay
-                        shift
-                        ;;
-                -ad)
+			VIDEO_SPAETER="${2}"			# Video-Delay
+			shift
+			;;
+		-ad)
 			# Wenn Audio- und Video-Spur nicht synchron sind,
 			# dann muss das korrigiert werden.
 			#
@@ -420,135 +426,141 @@ while [ "${#}" -ne "0" ]; do
 			# dann kann den Ton wie folgt um 0,2 Sekunden nach hinten
 			# verschoben werden:
 			# -ad 0.2
-                        AUDIO_SPAETER="${2}"			# Video-Delay
-                        shift
-                        ;;
-                -standard_ton)
-                        # Wird diese Option nicht verwendet,
-                        # dann wird die Einstellung aus dem Originalfilm übernommen
-                        # "0" für die erste Tonspur
-                        # "5" für die sechste Tonspur
-                        AUDIO_STANDARD_SPUR="${2}"		# -standard_ton 5
-                        shift
-                        ;;
-                -standard_u)
-                        # Wird diese Option nicht verwendet,
-                        # dann wird die Einstellung aus dem Originalfilm übernommen
-                        # "0" für die erste Untertitelspur
-                        # "5" für die sechste Untertitelspur
-                        UNTERTITEL_STANDARD_SPUR="${2}" 	# -standard_u 5
-                        shift
-                        ;;
-                -ton)
-                        # Wird diese Option nicht verwendet, dann werden ALLE Tonspuren eingebettet
-                        # "0" für die erste Tonspur
-                        # "1" für die zweite Tonspur
-                        # "0,1" für die erste und die zweite Tonspur
-                        #
-                        # die gewünschten Tonspuren (in der gewünschten Reihenfolge) angeben
-                        # -ton 0,1,2,3,4
-                        #
-                        # Sprachen nach ISO-639-2 für Tonspuren können jetzt mit angegeben werden und überschreiben die Angaben aus der Quelle.
-                        # für die angegebenen Tonspuren auch noch die entsprechende Sprache mit angeben
-                        # -ton 0:deu,1:eng,2:spa,3:fra,4:ita
-                        #
-                        TON_SPUR_SPRACHE="${2}"			# -ton 0,1,2,3,4 / -ton 0:deu,1:eng,2:spa,3:fra,4:ita
-                        shift
-                        ;;
+     			AUDIO_SPAETER="${2}"			# Video-Delay
+			shift
+			;;
+		-standard_ton)
+			# Wird diese Option nicht verwendet,
+			# dann wird die Einstellung aus dem Originalfilm übernommen
+			# "0" für die erste Tonspur
+			# "5" für die sechste Tonspur
+			AUDIO_STANDARD_SPUR="${2}"		# -standard_ton 5
+			shift
+			;;
+		-standard_u)
+			# Wird diese Option nicht verwendet,
+			# dann wird die Einstellung aus dem Originalfilm übernommen
+			# "0" für die erste Untertitelspur
+			# "5" für die sechste Untertitelspur
+			UNTERTITEL_STANDARD_SPUR="${2}" 	# -standard_u 5
+			shift
+			;;
+		-ton)
+			# Wird diese Option nicht verwendet, dann werden ALLE Tonspuren eingebettet
+			# "=0" keine Tonspur
+			# "0" für die erste Tonspur
+			# "1" für die zweite Tonspur
+			# "0,1" für die erste und die zweite Tonspur
+			#
+			# der Film soll keine Tonspuren (in der gewünschten Reihenfolge) angeben
+			# -ton =0
+			#
+			# die gewünschten Tonspuren (in der gewünschten Reihenfolge) angeben
+			# -ton 0,1,2,3,4
+			#
+			# Sprachen nach ISO-639-2 für Tonspuren können jetzt mit angegeben werden und überschreiben die Angaben aus der Quelle.
+			# für die angegebenen Tonspuren auch noch die entsprechende Sprache mit angeben
+			# -ton 0:deu,1:eng,2:spa,3:fra,4:ita
+			#
+			TON_SPUR_SPRACHE="${2}"			# -ton 0,1,2,3,4 / -ton 0:deu,1:eng,2:spa,3:fra,4:ita
+			shift
+			;;
 		-ffprobe)
 			# Dieser Wert gibt an wie weit von beginn der Filmdatei an
 			# ffprobe nach Tonspuren und Untertiteln suchen soll.
 			# Ist der Wert zu klein, dann werden beispielsweise keine
 			# Untertitel gefunden, die erst sehr spät beginnen.
-                        # Der Wert sollte so groß sein wie der zu transkodierende Film ist.
-                        # Die Voreinstellung ist "9223372036854" MiB
+			# Der Wert sollte so groß sein wie der zu transkodierende Film ist.
+			# Die Voreinstellung ist "9223372036854" MiB
 			# Das ist der praktisch ermittelte Maximalwert von einem
 			# "Intel(R) Core(TM) i5-10600T CPU @ 2.40GHz"
 			# auf einem "FreeBSD 13.0"-System mit 64 GiB RAM.
 			# 
 			# Hat der Film nur eine Tonspur, die ganz am Anfang des Films beginnt, und keine Untertitel,
 			# dann kann der Wert sehr klein gehalten werden. Zum Beispiel: 10
-                        FFPROBE_PROBESIZE="${2}"		# ffprobe-Scan-Größe in MiB
-                        shift
-                        ;;
-                -profil)
-                        # folgenden Parameter werden begrenzt:
-                        # Auflösung
-                        PROFIL_NAME="${2}"				# hls, hdready, firetv
-                        shift
-                        ;;
-                -format)
-                        # Das Format ist normalerweise durch die Dateiendung der Ziel-Datei vorgegeben.
+			FFPROBE_PROBESIZE="${2}"		# ffprobe-Scan-Größe in MiB
+			shift
+			;;
+		-profil)
+			# folgenden Parameter werden begrenzt:
+			# Auflösung
+			PROFIL_NAME="${2}"				# hls, hdready, firetv
+			shift
+			;;
+		-format)
+			# Das Format ist normalerweise durch die Dateiendung der Ziel-Datei vorgegeben.
 			# Diese Vorgabe kann mit dieser Option überschrieben werden.
-                        VIDEO_FORMAT="${2}"			# Video-Format: 3g2, 3gp, avi, flv, m2ts, mkv, mp4, mpg, ogg, ts, webm
-                        shift
-                        ;;
-                -cv)
-                        # Das Format (Video-Codec + Audio-Codec) ist normalerweise durch die Dateiendung der Ziel-Datei vorgegeben.
+			VIDEO_FORMAT="${2}"			# Video-Format: 3g2, 3gp, avi, flv, m2ts, mkv, mp4, mpg, ogg, ts, webm
+			shift
+			;;
+		-cv)
+			# Das Format (Video-Codec + Audio-Codec) ist normalerweise durch die Dateiendung der Ziel-Datei vorgegeben.
 			# Mit dieser Option kann der Video-Codec überschrieben werden.
-                        ALT_CODEC_VIDEO="${2}"			# Video-Codec: 261, 262, 263, 264, 2640, 265, 2650, av1, av10, divx, ffv1, flv, snow, theora, vc2, vp8, vp9, vp90, xvid
-                        shift
-                        ;;
-                -ca)
-                        # Das Format (Video-Codec + Audio-Codec) ist normalerweise durch die Dateiendung der Ziel-Datei vorgegeben.
+			ALT_CODEC_VIDEO="${2}"			# Video-Codec: 261, 262, 263, 264, 2640, 265, 2650, av1, av10, divx, ffv1, flv, snow, theora, vc2, vp8, vp9, vp90, xvid
+			shift
+			;;
+		-ca)
+			# Das Format (Video-Codec + Audio-Codec) ist normalerweise durch die Dateiendung der Ziel-Datei vorgegeben.
 			# Mit dieser Option kann der Audio-Codec überschrieben werden.
-                        ALT_CODEC_AUDIO="${2}"			# Audio-Codec: aac, ac3, mp2, mp3, opus, vorbis
-                        shift
-                        ;;
-                -stereo)
-                        STEREO="Ja"
-                        #STEREO="-ac 2"				# Stereo-Ausgabe erzwingen
+			ALT_CODEC_AUDIO="${2}"			# Audio-Codec: aac, ac3, mp2, mp3, opus, vorbis
+			shift
+			;;
+		-stereo)
+			STEREO="Ja"
 			# Stereo-Ausgabe erzwingen 
-                        # 5.1 mischen auf algorithmus von Dave_750 
-                        # hier werden die tiefbass spur (LFE) mit abgemischt
-                        # das trifft bei -ac 2 nicht zu (ATSC standards)
-                        # -ac 2 als filter:
-                        # -af "pan=stereo|FL < 1.0*FL + 0.707*FC + 0.707*BL|FR < 1.0*FR + 0.707*FC + 0.707*BR"
-                        # Quelle: https://superuser.com/questions/852400/properly-downmix-5-1-to-stereo-using-ffmpeg/1410620#1410620
-                        #STEREO="-filter_complex pan='stereo|FL=0.5*FC+0.707*FL+0.707*BL+0.5*LFE|FR=0.5*FC+0.707*FR+0.707*BR+0.5*LFE',volume='1.562500'"
-                        # NighMode 
-                        # The Nightmode Dialogue formula, created by Robert Collier on the Doom9 forum and sourced by Shane Harrelson in his answer, 
-                        # results in a far better downmix than the ac -2 switch - instead of overly quiet dialogues, it brings them back to levels that are much closer to the source.
-                        #STEREO="-filter_complex pan='stereo|FL=FC+0.30*FL+0.30*BL|FR=FC+0.30*FR+0.30*BR'"
-                        shift
-                        ;;
-                -schnitt)
+			# 5.1 mischen auf algorithmus von Dave_750 
+			# hier werden die tiefbass spur (LFE) mit abgemischt
+			# das trifft bei -ac 2 nicht zu (ATSC standards)
+			# -ac 2 als filter:
+			# -af "pan=stereo|FL < 1.0*FL + 0.707*FC + 0.707*BL|FR < 1.0*FR + 0.707*FC + 0.707*BR"
+			# Quelle: https://superuser.com/questions/852400/properly-downmix-5-1-to-stereo-using-ffmpeg/1410620#1410620
+			#STEREO="-filter_complex pan='stereo|FL=0.5*FC+0.707*FL+0.707*BL+0.5*LFE|FR=0.5*FC+0.707*FR+0.707*BR+0.5*LFE',volume='1.562500'"
+			# NighMode 
+			# The Nightmode Dialogue formula, created by Robert Collier on the Doom9 forum and sourced by Shane Harrelson in his answer, 
+			# results in a far better downmix than the ac -2 switch - instead of overly quiet dialogues, it brings them back to levels that are much closer to the source.
+			#STEREO="-filter_complex pan='stereo|FL=FC+0.30*FL+0.30*BL|FR=FC+0.30*FR+0.30*BR'"
+			shift
+			;;
+		-schnitt)
 			SCHNITTZEITEN="$(echo "${2}" | sed 's/,/ /g')"	# zum Beispiel zum Werbung entfernen (in Sekunden, Dezimaltrennzeichen ist der Punkt): -schnitt 10-432,520-833,1050-1280
-                        shift
-                        ;;
-                -test|-t)
-                        TEST="Ja"		# um die richtigen CROP-Parameter zu ermitteln
-                        shift
-                        ;;
-                -u)
-                        # Wird diese Option nicht verwendet, dann werden ALLE Untertitelspuren eingebettet
-                        # "=0" für keinen Untertitel
-                        # "0" für die erste Untertitelspur
-                        # "1" für die zweite Untertitelspur
-                        # "0,1" für die erste und die zweite Untertitelspur
-                        #
-                        # die gewünschten Untertitelspuren (in der gewünschten Reihenfolge) angeben
-                        # -u 0,1,2,3,4
-                        #
-                        # Sprachen nach ISO-639-2 für Untertitelspuren können jetzt mit angegeben werden und überschreiben die Angaben aus der Quelle.
-                        # für die angegebenen Untertitelspuren auch noch die entsprechende Sprache mit angeben
-                        # -u 0:deu,1:eng,2:spa,3:fra,4:ita
-                        #
-                        # Es können jetzt auch externe Untertiteldateien mit eingebunden werden.
-                        # -u Deutsch.srt,English.srt
-                        # -u Deutsch.srt:deu,English.srt:eng
-                        # -u 0:deu,1:eng,Deutsch.srt:deu,English.srt:eng,2:spa,3:fra,4:ita
-                        #
-                        UNTERTITEL_SPUR_SPRACHE="${2}"	# -u 0,1,2,3,4 / -u 0:deu,1:eng,2:spa,3:fra,4:ita
-                        shift
-                        ;;
-                -g)
+			shift
+			;;
+		-test|-t)
+			TEST="Ja"		# um die richtigen CROP-Parameter zu ermitteln
+			shift
+			;;
+		-u)
+			# Wird diese Option nicht verwendet, dann werden ALLE Untertitelspuren eingebettet
+			# "=0" für keinen Untertitel
+			# "0" für die erste Untertitelspur
+			# "1" für die zweite Untertitelspur
+			# "0,1" für die erste und die zweite Untertitelspur
+			#
+			# der Film soll keine Untertitelspuren enthalten
+			# -u =0
+			#
+			# die gewünschten Untertitelspuren (in der gewünschten Reihenfolge) angeben
+			# -u 0,1,2,3,4
+			#
+			# Sprachen nach ISO-639-2 für Untertitelspuren können jetzt mit angegeben werden und überschreiben die Angaben aus der Quelle.
+			# für die angegebenen Untertitelspuren auch noch die entsprechende Sprache mit angeben
+			# -u 0:deu,1:eng,2:spa,3:fra,4:ita
+			#
+			# Es können jetzt auch externe Untertiteldateien mit eingebunden werden.
+			# -u Deutsch.srt,English.srt
+			# -u Deutsch.srt:deu,English.srt:eng
+			# -u 0:deu,1:eng,Deutsch.srt:deu,English.srt:eng,2:spa,3:fra,4:ita
+			#
+			UNTERTITEL_SPUR_SPRACHE="${2}"	# -u 0,1,2,3,4 / -u 0:deu,1:eng,2:spa,3:fra,4:ita
+			shift
+			;;
+		-g)
 			echo "${BILD_FORMATNAMEN_AUFLOESUNGEN}"
-                        exit 70
-                        ;;
-                -h)
+			exit 70
+			;;
+		-h)
 			#ausgabe_hilfe
-                        echo "HILFE:
+			echo "HILFE:
 	# Video- und Audio-Spur in ein HTML5-kompatibles Format transkodieren
 
 	# grundsaetzlich ist der Aufbau wie folgt,
@@ -614,13 +626,17 @@ while [ "${#}" -ne "0" ]; do
 	# so wird die 1. Tonspur angegeben (die Zaehlweise beginnt mit 0)
 	-ton 0
 
-	# so wird so die 3. und 4. Untertitelspur angegeben (die Zaehlweise beginnt mit 0)
+	# Audio nicht übertragen
+	# das Ergebnis soll keine Audio-Spur enthalten
+	-ton =0
+
+	# so wird die 3. und 4. Untertitelspur angegeben (die Zaehlweise beginnt mit 0)
 	-u 2,3
 
 	# so wird Untertitel komplett abgeschaltet
 	-u =0
 
-	# so wird so die 3. und 4. Untertitelspur angegeben (die Zaehlweise beginnt mit 0)
+	# so wird die 3. und 4. Untertitelspur angegeben (die Zaehlweise beginnt mit 0)
 	-u 2,3
 
 	# so wird den Untertitelspuren noch eine Sprache mit angegeben
@@ -754,14 +770,6 @@ while [ "${#}" -ne "0" ]; do
 	# sonst wird automatisch auf 4:3 oder 16:9 umgerechnet
 	-orig_dar
 
-	# wenn das Bildformat des Originalfilmes nicht automatisch ermittelt
-	# werden kann oder falsch ermittelt wurde,
-	# dann muss es manuell als Parameter uebergeben werden;
-	# es wird nur einer der beiden Parameter DAR oder PAR benötigt
-	-dar 4:3		# TV (Röhre)
-	-dar 16:9		# TV (Flat)
-	-dar 480:201		# BluRay
-
 	# wenn die Pixelgeometrie des Originalfilmes nicht automatisch ermittelt
 	# werden kann oder falsch ermittelt wurde,
 	# dann muss es manuell als Parameter uebergeben werden;
@@ -771,6 +779,19 @@ while [ "${#}" -ne "0" ]; do
 	-par 8:9		# NTSC-DVD
 	-par 64:45		# NTSC / DVD / DVB
 	-par 1:1		# BluRay
+
+	# wenn das Bildformat des Originalfilmes nicht automatisch ermittelt
+	# werden kann oder falsch ermittelt wurde,
+	# dann muss es manuell als Parameter uebergeben werden;
+	# es wird nur einer der beiden Parameter DAR oder PAR benötigt
+	-dar 4:3		# TV (Röhre)
+	-dar 16:9		# TV (Flat)
+	-dar 480:201		# BluRay
+
+	# das Bildformat des zu erstellenden Videos wird hiermit angegeben
+	-soll_dar 4:3		# TV (Röhre)
+	-soll_dar 16:9		# TV (Flat)
+	-soll_dar 480:201	# BluRay
 
 	# will man eine andere Video-Qualitaet, dann sie manuell als Parameter
 	# uebergeben werden
@@ -1418,7 +1439,7 @@ echo "# 530
 UT_VORHANDEN="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F codec_type=subtitle)"
 IST_UT_FORMAT="$(echo "${UT_VORHANDEN}" | tr -s ';' '\n' | awk -F'=' '/^codec_name=/{print $2}')"
 
-echo "# 545
+echo "# 544
 # UT_VORHANDEN='${UT_VORHANDEN}'
 # IST_UT_FORMAT='${IST_UT_FORMAT}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
@@ -1430,21 +1451,23 @@ if [ 0 != "${VIDEO_NICHT_UEBERTRAGEN}" ] ; then
 	. ${AVERZ}/Filmwandler_video.txt
 fi
 
-#exit 550
-
 #------------------------------------------------------------------------------#
 ### BILD_BREIT und BILD_HOCH prüfen
 
 echo "# 560
 # ORIGINAL_DAR='${ORIGINAL_DAR}'
+# BREIT_DAR='${BREIT_DAR}'
+# HOCH_DAR='${HOCH_DAR}'
+# SOLL_DAR='${SOLL_DAR}'
 # BILD_BREIT='${BILD_BREIT}'
 # BILD_HOCH='${BILD_HOCH}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+#exit 561
 
 #set -x
 if [ x = "x${BILD_BREIT}" -o x = "x${BILD_HOCH}" ] ; then
 	echo "# 570: ${BILD_BREIT}x${BILD_HOCH}"
-	exit 570
+	exit 575
 fi
 
 #exit 580
@@ -1769,136 +1792,141 @@ echo "# 840
 
 #------------------------------------------------------------------------------#
 
-AUDIO_VON_OBEN="$(echo "${TONQUALIT}" | awk '{print $1 + 1}')"
-
-#exit 860
-
-echo "# 870
-TONQUALIT='${TONQUALIT}'
-AUDIO_OPTION_GLOBAL='${AUDIO_OPTION_GLOBAL}'
-AUDIO_SPUR_SPRACHE='${AUDIO_SPUR_SPRACHE}'
-AUDIOCODEC='${AUDIOCODEC}'
-AUDIO_QUALITAET_5='${AUDIO_QUALITAET_5}'
-TS_ANZAHL='${TS_ANZAHL}'
-TS_LISTE='${TS_LISTE}'
-STEREO='${STEREO}'
-" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-
-#exit 880
-
-if [ 0 -lt "${TS_ANZAHL}" ] ; then
-	echo "# 881: Es sind im Film Tonspuren vorhanden, die jetzt ausgewertet werden..." | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-	#----------------------------------------------------------------------#
-	# AUDIO_SPUR_SPRACHE='0 de'
-	AUDIO_VERARBEITUNG_01="${AUDIO_OPTION_GLOBAL} $(echo "${AUDIO_SPUR_SPRACHE}" | grep -Ev '^$' | nl | while read AKN TS_NR TS_SP
-	do
-		LFD_NR="$(echo "${AKN}" | awk '{print $1 - 1}')"
-		AUDIO_KANAELE="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E '^channels=' | awk -F'=' '{print $2}')"
-		echo "# 890 AUDIO_KANAELE='${AUDIO_KANAELE}'" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-
-		if [ x = "x${AUDIO_KANAELE}" ] ; then
-			AKL10="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E 'channel_layout=mono')"
-			AKL20="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E 'channel_layout=stereo')"
-			AKL30="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E 'channel_layout=3.0')"
-			AKL40="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E 'channel_layout=4.0')"
-			AKL50="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E 'channel_layout=5.0')"
-			AKL51="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E 'channel_layout=5.1')"
-			AKL61="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E 'channel_layout=6.1')"
-			AKL71="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E 'channel_layout=7.1')"
-
-			echo "
-			# 900
-			# AKL10='${AKL10}'
-			# AKL20='${AKL20}'
-			# AKL30='${AKL30}'
-			# AKL40='${AKL40}'
-			# AKL50='${AKL50}'
-			# AKL51='${AKL51}'
-			# AKL61='${AKL61}'
-			# AKL71='${AKL71}'
-			" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-
-			if [ "x${AKL10}" != "x" ] ; then
-				AUDIO_KANAELE=1
-			elif [ "x${AKL20}" != "x" ] ; then
-				AUDIO_KANAELE=2
-			elif [ "x${AKL30}" != "x" ] ; then
-				AUDIO_KANAELE=3
-			elif [ "x${AKL40}" != "x" ] ; then
-				AUDIO_KANAELE=4
-			elif [ "x${AKL50}" != "x" ] ; then
-				AUDIO_KANAELE=5
-			elif [ "x${AKL51}" != "x" ] ; then
-				AUDIO_KANAELE=6
-			elif [ "x${AKL61}" != "x" ] ; then
-				AUDIO_KANAELE=7
-			elif [ "x${AKL71}" != "x" ] ; then
-				AUDIO_KANAELE=8
-			fi
-		fi
-
-		echo "# 910 - ${LFD_NR}
-		AUDIO_KANAELE='${AUDIO_KANAELE}'
-		LFD_NR='${LFD_NR}'
-		" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-
-		#--------------------------------------------------------------#
-
-		AUDIO_OPTION_PRO_TONSPUR="$(F_AUDIO_QUALITAET ${LFD_NR})"
-
-		#--------------------------------------------------------------#
-
-		echo "# 920 - ${LFD_NR}
-		AUDIO_OPTION_PRO_TONSPUR='${AUDIO_OPTION_PRO_TONSPUR}'
-		AUDIO_SPUR_SPRACHE='${AUDIO_SPUR_SPRACHE}'
-		" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-
-		if [ 0 -lt "${TS_ANZAHL}" ] ; then
-			echo "# 930
-			AUDIO_VERARBEITUNG_01:
-			AUDIOQUALITAET='${AUDIOQUALITAET}'
-			" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-
-			echo "-map 0:a:${TS_NR} -c:a:${LFD_NR} ${AUDIOCODEC} ${AUDIO_OPTION_PRO_TONSPUR} -metadata:s:a:${LFD_NR} language=${TS_SP}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-
-			echo "# 940
-			AUDIO_SPUR_SPRACHE='${AUDIO_SPUR_SPRACHE}'
-			AUDIO_STANDARD_SPUR='${AUDIO_STANDARD_SPUR}'
-			" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-
-			#------------------------------------------------------#
-
-			if [ x != "x${AUDIO_STANDARD_SPUR}" ] ; then
-				if [ "${LFD_NR}" = "${AUDIO_STANDARD_SPUR}" ] ; then
-					echo "# 950" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-					echo "-disposition:a:${LFD_NR} default" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-				else
-					echo "# 960" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-					echo "-disposition:a:${LFD_NR} 0" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-				fi
-			fi
-		else
-			echo "# 970" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-			echo "-an" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-		fi
-	done | tr -s '\n' ' ')"
-
-	#----------------------------------------------------------------------#
-
-	TS_KOPIE="$(seq 0 ${TS_ANZAHL} | head -n ${TS_ANZAHL})"
-	AUDIO_VERARBEITUNG_02="$(for DIE_TS in ${TS_KOPIE}
-	do
-		#TONSPUR_SPRACHE="$(echo "${AUDIO_SPUR_SPRACHE}" | grep -E "^${DIE_TS} " | awk '{print $NF}' | head -n1)"
-
-		echo "# 980
-		AUDIO_VERARBEITUNG_02=' -map 0:a:${DIE_TS} -c:a:${DIE_TS} copy'
-		" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-
-		echo "-map 0:a:${DIE_TS} -c:a:${DIE_TS} copy"
-	done | tr -s '\n' ' ')"
-else
+if [ "=0" = "${TON_SPUR_SPRACHE}" ] ; then
 	AUDIO_VERARBEITUNG_01="-an"
 	AUDIO_VERARBEITUNG_02="-an"
+else
+	AUDIO_VON_OBEN="$(echo "${TONQUALIT}" | awk '{print $1 + 1}')"
+
+	#exit 860
+
+	echo "# 870
+	# TONQUALIT='${TONQUALIT}'
+	# AUDIO_OPTION_GLOBAL='${AUDIO_OPTION_GLOBAL}'
+	# AUDIO_SPUR_SPRACHE='${AUDIO_SPUR_SPRACHE}'
+	# AUDIOCODEC='${AUDIOCODEC}'
+	# AUDIO_QUALITAET_5='${AUDIO_QUALITAET_5}'
+	# TS_ANZAHL='${TS_ANZAHL}'
+	# TS_LISTE='${TS_LISTE}'
+	# STEREO='${STEREO}'
+	" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+	#exit 880
+
+	if [ 0 -lt "${TS_ANZAHL}" ] ; then
+		echo "# 881: Es sind im Film Tonspuren vorhanden, die jetzt ausgewertet werden..." | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+		#----------------------------------------------------------------------#
+		# AUDIO_SPUR_SPRACHE='0 de'
+		AUDIO_VERARBEITUNG_01="${AUDIO_OPTION_GLOBAL} $(echo "${AUDIO_SPUR_SPRACHE}" | grep -Ev '^$' | nl | while read AKN TS_NR TS_SP
+		do
+			LFD_NR="$(echo "${AKN}" | awk '{print $1 - 1}')"
+			AUDIO_KANAELE="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E '^channels=' | awk -F'=' '{print $2}')"
+			echo "# 890 AUDIO_KANAELE='${AUDIO_KANAELE}'" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+			if [ x = "x${AUDIO_KANAELE}" ] ; then
+				AKL10="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E 'channel_layout=mono')"
+				AKL20="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E 'channel_layout=stereo')"
+				AKL30="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E 'channel_layout=3.0')"
+				AKL40="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E 'channel_layout=4.0')"
+				AKL50="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E 'channel_layout=5.0')"
+				AKL51="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E 'channel_layout=5.1')"
+				AKL61="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E 'channel_layout=6.1')"
+				AKL71="$(echo "${META_DATEN_ZEILENWEISE_STREAMS}" | grep -F ';codec_type=audio;' | head -n${AKN} | tail -n1 | tr -s ';' '\n' | grep -E 'channel_layout=7.1')"
+
+				echo "
+				# 900
+				# AKL10='${AKL10}'
+				# AKL20='${AKL20}'
+				# AKL30='${AKL30}'
+				# AKL40='${AKL40}'
+				# AKL50='${AKL50}'
+				# AKL51='${AKL51}'
+				# AKL61='${AKL61}'
+				# AKL71='${AKL71}'
+				" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+				if [ "x${AKL10}" != "x" ] ; then
+					AUDIO_KANAELE=1
+				elif [ "x${AKL20}" != "x" ] ; then
+					AUDIO_KANAELE=2
+				elif [ "x${AKL30}" != "x" ] ; then
+					AUDIO_KANAELE=3
+				elif [ "x${AKL40}" != "x" ] ; then
+					AUDIO_KANAELE=4
+				elif [ "x${AKL50}" != "x" ] ; then
+					AUDIO_KANAELE=5
+				elif [ "x${AKL51}" != "x" ] ; then
+					AUDIO_KANAELE=6
+				elif [ "x${AKL61}" != "x" ] ; then
+					AUDIO_KANAELE=7
+				elif [ "x${AKL71}" != "x" ] ; then
+					AUDIO_KANAELE=8
+				fi
+			fi
+
+			echo "# 910 - ${LFD_NR}
+			AUDIO_KANAELE='${AUDIO_KANAELE}'
+			LFD_NR='${LFD_NR}'
+			" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+			#--------------------------------------------------------------#
+
+			AUDIO_OPTION_PRO_TONSPUR="$(F_AUDIO_QUALITAET ${LFD_NR})"
+
+			#--------------------------------------------------------------#
+
+			echo "# 920 - ${LFD_NR}
+			AUDIO_OPTION_PRO_TONSPUR='${AUDIO_OPTION_PRO_TONSPUR}'
+			AUDIO_SPUR_SPRACHE='${AUDIO_SPUR_SPRACHE}'
+			" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+			if [ 0 -lt "${TS_ANZAHL}" ] ; then
+				echo "# 930
+				AUDIO_VERARBEITUNG_01:
+				AUDIOQUALITAET='${AUDIOQUALITAET}'
+				" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+				echo "-map 0:a:${TS_NR} -c:a:${LFD_NR} ${AUDIOCODEC} ${AUDIO_OPTION_PRO_TONSPUR} -metadata:s:a:${LFD_NR} language=${TS_SP}" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+				echo "# 940
+				# AUDIO_SPUR_SPRACHE='${AUDIO_SPUR_SPRACHE}'
+				# AUDIO_STANDARD_SPUR='${AUDIO_STANDARD_SPUR}'
+				" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+				#------------------------------------------------------#
+
+				if [ x != "x${AUDIO_STANDARD_SPUR}" ] ; then
+					if [ "${LFD_NR}" = "${AUDIO_STANDARD_SPUR}" ] ; then
+						echo "# 950" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+						echo "-disposition:a:${LFD_NR} default" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+					else
+						echo "# 960" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+					echo "-disposition:a:${LFD_NR} 0" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+					fi
+				fi
+			else
+				echo "# 970" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+				echo "-an" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+			fi
+		done | tr -s '\n' ' ')"
+
+		#----------------------------------------------------------------------#
+
+		TS_KOPIE="$(seq 0 ${TS_ANZAHL} | head -n ${TS_ANZAHL})"
+		AUDIO_VERARBEITUNG_02="$(for DIE_TS in ${TS_KOPIE}
+		do
+			#TONSPUR_SPRACHE="$(echo "${AUDIO_SPUR_SPRACHE}" | grep -E "^${DIE_TS} " | awk '{print $NF}' | head -n1)"
+
+			echo "# 980
+			# AUDIO_VERARBEITUNG_02=' -map 0:a:${DIE_TS} -c:a:${DIE_TS} copy'
+			" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+			echo "-map 0:a:${DIE_TS} -c:a:${DIE_TS} copy"
+		done | tr -s '\n' ' ')"
+	else
+		AUDIO_VERARBEITUNG_01="-an"
+		AUDIO_VERARBEITUNG_02="-an"
+	fi
 fi
 
 echo "" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
