@@ -131,7 +131,8 @@
 #VERSION="v2024042700"			# Fehler im Transkodierkommando beim maskieren des Filmnamens behoben + Schutz vor unsicheren Dateinamen, das Leerzeichen erlaube ich aber
 #VERSION="v2024050100"			# Chrom-Leisten poliert
 #VERSION="v2024051500"			# mit "-soll_dar" kann jetzt das Display-Format, des zu erstellenden Videos angegeben werden
-VERSION="v2024051800"			# mit "-ton =0" kann man jetzt Filme ohne Tonspur erzeugen
+#VERSION="v2024051800"			# mit "-ton =0" kann man jetzt Filme ohne Tonspur erzeugen
+VERSION="v2024051801"			# mit "-kerne" (z.B.: -kerne 1) kann man jetzt angeben, wieviel Kerne benutzt werden sollen; z.B. wenn zuviel RAM belegt wird, kann man die Anzahl der zu nutzenden CPU-Kerne reduzieren, das reduziert, bei vielen Codecs, auch die RAM-Belegung
 
 
 VERSION_METADATEN="${VERSION}"
@@ -191,25 +192,6 @@ TEILER="2"
 ###TEILER="16"
 
 ZUFALL="$(head -c 100 /dev/urandom | base64 | tr -d '\n' | tr -cd '[:alnum:]' | cut -b-12)"
-
-#------------------------------------------------------------------------------#
-### diese Optionen sind für ffprobe und ffmpeg notwendeig,
-### damit auch die Spuren gefunden werden, die später als 5 Sekunden nach
-### Filmbeginn einsetzen
-
-## -probesize 18446744070G		# I64_MAX
-## -analyzeduration 18446744070G	# I64_MAX
-#KOMPLETT_DURCHSUCHEN="-probesize 18446744070G -analyzeduration 18446744070G"
-
-## Value 19807040624582983680.000000 for parameter 'analyzeduration' out of range [0 - 9.22337e+18]
-## Value 19807040624582983680.000000 for parameter 'analyzeduration' out of range [0 - 9.22337e+18]
-## -probesize 9223370Ki
-## -analyzeduration 9223370Ki
-
-if [ x = "x${FFPROBE_PROBESIZE}" ] ; then
-	#FFPROBE_PROBESIZE="9223372036"		# Maximalwert in GiB auf einem Intel(R) Core(TM) i5-10600T CPU @ 2.40GHz
-	FFPROBE_PROBESIZE="9223372036854"	# Maximalwert in MiB auf einem Intel(R) Core(TM) i5-10600T CPU @ 2.40GHz
-fi
 
 #==============================================================================#
 ### Funktionen
@@ -478,7 +460,7 @@ while [ "${#}" -ne "0" ]; do
 			# 
 			# Hat der Film nur eine Tonspur, die ganz am Anfang des Films beginnt, und keine Untertitel,
 			# dann kann der Wert sehr klein gehalten werden. Zum Beispiel: 10
-			FFPROBE_PROBESIZE="${2}"		# ffprobe-Scan-Größe in MiB
+			SOLL_PROBESIZE="${2}"		# ffprobe-Scan-Größe in MiB
 			shift
 			;;
 		-profil)
@@ -552,6 +534,10 @@ while [ "${#}" -ne "0" ]; do
 			# -u 0:deu,1:eng,Deutsch.srt:deu,English.srt:eng,2:spa,3:fra,4:ita
 			#
 			UNTERTITEL_SPUR_SPRACHE="${2}"	# -u 0,1,2,3,4 / -u 0:deu,1:eng,2:spa,3:fra,4:ita
+			shift
+			;;
+		-kerne)
+			SOLL_KERNE="${2}"		# mit "-kerne" (z.B.: -kerne 1) kann man jetzt angeben, wieviel Kerne benutzt werden sollen; z.B. wenn zuviel RAM belegt wird, dann kann man die Anzahl der zu nutzenden CPU-Kerne reduzieren, das reduziert, bei vielen Codecs, auch die RAM-Belegung
 			shift
 			;;
 		-g)
@@ -807,6 +793,10 @@ while [ "${#}" -ne "0" ]; do
 	# das Ergebnis soll keine Video-Spur enthalten
 	-vn
 
+	# mit "-kerne" (z.B.: -kerne 1) kann man jetzt angeben, wieviel Kerne benutzt werden sollen; z.B. wenn zuviel RAM belegt wird, dann kann man die Anzahl der zu nutzenden CPU-Kerne reduzieren, das reduziert, bei vielen Codecs, auch die RAM-Belegung
+	# wird eine zu große Zahl eingegeben, dann werden trotzdem nur alle Kerne benutzt
+	-kerne 1
+
 	# Man kann aus dem Film einige Teile entfernen, zum Beispiel Werbung.
 	# Angaben muessen in Sekunden erfolgen,
 	# Dezimaltrennzeichen ist der Punkt.
@@ -1012,16 +1002,80 @@ elif [ "Linux" = "${BS}" ] ; then
 	fi
 fi
 
+echo "# 158
+# CPU_KERNE='${CPU_KERNE}'
+# SOLL_KERNE='${SOLL_KERNE}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
 if [ "x" = "x${CPU_KERNE}" ] ; then
 	echo "Es konnte nicht ermittelt werden, wieviele CPU-Kerne in diesem System stecken."
 	echo "Es wird nun nur ein Kern benuzt."
 	CPU_KERNE="1"
 fi
 
-echo "# 160
-BS='${BS}'
-CPU_KERNE='${CPU_KERNE}'
+echo "# 159
+# CPU_KERNE='${CPU_KERNE}'
+# SOLL_KERNE='${SOLL_KERNE}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+if [ "x" != "x${SOLL_KERNE}" ] ; then
+	if [ 1 -gt "${SOLL_KERNE}" ] ; then
+		echo "In diesem System wurden nur '${CPU_KERNE}' CPU-Kerne gefunden."
+		CPU_KERNE="${CPU_KERNE}"
+	elif [ "${SOLL_KERNE}" -gt "${CPU_KERNE}" ] ; then
+		echo "In diesem System wurden nur '${CPU_KERNE}' CPU-Kerne gefunden."
+		CPU_KERNE="${CPU_KERNE}"
+	else
+		CPU_KERNE="${SOLL_KERNE}"
+	fi
+fi
+
+echo "# 160
+# BS='${BS}'
+# CPU_KERNE='${CPU_KERNE}'
+# SOLL_KERNE='${SOLL_KERNE}'
+# SOLL_PROBESIZE='${SOLL_PROBESIZE}'
+" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+#exit 161
+
+#==============================================================================#
+### diese Optionen sind für ffprobe und ffmpeg notwendeig,
+### damit auch die Spuren gefunden werden, die später als 5 Sekunden nach
+### Filmbeginn einsetzen
+
+## -probesize 18446744070G		# I64_MAX
+## -analyzeduration 18446744070G	# I64_MAX
+#KOMPLETT_DURCHSUCHEN="-probesize 18446744070G -analyzeduration 18446744070G"
+
+## Value 19807040624582983680.000000 for parameter 'analyzeduration' out of range [0 - 9.22337e+18]
+## Value 19807040624582983680.000000 for parameter 'analyzeduration' out of range [0 - 9.22337e+18]
+## -probesize 9223370Ki
+## -analyzeduration 9223370Ki
+
+if [ x != "x${SOLL_PROBESIZE}" ] ; then
+	FFPROBE_PROBESIZE="$(echo "${SOLL_PROBESIZE}" | awk '{print tolower($0)}' | sed 's/[a-zA-Z]*$/ &/' | while read FFPROBE_GR FFPROBE_EINHEIT
+	do
+		if [ k = "${FFPROBE_EINHEIT}" -o ki = "${FFPROBE_EINHEIT}" ] ; then
+			echo "${FFPROBE_GR}" | awk '{printf "%.0f\n", $1 / 1000}'
+		elif [ g = "${FFPROBE_EINHEIT}" -o gi = "${FFPROBE_EINHEIT}" ] ; then
+			echo "${FFPROBE_GR}" | awk '{printf "%.0f\n", $1 * 1000}'
+		elif [ t = "${FFPROBE_EINHEIT}" -o ti = "${FFPROBE_EINHEIT}" ] ; then
+			echo "${FFPROBE_GR}" | awk '{printf "%.0f\n", $1 * 1000000}'
+		else
+			echo "${FFPROBE_GR}" | awk '{printf "%.0f\n", $1}'
+		fi
+	done)"
+fi
+
+if [ x = "x${FFPROBE_PROBESIZE}" ] ; then
+	#FFPROBE_PROBESIZE="9223372036"		# Maximalwert in GiB auf einem Intel(R) Core(TM) i5-10600T CPU @ 2.40GHz
+	FFPROBE_PROBESIZE="9223372036854"	# Maximalwert in MiB auf einem Intel(R) Core(TM) i5-10600T CPU @ 2.40GHz
+fi
+
+echo "# 167 META_DATEN_STREAMS:
+# FFPROBE_PROBESIZE='${FFPROBE_PROBESIZE}'M
+"
+#exit 168
 
 #==============================================================================#
 #==============================================================================#
@@ -1042,8 +1096,13 @@ CPU_KERNE='${CPU_KERNE}'
 #------------------------------------------------------------------------------#
 ### Meta-Daten auslesen
 
+echo "# 169 META_DATEN_STREAMS:
+# FFPROBE_PROBESIZE='${FFPROBE_PROBESIZE}'M
+"
+
 meta_daten_streams
 echo "# 170 META_DATEN_STREAMS:
+# FFPROBE_PROBESIZE='${FFPROBE_PROBESIZE}'M
 ${META_DATEN_STREAMS}
 "
 
