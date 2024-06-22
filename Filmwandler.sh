@@ -132,7 +132,8 @@
 #VERSION="v2024050100"			# Chrom-Leisten poliert
 #VERSION="v2024051500"			# mit "-soll_dar" kann jetzt das Display-Format, des zu erstellenden Videos angegeben werden
 #VERSION="v2024051800"			# mit "-ton =0" kann man jetzt Filme ohne Tonspur erzeugen
-VERSION="v2024051801"			# mit "-kerne" (z.B.: -kerne 1) kann man jetzt angeben, wieviel Kerne benutzt werden sollen; z.B. wenn zuviel RAM belegt wird, kann man die Anzahl der zu nutzenden CPU-Kerne reduzieren, das reduziert, bei vielen Codecs, auch die RAM-Belegung
+#VERSION="v2024051801"			# mit "-kerne" (z.B.: -kerne 1) kann man jetzt angeben, wieviel Kerne benutzt werden sollen; z.B. wenn zuviel RAM belegt wird, kann man die Anzahl der zu nutzenden CPU-Kerne reduzieren, das reduziert, bei vielen Codecs, auch die RAM-Belegung
+VERSION="v2024062200"			# Fehler in der Verarbeitung ohne Video-Spur behoben
 
 
 VERSION_METADATEN="${VERSION}"
@@ -1247,34 +1248,36 @@ STARTZEITPUNKT="$(date +'%s')"
 #--- VIDEO_SPUR ---------------------------------------------------------------#
 #------------------------------------------------------------------------------#
 
-VIDEO_SPUR="$(echo "${META_DATEN_STREAMS}" | grep -F 'codec_type=video' | head -n1)"
-if [ "${VIDEO_SPUR}" != "codec_type=video" ] ; then
+if [ 0 != "${VIDEO_NICHT_UEBERTRAGEN}" ] ; then
+
+  VIDEO_SPUR="$(echo "${META_DATEN_STREAMS}" | grep -F 'codec_type=video' | head -n1)"
+  if [ "${VIDEO_SPUR}" != "codec_type=video" ] ; then
 	VIDEO_NICHT_UEBERTRAGEN=0
-fi
+  fi
 
-echo "# 300
-# VIDEO_SPUR='${VIDEO_SPUR}'
-# VIDEO_NICHT_UEBERTRAGEN='${VIDEO_NICHT_UEBERTRAGEN}'
-" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+  echo "# 300
+  # VIDEO_SPUR='${VIDEO_SPUR}'
+  # VIDEO_NICHT_UEBERTRAGEN='${VIDEO_NICHT_UEBERTRAGEN}'
+  " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
-#exit 310
+  #exit 310
 
-#------------------------------------------------------------------------------#
-### hier wird eine Liste externer verfügbarer Codecs erstellt
+  #------------------------------------------------------------------------------#
+  ### hier wird eine Liste externer verfügbarer Codecs erstellt
 
-FFMPEG_LIB="$( (ffmpeg -formats >/dev/null) 2>&1 | tr -s ' ' '\n' | grep -E '^[-][-]enable[-]' | sed 's/^[-]*enable[-]*//;s/[-]/_/g' | grep -E '^lib')"
-FFMPEG_FORMATS="$(ffmpeg -formats 2>/dev/null | awk '/^[ \t]*[ ][DE]+[ ]/{print $2}')"
+  FFMPEG_LIB="$( (ffmpeg -formats >/dev/null) 2>&1 | tr -s ' ' '\n' | grep -E '^[-][-]enable[-]' | sed 's/^[-]*enable[-]*//;s/[-]/_/g' | grep -E '^lib')"
+  FFMPEG_FORMATS="$(ffmpeg -formats 2>/dev/null | awk '/^[ \t]*[ ][DE]+[ ]/{print $2}')"
 
-#------------------------------------------------------------------------------#
-### alternative Methode zur Ermittlung der FPS
+  #------------------------------------------------------------------------------#
+  ### alternative Methode zur Ermittlung der FPS
 
-FPS_TEILE="$(echo "${META_DATEN_STREAMS}" | grep -E '^codec_type=|^r_frame_rate=' | grep -E -A1 '^codec_type=video' | awk -F'=' '/^r_frame_rate=/{print $2}' | sed 's|/| |')"
-TEIL_ZWEI="$(echo "${FPS_TEILE}" | awk '{print $2}')"
-if [ x = "x${TEIL_ZWEI}" ] ; then
+  FPS_TEILE="$(echo "${META_DATEN_STREAMS}" | grep -E '^codec_type=|^r_frame_rate=' | grep -E -A1 '^codec_type=video' | awk -F'=' '/^r_frame_rate=/{print $2}' | sed 's|/| |')"
+  TEIL_ZWEI="$(echo "${FPS_TEILE}" | awk '{print $2}')"
+  if [ x = "x${TEIL_ZWEI}" ] ; then
 	R_FPS="$(echo "${FPS_TEILE}" | awk '{print $1}')"
-else
+  else
 	R_FPS="$(echo "${FPS_TEILE}" | awk '{print $1/$2}')"
-fi
+  fi
 
 #------------------------------------------------------------------------------#
 ### hier wird ermittelt, ob der film progressiv oder im Zeilensprungverfahren vorliegt
@@ -1506,9 +1509,7 @@ echo "# 544
 #------------------------------------------------------------------------------#
 ### Seitenverhältnis des Bildes (DAR) muss hier bekannt sein!
 
-if [ 0 != "${VIDEO_NICHT_UEBERTRAGEN}" ] ; then
-	. ${AVERZ}/Filmwandler_video.txt
-fi
+. ${AVERZ}/Filmwandler_video.txt
 
 #------------------------------------------------------------------------------#
 ### BILD_BREIT und BILD_HOCH prüfen
@@ -1527,6 +1528,8 @@ echo "# 560
 if [ x = "x${BILD_BREIT}" -o x = "x${BILD_HOCH}" ] ; then
 	echo "# 570: ${BILD_BREIT}x${BILD_HOCH}"
 	exit 575
+fi
+
 fi
 
 #exit 580
@@ -1633,6 +1636,8 @@ echo "# 660
 #------------------------------------------------------------------------------#
 ### Video-Codec
 
+if [ 0 != "${VIDEO_NICHT_UEBERTRAGEN}" ] ; then
+
 if [ x != "x${ALT_CODEC_VIDEO}" ] ; then
 	if [ -r ${AVERZ}/Filmwandler_Codec_Video_${ALT_CODEC_VIDEO}.txt ] ; then
 		echo "# 672
@@ -1686,6 +1691,8 @@ echo "# 690 CONSTANT_QUALITY
 #
 # TWO_PASS='${TWO_PASS}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+
+fi
 
 #exit 692
 
