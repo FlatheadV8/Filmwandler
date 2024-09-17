@@ -133,7 +133,8 @@
 #VERSION="v2024051500"			# mit "-soll_dar" kann jetzt das Display-Format, des zu erstellenden Videos angegeben werden
 #VERSION="v2024051800"			# mit "-ton =0" kann man jetzt Filme ohne Tonspur erzeugen
 #VERSION="v2024051801"			# mit "-kerne" (z.B.: -kerne 1) kann man jetzt angeben, wieviel Kerne benutzt werden sollen; z.B. wenn zuviel RAM belegt wird, kann man die Anzahl der zu nutzenden CPU-Kerne reduzieren, das reduziert, bei vielen Codecs, auch die RAM-Belegung
-VERSION="v2024062200"			# Fehler in der Verarbeitung ohne Video-Spur behoben
+#VERSION="v2024062200"			# Fehler in der Verarbeitung ohne Video-Spur behoben
+VERSION="v2024091700"			# Deutsche Ton- und Untertitelspuren werden jetzt nach vorne sortiert
 
 
 VERSION_METADATEN="${VERSION}"
@@ -1243,6 +1244,8 @@ KOMMENTAR='${KOMMENTAR}'
 AUDIO_STANDARD_SPUR='${AUDIO_STANDARD_SPUR}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
+#exit 291
+
 STARTZEITPUNKT="$(date +'%s')"
 
 #--- VIDEO_SPUR ---------------------------------------------------------------#
@@ -1752,6 +1755,11 @@ IST_UT_FORMAT='${IST_UT_FORMAT}'
 if [ x = "x${TON_SPUR_SPRACHE}" ] ; then
 	echo "# 750" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	AUDIO_SPUR_SPRACHE="$(echo "${META_DATEN_SPURSPRACHEN}" | grep -F ' audio ' | nl | awk '{print $1 - 1,$4}' | grep -E '^[0-9]')"
+
+	### Deutsche Spuren werden nach vorne sortiert
+	AUDIO_SPUR_NUR_DEUTSCH="$(echo "${AUDIO_SPUR_SPRACHE}" | grep -Ei " deu| ger")"
+	AUDIO_SPUR_OHNE_DEUTSCH="$(echo "${AUDIO_SPUR_SPRACHE}" | grep -Eiv " deu| ger")"
+	AUDIO_SPUR_SPRACHE="$( (echo "${AUDIO_SPUR_NUR_DEUTSCH}"; echo "${AUDIO_SPUR_OHNE_DEUTSCH}") | grep -Ev '^[ \t]*$')"
 else
 	echo "# 760" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	AUDIO_SPUR_SPRACHE="$(echo "${TON_SPUR_SPRACHE}" | grep -Ev '^$'  | tr -s ',' '\n' | sed 's/:/ /g;s/.*/& und/' | awk '{print $1,$2}' | grep -E '^[0-9]')"
@@ -1761,6 +1769,11 @@ fi
 if [ x = "x${UNTERTITEL_SPUR_SPRACHE}" ] ; then
 	echo "# 770" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	NOTA_SPUR_SPRACHE="$(echo "${META_DATEN_SPURSPRACHEN}" | grep -F ' subtitle ' | nl | awk '{print $1 - 1,$4}' | grep -E '^[0-9]')"
+
+	### Deutsche Spuren werden nach vorne sortiert
+	NOTA_SPUR_NUR_DEUTSCH="$(echo "${NOTA_SPUR_SPRACHE}" | grep -Ei " deu| ger")"
+	NOTA_SPUR_OHNE_DEUTSCH="$(echo "${NOTA_SPUR_SPRACHE}" | grep -Eiv " deu| ger")"
+	NOTA_SPUR_SPRACHE="$( (echo "${NOTA_SPUR_NUR_DEUTSCH}"; echo "${NOTA_SPUR_OHNE_DEUTSCH}") | grep -Ev '^[ \t]*$')"
 else
 	echo "# 780" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	NOTA_SPUR_SPRACHE="$(echo "${UNTERTITEL_SPUR_SPRACHE}" | grep -Ev '^$'  | tr -s ',' '\n' | sed 's/:/ /g;s/.*/& und/' | awk '{print $1,$2}' | grep -E '^[0-9]')"

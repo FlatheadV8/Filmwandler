@@ -14,7 +14,8 @@
 #VERSION="v2023010200"			# Version 3, weil die Version 2 rekursiver Aufrufe erzeugte, wenn das Ziel nicht gefunden wurde
 #VERSION="v2023010500"			# leider braucht der jedesmal ein weiteres ENTER und ggf. auch noch einen 2. Aufruf
 #VERSION="v2023010700"			# Ungenauigkeit bei TAG:DURATION behoben
-VERSION="v2023010700"			# TAG:language
+#VERSION="v2023010700"			# TAG:language
+VERSION="v2024070900"			# jetzt funktioniert auch ${0} title_t*.mkv
 
 AVERZ="$(dirname ${0})"			# Arbeitsverzeichnis, hier liegen diese Dateien
 #META_DATEN_STREAMS="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${1}" -show_streams)"
@@ -46,7 +47,9 @@ AVERZ="$(dirname ${0})"			# Arbeitsverzeichnis, hier liegen diese Dateien
 ### Version 2
 ### Version 3
 
-FILM_DATEI="${1}"
+#FILM_DATEI="${1}"
+for FILM_DATEI in ${@}
+do
 if [ -r "${FILM_DATEI}" ] ; then
   DATEI_GROESSE="$(du -sm "${FILM_DATEI}" | awk '{print $1}')"
   #KOMPLETT_DURCHSUCHEN="-probesize 9223372036G -analyzeduration 9223372036G"
@@ -170,4 +173,5 @@ if [ -r "${FILM_DATEI}" ] ; then
 #else
 #  echo "Der Film '${FILM_DATEI}' konnte nicht gelesen werden."
 fi
+done
 

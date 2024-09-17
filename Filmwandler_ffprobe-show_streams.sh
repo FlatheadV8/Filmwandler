@@ -41,7 +41,7 @@ ALLE_DATEN="Ja"
 while [ "${#}" -ne "0" ]; do
         case "${1}" in
                 -d)
-                        FILM_DATEI="${2}"					# nur die Video-Infos ausgeben
+                        FILM_DATEI="${2}"				# nur die Video-Infos ausgeben
                         shift
                         ;;
                 -v)
@@ -60,7 +60,7 @@ while [ "${#}" -ne "0" ]; do
                         shift
                         ;;
                 -m)
-                        META_DATEN="metadaten"			# nur die Meta-Daten ausgeben
+                        META_DATEN="metadaten"				# nur die Meta-Daten ausgeben
 			ALLE_DATEN=""
                         shift
                         ;;
