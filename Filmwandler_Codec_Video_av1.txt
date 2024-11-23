@@ -146,8 +146,11 @@ elif [ libsvtav1 = "${VIDEOCODEC}" ] ; then
 	CRF="$(echo -e "9 1\n$(seq 0 44 | nl | awk '{printf "%.0f %.0f\n", $1+18,120*((36^(1/44))^$2)}')" | awk -v b="${BILD_HOCH}" -v q="${BILDQUALIT}" '{if ($2 >= b) crf=$1-q ; if ($2 < b) crf="#" ; print crf}' | grep -Ev '^#' | head -n1 | awk -v k="${KORREKTUR}" '{crf=$1; if ((10+k) >= $1) crf=(10+k) ; if ((60+k) <= $1) crf=(60+k) ; print crf-k}')"
 	echo "# -crf ${CRF}"
 	# https://gitlab.com/AOMediaCodec/SVT-AV1/-/blob/master/Docs/Parameters.md
-	#VIDEO_OPTION="-svtav1-params enable-overlays=1:enable-tf=1:film-grain=0:film-grain-denoise=0:keyint=5s:scd=1:tune=0:fast-decode=0:lp=${CPU_KERNE}"
-	VIDEO_OPTION="-svtav1-params enable-overlays=1:keyint=5s:scd=1:tune=0:lp=${CPU_KERNE}"
+	# https://gist.github.com/dvaupel/716598fc9e7c2d436b54ae00f7a34b95
+	# Disabling (--enable-tf 0) can preserve slightly more detail, but increases file size.
+	#VIDEO_OPTION="-svtav1-params enable-overlays=1:enable-tf=0:film-grain=0:film-grain-denoise=0:keyint=5s:scd=1:tune=0:fast-decode=0:lp=${CPU_KERNE}"
+	VIDEO_OPTION="-svtav1-params enable-overlays=1:enable-tf=1:film-grain=0:film-grain-denoise=0:keyint=5s:scd=1:tune=0:fast-decode=0:lp=${CPU_KERNE}"
+	#VIDEO_OPTION="-svtav1-params enable-overlays=1:keyint=5s:scd=1:tune=0:lp=${CPU_KERNE}"
 
 	# Fokus auf Qualität
 	VIDEO_QUALITAET_0="-crf ${CRF} -preset 9 ${VIDEO_OPTION}"		# größte Datei, schnellstes, schlechteste Qualität
