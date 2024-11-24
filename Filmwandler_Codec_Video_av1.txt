@@ -36,7 +36,8 @@
 #VERSION="v2024041700"			# Abstufungen für svtav1 etwas angepasst
 #VERSION="v2024041800"			# 2-Pass für AOM hinzugefügt
 #VERSION="v2024042000"			# Verbesserung in der CRF-Berechnung vorgenommen
-VERSION="v2024052000"			# ein paar Anpassungen von libsvtav1 entfernt
+#VERSION="v2024052000"			# ein paar Anpassungen von libsvtav1 entfernt
+VERSION="v2024112400"			# scd=1 entfernt - seit märz 2022 macht der parameter nix und es gibt einen issue wo vorgeschlagen ihm neue funktionalität zu geben, dann wird er aber wieder experimentell sein
 
 TWO_PASS="Nein"				# 2-Pass deaktiviert, es ist hier nicht vorgesehen
 CODEC_PATTERN="av1|aom"			# Beispiel: "h265|hevc"
@@ -148,9 +149,9 @@ elif [ libsvtav1 = "${VIDEOCODEC}" ] ; then
 	# https://gitlab.com/AOMediaCodec/SVT-AV1/-/blob/master/Docs/Parameters.md
 	# https://gist.github.com/dvaupel/716598fc9e7c2d436b54ae00f7a34b95
 	# Disabling (--enable-tf 0) can preserve slightly more detail, but increases file size.
-	#VIDEO_OPTION="-svtav1-params enable-overlays=1:enable-tf=0:film-grain=0:film-grain-denoise=0:keyint=5s:scd=1:tune=0:fast-decode=0:lp=${CPU_KERNE}"
-	VIDEO_OPTION="-svtav1-params enable-overlays=1:enable-tf=1:film-grain=0:film-grain-denoise=0:keyint=5s:scd=1:tune=0:fast-decode=0:lp=${CPU_KERNE}"
-	#VIDEO_OPTION="-svtav1-params enable-overlays=1:keyint=5s:scd=1:tune=0:lp=${CPU_KERNE}"
+	#VIDEO_OPTION="-svtav1-params enable-overlays=1:enable-tf=0:film-grain=0:film-grain-denoise=0:keyint=5s:tune=0:fast-decode=0:lp=${CPU_KERNE}"
+	VIDEO_OPTION="-svtav1-params enable-overlays=1:enable-tf=1:film-grain=0:film-grain-denoise=0:keyint=5s:tune=0:fast-decode=0:lp=${CPU_KERNE}"
+	#VIDEO_OPTION="-svtav1-params enable-overlays=1:keyint=5s:tune=0:lp=${CPU_KERNE}"
 
 	# Fokus auf Qualität
 	VIDEO_QUALITAET_0="-crf ${CRF} -preset 9 ${VIDEO_OPTION}"		# größte Datei, schnellstes, schlechteste Qualität
