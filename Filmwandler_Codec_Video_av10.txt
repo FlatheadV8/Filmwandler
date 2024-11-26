@@ -37,7 +37,8 @@ if [ libsvtav1 = "${VIDEOCODEC}" ] ; then
 	# https://gitlab.com/AOMediaCodec/SVT-AV1/-/blob/master/Docs/Parameters.md
 	# https://gist.github.com/dvaupel/716598fc9e7c2d436b54ae00f7a34b95
 	# Disabling (--enable-tf 0) can preserve slightly more detail, but increases file size.
-	VIDEO_OPTION="-crf 0 -svtav1-params enable-overlays=1:enable-tf=0:film-grain=0:film-grain-denoise=0:keyint=5s:tune=0:fast-decode=0"
+	#VIDEO_OPTION="-crf 0 -svtav1-params enable-overlays=1:enable-tf=0:film-grain=0:film-grain-denoise=0:keyint=5s:tune=0:fast-decode=0"
+	VIDEO_OPTION="-crf 0 -svtav1-params film-grain=0:film-grain-denoise=0:keyint=5s:tune=0:fast-decode=0"
 
 	VIDEO_QUALITAET_0="${VIDEO_OPTION} -preset 10"		# schnellstes, schlechteste Qualität
 	VIDEO_QUALITAET_1="${VIDEO_OPTION} -preset 9"		# 

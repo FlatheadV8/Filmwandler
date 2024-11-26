@@ -150,7 +150,7 @@ elif [ libsvtav1 = "${VIDEOCODEC}" ] ; then
 	# https://gist.github.com/dvaupel/716598fc9e7c2d436b54ae00f7a34b95
 	# Disabling (--enable-tf 0) can preserve slightly more detail, but increases file size.
 	#VIDEO_OPTION="-svtav1-params enable-overlays=1:enable-tf=0:film-grain=0:film-grain-denoise=0:keyint=5s:tune=0:fast-decode=0:lp=${CPU_KERNE}"
-	VIDEO_OPTION="-svtav1-params enable-overlays=1:enable-tf=1:film-grain=0:film-grain-denoise=0:keyint=5s:tune=0:fast-decode=0:lp=${CPU_KERNE}"
+	VIDEO_OPTION="-svtav1-params film-grain=0:film-grain-denoise=0:keyint=5s:tune=0:fast-decode=0:lp=${CPU_KERNE}"
 	#VIDEO_OPTION="-svtav1-params enable-overlays=1:keyint=5s:tune=0:lp=${CPU_KERNE}"
 
 	# Fokus auf Qualität
