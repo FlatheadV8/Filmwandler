@@ -134,7 +134,8 @@
 #VERSION="v2024051800"			# mit "-ton =0" kann man jetzt Filme ohne Tonspur erzeugen
 #VERSION="v2024051801"			# mit "-kerne" (z.B.: -kerne 1) kann man jetzt angeben, wieviel Kerne benutzt werden sollen; z.B. wenn zuviel RAM belegt wird, kann man die Anzahl der zu nutzenden CPU-Kerne reduzieren, das reduziert, bei vielen Codecs, auch die RAM-Belegung
 #VERSION="v2024062200"			# Fehler in der Verarbeitung ohne Video-Spur behoben
-VERSION="v2024091700"			# Deutsche Ton- und Untertitelspuren werden jetzt nach vorne sortiert
+#VERSION="v2024091700"			# Deutsche Ton- und Untertitelspuren werden jetzt nach vorne sortiert
+VERSION="v2025012500"			# Fehler behoben: die erste Tonspur (DE) ist jetzt immer die "Default"-Tonspur: -disposition:a:0 default
 
 
 VERSION_METADATEN="${VERSION}"
@@ -1782,6 +1783,7 @@ fi
 echo "# 790
 TON_SPUR_SPRACHE='${TON_SPUR_SPRACHE}'
 AUDIO_SPUR_SPRACHE='${AUDIO_SPUR_SPRACHE}'
+AUDIO_STANDARD_SPUR='${AUDIO_STANDARD_SPUR}'
 UNTERTITEL_SPUR_SPRACHE='${UNTERTITEL_SPUR_SPRACHE}'
 NOTA_SPUR_SPRACHE='${NOTA_SPUR_SPRACHE}'
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
@@ -1795,7 +1797,7 @@ NOTA_SPUR_SPRACHE='${NOTA_SPUR_SPRACHE}'
 if [ x = "x${AUDIO_STANDARD_SPUR}" ] ; then
 	### wenn nichts angegeben wurde, dann
 	### Deutsch als Standard-Sprache voreinstellen
-	AUDIO_STANDARD_SPUR="$(echo "${AUDIO_SPUR_SPRACHE}" | grep -Ei " deu| ger" | awk '{print $1}' | head -n1)"
+	AUDIO_STANDARD_SPUR="$(echo "${AUDIO_SPUR_SPRACHE}" | nl | grep -Ei " deu| ger" | awk '{print $1 - 1}' | head -n1)"
 
 	if [ x = "x${AUDIO_STANDARD_SPUR}" ] ; then
 		### wenn nichts angegeben wurde
@@ -1924,21 +1926,21 @@ else
 				# AKL71='${AKL71}'
 				" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
-				if [ "x${AKL10}" != "x" ] ; then
+				if [ x != "x${AKL10}" ] ; then
 					AUDIO_KANAELE=1
-				elif [ "x${AKL20}" != "x" ] ; then
+				elif [ x != "x${AKL20}" ] ; then
 					AUDIO_KANAELE=2
-				elif [ "x${AKL30}" != "x" ] ; then
+				elif [ x != "x${AKL30}" ] ; then
 					AUDIO_KANAELE=3
-				elif [ "x${AKL40}" != "x" ] ; then
+				elif [ x != "x${AKL40}" ] ; then
 					AUDIO_KANAELE=4
-				elif [ "x${AKL50}" != "x" ] ; then
+				elif [ x != "x${AKL50}" ] ; then
 					AUDIO_KANAELE=5
-				elif [ "x${AKL51}" != "x" ] ; then
+				elif [ x != "x${AKL51}" ] ; then
 					AUDIO_KANAELE=6
-				elif [ "x${AKL61}" != "x" ] ; then
+				elif [ x != "x${AKL61}" ] ; then
 					AUDIO_KANAELE=7
-				elif [ "x${AKL71}" != "x" ] ; then
+				elif [ x != "x${AKL71}" ] ; then
 					AUDIO_KANAELE=8
 				fi
 			fi
@@ -1980,7 +1982,7 @@ else
 						echo "-disposition:a:${LFD_NR} default" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 					else
 						echo "# 960" >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-					echo "-disposition:a:${LFD_NR} 0" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+						echo "-disposition:a:${LFD_NR} 0" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 					fi
 				fi
 			else
