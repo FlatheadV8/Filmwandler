@@ -135,7 +135,8 @@
 #VERSION="v2024051801"			# mit "-kerne" (z.B.: -kerne 1) kann man jetzt angeben, wieviel Kerne benutzt werden sollen; z.B. wenn zuviel RAM belegt wird, kann man die Anzahl der zu nutzenden CPU-Kerne reduzieren, das reduziert, bei vielen Codecs, auch die RAM-Belegung
 #VERSION="v2024062200"			# Fehler in der Verarbeitung ohne Video-Spur behoben
 #VERSION="v2024091700"			# Deutsche Ton- und Untertitelspuren werden jetzt nach vorne sortiert
-VERSION="v2025012500"			# Fehler behoben: die erste Tonspur (DE) ist jetzt immer die "Default"-Tonspur: -disposition:a:0 default
+#VERSION="v2025012500"			# Fehler behoben: die erste Tonspur (DE) ist jetzt immer die "Default"-Tonspur: -disposition:a:0 default
+VERSION="v2025031600"			# wenn ein zu großer Bereich von einer Datei übersprungen wird, dann muß dieser Wert erhöht werden: max_muxing_queue_size
 
 
 VERSION_METADATEN="${VERSION}"
@@ -2443,24 +2444,24 @@ transkodieren_4_1()
 	if [ Ja = "${TWO_PASS}" ] ; then
 		echo "# 1240 TWO_PASS='${TWO_PASS}'
 		2-Pass: pass 1 + Schnitt
-       		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_PASS_1} -pass 1 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass -an -sn -ss ${VON} -to ${BIS} ${FPS} -f null /dev/null"
+       		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${VIDEO_PARAMETER_PASS_1} -pass 1 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass -an -sn -ss ${VON} -to ${BIS} ${FPS} ${MMQS} -f null /dev/null"
 
-       		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${VIDEO_PARAMETER_PASS_1} -pass 1 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass -an -sn -ss ${VON} -to ${BIS} ${FPS} -f null /dev/null
+       		${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${VIDEO_PARAMETER_PASS_1} -pass 1 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass -an -sn -ss ${VON} -to ${BIS} ${FPS} ${MMQS} -f null /dev/null
 
 		echo "# 1241 TWO_PASS='${TWO_PASS}'
 		2-Pass: pass 2 + Schnitt
-        	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/${ZUFALL}_${NUMMER}_\"${ZIEL_FILM}\".${ENDUNG}"
+        	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile \"${ZIELVERZ}\"/\"${ZIEL_FILM}\".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} ${MMQS} -y \"${ZIELVERZ}\"/${ZUFALL}_${NUMMER}_\"${ZIEL_FILM}\".${ENDUNG}"
 
 		ls -lha "${ZIELVERZ}"/"${ZIEL_FILM}".pass*
-        	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=Fehler
+        	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} -pass 2 -passlogfile "${ZIELVERZ}"/"${ZIEL_FILM}".pass ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} ${MMQS} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_${ZIEL_FILM}.${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=Fehler
 
 		ls -lha "${ZIELVERZ}"/"${ZIEL_FILM}".pass*
 		rm -fv "${ZIELVERZ}"/"${ZIEL_FILM}".pass*
 	else
 		echo "# 1250 TWO_PASS='${TWO_PASS}'
-        	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} -y \"${ZIELVERZ}\"/${ZUFALL}_${NUMMER}_\"${ZIEL_FILM}\".${ENDUNG}"
+        	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i \"${FILMDATEI}\" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}\"${EIGENER_TITEL}\" ${METADATEN_BESCHREIBUNG}\"${KOMMENTAR}\" ${START_ZIEL_FORMAT} ${MMQS} -y \"${ZIELVERZ}\"/${ZUFALL}_${NUMMER}_\"${ZIEL_FILM}\".${ENDUNG}"
 
-        	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_"${ZIEL_FILM}".${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=Fehler
+        	${PROGRAMM} ${FFMPEG_OPTIONEN} ${VIDEO_DELAY} ${KOMPLETT_DURCHSUCHEN} ${REPARATUR_PARAMETER} -i "${FILMDATEI}" ${I_SUB} ${VIDEO_PARAMETER_TRANS} ${AUDIO_VERARBEITUNG_01} ${U_TITEL_FF_01} ${UNTERTITEL_VERARBEITUNG_01} -ss ${VON} -to ${BIS} ${FPS} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} ${MMQS} -y "${ZIELVERZ}"/${ZUFALL}_${NUMMER}_"${ZIEL_FILM}".${ENDUNG} >> "${ZIELVERZ}"/${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=Fehler
 	fi
 	echo "# 1260
 	WEITER='${WEITER}'
@@ -2484,6 +2485,18 @@ transkodieren_7_1()
 }
 
 #------------------------------------------------------------------------------#
+# wenn ein zu großer Bereich von einer Datei übersprungen wird, dann muß dieser Wert erhöht werden: max_muxing_queue_size
+max_muxing_queue_size()
+{
+	if [ x != "x${VON}" ] ; then
+        	TEST_VON_IN="$(echo "${VON}" | awk '{printf "%.0f\n", $1}')"
+        	if [ 100 -lt "${TEST_VON_IN}" ] ; then
+                	MMQS="-max_muxing_queue_size $(echo "${VON}" | awk '{printf "%.0f\n", $1 * 10}')"
+        	fi
+	fi
+}
+
+#------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------#
 
@@ -2493,6 +2506,9 @@ if [ ${SCHNITT_ANZAHL} -lt 1 ] ; then
 	if [ ${SCHNITT_ANZAHL} -eq 1 ] ; then
 		VON="-ss $(echo "${SCHNITTZEITEN}" | tr -d '"' | awk -F'-' '{print $1}')"
 		BIS="-to $(echo "${SCHNITTZEITEN}" | tr -d '"' | awk -F'-' '{print $2}')"
+		max_muxing_queue_size
+	else
+                unset MMQS
 	fi
 
 	###------------------------------------------------------------------###
@@ -2527,9 +2543,11 @@ else
 	do
 		echo "---------------------------------------------------------" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
+                unset MMQS
 		NUMMER="$(echo "${NUMMER}" | awk '{printf "%2.0f\n", $1+1}' | tr -s ' ' '0')"
 		VON="$(echo "${_SCHNITT}" | tr -d '"' | awk -F'-' '{print $1}')"
 		BIS="$(echo "${_SCHNITT}" | tr -d '"' | awk -F'-' '{print $2}')"
+		max_muxing_queue_size
 
 		###----------------------------------------------------------###
 		### hier werden die Teile zwischen der Werbung transkodiert  ###
