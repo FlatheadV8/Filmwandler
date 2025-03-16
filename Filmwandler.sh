@@ -187,6 +187,7 @@ TONQUALIT="auto"
 ORIGINAL_DAR="Ja"
 TWO_PASS="Nein"
 
+MUXING_QUEUE_SIZE_FAKTOR="10"		# -max_muxing_queue_size $(-ss * FAKTOR) / Work-Around um einen Bug in FFmpeg
 AVERZ="$(dirname ${0})"			# Arbeitsverzeichnis, hier liegen diese Dateien
 
 ### die Pixel sollten wenigstens durch 2 teilbar sein! besser aber durch 8                          
@@ -2465,7 +2466,7 @@ transkodieren_4_1()
 	fi
 	echo "# 1260
 	WEITER='${WEITER}'
-	"
+	" | tee -a "${ZIELVERZ}"/${ZUFALL}_Status.txt
 }
 
 #------------------------------------------------------------------------------#
@@ -2481,7 +2482,7 @@ transkodieren_7_1()
 	${PROGRAMM} ${FFMPEG_OPTIONEN} -f concat -safe 0 -i ${ZUFALL}_${PROTOKOLLDATEI}_Filmliste.txt ${I_SUB} ${VIDEO_PARAMETER_KOPIE} ${AUDIO_VERARBEITUNG_02} ${SCHNELLSTART} ${U_TITEL_FF_02} ${UNTERTITEL_VERARBEITUNG_02} ${METADATEN_TITEL}"${EIGENER_TITEL}" ${METADATEN_BESCHREIBUNG}"${KOMMENTAR}" ${START_ZIEL_FORMAT} -y "${ZIEL_FILM}".${ENDUNG} >> ${PROTOKOLLDATEI}.out 2>&1 && WEITER=OK || WEITER=kaputt
 	echo "# 1360
 	WEITER='${WEITER}'
-	"
+	" | tee -a "${ZIELVERZ}"/${ZUFALL}_Status.txt
 }
 
 #------------------------------------------------------------------------------#
@@ -2491,7 +2492,7 @@ max_muxing_queue_size()
 	if [ x != "x${VON}" ] ; then
         	TEST_VON_IN="$(echo "${VON}" | awk '{printf "%.0f\n", $1}')"
         	if [ 100 -lt "${TEST_VON_IN}" ] ; then
-                	MMQS="-max_muxing_queue_size $(echo "${VON}" | awk '{printf "%.0f\n", $1 * 10}')"
+                	MMQS="-max_muxing_queue_size $(echo "${VON} ${MUXING_QUEUE_SIZE_FAKTOR}" | awk '{printf "%.0f\n", $1 * $2}')"
         	fi
 	fi
 }
@@ -2584,10 +2585,13 @@ fi
 #------------------------------------------------------------------------------#
 
 ls -lh "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+STATUS="$(grep -F Fehler | head -n1)"
+echo "${STATUS}" | tee -a "${ZIELVERZ}"/${ZUFALL}_Status.txt
 
 LAUFZEIT="$(echo "${STARTZEITPUNKT} $(date +'%s')" | awk '{print $2 - $1}')"
 echo "# 1380
 $(date +'%F %T') (${LAUFZEIT})" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+if [ -r /var/log/messages ] ; then grep -F 'kernel:' /var/log/messages | grep -F 'killed:' | grep -F ffmpeg | tail -n1; fi | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 
 #exit 1390
 
