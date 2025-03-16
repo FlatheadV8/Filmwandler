@@ -3,7 +3,8 @@
 #VERSION="v2023052600"			# das Profil fullhd konnte nicht aufgerufen werden / ein neues universelles Profil ist dazu gekommen, bei dem eine Auflösung frei gewählt werden kann
 #VERSION="v2024040100"			# Fehler bei der Verarbeitung mit IST_PAR, IST_DAR, ORIG_DAR_BREITE und ORIG_DAR_HOEHE behoben
 #VERSION="v2024050100"			# Chrom-Leisten poliert
-VERSION="v2024051500"			# mit -soll_dar kann jetzt das Display-Format, des zu erstellenden Videos angegeben werden
+#VERSION="v2024051500"			# mit -soll_dar kann jetzt das Display-Format, des zu erstellenden Videos angegeben werden
+VERSION="v2025031600"			# wenn das DAR nicht verändert werden soll, dann braucht die Option PAD auch nicht gesetzt werden
 
 echo "# 10 Video
 " | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
@@ -296,7 +297,7 @@ FORMAT_ANPASSUNG="setsar='1/1',"
 ### Aber wenn nicht, dann sind diese Berechnungen nötig.
 
 echo "# 219 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-if [ "x${ORIGINAL_DAR}" = "xNein" ] ; then
+if [ "xNein" = "x${ORIGINAL_DAR}" ] ; then
 	echo "# 220 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
 	if [ x != "x${SOLL_DAR}" ] ; then
 		echo "# 230 Video" | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
@@ -709,12 +710,17 @@ elif [ "${HOCH_QUADRATISCH}" -gt "${IN_HOCH}" ] ; then
 else
 	ZWISCHENFORMAT_QUADRATISCH=""
 fi
-#
-### hier wird die schwarze Hintergrundfläche definiert, auf der dann das Bild zentriert wird
-# pad='[hier wird "ow" gesetzt]:[hier wird "oh" gesetzt]:[hier wird der linke Abstand gesetzt]:[hier wird der obere Abstand gesetzt]:[hier wird die padding-Farbe gesetzt]'
-#  4/3 => PAD="pad='max(iw\,ih*(4/3)):ow/(4/3):(ow-iw)/2:(oh-ih)/2:black',"
-# 16/9 => PAD="pad='max(iw\,ih*(16/9)):ow/(16/9):(ow-iw)/2:(oh-ih)/2:black',"
-PAD="${ZWISCHENFORMAT_QUADRATISCH}pad='max(iw\\,ih*(${BREITE}/${HOEHE})):ow/(${BREITE}/${HOEHE}):(ow-iw)/2:(oh-ih)/2:black',"
+
+if [ "xNein" = "x${ORIGINAL_DAR}" ] ; then
+	### hier wird die schwarze Hintergrundfläche definiert, auf der dann das Bild zentriert wird
+	# pad='[hier wird "ow" gesetzt]:[hier wird "oh" gesetzt]:[hier wird der linke Abstand gesetzt]:[hier wird der obere Abstand gesetzt]:[hier wird die padding-Farbe gesetzt]'
+	#  4/3 => PAD="pad='max(iw\,ih*(4/3)):ow/(4/3):(ow-iw)/2:(oh-ih)/2:black',"
+	# 16/9 => PAD="pad='max(iw\,ih*(16/9)):ow/(16/9):(ow-iw)/2:(oh-ih)/2:black',"
+	PAD="${ZWISCHENFORMAT_QUADRATISCH}pad='max(iw\\,ih*(${BREITE}/${HOEHE})):ow/(${BREITE}/${HOEHE}):(ow-iw)/2:(oh-ih)/2:black',"
+else
+	### wenn das DAR nicht verändert werden soll, dann braucht die Option PAD auch nicht gesetzt werden
+	unset PAD
+fi
 
 echo "# 600 Video
 # O_BREIT='${O_BREIT}'
