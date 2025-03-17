@@ -158,9 +158,12 @@ elif [ libsvtav1 = "${VIDEOCODEC}" ] ; then
 	# "LogicalProcessors" (lp) ist veraltet
 	# und wird in v3.0 durch "LevelOfParallelism" (lp) ersetzt.
 	# Option "lp=[0,6]"
-	# lp=0  - 0 means choose level based on machine core count.
+	# lp=0  - (default / Auto) 0 means choose level based on machine core count.
+	# Higher LevelOfParallelism will increase both the threads and pictures in a way that optimizes speed and memory at each level.
+	# In CRF mode, levels 4 and higher will process extra mini-gops in parallel as well, leading to higher speed, but much higher memory.
+	# In low-delay mode, only one picture can be processed at once, so no extra pictures will be allocated.
 	#----------------------------------------------------------------------#
-	VIDEO_OPTION="-svtav1-params film-grain=0:film-grain-denoise=0:keyint=5s:tune=0:fast-decode=0:lp=0"
+	VIDEO_OPTION="-svtav1-params film-grain=0:film-grain-denoise=0:keyint=5s:tune=0:fast-decode=0"
 
 	# Fokus auf Qualität
 	VIDEO_QUALITAET_0="-crf ${CRF} -preset 9 ${VIDEO_OPTION}"		# größte Datei, schnellstes, schlechteste Qualität
