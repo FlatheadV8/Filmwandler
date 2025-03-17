@@ -187,7 +187,7 @@ TONQUALIT="auto"
 ORIGINAL_DAR="Ja"
 TWO_PASS="Nein"
 
-MUXING_QUEUE_SIZE_FAKTOR="10"		# -max_muxing_queue_size $(-ss * FAKTOR) / Work-Around um einen Bug in FFmpeg
+MUXING_QUEUE_SIZE_FAKTOR="30"		# -max_muxing_queue_size $(-ss * FAKTOR) / Work-Around um einen Bug in FFmpeg
 AVERZ="$(dirname ${0})"			# Arbeitsverzeichnis, hier liegen diese Dateien
 
 ### die Pixel sollten wenigstens durch 2 teilbar sein! besser aber durch 8                          
@@ -2586,7 +2586,7 @@ fi
 #------------------------------------------------------------------------------#
 
 ls -lh "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-STATUS="$(grep -F Fehler | head -n1)"
+STATUS="$(grep -F Fehler "${ZIELVERZ}"/${ZUFALL}_Status.txt | head -n1)"
 echo "${STATUS}" | tee -a "${ZIELVERZ}"/${ZUFALL}_Status.txt
 
 LAUFZEIT="$(echo "${STARTZEITPUNKT} $(date +'%s')" | awk '{print $2 - $1}')"
