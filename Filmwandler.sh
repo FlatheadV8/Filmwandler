@@ -1309,7 +1309,8 @@ if [ "${SCAN_TYPE}" != "progressive" ] ; then
 	# https://ffmpeg.org/ffmpeg-filters.html#mcdeint
         #ZEILENSPRUNG="yadif=3:1,mcdeint=2:1,"
         #ZEILENSPRUNG="yadif=1/3,mcdeint=mode=extra_slow,"
-        ZEILENSPRUNG="yadif=1:-1:0,"
+        #ZEILENSPRUNG="yadif=1:-1:0,"
+        ZEILENSPRUNG="bwdif=mode=send_frame,"
     fi
 fi
 
