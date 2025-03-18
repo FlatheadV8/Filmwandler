@@ -2586,8 +2586,10 @@ fi
 #------------------------------------------------------------------------------#
 
 ls -lh "${ZIELVERZ}"/"${ZIEL_FILM}".${ENDUNG} "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
-STATUS="$(grep -F Fehler "${ZIELVERZ}"/${ZUFALL}_Status.txt | head -n1)"
-echo "${STATUS}" | tee -a "${ZIELVERZ}"/${ZUFALL}_Status.txt
+if [ -r "${ZIELVERZ}"/${ZUFALL}_Status.txt ] ; then
+	cat "${ZIELVERZ}"/${ZUFALL}_Status.txt | tee -a "${ZIELVERZ}"/${PROTOKOLLDATEI}.txt
+	rm -f "${ZIELVERZ}"/${ZUFALL}_Status.txt
+fi
 
 LAUFZEIT="$(echo "${STARTZEITPUNKT} $(date +'%s')" | awk '{print $2 - $1}')"
 echo "# 1380
