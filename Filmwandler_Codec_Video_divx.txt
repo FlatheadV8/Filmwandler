@@ -7,7 +7,8 @@
 
 #VERSION="v2018090200"
 #VERSION="v2023032500"			# neue Ermittlungsmethode für Encoder
-VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
+#VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
+VERSION="v2025031900"			# Bitrate war mind. um den Faktor 1000 zu groß (ein k war zuviel)
 
 #==============================================================================#
 # getestet auf LG BP420 Blu-ray Player (kann keine variable Bitrate bei DivX)
@@ -20,6 +21,7 @@ VERSION="v2023061000"			# jetzt werden Codecs konsequent in encoders gesucht
 
 TWO_PASS="Nein"				# 2-Pass deaktiviert, es ist hier nicht vorgesehen
 CODEC_PATTERN="mpeg4"			# Beispiel: "h265|hevc"
+LANG="C"
 
 VIDEOCODEC="$(suche_video_encoder "${CODEC_PATTERN}")"
 if [ "x${VIDEOCODEC}" = "x" ] ; then
@@ -54,16 +56,15 @@ VIDEO_OPTION="${VIDEO_TAG}"
 
 #VIDEO_QUALITAET_5="-q:v 2" ${VIDEO_OPTION}"		# qscale:v 1 - 31
 
-#T="3.7"
-T="3"
-VIDEO_QUALITAET_0="-b:v $(echo "12 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}')k ${VIDEO_OPTION}"
-VIDEO_QUALITAET_1="-b:v $(echo "14 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}')k ${VIDEO_OPTION}"
-VIDEO_QUALITAET_2="-b:v $(echo "16 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}')k ${VIDEO_OPTION}"
-VIDEO_QUALITAET_3="-b:v $(echo "18 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}')k ${VIDEO_OPTION}"
-VIDEO_QUALITAET_4="-b:v $(echo "20 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}')k ${VIDEO_OPTION}"
-VIDEO_QUALITAET_5="-b:v $(echo "22 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}')k ${VIDEO_OPTION}"
-VIDEO_QUALITAET_6="-b:v $(echo "24 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}')k ${VIDEO_OPTION}"
-VIDEO_QUALITAET_7="-b:v $(echo "26 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}')k ${VIDEO_OPTION}"
-VIDEO_QUALITAET_8="-b:v $(echo "28 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}')k ${VIDEO_OPTION}"
-VIDEO_QUALITAET_9="-b:v $(echo "30 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{print $1 * $2 * $3 / $4}')k ${VIDEO_OPTION}"
+T="37"
+VIDEO_QUALITAET_0="-b:v $(echo "12 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{printf "%.0f\n", $1 * $2 * $3 * 10 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_1="-b:v $(echo "14 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{printf "%.0f\n", $1 * $2 * $3 * 10 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_2="-b:v $(echo "16 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{printf "%.0f\n", $1 * $2 * $3 * 10 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_3="-b:v $(echo "18 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{printf "%.0f\n", $1 * $2 * $3 * 10 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_4="-b:v $(echo "20 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{printf "%.0f\n", $1 * $2 * $3 * 10 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_5="-b:v $(echo "22 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{printf "%.0f\n", $1 * $2 * $3 * 10 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_6="-b:v $(echo "24 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{printf "%.0f\n", $1 * $2 * $3 * 10 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_7="-b:v $(echo "26 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{printf "%.0f\n", $1 * $2 * $3 * 10 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_8="-b:v $(echo "28 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{printf "%.0f\n", $1 * $2 * $3 * 10 / $4}') ${VIDEO_OPTION}"
+VIDEO_QUALITAET_9="-b:v $(echo "30 ${VERGLEICH_BREIT} ${VERGLEICH_HOCH} ${T}" | awk '{printf "%.0f\n", $1 * $2 * $3 * 10 / $4}') ${VIDEO_OPTION}"
 

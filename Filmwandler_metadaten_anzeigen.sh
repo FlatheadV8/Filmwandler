@@ -16,22 +16,43 @@
 #VERSION="v2023010700"			# Ungenauigkeit bei TAG:DURATION behoben
 #VERSION="v2023010700"			# TAG:language
 #VERSION="v2024070900"			# jetzt funktioniert auch ${0} title_t*.mkv
-VERSION="v2025022500"			# jetzt auch mit codec_name
+#VERSION="v2025022500"			# jetzt auch mit codec_name
+VERSION="v2025022501"			# mit -k, als erste Option, werden Beschreibung und Kommentar ausgegeben
 
 AVERZ="$(dirname ${0})"			# Arbeitsverzeichnis, hier liegen diese Dateien
 #META_DATEN_STREAMS="$(ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${1}" -show_streams)"
 #echo "${META_DATEN_STREAMS}" | grep -Ei 'width|height|aspect_ratio|frame_rate|level'
 
 #==============================================================================#
+#KOMPLETT_DURCHSUCHEN="-probesize 9223372036G -analyzeduration 9223372036G"
+KOMPLETT_DURCHSUCHEN="-probesize 1G -analyzeduration 1G"
 
-#FILM_DATEI="${1}"
-echo "| DATEI-GROESSE | Filmlänge          | BreitxHoch | Ton-Spur-Name | Ton-Spur-Sprache | Untertitel-Spur-Name | Untertitel-Spur-Sprache | Codec-Name | Film-Datei-Name"
-for FILM_DATEI in ${@}
-do
+echo "################################################################################"
+echo "${0} Film.mkv"
+echo "${0} Filme*.mkv"
+echo "${0} \"\$(ls -1 /pfad/zu/den/Filmen/Filme\\ mit\\ Leerzeichen_t*.mkv)\""
+echo "################################################################################"
+K="$(echo "${1}" | base64)"		# -k als erste Option
+if [ 'LWsK' = "${K}" ] ; then
+	shift
+	echo "${@}" | while read FILM_DATEI
+	do
+		if [ -r "${FILM_DATEI}" ] ; then
+			echo
+			echo "${FILM_DATEI}"
+			ffprobe -v error ${KOMPLETT_DURCHSUCHEN} -i "${FILM_DATEI}" -show_format | grep -Ei 'TAG:(comment|DESCRIPTION)'
+		fi
+	done
+else
+
+#==============================================================================#
+
+  #FILM_DATEI="${1}"
+  echo "| DATEI-GROESSE | Filmlänge          | BreitxHoch | Ton-Spur-Name | Ton-Spur-Sprache | Untertitel-Spur-Name | Untertitel-Spur-Sprache | Codec-Name | Film-Datei-Name"
+  echo "${@}" | while read FILM_DATEI
+  do
 	if [ -r "${FILM_DATEI}" ] ; then
 		DATEI_GROESSE="$(du -sm "${FILM_DATEI}" | awk '{print $1}')"
-		#KOMPLETT_DURCHSUCHEN="-probesize 9223372036G -analyzeduration 9223372036G"
-		KOMPLETT_DURCHSUCHEN="-probesize 1G -analyzeduration 1G"
 
 		FILM_SCANNEN()
 		{
@@ -111,5 +132,6 @@ do
 
 		echo " ${C01} | ${C02} | ${C03} | ${C04} | ${C05} | ${C06} | ${C07} | ${C08} | ${FILM_DATEI}"
 	fi
-done
+  done
+fi
 
