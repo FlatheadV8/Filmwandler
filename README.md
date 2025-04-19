@@ -14,7 +14,15 @@ Leider habe ich bei den ersten 3 Generationen immer unlösbare Probleme bekommen
 Am 29. Oktober 2018 wurde die Entwicklung an der 4. Generation eingestellt.
 Statt dessen habe ich aus der 4. Generation eine abgespeckte Version extrahiert, die nur MP4 im HTML-5-Standard erzeugen konnte (Film2MP4.sh). Diese wurde bis September 2019 soweit erweitert, dass ich mit dem "Funktionsmantel" von diesem Skript problemlos den "Funktionsmantel" der 4. Generation ersetzen konnte und so wurde am 22. September 2019 die 5. Generation geboren.
 
-Download:
+
+Link zur aktuellen Version:
+
+https://gitlab.com/OHV-R6/Filmwandler/
+
+https://gitlab.com/OHV-R6/Filmwandler/-/releases/
+
+
+Download der älteren Versionen:
 
 https://github.com/FlatheadV8/Filmwandler
 
