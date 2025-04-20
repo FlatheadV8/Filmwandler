@@ -17,18 +17,13 @@ Statt dessen habe ich aus der 4. Generation eine abgespeckte Version extrahiert,
 
 Link zur aktuellen Version:
 
-https://gitlab.com/OHV-R6/Filmwandler/
-
-https://gitlab.com/OHV-R6/Filmwandler/-/releases/
-
+- https://gitlab.com/OHV-R6/Filmwandler.git
+- https://gitlab.com/OHV-R6/Filmwandler/-/tags
 
 Download der älteren Versionen:
 
-https://github.com/FlatheadV8/Filmwandler
-
-https://github.com/FlatheadV8/Filmwandler/releases/
-
-https://github.com/FlatheadV8/Filmwandler/releases/latest
+- https://github.com/FlatheadV8/Filmwandler.git
+- https://github.com/FlatheadV8/Filmwandler/tags
 
 Das Skript besitzt viele weitere nützliche Optionen, siehe:
 
